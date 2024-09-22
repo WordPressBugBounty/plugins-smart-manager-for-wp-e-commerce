@@ -1,0 +1,1 @@
+# plugins-smart-manager-for-wp-e-commerce
