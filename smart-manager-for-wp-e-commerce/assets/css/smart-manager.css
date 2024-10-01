@@ -853,7 +853,7 @@ td[aria-describedby*="postmeta_meta_key__thumbnail_id_meta_value__thumbnail_id"]
 	height: 2.5rem;
 }
 
-#sm_simple_search_box, #sm_nav_bar .sm-search-box, #sm_advanced_search {
+#sm_simple_search_box, #sm_nav_bar .sm-search-box {
 	background-color: #161e2e!important;
 	color: #9fa6b2!important;
 	border: 1px solid #8c8f948c !important;
@@ -1095,10 +1095,12 @@ input[type=checkbox]:checked{
 }
 
 .sm_image_thumbnail {
-	margin: 0.5em 0.5em 0 0;
-	max-width: 45px;
-	border-radius: 5px;
-	cursor: pointer;
+    margin: 0.5em 0.5em 0 0;
+    max-width: calc(var(--row-height) * 0.95) !important;
+    border-radius: 0.313rem;
+    cursor: pointer;
+    height: calc(var(--row-height) * 0.95) !important;
+    width: calc(var(--row-height) * 0.95) !important;
 }
 
 #sm_editor_grid {
@@ -1363,11 +1365,12 @@ input[type=checkbox]:checked{
 #sm_top_bar_advanced_search {
 	display: flex;
 	padding-top: 0.8em;
+	padding-left: 1rem;
 }
 
 #sm_top_bar_advanced_search label {
 	cursor: pointer;
-	vertical-align: initial;
+	vertical-align: middle;
 	padding-left: 0.2em;
 }
 
@@ -1383,7 +1386,7 @@ input[type=checkbox]:checked{
 	transition: 0.3s;
 } */
 
-#search_switch, #sm_view_access_public{
+#sm_view_access_public{
 	background-image: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%22-4 -4 8 8%22%3E%3Ccircle r=%223%22 fill=%22%23fff%22/%3E%3C/svg%3E");
 	background-position: 0;
 	transition: background-position .15s ease-in-out;
@@ -1397,13 +1400,7 @@ input[type=checkbox]:checked{
 	float: left;
 }
 
-#search_switch:checked::before{
-	/* background-image: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%22-4 -4 8 8%22%3E%3Ccircle r=%223%22 fill=%22%23fff%22/%3E%3C/svg%3E");
-	background-position: 100%; */
-	content: '' !important;
-}
-
-#search_switch:checked, #sm_view_access_public:checked{
+#sm_view_access_public:checked{
 	background-size: auto !important;	
 	background-image: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%22-4 -4 8 8%22%3E%3Ccircle r=%223%22 fill=%22%23fff%22/%3E%3C/svg%3E");
 	background-position: 100%;
@@ -1581,18 +1578,17 @@ div[aria-describedby="sm_inline_dialog"] {
 #sm_advanced_search{
 	font-size: 1rem;
     cursor: pointer;
-    border: 1px solid #8c8f94;
 }
 
 #sm_advanced_search_content {
 	float: left;
 	padding: 0.7em;
+	padding-top: 0em !important;
 }
 
 #sm_advanced_search_icon{
 	margin-top: 0.7em;
 	color: #fff !important;
-	float: right;
 }
 
 .handsontable .manualColumnResizer.active, .handsontable .manualColumnResizer:hover, .handsontable .manualRowResizer.active, .handsontable .manualRowResizer:hover{
@@ -1777,4 +1773,10 @@ input#sm_add_title{
 }
 #sm_view_access_public:checked{
 	background-color: #5850ec !important;
+}
+#search_content_parent:has(#sm_advanced_search){
+    width: 35% !important;
+}
+#sm_custom_views {
+    padding-right: 2rem !important;
 }

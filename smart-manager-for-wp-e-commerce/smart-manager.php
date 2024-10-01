@@ -3,7 +3,7 @@
 * Plugin Name: WooCommerce Bulk Edit Products, Orders, Coupons, Any WordPress Post Type (Advanced) - Smart Manager
 * Plugin URI: https://www.storeapps.org/product/smart-manager/
 * Description: <strong>Lite Version Installed</strong>. The #1 tool for WooCommerce inventory management, stock management, bulk edit, export, delete, duplicate...from one place using an Excel-like sheet editor.
-* Version: 8.47.0
+* Version: 8.48.0
 * Author: StoreApps
 * Author URI: https://www.storeapps.org/
 * Text Domain: smart-manager-for-wp-e-commerce
@@ -12,7 +12,7 @@
 * Tested up to: 6.6.2
 * Requires PHP: 5.6+
 * WC requires at least: 3.0.0
-* WC tested up to: 9.2.3
+* WC tested up to: 9.3.3
 * Copyright (c) 2010 - 2024 StoreApps. All rights reserved.
 * License: GNU General Public License v2.0
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html

@@ -7,14 +7,14 @@ Tags: woocommerce advanced bulk edit, wordpress bulk edit, woocommerce inventory
 Requires at least: 4.8
 Tested up to: 6.6.2
 Requires PHP: 5.6
-Stable tag: 8.47.0
+Stable tag: 8.48.0
 License: GPLv2
 
 Most advanced WooCommerce bulk edit plugin for products, orders, coupons, any WordPress post type using an Excel-like sheet editor.
 
 == Description ==
 
-**Powerful and advanced WooCommerce bulk edit plugin** to manage your store from one place in a user-friendly, **Excel-like sheet editor**.
+**Powerful and advanced WooCommerce bulk edit plugin** to manage your store from one place in a user-friendly, **Excel-like sheet editor**. 
 
 > ***Smart Manager is a lifesaver**. Anyone starting a new store or migrating to a new line (perhaps seasonal shifts) should consider this mandatory in their toolbox.*
 > – Envoymatt
@@ -284,6 +284,14 @@ It also gives the warm feeling of supporting further development of the plugin.
 
 == Changelog ==
 
+= 8.48.0 (01.10.2024) =
+* New: WooCommerce 9.3.3 compatible
+* Fix: 'Post Date' column not saving when adding the record using Add Row functionality and updating using inline edit functionality
+* Fix: 'Post Date' column not saving when updating using Bulk Edit functionality (Pro)
+* Update: UI/UX for Advanced Search functionality
+* Update: Automatically resize the display of 'Featured Image' in the WooCommerce Products dashboard to match the 'Grid Row Height' global setting
+* Update: POT file
+
 = 8.47.0 (12.09.2024) =
 * New: WordPress 6.6.2 compatible
 * New: WooCommerce 9.2.3 compatible
@@ -431,6 +439,9 @@ It also gives the warm feeling of supporting further development of the plugin.
 [See changelog for all versions](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 8.48.0 =
+WooCommerce 9.3.3 compatible, Fixes related to 'Post Date' column not saving when adding the record using Add Row functionality and updating using inline edit functionality, 'Post Date' column not saving when updating using Bulk Edit functionality (Pro), Updates related to UI/UX for Advanced Search functionality, Automatically resize the display of 'Featured Image' in the WooCommerce Products dashboard to match the 'Grid Row Height' global setting along with other important fixes and updates. Recommended upgrade.
 
 = 8.47.0 =
 WordPress 6.6.2 compatible, WooCommerce 9.2.3 compatible, Fixes related to Clicking on column headers displays modal dialogs in some cases, Incorrect last accessed dashboard on page refresh, Updates related to UI/UX for 'Public' view settings in Custom Views (Pro) along with other important fixes and updates. Recommended upgrade.

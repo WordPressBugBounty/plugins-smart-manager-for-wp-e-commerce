@@ -2693,6 +2693,10 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 							}
 
 							$data_col_params['posts_fields'][$id][$update_column] = $value;
+							if ( ( ! empty( $update_column ) ) && ( 'post_date' === $update_column ) ) {
+								$data_col_params['posts_fields'][ $id ]['post_date_gmt'] = get_gmt_from_date( $value );
+								$data_col_params['posts_fields'][ $id ]['edit_date'] = true;
+							}
 							$this->prev_post_values[ $id ][ $update_column ] = $prev_val;
 						} else if ( $update_params_meta_flag === true ) {
 
