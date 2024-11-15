@@ -552,6 +552,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 										WHERE {$wpdb->prefix}postmeta.meta_key != '' 
 											AND {$wpdb->prefix}postmeta.meta_key NOT LIKE 'free-%'
 											AND {$wpdb->prefix}postmeta.meta_key NOT LIKE '_oembed%'
+											AND {$wpdb->prefix}postmeta.meta_key NOT REGEXP '^[a-f0-9]{32}$'
 											$post_type_cond
 										GROUP BY {$wpdb->prefix}postmeta.meta_key";
 			$results_postmeta_col = $wpdb->get_results ($query_postmeta_col , 'ARRAY_A');
@@ -2351,45 +2352,6 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			}
 		}
 
-		// Function to get the meta data for the given ids
-		public function get_meta_data($ids, $meta_keys, $update_table, $update_table_key = 'post_id') {
-			global $wpdb;
-
-			$ids_format = implode(', ', array_fill(0, count($ids), '%s'));
-			$meta_keys_format = implode(', ', array_fill(0, count($meta_keys), '%s'));
-			$group_by = '';
-
-			if ( $update_table == 'postmeta' ) {
-				$group_by = 'GROUP BY '.$update_table_key.' , meta_id';
-			}
-
-			$old_meta_data_query = "SELECT *
-								  FROM {$wpdb->prefix}$update_table
-								  WHERE post_id IN (".implode(',',$ids).")
-								  	AND meta_key IN ('".implode("','",$meta_keys)."')
-								  	AND 1=%d
-								  $group_by";
-
-			$old_meta_data_results = $wpdb->get_results( $wpdb->prepare( $old_meta_data_query, 1 ), 'ARRAY_A');  // passed 1 to avoid the debug warning
-
-			$old_meta_data = array();
-
-			if ( count($old_meta_data_results) > 0) {
-				foreach ($old_meta_data_results as $meta_data) {
-
-					$post_id = $meta_data[$update_table_key];
-					unset($meta_data[$update_table_key]);
-
-					if ( empty($old_meta_data[$post_id]) ) {
-						$old_meta_data[$post_id] = array();
-					}
-					
-					$old_meta_data[$post_id][] = $meta_data;
-				}
-			}
-
-			return $old_meta_data;
-		}
 
 		public function save_state() {
 			$slug = ( ! empty( $this->req_params['active_module'] ) ) ? $this->req_params['active_module'] : '';
@@ -2785,235 +2747,48 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 					}
 				}
 				//Code for updating the meta tables
-				if (!empty($meta_data_edited)) {
-
-					foreach ($meta_data_edited as $update_table => $update_params) {
-
-						if (empty($update_params)) continue;
-
-						$post_ids = array_keys($update_params);
-						$meta_keys_edited = (!empty($meta_keys_edited)) ? array_keys($meta_keys_edited) : '';
-
-						$update_table_key = ''; //pkey for the update table
-
-						if ( $update_table == 'postmeta' ) {
-							$update_table_key = 'post_id';
-						}
-
-						//Code for getting the old values and meta_ids
-						$old_meta_data = $this->get_meta_data($post_ids, $meta_keys_edited, $update_table, $update_table_key);
-
-						$meta_data = array();
-
-						if (!empty($old_meta_data)) {
-							foreach ($old_meta_data as $key => $old_values) {
-								foreach ($old_values as $data) {
-									if ( empty($meta_data[$key]) ) {
-										$meta_data[$key] = array();
-									}
-									$meta_data[$key][$data['meta_key']] = array();
-									$meta_data[$key][$data['meta_key']]['meta_id'] = $data['meta_id'];
-									$meta_data[$key][$data['meta_key']]['meta_value'] = $data['meta_value'];
+				if ( !empty( $meta_data_edited ) && !empty( $meta_keys_edited ) ) {
+					if( ( defined('SMPRO') && true === SMPRO ) && is_callable( 'Smart_Manager_Pro_Base', 'sm_update_meta_tables' ) ){
+						Smart_Manager_Pro_Base::sm_update_meta_tables(
+							array(
+								'meta_data_edited' => !empty( $meta_data_edited ) ? $meta_data_edited : array(),
+								'meta_keys_edited' => !empty( $meta_keys_edited ) ? array_keys( $meta_keys_edited ) : array(),
+								'task_id' => !empty( $this->task_id ) ? $this->task_id : 0, 
+								'prev_postmeta_values'=> !empty( $this->prev_postmeta_values ) ? $this->prev_postmeta_values : array(), 
+							)
+						);
+					}else{
+						foreach ( $meta_data_edited as $update_params ) {
+							if( empty( $update_params ) || !is_array( $update_params ) ) continue;
+							foreach ($update_params as $id => $updated_data) {
+								if( empty( $id ) || empty( $updated_data ) || !is_array( $updated_data ) ) continue;
+								foreach ($updated_data as $key => $value) {
+									if( empty( $key ) ) continue;
+									$key      = wp_unslash( $key );
+									$value    = wp_unslash( $value );
+									$prev_val = !empty($this->prev_postmeta_values[$id][$key]) ? $this->prev_postmeta_values[$id][$key] : '';
+									update_post_meta( $id, $key, $value, $prev_val );
 								}
 							}
 						}
-
-						$meta_index = 0;
-						$insert_meta_index = 0;
-						$index=0;
-						$insert_index=0;
-						$old_post_id = '';
-						$update_params_index = 0;
-
-						//Code for generating the query
-						foreach ($update_params as $id => $updated_data) {
-
-							$updated_data_index = 0;
-							$update_params_index++;
-
-							foreach ($updated_data as $key => $value) {
-								
-								$key = wp_unslash($key);
-			    				$value = wp_unslash($value);
-			    				$meta_type = 'post';
-			    				if ( $update_table == 'postmeta' ) {
-			    					$value = sanitize_meta( $key, $value, 'post' );	
-			    				}
-								
-								$updated_data_index++;
-
-								// Filter whether to update metadata of a specific type.
-								$check = apply_filters( "update_{$meta_type}_metadata", null, $id, $key, $value, '' );
-								if ( null !== $check ) {
-									continue;
-								}
-
-								if( is_numeric( $value ) ) {
-									$value = strval( $value );
-								}
-
-								// Code for handling if the meta key does not exist
-								if ( empty($meta_data[$id][$key] ) ) {
-
-									// Filter whether to add metadata of a specific type.
-									$check = apply_filters( "add_{$meta_type}_metadata", null, $id, $key, $value, false );
-									if ( null !== $check ) {
-										continue;
-									}
-
-									if ( empty($insert_params_meta[$update_table]) ) {
-										$insert_params_meta[$update_table] = array();
-										$insert_params_meta[$update_table][$insert_meta_index] = array();
-										$insert_params_meta[$update_table][$insert_meta_index]['values'] = array();
-									}
-
-									if ( $insert_index >= 5 ) { //Code to have not more than 5 value sets in single insert query
-										$insert_index=0;
-										$insert_meta_index++;							
-									}
-
-									$insert_params_meta[$update_table][$insert_meta_index]['values'][] = array('id' => $id,
-																												'meta_key' => $key,
-																												'meta_value' => $value);
-
-									$value = maybe_serialize( $value );
-
-									if ( empty($insert_params_meta[$update_table][$insert_meta_index]['query']) ) {
-										$insert_params_meta[$update_table][$insert_meta_index]['query'] = "(".$id.", '".$key."', '".$value."')";
-									} else {
-										$insert_params_meta[$update_table][$insert_meta_index]['query'] .= ", (".$id.", '".$key."', '".$value."')";
-									}
-
-									$insert_index++;
-
-									continue;
-
-								}
-
-								$value = maybe_serialize( $value );
-
-								if ( empty($update_params_meta[$update_table]) ) {
-									$update_params_meta[$update_table] = array();
-									$update_params_meta[$update_table][$meta_index] = array();
-									$update_params_meta[$update_table][$meta_index]['ids'] = array();
-									$update_params_meta[$update_table][$meta_index]['query'] = '';
-								}
-
-								if ( ! empty( $meta_data[$id][$key] ) && $meta_data[$id][$key]['meta_value'] !== $value ) {	
-									$meta_data[$id][$key]['meta_value'] = $value;
-									if ( $index >= 5 && $old_post_id != $id ) {
-										$update_params_meta[$update_table][$meta_index]['query'] .= ' ELSE meta_value END END ';
-										$index=0;
-										$meta_index++;							
-									}					
-
-									if ( empty($update_params_meta[$update_table][$meta_index]['query']) ) {
-										$update_params_meta[$update_table][$meta_index]['query'] = ' CASE post_id ';
-									}
-
-									if ( $old_post_id != $id ) {
-										
-										if ( !empty($index) ) {
-											$update_params_meta[$update_table][$meta_index]['query'] .= ' ELSE meta_value END ';
-										}
-
-										$update_params_meta[$update_table][$meta_index]['query'] .= " WHEN '".$id."' THEN 
-																							CASE meta_key ";
-
-										$old_post_id = $id;
-										$update_params_meta[$update_table][$meta_index]['ids'][] = $id;
-
-										$index++;
-									}
-
-									$update_params_meta[$update_table][$meta_index]['query'] .= " WHEN '".$key."' THEN '". $value ."' ";
-								}
-
-								//Code for the last condition
-								if ( $update_params_index === sizeof($update_params) &&  $updated_data_index === sizeof($updated_data) ) {
-									$update_params_meta[$update_table][$meta_index]['query'] .= ' ELSE meta_value END END ';
-								}
-							}
-						}
-
-						// Start here... update the actions and query in for loop
-						if ( !empty($insert_params_meta) ) {
-							foreach ($insert_params_meta as $insert_table => $data) {
-
-								if ( empty($data) ) {
-									continue;
-								}
-
-								$insert_table_key = 'post_id';
-
-								foreach ( $data as $insert_params ) {
-
-									if ( empty($insert_params['values']) || empty($insert_params['query']) ) {
-										continue;
-									}
-
-									$insert_meta_query = "INSERT INTO {$wpdb->prefix}".$insert_table." (".$insert_table_key.",meta_key,meta_value)
-															 VALUES ".$insert_params['query'];
-
-									if ( $insert_table == 'postmeta' ) {
-										// function to replicate wordpress add_metadata()
-										$this->sm_add_post_meta('post', $insert_params['values'], $insert_meta_query);
-
-									} else {
-										$result_insert_meta = $wpdb -> query($insert_meta_query);
-									}
-								}
-							}	
-						}
-
-						// Inline data updation for meta tables
-						if ( !empty( $update_params_meta ) ) {
-							foreach ( $update_params_meta as $update_table => $data ) {
-
-								if ( empty( $data ) ) {
-									continue;
-								}
-
-								$update_table_key = (empty($update_table_key)) ? 'post_id' : $update_table_key;
-
-								foreach ( $data as $update_params ) {
-
-									if ( empty($update_params['ids']) || empty($update_params['query']) ) {
-										continue;
-									}
-
-									$update_meta_query = "UPDATE {$wpdb->prefix}$update_table
-														SET meta_value = ".$update_params['query']."
-														WHERE $update_table_key IN (".implode(',',$update_params['ids']).")";
-
-									if ( 'postmeta' === $update_table ) {
-										// function to replicate wordpress update_postmeta()
-										$this->sm_update_post_meta(
-											array(
-											'meta_type' => 'post', 
-											'update_ids' => ( ! empty( $update_params['ids'] ) ) ? $update_params['ids'] : array(), 
-											'meta_data' => ( ! empty( $meta_data ) ) ? $meta_data : array(), 
-											'update_meta_query' => ( ! empty( $update_meta_query ) ) ? $update_meta_query : '',
-											'update_table_key' => ( ! empty( $update_table_key ) ) ? $update_table_key : 'post_id',
-											)
-										);
-
-									} else {
-										$result_update_meta = $wpdb -> query($update_meta_query);
-									}
-								}
-							}	
-						}
-						
 					}
 				}
 
 				// Code for updating the posts table.
 				if ( !empty( $data_col_params['posts_fields'] ) ) {
+					$update_posts_result = false;
+					if( ( defined('SMPRO') && true === SMPRO ) && is_callable( 'Smart_Manager_Pro_Base', 'sm_update_posts' ) ){
+						$update_posts_result = Smart_Manager_Pro_Base::sm_update_posts( array( 'posts_data' => $data_col_params['posts_fields'] ) );
+					}
 					foreach ( $data_col_params['posts_fields'] as $id => $post_params ) {
-	    				if ( is_wp_error( wp_update_post( $post_params ) ) || ( defined('SMPRO') && empty( SMPRO ) ) || empty( $this->task_id ) || empty( $id ) ) { 
+						if( empty( $this->task_id ) || empty( $id ) ){
 							continue;	
 						}
+						if ( defined('SMPRO') && empty( SMPRO ) ){
+							wp_update_post( $post_params );
+							continue;	
+						}
+						if( empty( $update_posts_result ) ) continue; //do not store task details if posts update is failed
 						foreach ( $post_params as $key => $value ) {
 							if ( ( ( ! empty( $key ) ) && ('ID' === $key ) ) || ! isset( $this->field_names[ $id ][ $key ] ) ) {
 								continue;
@@ -3063,129 +2838,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			echo $msg;
 			exit;
 		}
-
-		// Function to replicate wordpress add_metadata()
-		// Chk if the function can be made static
-		public function sm_add_post_meta($meta_type = 'post', $insert_values = array(), $insert_meta_query = '', $insert_table_key = 'post_id') {
-			global $wpdb;
-
-			if ( empty($insert_values) ) {
-				return;
-			}
-
-			$insert_query_values = array();
-
-			// Code for executing actions pre insert
-			foreach ( $insert_values as $insert_value ) {
-				do_action( "add_{$meta_type}_meta", $insert_value['id'], $insert_value['meta_key'], $insert_value['meta_value'] );
 				
-				if( empty($insert_meta_query) ) {
-					$insert_query_values[] = " ( ". $insert_value['id'] .", '". $insert_value['meta_key'] ."', '". $insert_value['meta_value'] ."' ) ";
-				}
-			}
-
-			if( empty($insert_meta_query) && !empty($insert_query_values) ) {
-				$insert_meta_query = "INSERT INTO {$wpdb->prefix}". $meta_type ."meta(". $insert_table_key .", meta_key, meta_value) VALUES ". implode(",", $insert_query_values);
-			}
-			
-
-			//Code for inserting the values
-			$result_insert_meta = $wpdb->query($insert_meta_query);
-			$mid = '';
-
-			// Code for executing actions pre insert
-			foreach ( $insert_values as $insert_value ) {
-				
-				if ( empty($first_insert_id) ) {
-					$mid = $wpdb->insert_id;
-				}
-				wp_cache_delete($insert_value['id'], $meta_type . '_meta');
-				do_action( "added_{$meta_type}_meta", $mid, $insert_value['id'], $insert_value['meta_key'], $insert_value['meta_value'] );
-
-				$mid++;
-				if ( ( defined('SMPRO') && empty( SMPRO ) ) || empty( $this->task_id ) || empty( $insert_value['id'] ) || empty( $insert_value['meta_key'] ) || ( is_wp_error( $result_insert_meta ) ) || ! isset( $this->field_names[ $insert_value['id'] ][ $insert_value['meta_key'] ] ) ) {
-				    continue;
-				}
-				self::$update_task_details_params[] = array(
-						'task_id' => $this->task_id,
-						'action' => 'set_to',
-						'status' => 'completed',
-						'record_id' => $insert_value['id'],
-						'field' => $this->field_names[ $insert_value['id'] ][ $insert_value['meta_key'] ],                                                               
-						'prev_val' => $this->prev_postmeta_values[ $insert_value['id'] ][ $insert_value['meta_key'] ],
-						'updated_val' => $insert_value['meta_value'],
-				);
-			}
-			return;
-		}
-
-		// Function to replicate wordpress update_postmeta()
-		// Chk if the function can be made static
-		public function sm_update_post_meta( $args = array() ) {
-			if ( empty( $args['update_ids'] ) || empty( $args['meta_data'] ) ) {
-				return;
-			}
-			global $wpdb;
-			$update_query_values = $update_query_ids = array();
-			// Code for executing actions pre update.
-			foreach ( $args['update_ids'] as $id ) {
-				if ( empty( $args['meta_data'][ $id ] ) ) {
-					continue;
-				}
-				$meta_key_update_values = '';
-				foreach ( $args['meta_data'][ $id ] as $meta_key => $value ) {
-					do_action( "update_{$args['meta_type']}_meta", $value['meta_id'], $id, $meta_key, $value['meta_value'] );
-					$meta_value = maybe_serialize( $value['meta_value'] );
-					if ( 'post' === $args['meta_type'] ) {
-						do_action( 'update_postmeta', $value['meta_id'], $id, $meta_key, $value['meta_value'] );
-					}
-					if ( empty( $args['update_meta_query'] ) ) {
-						$meta_key_update_values .= " WHEN '". $meta_key ."' THEN '". $value['meta_value'] ."' ";
-					}
-				}
-				if ( empty( $args['update_meta_query'] ) && ! empty( $meta_key_update_values ) ) {
-					$update_query_ids[] = $id;
-					$update_query_values[] = " WHEN '". $id ."' THEN CASE meta_key ". $meta_key_update_values ." ELSE meta_value END ";
-				}
-			}
-			if ( empty( $args['update_meta_query'] ) && ! empty( $update_query_values ) ) {
-				$args['update_meta_query'] = "UPDATE {$wpdb->prefix}". $args['meta_type'] ."meta SET meta_value = CASE ". $args['update_table_key'] ." ". implode( ' ', $update_query_values ) ." END 
-									WHERE ". $args['update_table_key'] ." IN (". implode( ',', $update_query_ids ) ." ) ";
-			}
-			if ( empty( $args['update_meta_query'] ) ) {
-				return;
-			}
-			$result_update_meta = $wpdb -> query( $args['update_meta_query'] );
-			// Code for executing actions post update
-			foreach ( $args['update_ids'] as $id ) {
-				if ( empty( $args['meta_data'][ $id] ) ) {
-					continue;
-				}
-				wp_cache_delete($id, $args['meta_type'] . '_meta');
-				foreach ( $args['meta_data'][ $id ] as $meta_key => $value ) {
-					do_action( "updated_{$args['meta_type']}_meta", $value['meta_id'], $id, $meta_key, $value['meta_value'] );
-					$meta_value = maybe_serialize( $value['meta_value'] );
-					if ( 'post' === $args['meta_type'] ) {
-						do_action( 'updated_postmeta', $value['meta_id'], $id, $meta_key, $meta_value );
-					}
-					$this->disable_task_details_update = apply_filters( 'sm_disable_task_details_update',self::$previous_vals, $this->field_names[ $id ][ $meta_key ] );
-					if ( empty( $this->task_id ) || empty( $id ) || empty( $meta_key ) || ( is_wp_error( $result_update_meta ) ) || ! isset( $this->field_names[ $id ][ $meta_key ] ) || ( ! empty( $this->disable_task_details_update ) ) ) {
-				    		continue;
-					}
-					self::$update_task_details_params[] = array(
-						'task_id' => $this->task_id,
-						'action' => 'set_to',
-						'status' => 'completed',
-						'record_id' => $id,
-						'field' => $this->field_names[ $id ][ $meta_key ],                                                               
-						'prev_val' => $this->prev_postmeta_values[ $id ][ $meta_key ],
-						'updated_val' => $meta_value,
-					);	
-				}
-			}
-			return;
-		}
-
 		// Function to handle the delete data functionality
 		public function delete() {
 

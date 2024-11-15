@@ -3568,6 +3568,9 @@ jQuery(document).ready(function() {
 	if('#!/pricing' != document.location.hash){
 		window.smart_manager.init();
 	}
+	jQuery('#dashboard-select').on('select2:open', function() {
+		jQuery('.select2-search__field').focus();
+   	});   
 });
 
 jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, { 

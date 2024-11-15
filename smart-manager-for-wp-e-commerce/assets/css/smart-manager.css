@@ -1101,6 +1101,7 @@ input[type=checkbox]:checked{
     cursor: pointer;
     height: calc(var(--row-height) * 0.95) !important;
     width: calc(var(--row-height) * 0.95) !important;
+	object-fit: contain;
 }
 
 #sm_editor_grid {
@@ -1779,4 +1780,13 @@ input#sm_add_title{
 }
 #sm_custom_views {
     padding-right: 2rem !important;
+}
+#sm_dashboard_select + span.select2.select2-container.select2-container--default {
+    width: 20em !important;
+}
+.sm-advanced-search-select + span.select2.select2-container {
+    width: 15em !important;
+}
+.handsontable thead th {
+    height: 50px !important;
 }
