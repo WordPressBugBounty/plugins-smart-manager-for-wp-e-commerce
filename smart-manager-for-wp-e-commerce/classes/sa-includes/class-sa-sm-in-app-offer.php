@@ -222,7 +222,7 @@ class SA_SM_In_App_Offer {
 		<div class="sa_offer">
 			<div class="sa_offer_content">
 				<a href="https://www.storeapps.org/woocommerce-plugins/?utm_source=in_app&utm_medium=<?php echo esc_attr( $this->prefix ); ?>_banner&utm_campaign=<?php echo esc_attr( $this->campaign ); ?>" target="_blank">
-					<img src="<?php echo esc_url( plugins_url( 'sa-includes/images/bfcm-2023.png', $this->plugin_file ) ); ?>" />
+					<img src="<?php echo esc_url( plugins_url( 'sa-includes/images/bfcm-2024.jpg', $this->plugin_file ) ); ?>" />
 				</a>
 				<div class="sa_dismiss"> <!-- Do not change this class -->
 					<a href="javascript:void(0)" style="color: black; text-decoration: none;" title="<?php echo esc_attr__( 'Dismiss', 'smart-manager-for-wp-e-commerce' ); ?>"><?php echo esc_html__( 'Hide this', 'smart-manager-for-wp-e-commerce' ); ?></a>

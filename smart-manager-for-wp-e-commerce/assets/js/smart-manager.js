@@ -3276,7 +3276,8 @@ Smart_Manager.prototype.saveData = function(){
 						edited_data: JSON.stringify(window.smart_manager.editedData),
 						security: window.smart_manager.sm_nonce,
 						pro: ( ( typeof(window.smart_manager.sm_beta_pro) != 'undefined' ) ? window.smart_manager.sm_beta_pro : 0 ),
-						table_model: (window.smart_manager.currentDashboardModel.hasOwnProperty('tables') ) ? window.smart_manager.currentDashboardModel.tables : ''
+						table_model: (window.smart_manager.currentDashboardModel.hasOwnProperty('tables') ) ? window.smart_manager.currentDashboardModel.tables : '',
+						is_advanced_search: jQuery('#search_switch').is(':checked')
 					};
 		params.data = ("undefined" !== typeof(window.smart_manager.addTasksParams) && "function" === typeof(window.smart_manager.addTasksParams) && 1 == window.smart_manager.sm_beta_pro) ? window.smart_manager.addTasksParams(params.data) : params.data;
 	let hasInvalidClass = jQuery('.sm-grid-dirty-cell').hasClass('htInvalid');
@@ -3320,11 +3321,17 @@ Smart_Manager.prototype.saveData = function(){
 					window.smart_manager.isRefreshingLoadedPage = false;
 				}
 				window.smart_manager.hot.render();
-				window.smart_manager.notification = {message: msg}
-				if('success' === title){
-					window.smart_manager.notification.status = title	
+				if (('undefined' !== typeof(window.smart_manager.sm_beta_pro) && 1 != window.smart_manager.sm_beta_pro) &&
+					(response.hasOwnProperty('modal_message') && response.modal_message.trim() !== '') && 
+					sm_beta_params.hasOwnProperty('manHoursData') && ('success' === title)) {
+					window.smart_manager.showManHoursSaved({message: response.modal_message, title:msg});
+				}else{
+					window.smart_manager.notification = {message: msg}
+					if('success' === title){
+						window.smart_manager.notification.status = title	
+					}
+					window.smart_manager.showNotification()
 				}
-				window.smart_manager.showNotification()
 			}
 		});	
 	}else{
@@ -3568,7 +3575,7 @@ jQuery(document).ready(function() {
 	if('#!/pricing' != document.location.hash){
 		window.smart_manager.init();
 	}
-	jQuery('#dashboard-select').on('select2:open', function() {
+	jQuery(document).on('select2:open', function() {
 		jQuery('.select2-search__field').focus();
    	});   
 });
@@ -4287,7 +4294,24 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 				SMErrorHandler.log('Exception occurred in confirmUnsavedChanges:: ', e)
 			}
 	}
-// Function for updating Advanced Search rule count.
+	// Function to show man-hrs saved message, post inline-update in lite version
+	Smart_Manager.prototype.showManHoursSaved = function(params ={}) {
+		try{
+			window.smart_manager.modal = {
+				title: _x( params.hasOwnProperty('title')?params.title:"", 'modal title', 'smart-manager-for-wp-e-commerce'),
+				content: '<div style="font-size:1.2em;margin:1em;"> <div style="margin-bottom:1em;">'+
+					_x( params.hasOwnProperty('message')?params.message:"", 'modal content', 'smart-manager-for-wp-e-commerce')+'</div></div>',
+				hideFooter:true,
+				autoHide: false,
+				isFooterItemsCenterAligned: true
+			}
+			window.smart_manager.showModal()
+		}
+		catch(e){
+			SMErrorHandler.log('Exception occurred in showManHoursSaved:: ', e)
+		}
+	}
+	// Function for updating Advanced Search rule count.
 	Smart_Manager.prototype.updateAdvancedSearchRuleCount = function(){
 		if(!window.smart_manager.advancedSearchQuery || !window.smart_manager.advancedSearchQuery.length > 0){
 			return;

@@ -2429,6 +2429,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 
 		public function inline_update() {
 			global $wpdb, $current_user;
+			$is_advanced_search  = ( ( ! empty( $this->req_params['is_advanced_search'] ) ) && ( sanitize_text_field( $this->req_params['is_advanced_search'] ) === 'true' ) ) ? true : false;
 			$edited_data = ( ! empty( $this->req_params['edited_data'] ) ) ? json_decode( stripslashes( $this->req_params['edited_data'] ), true ) : array();
 			$updated_edited_data = apply_filters( 'sm_filter_updated_edited_data', ( ! empty( $this->req_params['updatedEditedData'] ) ) ? json_decode( stripslashes( $this->req_params['updatedEditedData'] ), true ) : $edited_data );
 			$store_model_transient = $store_model_transient = get_transient( 'sa_sm_' . $this->dashboard_key );
@@ -2766,7 +2767,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 									if( empty( $key ) ) continue;
 									$key      = wp_unslash( $key );
 									$value    = wp_unslash( $value );
-									$prev_val = !empty($this->prev_postmeta_values[$id][$key]) ? $this->prev_postmeta_values[$id][$key] : '';
+									$prev_val = ( ( ! empty( $this->prev_postmeta_values[$id] ) ) && ( ! empty($this->prev_postmeta_values[$id][$key]) ) ) ? $this->prev_postmeta_values[$id][$key] : '';
 									update_post_meta( $id, $key, $value, $prev_val );
 								}
 							}
@@ -2775,34 +2776,24 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				}
 
 				// Code for updating the posts table.
-				if ( !empty( $data_col_params['posts_fields'] ) ) {
-					$update_posts_result = false;
-					if( ( defined('SMPRO') && true === SMPRO ) && is_callable( 'Smart_Manager_Pro_Base', 'sm_update_posts' ) ){
-						$update_posts_result = Smart_Manager_Pro_Base::sm_update_posts( array( 'posts_data' => $data_col_params['posts_fields'] ) );
-					}
-					foreach ( $data_col_params['posts_fields'] as $id => $post_params ) {
-						if( empty( $this->task_id ) || empty( $id ) ){
-							continue;	
-						}
-						if ( defined('SMPRO') && empty( SMPRO ) ){
-							wp_update_post( $post_params );
-							continue;	
-						}
-						if( empty( $update_posts_result ) ) continue; //do not store task details if posts update is failed
-						foreach ( $post_params as $key => $value ) {
-							if ( ( ( ! empty( $key ) ) && ('ID' === $key ) ) || ! isset( $this->field_names[ $id ][ $key ] ) ) {
-								continue;
+				if ( ! empty( $data_col_params['posts_fields'] ) ) {
+					if ( ( defined( 'SMPRO' ) && true === SMPRO ) && is_callable( 'Smart_Manager_Pro_Base', 'sm_update_posts' ) ) { // For pro.
+						Smart_Manager_Pro_Base::sm_update_posts( 
+							array( 
+								'posts_data' => $data_col_params['posts_fields'], 
+								'task_id' => ( ! empty( $this->task_id ) ) ? $this->task_id : 0, 
+							) 
+						);
+					} else { // For lite.
+						foreach ( $data_col_params['posts_fields'] as $id => $post_params ) {
+							if ( empty( $id ) || empty( $post_params ) ) {
+								continue;	
 							}
-							self::$update_task_details_params[] = array(
-								'task_id' => $this->task_id,
-								'action' => 'set_to',
-								'status' => 'completed',
-								'record_id' => $id,
-								'field' => $this->field_names[ $id ][ $key ],                                                               
-								'prev_val' => $this->prev_post_values[ $id ][ $key ],
-								'updated_val' => $value
-							);
-						}	
+							if ( defined('SMPRO') && empty( SMPRO ) ) {
+								wp_update_post( $post_params );
+								continue;	
+							}
+						}
 					}
 				}
 			}
@@ -2817,15 +2808,49 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			if ( sizeof($edited_data) > 1 ) {
 				$msg_str = 's';
 			}
-
+			//Update man-hrs data in DB
+			Smart_Manager::sm_update_man_hours_data( $is_advanced_search ? 'advanced_search_inline' : 'inline', sizeof( $edited_data ) );
 			if( isset( $this->req_params['pro'] ) && empty( $this->req_params['pro'] ) ) {
 				$sm_inline_update_count = get_option( 'sm_inline_update_count', 0 );
 				$sm_inline_update_count += sizeof($edited_data);
 				update_option( 'sm_inline_update_count', $sm_inline_update_count, 'no' );
-				$resp = array( 'sm_inline_update_count' => $sm_inline_update_count,
-								'msg' => sprintf(
+				//Get time saved
+
+				$man_hours_data = Smart_Manager::sm_get_man_hours_data();
+				$modal_message = '';
+				if( ! empty( $man_hours_data ) && is_array( $man_hours_data )  ){
+					$time_saved_details = Smart_Manager::sm_get_time_saved_with_additional_savings( $is_advanced_search ? 'advanced_search_inline' : 'inline', sizeof( $edited_data ), 'mins' );
+					$modal_message = sprintf(
+								/* translators: %1$s: time saved in minutes/hours, %2$s: additional savings possible, %3$s: Pro upgrade link */
+								__(
+									'You saved <strong>%1$s</strong>, and you can save more <strong>%2$s</strong> by upgrading to %3$s.',
+									'smart-manager-for-wp-e-commerce'
+								),
+								__(
+									( ( ! empty( $time_saved_details['time_saved'] ) ) ? $time_saved_details['time_saved'] : '' ) . 
+									' ' . 
+									( ( ! empty( $time_saved_details['unit'] ) ) ? $time_saved_details['unit'] : '' )
+								), // Time saved in mins/hrs.
+								__(
+									( ( ! empty( $time_saved_details['additional_savings'] ) ) ? $time_saved_details['additional_savings'] : '' ) . 
+									' ' . 
+									( ( ! empty( $time_saved_details['unit'] ) ) ? $time_saved_details['unit'] : '' )
+								), // Additional savings in mins/hrs.
+								sprintf(
+									'<a href="%s" target="_blank">%s</a>',
+									esc_url( SM_APP_ADMIN_URL . "-pricing" ),
+									esc_html__( 'Pro', 'smart-manager-for-wp-e-commerce' )
+								)
+							);
+				}
+				$resp = array( 
+							'sm_inline_update_count' => $sm_inline_update_count,
+							'modal_message' => $modal_message,
+							'msg' => sprintf(
 									/* translators: %1$d: number of updated record %2$s: record update message */ 
-									esc_html__( '%1$d record%2$s updated successfully!', 'smart-manager-for-wp-e-commerce'), sizeof( $edited_data ), $msg_str ) );
+									esc_html__( '%1$d record%2$s updated successfully!', 'smart-manager-for-wp-e-commerce'), sizeof( $edited_data ), $msg_str 
+								),
+						);
 								
 				$msg = json_encode($resp);
 			} else {

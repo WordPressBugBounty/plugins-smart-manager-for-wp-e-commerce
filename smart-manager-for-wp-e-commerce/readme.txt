@@ -5,9 +5,9 @@ Author URI: https://www.storeapps.org/woocommerce-plugins/
 Plugin URI: https://www.storeapps.org/product/smart-manager/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme
 Tags: woocommerce advanced bulk edit, wordpress bulk edit, woocommerce inventory management, woocommerce stock manager, woocommerce product manager
 Requires at least: 5.0
-Tested up to: 6.7
+Tested up to: 6.7.1
 Requires PHP: 5.6
-Stable tag: 8.49.0
+Stable tag: 8.50.0
 License: GPLv2
 
 Most advanced WooCommerce bulk edit plugin for products, orders, coupons, any WordPress post type using an Excel-like sheet editor.
@@ -287,6 +287,11 @@ It also gives the warm feeling of supporting further development of the plugin.
 2. Bulk edit / Batch update (only in Pro version)
 
 == Changelog ==
+= 8.50.0 (25.11.2024) =
+* New: WordPress 6.7.1 compatible
+* New: WooCommerce 9.4.2 compatible
+* Update: UI/UX for combo boxes
+* Update: POT file
 
 = 8.49.0 (15.11.2024) =
 * New: WordPress 6.7 compatible
@@ -456,6 +461,9 @@ It also gives the warm feeling of supporting further development of the plugin.
 [See changelog for all versions](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 8.50.0 =
+WordPress 6.7.1 compatible, WooCommerce 9.4.2 compatible, Updates related to UI/UX for combo boxes along with other important fixes and updates. Recommended upgrade.
 
 = 8.49.0 =
 WordPress 6.7 compatible, WooCommerce 9.4.1 compatible, WooCommerce Product 'Slug' column in WooCommerce Import CSV suite, Fixes related to Fetching hidden meta fields in the grid impacting dashboard load speed, Broken user interface due to 'select2' library conflict with other plugins, Column header height updated with update in row height setting, Image in the 'Featured Image' column not respecting the row height setting, Internationalization related warnings on WordPress v6.7, Updates related to 10x speed improvement for Bulk Edit, Move to Trash & Delete Permanently functionalities (Pro), UI/UX for combo boxes along with other important fixes and updates. Recommended upgrade.

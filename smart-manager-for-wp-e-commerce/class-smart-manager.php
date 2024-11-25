@@ -28,7 +28,12 @@ class Smart_Manager {
 	public static $sm_dashboards_final = array();
 	public static $sm_public_dashboards = array();
 	public static $taxonomy_dashboards = array();
-
+	// Time saved per record in hours.
+	public static $time_saved_per_record = array(
+		'inline'                  => ( 2 / 60 ),    
+		'advanced_search_inline'  => ( 3 / 60 ),    
+		'bulk'                    => ( 4.5 / 60 ),
+	);
 	public static function instance() {
 		if ( is_null( self::$_instance ) ) {
 			self::$_instance = new self();
@@ -513,10 +518,10 @@ class Smart_Manager {
 			$args = array(
 				'file'           => (dirname( SM_PLUGIN_FILE )) . '/classes/sa-includes/',
 				'prefix'         => 'sm',				// prefix/slug of your plugin
-				'option_name'    => 'sa_sm_offer_bfcm_2023',
-				'campaign'       => 'sa_bfcm_2023',
-				'start'          => '2023-11-21 07:00:00',
-				'end'            => '2023-12-01 06:00:00',
+				'option_name'    => 'sa_sm_offer_bfcm_2024',
+				'campaign'       => 'sa_bfcm_2024',
+				'start'          => '2024-11-26 07:00:00',
+				'end'            => '2024-12-06 06:30:00',
 				'is_plugin_page' => ( !empty($_GET['page']) && in_array( $_GET['page'], array( 'smart-manager', 'sm-storeapps-plugins' ) ) ) ? true : false,	// page where you want to show offer, do not send this if no plugin page is there and want to show offer on Products page
 			);
 			$sa_offer = SA_SM_In_App_Offer::get_instance( $args );
@@ -916,59 +921,54 @@ class Smart_Manager {
 			if ( 'smart-manager' === $_GET['page'] && $is_pro_available === false && ( ! defined('SA_OFFER_VISIBLE') || ( defined('SA_OFFER_VISIBLE') && SA_OFFER_VISIBLE === false ) ) ) {
 
 				$sm_inline_update_count = get_option( 'sm_inline_update_count', 0 );
-
-				$current_user = wp_get_current_user();
-				if ( ! $current_user->exists() ) {
-					return;
-				}
-				$sm_current_user_display_name = $current_user->display_name;
-				if ( empty( $sm_current_user_display_name ) ) {
-					$sm_current_user_display_name = 'there';
-				}
+				$sm_current_user_display_name = self::sm_get_current_user_display_name();
+				if( ( empty( $sm_current_user_display_name ) ) ) return;
 
 				if( false !== get_option( 'sm_dismiss_admin_notice', false ) ) {
 					delete_option( 'sm_dismiss_admin_notice' );
 				}
 
 				echo '<style type="text/css">
-						.sm_design_notice {
-							display: none;
-							width: 45%;
-							background-color: rgb(204 251 241 / 82%) !important;
-							margin-top: 1em !important;
-							margin-bottom: 1em !important;
-							padding: 1em;
-							box-shadow: 0 0 7px 0 rgba(0, 0, 0, .2);
-							font-size: 1.1em;
-							// border: 0.15rem solid #5850ec;
-							margin: 0 auto;
-							text-align: center;
-							border-bottom-right-radius: 0.25rem;
-							border-bottom-left-radius: 0.25rem;
-							border-top: 4px solid #508991;
-						}
-						.sm_main_headline {
-							font-size: 1.7em;
-							padding-bottom: 0.5em;
-							color: rgb(55 65 81);
-							opacity: 0.9;
-						}
-						.sm_main_headline .dashicons.dashicons-awards {
-							font-size: 1.5em;
-							color: #508991;
-							width: unset;
-							line-height: 0.75em;
-							margin-right: 0.1em;
-						}
-						.sm_sub_headline {
-							font-size: 1.2em;
-							color: rgb(55 65 81);
-							line-height: 1.3em;
-							opacity: 0.8;
-						}
-					</style>
-
-					<div class="sm_design_notice">
+					.sm_design_notice {
+						display: none;
+						width: 50%;
+						background-color: rgb(204 251 241 / 82%) !important;
+						margin-top: 1em !important;
+						margin-bottom: 1em !important;
+						padding: 1em;
+						box-shadow: 0 0 7px 0 rgba(0, 0, 0, .2);
+						font-size: 1.1em;
+						// border: 0.15rem solid #5850ec;
+						margin: 0 auto;
+						text-align: center;
+						border-bottom-right-radius: 0.25rem;
+						border-bottom-left-radius: 0.25rem;
+						border-top: 4px solid #508991 !important;
+					}
+					.sm_main_headline {
+						font-size: 1.7em;
+						color: rgb(55 65 81);
+						opacity: 0.9;
+					}
+					.sm_main_headline .dashicons.dashicons-awards {
+						font-size: 3em;
+						color: #508991;
+						width: unset;
+						line-height: 3rem;
+						margin-right: 0.1em;
+					}
+					.sm_sub_headline {
+						font-size: 1.2em;
+						color: rgb(55 65 81);
+						line-height: 1.3em;
+						opacity: 0.8;
+					}
+				</style>';
+				$man_hours_data = self::sm_get_man_hours_data();
+				if( ( ! empty( $man_hours_data ) ) && ( is_array( $man_hours_data ) ) && ( ! empty( $man_hours_data['display_man_hours'] ) )  ){
+					echo self::sm_get_man_hours_html( $man_hours_data, $sm_current_user_display_name );
+				}else{
+					echo '<div class="sm_design_notice">
 						<div class="sm_container">
 							<div class="sm_main_headline"><span class="dashicons dashicons-awards"></span><span>'. ( ( self::show_halloween_offer() ) ? sprintf( 
 								/* translators: %1$s: current user display name %2$s: HTML of Pro price discount */
@@ -976,14 +976,14 @@ class Smart_Manager {
 								$sm_current_user_display_name,
 								'<span style="font-weight: bold;font-size: 2rem;color: rgb(20 184 166);color: #508991;color: rgb(55 65 81);">'. __( "25% off", "smart-manager-for-wp-e-commerce" ) .'</span>' ) : sprintf(
 								/* translators: %1$s: current user display name %2$s: HTML of Pro price discount */
-								 __( 'Hey %1$s, you just unlocked %2$s on Smart Manager Pro!', 'smart-manager-for-wp-e-commerce' ), $sm_current_user_display_name,
-								 '<span style="font-weight: bold;font-size: 2rem;color: rgb(20 184 166);color: #508991;color: rgb(55 65 81);">'. __( "25% off", "smart-manager-for-wp-e-commerce" ) .'</span>' ) ) .'</span></div>
-							<div class="sm_sub_headline">' . sprintf( 
+									__( 'Hey %1$s, you just unlocked %2$s on Smart Manager Pro!', 'smart-manager-for-wp-e-commerce' ), $sm_current_user_display_name,
+									'<span style="font-weight: bold;font-size: 2rem;color: rgb(20 184 166);color: #508991;color: rgb(55 65 81);">'. __( "25% off", "smart-manager-for-wp-e-commerce" ) .'</span>' ) ) .'</span></div>
+							<div class="sm_sub_headline" style="margin: 0.75rem 0 0 .5em !important;">' . sprintf( 
 								/* translators: %s: pricing page link */
 								__( '%s to check Smart Manager Pro features/benefits and claim your discount.', 'smart-manager-for-wp-e-commerce' ), '<a style="color: rgb(55 65 81);" href="'. admin_url( 'admin.php?page=smart-manager-pricing' ) .'" target="_blank">' . __( 'Click here', 'smart-manager-for-wp-e-commerce' ) . '</a>' ) .'</div>
 						</div>
 					</div>';
-
+				}
 			}
 		}
 	}
@@ -1295,9 +1295,11 @@ class Smart_Manager {
 							'useDatePickerForDateTimeOrDateCols' => ( 'no' === apply_filters( 'sm_use_date_picker_for_date_or_datetime_cols', Smart_Manager_Settings::get( 'use_date_picker_for_date_or_datetime_cols' ) ) ) ? 0 : 1,
 							'SM_IS_WOO79' => ( ! empty( self::$sm_is_woo79 ) ) ? 'true' : 'false',
 							'isSAOfferVisible' => SA_OFFER_VISIBLE,
-							'isSAOfferBannerVisible' => ( 'yes' === get_option( 'sa_sm_offer_bfcm_2023', 'yes' ) ) ? true : false,
+							'isSAOfferBannerVisible' => ( 'yes' === get_option( 'sa_sm_offer_bfcm_2024', 'yes' ) ) ? true : false,
 							'scheduled_action_admin_url' => admin_url( 'tools.php?page=action-scheduler&orderby=schedule&order=desc&action=-1&action2=-1&status=pending&s=storeapps_smart_manager_scheduled_actions&paged=1' ),
-							'is_admin' => ( 'administrator' === self::get_current_user_role() ) ? true : false
+							'is_admin' => ( 'administrator' === self::get_current_user_role() ) ? true : false,
+							'manHoursData' => self::sm_get_man_hours_data(),
+							'userName' => self::sm_get_current_user_display_name()
 						);
 
 		$active_plugins = (array) get_option( 'active_plugins', array() );
@@ -1995,6 +1997,176 @@ class Smart_Manager {
 		}
 		$object->set_slug( $data['slug'] );
 		return $object;
+	}
+
+	/**
+	 * Calculate saved time and additional savings using bulk edit calculation.
+	 *
+	 * @param string $edit_type Type of edit ('inline', 'advanced_search_inline', 'bulk').
+	 * @param int    $records_updated Number of records updated.
+	 * @param string $return_unit Unit to return the result in ('hrs' or 'mins'). Default is 'hrs'.
+	 * @return array|void Array with man-hours saved and additional savings, or void if input is invalid.
+	*/
+	public static function sm_get_time_saved_with_additional_savings( $edit_type = '', $records_updated = 0, $return_unit = 'hrs' ) {
+		if ( empty( $edit_type ) || empty( $records_updated ) || ! array_key_exists( $edit_type, self::$time_saved_per_record ) ) {
+			return;
+		}
+		$return_unit = strtolower( sanitize_text_field( $return_unit ) );
+		// Calculate man-hours saved for the given edit type.
+		$man_hours_saved = floatval( ( absint( $records_updated ) ) * ( self::$time_saved_per_record[ $edit_type ] ) );
+
+		// Additional savings if bulk edit was used.
+		$additional_savings = 0;
+		if ( $edit_type !== 'bulk' ) {
+			$additional_savings = absint( $records_updated ) * ( self::$time_saved_per_record['bulk'] - self::$time_saved_per_record[ $edit_type ] );
+		}
+		$multiplier = ( $return_unit === 'mins' ) ? 60 : 1;
+		return array(
+			'time_saved'        => round( $man_hours_saved * $multiplier, 2 ),
+			'additional_savings' => round( $additional_savings * $multiplier, 2 ),
+			'unit'              => $return_unit
+		);
+	}
+
+	/**
+	 * Update man-hours saved and records updated in the database.
+	 *
+	 * @param string $edit_type Type of edit ('inline', 'advanced_search_inline', 'bulk').
+	 * @param int    $records_updated Number of records updated.
+	 * @return void 
+	*/
+	public static function sm_update_man_hours_data( $edit_type = '', $records_updated = 0 ) {
+		if ( empty( $edit_type ) || empty( $records_updated ) ) return;
+
+		$edit_type = sanitize_key( $edit_type );
+		$records_updated = absint( $records_updated );
+
+		$time_saved_details = self::sm_get_time_saved_with_additional_savings( $edit_type, $records_updated, 'hrs' );
+		if ( empty( $time_saved_details['time_saved'] ) ) return;
+		
+		$man_hours_saved = floatval( $time_saved_details['time_saved'] );
+		if ( empty( $man_hours_saved ) ) return;
+
+		$man_hours_data = get_option( 'sa_sm_man_hours_saved', array() );
+		$records_data = get_option( 'sa_sm_records_updated', array() );
+
+		// Set 'advanced_search_inline' as 'inline' to simplify man-hours tracking.
+		if( $edit_type === 'advanced_search_inline' ){
+			$edit_type = 'inline';
+		}
+
+		$man_hours_data[ $edit_type ] = round( ( ! empty( $man_hours_data[ $edit_type ] ) ) ? ( $man_hours_data[ $edit_type ] + $man_hours_saved ) : $man_hours_saved, 2 );
+		$records_data[ $edit_type ] = round( ( ! empty( $records_data[ $edit_type ] ) ) ? ( $records_data[ $edit_type ] + $records_updated ) : $records_updated, 2 );
+
+		update_option( 'sa_sm_man_hours_saved', $man_hours_data );
+		update_option( 'sa_sm_records_updated', $records_data );
+	}
+
+	/**
+	 * Get total man-hours saved from options and determine if they should be displayed.
+	 *
+	 * @return array|void Array with 'man_hours' and 'display_man_hours' keys, void if not found or empty
+	*/
+	public static function sm_get_man_hours_data() {
+		$man_hours_data = get_option( 'sa_sm_man_hours_saved', array() );
+		if( ( ! is_array( $man_hours_data ) ) || ( empty( $man_hours_data['inline'] ) ) ) return;
+		return array(
+			'man_hours_saved'    => floatval( $man_hours_data['inline'] ),
+			'display_man_hours'  => ( floatval( $man_hours_data['inline'] ) >= 0.25 ) ? true : false,
+			'additional_savings' => round( self::sm_calculate_additional_man_hrs_savings( floatval( $man_hours_data['inline'] ) ), 2 )
+		);
+	}
+
+	/**
+	 * Calculate additional man-hours saved by using bulk edit instead of inline edit.
+	 *
+	 * @param float $man_hours_inline Total man-hours saved using inline edit.
+	 * @return float Additional man-hours saved using bulk edit.
+	*/
+	public static function sm_calculate_additional_man_hrs_savings( $man_hours_inline = 0 ) {
+		if( ( empty( $man_hours_inline ) ) ) return;
+		return round( ( ( floatval( $man_hours_inline ) ) / ( floatval( self::$time_saved_per_record['inline'] ) ) ) * ( ( floatval( self::$time_saved_per_record['bulk'] ) ) - ( floatval( self::$time_saved_per_record['inline'] ) ) ), 2 );
+	}
+	
+	/**
+	 * Display a notice summarizing the saved man-hours and available discounts.
+	 *
+	 * @param string $user_name The name of the current user.
+	 * @param array  $man_hours_data The data about the saved man-hours and additional savings.
+	 * @return string html containing man hours data or empty string if data is not valid.
+	*/
+	public static function sm_get_man_hours_html( $man_hours_data = array(), $user_name = '' ) {
+		if( ( empty( $man_hours_data ) ) || ( ! is_array( $man_hours_data ) ) || ( empty( $user_name ) ) || ( empty( $man_hours_data['additional_savings'] ) ) || ( empty( $man_hours_data['man_hours_saved'] ) ) ) return '';
+		return '<style>
+			.sm_main_headline {
+				display: flex;
+				justify-content: center;
+			}
+			.sm_main_headline .dashicons {
+				margin-right: 1rem;
+			}
+			.sm_main_content {
+				font-size: 1rem;
+			}
+			.sm_claim_discount {
+				margin-top: 1rem;
+			}
+			.discount-text {
+				font-weight: bold;
+				font-size: 1.25rem;
+				color: rgb(55, 65, 81);
+			}
+			.sm_sub_headline {
+				font-size: 1.1em;
+				line-height: 1.5rem;
+			}
+			.pricing-link {
+				color: rgb(55, 65, 81);
+			}
+		</style>
+		<div class="sm_design_notice">
+			<div class="sm_container">
+				<div class="sm_main_headline">
+				<div class="dashicons dashicons-awards"></div>
+				<div class="sm_main_content">
+					<span>
+					' . sprintf(
+						/* translators: %1$s: user name, %2$s: saved man-hours */
+						__( 'Hey %1$s, you’ve just saved <strong>%2$s productive hours</strong> with Smart Manager! 🎉', 'smart-manager-for-wp-e-commerce' ),
+						$user_name,
+						$man_hours_data['man_hours_saved']
+					) . '
+					</span>
+					<div class="sm_claim_discount">
+					' . sprintf(
+						/* translators: %1$s: discount percentage, %2$s: additional man-hours */
+						__( 'Upgrade to Smart Manager Pro to save <strong>additional %1$s hours</strong> (minimum) and unlock all features. %2$s', 'smart-manager-for-wp-e-commerce' ),
+						$man_hours_data['additional_savings'],
+						'<a class="pricing-link" href="' . admin_url( 'admin.php?page=smart-manager-pricing' ) . '" target="_blank">' . __( 'Get it at', 'smart-manager-for-wp-e-commerce' ) . ' <strong>'. __( '25% off!', 'smart-manager-for-wp-e-commerce' ) . '</strong> </a>'
+					) . '
+					</div>
+				</div>
+				</div>
+			</div>
+		</div>';
+	}
+
+	/**
+	 * Get the display name of the current user or a fallback value.
+	 *
+	 * @param string $fallback The fallback value to use if the user's display name is not set. Default is 'there'.
+	 * @return string|false The display name of the current user or false if user not exist.
+	*/
+	public static function sm_get_current_user_display_name( $fallback = 'there' ) {
+		if( ( empty( $fallback ) ) ){
+			$fallback = 'there';
+		}
+		$current_user = wp_get_current_user();
+		if ( ! $current_user->exists() ) {
+			return false;
+		}
+		$display_name = $current_user->display_name;
+		return ( ( ! empty( $display_name ) ) ) ? $display_name : __( $fallback, 'smart-manager-for-wp-e-commerce' );
 	}
 }
 
