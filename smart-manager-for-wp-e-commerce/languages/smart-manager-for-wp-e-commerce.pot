@@ -2,14 +2,14 @@
 # This file is distributed under the GNU General Public License v2.0.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce Advanced Bulk Edit Products, Orders, Coupons, Any WordPress Post Type - Smart Manager 8.50.0\n"
+"Project-Id-Version: WooCommerce Advanced Bulk Edit Products, Orders, Coupons, Any WordPress Post Type - Smart Manager 8.51.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/smart-manager-for-wp-e-commerce\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2024-11-25T13:40:01+00:00\n"
+"POT-Creation-Date: 2024-12-05T05:34:16+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.9.0\n"
 "X-Domain: smart-manager-for-wp-e-commerce\n"
@@ -720,7 +720,7 @@ msgid "Price"
 msgstr ""
 
 #: classes/class-smart-manager-shop-order.php:502
-#: pro/classes/class-smart-manager-pro-product.php:119
+#: pro/classes/class-smart-manager-pro-product.php:120
 msgid "Cost of Good"
 msgstr ""
 
@@ -1085,37 +1085,37 @@ msgid "Bulk Edit action scheduled successfully. Check all your scheduled actions
 msgstr ""
 
 #. translators: %s process name
-#: pro/classes/class-smart-manager-pro-base.php:941
+#: pro/classes/class-smart-manager-pro-base.php:967
 msgctxt "update status"
 msgid "%s failed"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-base.php:993
+#: pro/classes/class-smart-manager-pro-base.php:1019
 msgctxt "batch process"
 msgid "No batch process params found"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-base.php:1204
+#: pro/classes/class-smart-manager-pro-base.php:1230
 msgctxt "duplicate process"
 msgid "Duplicate process failed"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-base.php:1275
+#: pro/classes/class-smart-manager-pro-base.php:1302
 msgctxt "move to trash process"
 msgid "Move to trash failed"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-base.php:1703
+#: pro/classes/class-smart-manager-pro-base.php:1735
 msgctxt "delete permanently"
 msgid "Delete records permanently failed"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-base.php:1817
+#: pro/classes/class-smart-manager-pro-base.php:1849
 msgctxt "delete process"
 msgid "Delete process failed"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-base.php:2704
+#: pro/classes/class-smart-manager-pro-base.php:2746
 msgctxt "bulk update process"
 msgid "Bulk update posts batch failed"
 msgstr ""
@@ -1124,311 +1124,311 @@ msgstr ""
 msgid "Category"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:89
+#: pro/classes/class-smart-manager-pro-product.php:90
 msgid "Booking duration"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:90
+#: pro/classes/class-smart-manager-pro-product.php:91
 msgid "Minimum duration"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:91
+#: pro/classes/class-smart-manager-pro-product.php:92
 msgid "Maximum duration"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:92
+#: pro/classes/class-smart-manager-pro-product.php:93
 msgid "Booking can be cancelled until"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:93
+#: pro/classes/class-smart-manager-pro-product.php:94
 msgid "Min persons"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:94
+#: pro/classes/class-smart-manager-pro-product.php:95
 msgid "Max persons"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:95
+#: pro/classes/class-smart-manager-pro-product.php:96
 msgid "Max bookings per block"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:96
+#: pro/classes/class-smart-manager-pro-product.php:97
 msgid "Minimum block bookable"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:97
+#: pro/classes/class-smart-manager-pro-product.php:98
 msgid "Maximum block bookable"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:98
+#: pro/classes/class-smart-manager-pro-product.php:99
 msgid "Require a buffer period of"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:100
+#: pro/classes/class-smart-manager-pro-product.php:101
 msgid "Minimum quantity"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:101
+#: pro/classes/class-smart-manager-pro-product.php:102
 msgid "Maximum quantity"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:102
+#: pro/classes/class-smart-manager-pro-product.php:103
 msgid "Group of..."
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:103
+#: pro/classes/class-smart-manager-pro-product.php:104
 msgid "Variation Minimum quantity"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:104
+#: pro/classes/class-smart-manager-pro-product.php:105
 msgid "Variation Maximum quantity"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:105
+#: pro/classes/class-smart-manager-pro-product.php:106
 msgid "Variation Group of..."
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:107
+#: pro/classes/class-smart-manager-pro-product.php:108
 msgid "Minimum Quantity"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:108
+#: pro/classes/class-smart-manager-pro-product.php:109
 msgid "Maximum Quantity"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:109
+#: pro/classes/class-smart-manager-pro-product.php:110
 msgid "Variation Minimum Quantity"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:110
+#: pro/classes/class-smart-manager-pro-product.php:111
 msgid "Variation Maximum Quantity"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:112
+#: pro/classes/class-smart-manager-pro-product.php:113
 msgid "Min Quantity"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:113
+#: pro/classes/class-smart-manager-pro-product.php:114
 msgid "Max Quantity"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:115
+#: pro/classes/class-smart-manager-pro-product.php:116
 msgid "Subscription Price"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:116
+#: pro/classes/class-smart-manager-pro-product.php:117
 msgid "Sign-up Fee"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:117
+#: pro/classes/class-smart-manager-pro-product.php:118
 msgid "Free Trial"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:121
+#: pro/classes/class-smart-manager-pro-product.php:122
 msgid "Product Units"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:122
+#: pro/classes/class-smart-manager-pro-product.php:123
 msgid "Unit Price Units"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:123
+#: pro/classes/class-smart-manager-pro-product.php:124
 msgid "Regular Unit Price"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:124
+#: pro/classes/class-smart-manager-pro-product.php:125
 msgid "Sale Unit Price"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:131
+#: pro/classes/class-smart-manager-pro-product.php:132
 msgid "Enable Calendar Range Picker?"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:132
+#: pro/classes/class-smart-manager-pro-product.php:133
 msgid "Requires confirmation?"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:133
+#: pro/classes/class-smart-manager-pro-product.php:134
 msgid "Can be cancelled?"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:134
+#: pro/classes/class-smart-manager-pro-product.php:135
 msgid "Has persons"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:135
+#: pro/classes/class-smart-manager-pro-product.php:136
 msgid "Has resources"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:136
+#: pro/classes/class-smart-manager-pro-product.php:137
 msgid "Multiply all costs by person count"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:137
+#: pro/classes/class-smart-manager-pro-product.php:138
 msgid "Count persons as bookings"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:138
+#: pro/classes/class-smart-manager-pro-product.php:139
 msgid "Enable person types"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:139
+#: pro/classes/class-smart-manager-pro-product.php:140
 msgid "Restrict start and end days?"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:140
+#: pro/classes/class-smart-manager-pro-product.php:141
 msgid "Adjacent Buffering?"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:145
+#: pro/classes/class-smart-manager-pro-product.php:146
 msgid "Enable Min Max Quantity"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:150
+#: pro/classes/class-smart-manager-pro-product.php:151
 msgid "Min/Max Rules"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:151
+#: pro/classes/class-smart-manager-pro-product.php:152
 msgid "Allow Combination"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:152
+#: pro/classes/class-smart-manager-pro-product.php:153
 msgid "Order rules: Do not count"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:153
+#: pro/classes/class-smart-manager-pro-product.php:154
 msgid "Order rules: Exclude"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:154
+#: pro/classes/class-smart-manager-pro-product.php:155
 msgid "Category group-of rules: Exclude"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:155
+#: pro/classes/class-smart-manager-pro-product.php:156
 msgid "Variation Order rules: Do not count"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:156
+#: pro/classes/class-smart-manager-pro-product.php:157
 msgid "Variation Order rules: Exclude"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:157
+#: pro/classes/class-smart-manager-pro-product.php:158
 msgid "Variation Category group-of rules: Exclude"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:159
+#: pro/classes/class-smart-manager-pro-product.php:160
 msgid "Calculate unit prices automatically"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:163
+#: pro/classes/class-smart-manager-pro-product.php:164
 msgid "Month(s)"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:164
+#: pro/classes/class-smart-manager-pro-product.php:165
 msgid "Day(s)"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:165
+#: pro/classes/class-smart-manager-pro-product.php:166
 msgid "Hour(s)"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:166
+#: pro/classes/class-smart-manager-pro-product.php:167
 msgid "Minutes(s)"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:198
+#: pro/classes/class-smart-manager-pro-product.php:199
 msgid "Booking Duration (Type)"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:200
+#: pro/classes/class-smart-manager-pro-product.php:201
 msgid "Fixed blocks of"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:201
+#: pro/classes/class-smart-manager-pro-product.php:202
 msgid "Customer defined blocks of"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:206
+#: pro/classes/class-smart-manager-pro-product.php:207
 msgid "Booking Duration (Unit)"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:211
+#: pro/classes/class-smart-manager-pro-product.php:212
 msgid "Booking can be cancelled until (Unit)"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:216
+#: pro/classes/class-smart-manager-pro-product.php:217
 msgid "Minimum block bookable (Unit)"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:221
+#: pro/classes/class-smart-manager-pro-product.php:222
 msgid "Maximum block bookable (Unit)"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:226
+#: pro/classes/class-smart-manager-pro-product.php:227
 msgid "Calendar display mode"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:228
+#: pro/classes/class-smart-manager-pro-product.php:229
 msgid "Display calendar on click"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:229
+#: pro/classes/class-smart-manager-pro-product.php:230
 msgid "Calendar always visible"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:234
+#: pro/classes/class-smart-manager-pro-product.php:235
 msgid "Resources are..."
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:236
+#: pro/classes/class-smart-manager-pro-product.php:237
 msgid "Customer selected"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:237
+#: pro/classes/class-smart-manager-pro-product.php:238
 msgid "Automatically assigned"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:242
+#: pro/classes/class-smart-manager-pro-product.php:243
 msgid "All dates are..."
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:244
+#: pro/classes/class-smart-manager-pro-product.php:245
 msgid "available by default"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:245
+#: pro/classes/class-smart-manager-pro-product.php:246
 msgid "not-available by default"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:250
+#: pro/classes/class-smart-manager-pro-product.php:251
 msgid "Check rules against..."
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:252
+#: pro/classes/class-smart-manager-pro-product.php:253
 msgid "All blocks being booked"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:253
+#: pro/classes/class-smart-manager-pro-product.php:254
 msgid "The starting block only"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:261
+#: pro/classes/class-smart-manager-pro-product.php:262
 msgid "Subscription Periods"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:267
+#: pro/classes/class-smart-manager-pro-product.php:268
 msgid "Billing Period"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:272
+#: pro/classes/class-smart-manager-pro-product.php:273
 msgid "Expire After"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:275
+#: pro/classes/class-smart-manager-pro-product.php:276
 msgid "Never expire"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-product.php:286
+#: pro/classes/class-smart-manager-pro-product.php:287
 msgid "Subscription Trial Period"
 msgstr ""
 
@@ -1576,65 +1576,65 @@ msgctxt "delete task details"
 msgid "No task detail ids found for deleting task details"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:98
+#: pro/classes/class-smart-manager-pro-user.php:99
 msgctxt "AFWC Affiliate Tags field name"
 msgid "AFWC Affiliate Tags"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:215
+#: pro/classes/class-smart-manager-pro-user.php:216
 msgid "Nickname"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:393
+#: pro/classes/class-smart-manager-pro-user.php:394
 msgctxt "AFWC Is Affiliate field name"
 msgid "AFWC Is Affiliate"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:394
+#: pro/classes/class-smart-manager-pro-user.php:395
 msgctxt "AFWC Referral URL ID field name"
 msgid "AFWC Referral URL ID"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:395
+#: pro/classes/class-smart-manager-pro-user.php:396
 msgctxt "AFWC PayPal Email field name"
 msgid "AFWC PayPal Email"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:396
+#: pro/classes/class-smart-manager-pro-user.php:397
 msgctxt "AFWC Parent Chain field name"
 msgid "AFWC Parent Chain"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:397
+#: pro/classes/class-smart-manager-pro-user.php:398
 msgctxt "AFWC Lifetime Customers field name"
 msgid "AFWC Lifetime Customers"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:398
+#: pro/classes/class-smart-manager-pro-user.php:399
 msgctxt "AFWC Affiliate Form Description field name"
 msgid "AFWC Affiliate Form Description"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:399
+#: pro/classes/class-smart-manager-pro-user.php:400
 msgctxt "AFWC Affiliate Form Contact field name"
 msgid "AFWC Affiliate Form Contact"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:400
+#: pro/classes/class-smart-manager-pro-user.php:401
 msgctxt "AFWC Affiliate Skype Handle field name"
 msgid "AFWC Affiliate Skype Handle"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:402
+#: pro/classes/class-smart-manager-pro-user.php:403
 msgctxt "AFWC Additional Form Fields field name"
 msgid "AFWC Additional Form Fields"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:1411
+#: pro/classes/class-smart-manager-pro-user.php:1412
 msgid "Email cannot be empty"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:1417
+#: pro/classes/class-smart-manager-pro-user.php:1418
 msgid "Email already exists. Please enter another email."
 msgstr ""
 
@@ -3496,7 +3496,7 @@ msgstr ""
 
 #: assets/js/smart-manager.js:2812
 msgctxt "button"
-msgid "Get Pro at 25% off"
+msgid "Upgrade Now"
 msgstr ""
 
 #. translators: %s: pricing page link

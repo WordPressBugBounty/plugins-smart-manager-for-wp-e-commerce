@@ -2809,7 +2809,7 @@ Smart_Manager.prototype.event_handler = function() {
 						autoHide: false,
 						isFooterItemsCenterAligned: true,
 						cta: {
-							title: _x('Get Pro at 25% off', 'button', 'smart-manager-for-wp-e-commerce'),
+							title: _x('Upgrade Now', 'button', 'smart-manager-for-wp-e-commerce'),
 							callback: function() {
 								window.open(window.smart_manager.pricingPageURL, "_blank");
 								jQuery( this ).dialog( "close" );

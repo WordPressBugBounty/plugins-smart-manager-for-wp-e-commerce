@@ -2749,8 +2749,8 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				}
 				//Code for updating the meta tables
 				if ( !empty( $meta_data_edited ) && !empty( $meta_keys_edited ) ) {
-					if( ( defined('SMPRO') && true === SMPRO ) && is_callable( 'Smart_Manager_Pro_Base', 'sm_update_meta_tables' ) ){
-						Smart_Manager_Pro_Base::sm_update_meta_tables(
+					if( ( defined('SMPRO') && true === SMPRO ) && is_callable( 'Smart_Manager_Pro_Base', 'update_meta_tables' ) ){
+						Smart_Manager_Pro_Base::update_meta_tables(
 							array(
 								'meta_data_edited' => !empty( $meta_data_edited ) ? $meta_data_edited : array(),
 								'meta_keys_edited' => !empty( $meta_keys_edited ) ? array_keys( $meta_keys_edited ) : array(),
@@ -2777,8 +2777,8 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 
 				// Code for updating the posts table.
 				if ( ! empty( $data_col_params['posts_fields'] ) ) {
-					if ( ( defined( 'SMPRO' ) && true === SMPRO ) && is_callable( 'Smart_Manager_Pro_Base', 'sm_update_posts' ) ) { // For pro.
-						Smart_Manager_Pro_Base::sm_update_posts( 
+					if ( ( defined( 'SMPRO' ) && true === SMPRO ) && is_callable( 'Smart_Manager_Pro_Base', 'update_posts' ) ) { // For pro.
+						Smart_Manager_Pro_Base::update_posts( 
 							array( 
 								'posts_data' => $data_col_params['posts_fields'], 
 								'task_id' => ( ! empty( $this->task_id ) ) ? $this->task_id : 0, 

@@ -7,10 +7,10 @@ Tags: woocommerce advanced bulk edit, wordpress bulk edit, woocommerce inventory
 Requires at least: 5.0
 Tested up to: 6.7.1
 Requires PHP: 5.6
-Stable tag: 8.50.0
+Stable tag: 8.51.0
 License: GPLv2
 
-Most advanced WooCommerce bulk edit plugin for products, orders, coupons, any WordPress post type using an Excel-like sheet editor.
+WooCommerce Advanced Bulk Edit products, orders, & posts in an Excel-like sheet editor. Get advanced WooCommerce stock, pricing, & order management.
 
 == Description ==
 
@@ -19,11 +19,11 @@ Most advanced WooCommerce bulk edit plugin for products, orders, coupons, any Wo
 > ***Smart Manager is a lifesaver**. Anyone starting a new store or migrating to a new line (perhaps seasonal shifts) should consider this mandatory in their toolbox.*
 > – Envoymatt
 
-**Smart Manager** is a single-screen, excel-like interface to browse and manage these dashboards – ** products (all types), orders, blog posts, and coupons**. 
+**Smart Manager** is a single-screen, excel-like interface to browse and manage these dashboards – **products (all types), orders, blog posts, and coupons**. 
 
 Select a dashboard and start making edits without leaving the spreadsheet. Speed up the way you create content and manage your store.
 
-Manage Products, Orders, Coupons, Get endless powerful features with this plugin
+Manage Products, Orders, Coupons, Get endless powerful features with this FREE plugin
 
 https://www.youtube.com/watch?v=COXCuX2rFrk
 
@@ -94,7 +94,7 @@ Embrace the power of next-generation WooCommerce store management. Smart Manager
 
 **Happy customers, happy life** – Smooth WooCommerce inventory management, WooCommerce orders management, and efficient operations mean happy customers and a thriving business.
 
-**TL;DR:** With Smart Manager Lite, effortlessly manage your e-commerce store by performing inline edits on products, orders, coupons, and posts. Use advanced search filters to quickly find and edit posts with specific keywords, manage stock levels, and track product performance. Bulk edit prices, update SKUs, or change order statuses with ease. Add new products or orders directly through the spreadsheet interface and monitor store activities effortlessly.
+**TL;DR:** Smart Manager Lite makes managing your e-commerce store easy. Quickly edit products, orders, coupons, and posts using inline edit. Use advanced search to find and update items, manage stock, and track performance. Bulk edit prices, SKUs, and order statuses, or add new products and orders directly. Simplify store management in one place.
 
 > ***I’m very happy using the free version of the plugin on my WooCommerce site**. No issue with a lot of plugins I have active on my site.
 > The best is the support: **6 stars** I would give them. Keep in mind that I’m talking about the free version and from the first contact they have been very kind and fast. Sure I recommend it!*
@@ -132,7 +132,7 @@ https://www.youtube.com/watch?v=20iodFpP5ow
 
 - Create **Excel-like custom views** / segmented views / column sets, i.e. view only the data you want. Enable / disable data columns, make edits, apply filters, and save. - **Supports all post types and custom taxonomies**.
 - **Predefined custom views** – Product Stock & Product Price List
-- **Advanced Export CSV for all post types and custom taxonomies** – all or filtered data using date filters, search filters, or column filters. Use it for better inventory management, reporting, sales, designing your marketing campaigns, migration to a new store, etc.
+- **Advanced Export CSV for all post types and custom taxonomies** – access all or filtered data using date, search, or column filters. Perfect for inventory management, reporting, sales, marketing campaigns, and store migration.
 - **Rename the admin columns title at your convenience**. For example, change Stock to Quantity.
 - Add your own logo to packing slips.
 - **Print PDF invoices for orders in bulk**.
@@ -173,8 +173,8 @@ https://www.youtube.com/watch?v=20iodFpP5ow
 -- [File Uploads Addon for WooCommerce](https://wordpress.org/plugins/woo-addon-uploads/)
 - And all other features of the Smart Manager Lite version...
 
-**TL;DR:** With Smart Manager, search for all expired subscriptions and delete them, bulk edit bookings made between a date range, inline edit a membership based on search, search for all posts having the same keyword and make an edit, modify the cost of goods in bulk, manage courses, and a lot more...
-Easily manage suppliers, vendors, and warehouses, and stay in control of your WooCommerce inventory management.
+**TL;DR:** With Smart Manager, quickly search and delete expired subscriptions, bulk edit bookings, inline edit memberships, search and edit posts by keyword, adjust product costs in bulk, manage courses, and more. 
+Effortlessly handle suppliers, vendors, warehouses, and WooCommerce inventory.
 
 Get priority support from plugin developers and receive plugin updates till your license period.
 
@@ -287,6 +287,15 @@ It also gives the warm feeling of supporting further development of the plugin.
 2. Bulk edit / Batch update (only in Pro version)
 
 == Changelog ==
+
+= 8.51.0 (05.12.2024) =
+* New: WooCommerce 9.4.3 compatible
+* Fix: 'save_post' hook doesn't trigger when updating meta or taxonomy data
+* Fix: Move to Trash not working for WooCommerce Orders dashboard
+* Fix: Bulk Edit functionality not working when multiple actions are applied to the same field (Pro)
+* Fix: Delete Permanently and Move to Trash not working for WooCommerce Orders, Users and taxonomy dashboards (Pro)
+* Update: POT file
+
 = 8.50.0 (25.11.2024) =
 * New: WordPress 6.7.1 compatible
 * New: WooCommerce 9.4.2 compatible
@@ -461,6 +470,9 @@ It also gives the warm feeling of supporting further development of the plugin.
 [See changelog for all versions](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 8.51.0 =
+WooCommerce 9.4.3 compatible, Fixes related to 'save_post' hook doesn't trigger when updating meta or taxonomy data, Move to Trash not working for WooCommerce Orders dashboard, Bulk Edit functionality not working when multiple actions are applied to the same field (Pro), Delete Permanently and Move to Trash not working for WooCommerce Orders, Users and taxonomy dashboards (Pro). Recommended upgrade.
 
 = 8.50.0 =
 WordPress 6.7.1 compatible, WooCommerce 9.4.2 compatible, Updates related to UI/UX for combo boxes along with other important fixes and updates. Recommended upgrade.
