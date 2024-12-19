@@ -2815,11 +2815,9 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				$sm_inline_update_count += sizeof($edited_data);
 				update_option( 'sm_inline_update_count', $sm_inline_update_count, 'no' );
 				//Get time saved
-
-				$man_hours_data = Smart_Manager::sm_get_man_hours_data();
 				$modal_message = '';
-				if( ! empty( $man_hours_data ) && is_array( $man_hours_data )  ){
-					$time_saved_details = Smart_Manager::sm_get_time_saved_with_additional_savings( $is_advanced_search ? 'advanced_search_inline' : 'inline', sizeof( $edited_data ), 'mins' );
+				$time_saved_details = Smart_Manager::sm_get_time_saved_with_additional_savings( $is_advanced_search ? 'advanced_search_inline' : 'inline', sizeof( $edited_data ), 'mins' );
+				if( ! empty( $time_saved_details ) && is_array( $time_saved_details )  ){
 					$modal_message = sprintf(
 								/* translators: %1$s: time saved in minutes/hours, %2$s: additional savings possible, %3$s: Pro upgrade link */
 								__(

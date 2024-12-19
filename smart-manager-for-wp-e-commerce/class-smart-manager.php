@@ -795,16 +795,25 @@ class Smart_Manager {
 		global $wpdb;
 	
 		$current_user_role = ( is_callable( array( 'Smart_Manager', 'get_current_user_role' ) ) ) ? self::get_current_user_role() : '';
+		if( ( empty( $current_user_role ) ) ) return;
+
+		if( 'administrator' === $current_user_role ){
+			$this->add_menu();
+			return;
+		}
+
 		$query = "SELECT option_value FROM {$wpdb->prefix}options WHERE option_name = 'sm_" . $current_user_role . "_dashboard'";
 		$result_old = $wpdb->get_results( $query );
 	
-		$beta_dashboard_privileges = array();
+		$user_role_accessible_dashboards = array();
+		$user_accessible_dashboards = array();
 	
 		if( class_exists('Smart_Manager_Pro_Access_Privilege') ) {
 			$option_nm = Smart_Manager_Pro_Access_Privilege::$access_privilege_option_start."".$current_user_role."".Smart_Manager_Pro_Access_Privilege::$access_privilege_option_end;
-			$beta_dashboard_privileges = $wpdb->get_results( $wpdb->prepare( "SELECT option_name, option_value FROM {$wpdb->prefix}options WHERE option_name = %s", $option_nm ), 'ARRAY_A' );
+			$user_role_accessible_dashboards = $wpdb->get_results( $wpdb->prepare( "SELECT option_name, option_value FROM {$wpdb->prefix}options WHERE option_name = %s", $option_nm ), 'ARRAY_A' );
+			$user_accessible_dashboards = $wpdb->get_results( $wpdb->prepare( "SELECT meta_value FROM {$wpdb->prefix}usermeta WHERE user_id = %d AND meta_key = %s", get_current_user_id(), Smart_Manager_Pro_Access_Privilege::$access_privilege_option_start."dashboards" ), 'ARRAY_A' );
 		}
-		if ( ( ! empty( $result_old[0] ) && ! empty( $result_old[0]->option_value ) ) || ! empty( $beta_dashboard_privileges ) || 'administrator' === $current_user_role ) { //modified cond for client fix
+		if ( ( ! empty( $result_old[0] ) && ! empty( $result_old[0]->option_value ) ) || ! empty( $user_accessible_dashboards )  || ! empty( $user_role_accessible_dashboards ) ) { //modified cond for client fix
 			$this->add_menu();
 		}
 	}
@@ -2036,16 +2045,22 @@ class Smart_Manager {
 	 * @return void 
 	*/
 	public static function sm_update_man_hours_data( $edit_type = '', $records_updated = 0 ) {
-		if ( empty( $edit_type ) || empty( $records_updated ) ) return;
+		if ( empty( $edit_type ) || empty( $records_updated ) ) {
+			return;
+		}
 
 		$edit_type = sanitize_key( $edit_type );
 		$records_updated = absint( $records_updated );
 
 		$time_saved_details = self::sm_get_time_saved_with_additional_savings( $edit_type, $records_updated, 'hrs' );
-		if ( empty( $time_saved_details['time_saved'] ) ) return;
+		if ( empty( $time_saved_details['time_saved'] ) ) {
+			return;
+		}
 		
 		$man_hours_saved = floatval( $time_saved_details['time_saved'] );
-		if ( empty( $man_hours_saved ) ) return;
+		if ( empty( $man_hours_saved ) ) {
+			return;
+		}
 
 		$man_hours_data = get_option( 'sa_sm_man_hours_saved', array() );
 		$records_data = get_option( 'sa_sm_records_updated', array() );
@@ -2069,7 +2084,13 @@ class Smart_Manager {
 	*/
 	public static function sm_get_man_hours_data() {
 		$man_hours_data = get_option( 'sa_sm_man_hours_saved', array() );
-		if( ( ! is_array( $man_hours_data ) ) || ( empty( $man_hours_data['inline'] ) ) ) return;
+		if ( ( ! is_array( $man_hours_data ) ) || ( empty( $man_hours_data['inline'] ) ) ) {
+			return array(
+				'man_hours_saved' => 0,
+				'display_man_hours' => false,
+				'additional_savings' => 0,
+			);
+		} 
 		return array(
 			'man_hours_saved'    => floatval( $man_hours_data['inline'] ),
 			'display_man_hours'  => ( floatval( $man_hours_data['inline'] ) >= 0.25 ) ? true : false,
@@ -2084,7 +2105,9 @@ class Smart_Manager {
 	 * @return float Additional man-hours saved using bulk edit.
 	*/
 	public static function sm_calculate_additional_man_hrs_savings( $man_hours_inline = 0 ) {
-		if( ( empty( $man_hours_inline ) ) ) return;
+		if( ( empty( $man_hours_inline ) ) ) {
+			return;
+		}
 		return round( ( ( floatval( $man_hours_inline ) ) / ( floatval( self::$time_saved_per_record['inline'] ) ) ) * ( ( floatval( self::$time_saved_per_record['bulk'] ) ) - ( floatval( self::$time_saved_per_record['inline'] ) ) ), 2 );
 	}
 	
@@ -2096,7 +2119,9 @@ class Smart_Manager {
 	 * @return string html containing man hours data or empty string if data is not valid.
 	*/
 	public static function sm_get_man_hours_html( $man_hours_data = array(), $user_name = '' ) {
-		if( ( empty( $man_hours_data ) ) || ( ! is_array( $man_hours_data ) ) || ( empty( $user_name ) ) || ( empty( $man_hours_data['additional_savings'] ) ) || ( empty( $man_hours_data['man_hours_saved'] ) ) ) return '';
+		if( ( empty( $man_hours_data ) ) || ( ! is_array( $man_hours_data ) ) || ( empty( $user_name ) ) || ( empty( $man_hours_data['additional_savings'] ) ) || ( empty( $man_hours_data['man_hours_saved'] ) ) ) {
+			return '';
+		}
 		return '<style>
 			.sm_main_headline {
 				display: flex;

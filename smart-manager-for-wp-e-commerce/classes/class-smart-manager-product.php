@@ -263,26 +263,21 @@ if ( ! class_exists( 'Smart_Manager_Product' ) ) {
 	                    $terms_cond = " ( ". $wpdb->prefix ."term_taxonomy.taxonomy NOT LIKE '". $search_params['search_col'] . "' AND ". $wpdb->prefix ."term_taxonomy.taxonomy NOT LIKE 'product_type' ". $empty_cond ." )";
 					} else {
 
-							if( $search_params['search_col'] == 'product_visibility' && ( ( !empty( Smart_Manager::$sm_is_woo30 ) && Smart_Manager::$sm_is_woo30 == 'true' ) ) ) { //TODO in products
+						if( ( 'product_visibility' === $search_params['search_col'] ) && ( ( !empty( Smart_Manager::$sm_is_woo30 ) && Smart_Manager::$sm_is_woo30 == 'true' ) ) ) { //TODO in products
 
                             if( $search_params['search_value'] == 'visible' ) {
                                 $terms_cond = " ( ( ". $wpdb->prefix ."term_taxonomy.taxonomy LIKE '". $search_params['search_col'] . "' AND ". $wpdb->prefix ."terms.slug != 'exclude-from-search' AND ". $wpdb->prefix ."terms.slug != 'exclude-from-catalog' ) OR ( ". $wpdb->prefix ."term_taxonomy.taxonomy NOT LIKE '". $search_params['search_col'] . "' ) )";
-                                $advanced_search_query[$i]['cond_terms_operator'] .= 'LIKE';    
                             } else if( $search_params['search_value'] == 'hidden' ) {
                                 $terms_cond = " ( ". $wpdb->prefix ."term_taxonomy.taxonomy LIKE '". $search_params['search_col'] . "' AND ". $wpdb->prefix ."terms.slug = 'exclude-from-search' ) &&  ( ". $wpdb->prefix ."term_taxonomy.taxonomy LIKE '". $search_params['search_col'] . "' AND ". $wpdb->prefix ."terms.slug = 'exclude-from-catalog' ) ";
-                                $advanced_search_query[$i]['cond_terms_operator'] .= 'LIKE'; 
                             } else if( $search_params['search_value'] == 'catalog' ) { //TODO: Needs Improvement
                                 $terms_cond = " ( ". $wpdb->prefix ."term_taxonomy.taxonomy LIKE '". $search_params['search_col'] . "' AND ". $wpdb->prefix ."terms.slug = 'exclude-from-search' ) &&  ( ". $wpdb->prefix ."term_taxonomy.taxonomy LIKE '". $search_params['search_col'] . "' AND ". $wpdb->prefix ."terms.slug != 'exclude-from-catalog' ) ";
-                                $advanced_search_query[$i]['cond_terms_operator'] .= 'LIKE'; 
-
-                                $advanced_search_query[$i]['cond_terms_col_name'] .= " AND ". $search_params['search_col']; //added only for this specific search condition
                             } else if( $search_params['search_value'] == 'search' ) { //TODO: Needs Improvement
                                 $terms_cond = " ( ". $wpdb->prefix ."term_taxonomy.taxonomy LIKE '". $search_params['search_col'] . "' AND ". $wpdb->prefix ."terms.slug = 'exclude-from-catalog' ) &&  ( ". $wpdb->prefix ."term_taxonomy.taxonomy LIKE '". $search_params['search_col'] . "' AND ". $wpdb->prefix ."terms.slug != 'exclude-from-search' ) ";
-                                $advanced_search_query[$i]['cond_terms_operator'] .= 'LIKE'; 
                             }
 
-                        } else if( $search_params['search_col'] == 'product_visibility_featured' && ( !empty( Smart_Manager::$sm_is_woo30 ) && Smart_Manager::$sm_is_woo30 == 'true' ) ) {
-                            $terms_cond = " ( ". $wpdb->prefix ."term_taxonomy.taxonomy LIKE 'product_visibility' AND ". $wpdb->prefix ."terms.slug = 'featured' ) ";
+                        } else if( ( 'product_visibility_featured' === $search_params['search_col'] ) && ( !empty( Smart_Manager::$sm_is_woo30 ) && Smart_Manager::$sm_is_woo30 == 'true' ) ) {
+							$operator = ( 'yes' === $search_params['search_value'] ) ? '=' : '!=';
+							$terms_cond = " ( ". $wpdb->prefix ."term_taxonomy.taxonomy $operator 'product_visibility' AND ". $wpdb->prefix ."terms.slug $operator 'featured' ) ";
                         }
 					}
 				} else if ($search_params['search_operator'] == 'is not') {
@@ -306,7 +301,8 @@ if ( ! class_exists( 'Smart_Manager_Product' ) ) {
                             }
 
                         } else if( $search_params['search_col'] == 'product_visibility_featured' && ( !empty( Smart_Manager::$sm_is_woo30 ) && Smart_Manager::$sm_is_woo30 == 'true' ) ) {
-                            $terms_cond = " ( ". $wpdb->prefix ."term_taxonomy.taxonomy LIKE 'product_visibility' AND ". $wpdb->prefix ."terms.slug != 'featured' ) ";
+							$operator = ( 'yes' === $search_params['search_value'] ) ? '!=' : '=';
+							$terms_cond = " ( ". $wpdb->prefix ."term_taxonomy.taxonomy $operator 'product_visibility' AND ". $wpdb->prefix ."terms.slug $operator 'featured' ) ";
                         } else {
                             $terms_cond = " ( ". $wpdb->prefix ."term_taxonomy.taxonomy NOT LIKE '". $search_params['search_col'] . "' ". $attr_cond ." AND ". $wpdb->prefix ."terms.slug NOT LIKE '" . $search_params['search_value'] . "'" . " )";
                         }
@@ -380,6 +376,28 @@ if ( ! class_exists( 'Smart_Manager_Product' ) ) {
 			$col_name = ( ! empty( $search_params['cond_terms_col_name'] ) ) ? $search_params['cond_terms_col_name'] : '';
 			$col_op	= ( ! empty( $search_params['cond_terms_operator'] ) ) ? $search_params['cond_terms_operator'] : '';
 			$col_value = ( ! empty( $search_params['cond_terms_col_value'] ) ) ? $search_params['cond_terms_col_value'] : '';
+
+			//code to exlcude featured products when filter products that are not featured.
+			if ( ( ! empty( $col_value ) ) && ( "product_visibility_featured" === $col_name ) && ( ( ( "LIKE" === $col_op ) && ( "no" === $col_value ) ) || ( ( "NOT LIKE" === $col_op ) && ( "yes" === $col_value ) ) ) ) {
+				$featured_term = get_term_by( 'slug', "featured", "product_visibility" );
+				if ( ! is_wp_error( $featured_term ) && ! empty( $featured_term->term_taxonomy_id ) ) {
+					$sm_search_query_terms_where .= " AND {$wpdb->prefix}posts.ID NOT IN ( SELECT object_id FROM {$wpdb->prefix}term_relationships WHERE term_taxonomy_id IN (". $featured_term->term_taxonomy_id .") )";
+				}
+			}
+
+			// Handle product visibility conditions for 'search' and 'catalog' values.
+			if ( ( ! empty( $col_value ) ) && ( "product_visibility" === $col_name ) && ( "NOT LIKE" === $col_op ) ) {
+				$visibility_tts = array(
+					'search' => 'exclude-from-search',
+					'catalog' => 'exclude-from-catalog',
+				);
+				if ( array_key_exists( $col_value, $visibility_tts ) ) {
+					$term_info = get_term_by( 'slug', $visibility_tts[ $col_value ], 'product_visibility' );
+					if ( ! is_wp_error( $term_info ) && ! empty( $term_info->term_taxonomy_id ) ) {
+						$sm_search_query_terms_where .= " AND {$wpdb->prefix}posts.ID NOT IN ( SELECT object_id FROM {$wpdb->prefix}term_relationships WHERE term_taxonomy_id IN (". $term_info->term_taxonomy_id .") )";
+					}
+				}
+			}
 
 			if ( !empty($col_name) && substr($col_name, 0, 10) == 'attribute_' ) {
 
@@ -458,8 +476,6 @@ if ( ! class_exists( 'Smart_Manager_Product' ) ) {
 
 			return $sm_search_query_terms_where;
 		}
-
-
 
 		//function to handle postmeta custom where clause
 		public function sm_search_query_postmeta_where($sm_search_query_postmeta_where = '', $search_params = array()) {

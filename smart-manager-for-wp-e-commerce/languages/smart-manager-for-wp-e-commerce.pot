@@ -2,16 +2,16 @@
 # This file is distributed under the GNU General Public License v2.0.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce Advanced Bulk Edit Products, Orders, Coupons, Any WordPress Post Type - Smart Manager 8.51.0\n"
+"Project-Id-Version: WooCommerce Advanced Bulk Edit Products, Orders, Coupons, Any WordPress Post Type - Smart Manager 8.52.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/smart-manager-for-wp-e-commerce\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2024-12-05T05:34:16+00:00\n"
+"POT-Creation-Date: 2024-12-19T12:14:36+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.9.0\n"
+"X-Generator: WP-CLI 2.10.0\n"
 "X-Domain: smart-manager-for-wp-e-commerce\n"
 
 #. Plugin Name of the plugin
@@ -60,143 +60,143 @@ msgid "StoreApps Plugins"
 msgstr ""
 
 #. translators: %1$s: current user display name %2$s: HTML of Pro price discount
-#: class-smart-manager.php:975
+#: class-smart-manager.php:984
 msgid "Hey %1$s, grab your %2$s Halloween discount!"
 msgstr ""
 
-#: class-smart-manager.php:977
-#: class-smart-manager.php:980
+#: class-smart-manager.php:986
+#: class-smart-manager.php:989
 msgid "25% off"
 msgstr ""
 
 #. translators: %1$s: current user display name %2$s: HTML of Pro price discount
-#: class-smart-manager.php:979
+#: class-smart-manager.php:988
 msgid "Hey %1$s, you just unlocked %2$s on Smart Manager Pro!"
 msgstr ""
 
 #. translators: %s: pricing page link
-#: class-smart-manager.php:983
+#: class-smart-manager.php:992
 msgid "%s to check Smart Manager Pro features/benefits and claim your discount."
 msgstr ""
 
 #. translators: %s: pricing page link
-#: class-smart-manager.php:983
+#: class-smart-manager.php:992
 msgid "Click here"
 msgstr ""
 
-#: class-smart-manager.php:1253
+#: class-smart-manager.php:1262
 msgid "This functionality has been disabled. Please contact store administrator for enabling the same."
 msgstr ""
 
-#: class-smart-manager.php:1286
+#: class-smart-manager.php:1295
 msgid "In the meanwhile, you can use Smart Manager. But before using actions like "
 msgstr ""
 
-#: class-smart-manager.php:1286
+#: class-smart-manager.php:1295
 #: classes/class-smart-manager-admin-welcome.php:344
 #: classes/class-smart-manager-task.php:481
 msgid "Bulk Edit"
 msgstr ""
 
-#: class-smart-manager.php:1286
+#: class-smart-manager.php:1295
 msgid "Duplicate Records"
 msgstr ""
 
-#: class-smart-manager.php:1286
+#: class-smart-manager.php:1295
 #: classes/class-smart-manager-admin-welcome.php:329
 msgid "Delete Records"
 msgstr ""
 
-#: class-smart-manager.php:1286
+#: class-smart-manager.php:1295
 msgid "Undo Tasks"
 msgstr ""
 
-#: class-smart-manager.php:1286
+#: class-smart-manager.php:1295
 msgid "Delete Tasks"
 msgstr ""
 
-#: class-smart-manager.php:1286
+#: class-smart-manager.php:1295
 #: classes/class-smart-manager-admin-welcome.php:367
 msgid "Export CSV"
 msgstr ""
 
-#: class-smart-manager.php:1286
+#: class-smart-manager.php:1295
 msgid "you will have to wait for the current background process to finish."
 msgstr ""
 
-#: class-smart-manager.php:1625
+#: class-smart-manager.php:1634
 msgid "PRO"
 msgstr ""
 
-#: class-smart-manager.php:1625
+#: class-smart-manager.php:1634
 msgid "LITE"
 msgstr ""
 
-#: class-smart-manager.php:1638
+#: class-smart-manager.php:1647
 msgid "An upgrade for Smart Manager Pro"
 msgstr ""
 
-#: class-smart-manager.php:1638
+#: class-smart-manager.php:1647
 msgid "is available."
 msgstr ""
 
-#: class-smart-manager.php:1638
+#: class-smart-manager.php:1647
 msgid "Click to upgrade."
 msgstr ""
 
-#: class-smart-manager.php:1737
+#: class-smart-manager.php:1746
 msgid "A required Smart Manager file is missing. Can't continue. "
 msgstr ""
 
-#: class-smart-manager.php:1752
+#: class-smart-manager.php:1761
 msgid "Error:"
 msgstr ""
 
-#: class-smart-manager.php:1810
+#: class-smart-manager.php:1819
 msgid "Auto-updates are not available for this plugin."
 msgstr ""
 
-#: class-smart-manager.php:1865
 #: class-smart-manager.php:1874
+#: class-smart-manager.php:1883
 msgctxt "WooCommerce post type label"
 msgid "WooCommerce - "
 msgstr ""
 
-#: class-smart-manager.php:1900
+#: class-smart-manager.php:1909
 msgctxt "go pro link title"
 msgid "Go Pro"
 msgstr ""
 
-#: class-smart-manager.php:1900
+#: class-smart-manager.php:1909
 msgctxt "go pro link"
 msgid "Go Pro"
 msgstr ""
 
 #. translators: %1\$: 5-star link %2s: 5-star link
-#: class-smart-manager.php:1905
+#: class-smart-manager.php:1914
 msgid "Boost us with %1$s&#11088;&#11088;&#11088;&#11088;&#11088; &#128640;%2$s"
 msgstr ""
 
-#: class-smart-manager.php:1906
+#: class-smart-manager.php:1915
 msgctxt "5-star link title"
 msgid "5-star review"
 msgstr ""
 
 #. translators: %1$s: user name, %2$s: saved man-hours
-#: class-smart-manager.php:2135
+#: class-smart-manager.php:2160
 msgid "Hey %1$s, you’ve just saved <strong>%2$s productive hours</strong> with Smart Manager! 🎉"
 msgstr ""
 
 #. translators: %1$s: discount percentage, %2$s: additional man-hours
-#: class-smart-manager.php:2143
+#: class-smart-manager.php:2168
 msgid "Upgrade to Smart Manager Pro to save <strong>additional %1$s hours</strong> (minimum) and unlock all features. %2$s"
 msgstr ""
 
-#: class-smart-manager.php:2145
+#: class-smart-manager.php:2170
 msgid "Get it at"
 msgstr ""
 
-#: class-smart-manager.php:2145
+#: class-smart-manager.php:2170
 msgid "25% off!"
 msgstr ""
 
@@ -308,7 +308,7 @@ msgstr ""
 
 #: classes/class-smart-manager-admin-welcome.php:350
 #: classes/class-smart-manager-admin-welcome.php:372
-#: classes/class-smart-manager-base.php:2842
+#: classes/class-smart-manager-base.php:2840
 msgid "Pro"
 msgstr ""
 
@@ -437,7 +437,7 @@ msgid "View"
 msgstr ""
 
 #: classes/class-smart-manager-base.php:1011
-#: classes/class-smart-manager-product.php:964
+#: classes/class-smart-manager-product.php:980
 #: pro/classes/class-smart-manager-pro-wc-membership-plan.php:97
 #: pro/classes/class-smart-manager-pro-wc-membership-plan.php:98
 msgid "Slug"
@@ -451,27 +451,27 @@ msgid "Trash"
 msgstr ""
 
 #. translators: %1$s: time saved in minutes/hours, %2$s: additional savings possible, %3$s: Pro upgrade link
-#: classes/class-smart-manager-base.php:2825
+#: classes/class-smart-manager-base.php:2823
 msgid "You saved <strong>%1$s</strong>, and you can save more <strong>%2$s</strong> by upgrading to %3$s."
 msgstr ""
 
 #. translators: %1$d: number of updated record %2$s: record update message
-#: classes/class-smart-manager-base.php:2851
-#: classes/class-smart-manager-base.php:2859
+#: classes/class-smart-manager-base.php:2849
+#: classes/class-smart-manager-base.php:2857
 msgid "%1$d record%2$s updated successfully!"
 msgstr ""
 
 #. translators: %1$d: number of updated record %2$s: record update message
-#: classes/class-smart-manager-base.php:2907
+#: classes/class-smart-manager-base.php:2905
 msgid "%1$d record%2$s deleted successfully!"
 msgstr ""
 
-#: classes/class-smart-manager-base.php:3948
+#: classes/class-smart-manager-base.php:3946
 msgctxt "export data model"
 msgid "Export CSV: no data found "
 msgstr ""
 
-#: classes/class-smart-manager-base.php:4012
+#: classes/class-smart-manager-base.php:4010
 msgctxt "export file data"
 msgid "Export CSV: no file data found "
 msgstr ""
@@ -541,136 +541,136 @@ msgctxt "product stock log dashboard"
 msgid "Product Stock Log"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:741
+#: classes/class-smart-manager-product.php:757
 msgid "Shop and search results"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:742
+#: classes/class-smart-manager-product.php:758
 msgid "Shop only"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:743
+#: classes/class-smart-manager-product.php:759
 msgid "Search results only"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:744
+#: classes/class-smart-manager-product.php:760
 msgid "Hidden"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:815
+#: classes/class-smart-manager-product.php:831
 msgctxt "Product category"
 msgid "Category"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:854
-#: classes/class-smart-manager-product.php:860
+#: classes/class-smart-manager-product.php:870
+#: classes/class-smart-manager-product.php:876
 msgid "Taxable"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:855
-#: classes/class-smart-manager-product.php:861
+#: classes/class-smart-manager-product.php:871
+#: classes/class-smart-manager-product.php:877
 msgid "Shipping only"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:856
-#: classes/class-smart-manager-product.php:862
+#: classes/class-smart-manager-product.php:872
+#: classes/class-smart-manager-product.php:878
 #: pro/classes/class-smart-manager-pro-base.php:67
 msgid "None"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:872
+#: classes/class-smart-manager-product.php:888
 msgid "In stock"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:873
+#: classes/class-smart-manager-product.php:889
 msgid "Out of stock"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:874
+#: classes/class-smart-manager-product.php:890
 msgid "On backorder"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:899
+#: classes/class-smart-manager-product.php:915
 msgid "Standard"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:900
+#: classes/class-smart-manager-product.php:916
 msgid "Reduced Rate"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:901
+#: classes/class-smart-manager-product.php:917
 msgid "Zero Rate"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:920
+#: classes/class-smart-manager-product.php:936
 msgid "Do Not Allow"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:921
+#: classes/class-smart-manager-product.php:937
 msgid "Allow, but notify customer"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:922
+#: classes/class-smart-manager-product.php:938
 msgid "Allow"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:951
-#: classes/class-smart-manager-product.php:953
+#: classes/class-smart-manager-product.php:967
+#: classes/class-smart-manager-product.php:969
 msgid "No shipping class"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:959
+#: classes/class-smart-manager-product.php:975
 #: pro/templates/order-invoice.php:172
 msgid "SKU"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:962
+#: classes/class-smart-manager-product.php:978
 #: pro/classes/class-smart-manager-pro-acf-field-group.php:42
 #: pro/classes/class-smart-manager-pro-acf-field.php:42
 msgid "Name"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:966
+#: classes/class-smart-manager-product.php:982
 #: classes/class-smart-manager-shop-coupon.php:117
 msgid "Description"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:968
+#: classes/class-smart-manager-product.php:984
 msgid "Additional Description"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:982
+#: classes/class-smart-manager-product.php:998
 msgid "External Url"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:1074
+#: classes/class-smart-manager-product.php:1090
 msgid "Attributes"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:1107
+#: classes/class-smart-manager-product.php:1123
 msgid "Attributes: custom"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:1149
+#: classes/class-smart-manager-product.php:1165
 msgid "Catalog Visibility"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:1196
+#: classes/class-smart-manager-product.php:1212
 msgid "Featured"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:1285
-#: classes/class-smart-manager-product.php:1286
+#: classes/class-smart-manager-product.php:1301
+#: classes/class-smart-manager-product.php:1302
 msgctxt "variations enabled column for advanced search"
 msgid "Variations Enabled"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:2197
-#: classes/class-smart-manager-product.php:2200
+#: classes/class-smart-manager-product.php:2213
+#: classes/class-smart-manager-product.php:2216
 msgid "Featured Image updated successfully"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:2243
+#: classes/class-smart-manager-product.php:2259
 msgctxt "Title for task"
 msgid "Edited Stock"
 msgstr ""
@@ -1085,37 +1085,37 @@ msgid "Bulk Edit action scheduled successfully. Check all your scheduled actions
 msgstr ""
 
 #. translators: %s process name
-#: pro/classes/class-smart-manager-pro-base.php:967
+#: pro/classes/class-smart-manager-pro-base.php:964
 msgctxt "update status"
 msgid "%s failed"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-base.php:1019
+#: pro/classes/class-smart-manager-pro-base.php:1016
 msgctxt "batch process"
 msgid "No batch process params found"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-base.php:1230
+#: pro/classes/class-smart-manager-pro-base.php:1227
 msgctxt "duplicate process"
 msgid "Duplicate process failed"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-base.php:1302
+#: pro/classes/class-smart-manager-pro-base.php:1299
 msgctxt "move to trash process"
 msgid "Move to trash failed"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-base.php:1735
+#: pro/classes/class-smart-manager-pro-base.php:1732
 msgctxt "delete permanently"
 msgid "Delete records permanently failed"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-base.php:1849
+#: pro/classes/class-smart-manager-pro-base.php:1846
 msgctxt "delete process"
 msgid "Delete process failed"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-base.php:2746
+#: pro/classes/class-smart-manager-pro-base.php:2745
 msgctxt "bulk update process"
 msgid "Bulk update posts batch failed"
 msgstr ""
@@ -1745,36 +1745,44 @@ msgid "Total"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/Rule.js:22
 msgctxt "bulk edit action - date duration"
 msgid "days"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/Rule.js:22
 msgctxt "bulk edit action - date duration"
 msgid "weeks"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/Rule.js:22
 msgctxt "bulk edit action - date duration"
 msgid "months"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/Rule.js:22
 msgctxt "bulk edit action - date duration"
 msgid "years"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/Rule.js:23
 msgctxt "bulk edit action - time duration"
 msgid "hours"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/Rule.js:23
 msgctxt "bulk edit action - time duration"
 msgid "minutes"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/Rule.js:67
+#: src/views/Rule.js:581
 msgctxt "placeholder"
 msgid "Enter value"
 msgstr ""
@@ -1782,26 +1790,31 @@ msgstr ""
 #. translators: %s: dashboard display name
 #: assets/js/admin.js:1
 #: pro/assets/js/smart-manager.js:1140
+#: src/views/Rule.js:268
 msgctxt "placeholder"
 msgid "Select %s"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/Rule.js:272
 msgctxt "placeholder"
 msgid "Select Notes"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/Rule.js:312
 msgctxt "placeholder"
 msgid "Search user roles"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/Rule.js:312
 msgctxt "placeholder"
 msgid "Search user"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/Rule.js:346
 msgctxt "placeholder"
 msgid "Select Dashboards"
 msgstr ""
@@ -1814,6 +1827,8 @@ msgstr ""
 #: assets/js/smart-manager.js:2890
 #: assets/js/smart-manager.js:2898
 #: assets/js/smart-manager.js:3378
+#: src/views/Rule.js:428
+#: src/views/RuleGroup.js:59
 msgctxt "modal content"
 msgid "This feature is available only in the %s version"
 msgstr ""
@@ -1827,227 +1842,273 @@ msgstr ""
 #: assets/js/smart-manager.js:2890
 #: assets/js/smart-manager.js:2898
 #: assets/js/smart-manager.js:3378
+#: src/views/Rule.js:428
+#: src/views/RuleGroup.js:59
 msgctxt "modal content"
 msgid "Pro"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/Rule.js:581
 msgctxt "placeholder"
 msgid "Enter \"|\" separated values"
 msgstr ""
 
 #: assets/js/admin.js:1
 #: pro/assets/js/smart-manager.js:1176
+#: src/views/Rule.js:680
 msgctxt "placeholder"
 msgid "Search for..."
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/Rule.js:680
 msgctxt "placeholder"
 msgid "Enter attribute name..."
 msgstr ""
 
 #: assets/js/admin.js:1
 #: pro/assets/js/smart-manager.js:1177
+#: src/views/Rule.js:681
 msgctxt "placeholder"
 msgid "Replace with..."
 msgstr ""
 
 #: assets/js/admin.js:1
 #: pro/assets/js/smart-manager-product.js:213
+#: src/views/Rule.js:681
 msgctxt "placeholder"
 msgid "Enter values..."
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/RuleGroup.js:34
 msgctxt "group title"
 msgid "Restrict by users"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/RuleGroup.js:34
 msgctxt "group title"
 msgid "Restrict by user roles"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/RuleGroup.js:37
 msgctxt "rule content"
 msgid "This group is a \"pass\" when"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/RuleGroup.js:38
 msgctxt "rule option"
 msgid "all"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/RuleGroup.js:39
 msgctxt "group content"
 msgid "of the following conditions is true."
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/RuleGroup.js:52
 msgctxt "button"
 msgid "Add a condition"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/RuleGroup.js:69
 msgctxt "button"
 msgid "Add another group"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/RuleGroup.js:77
 msgctxt "button"
 msgid "Remove this group"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/AdvancedSearchDialog.js:21
 msgctxt "advanced search notice for custom views"
 msgid "Conditions cannot be edited when using Custom Views"
 msgstr ""
 
+#. translators: %1$d: Advanced search rule count %2$s: search conditions
 #: assets/js/admin.js:1
+#: src/views/AdvancedSearchDialog.js:46
 msgctxt "advanced search conditions"
 msgid "%1$d condition%2$s"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/AdvancedSearchDialog.js:46
 msgctxt "advanced search conditions"
 msgid "s"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/AdvancedSearchDialog.js:64
 msgctxt "side pannel - modal title"
 msgid "Advanced Search"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/AdvancedSearchDialog.js:110
 msgctxt "advanced search button title"
 msgid "Search [ENTER]"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/AdvancedSearchDialog.js:112
 msgctxt "advanced search button"
 msgid "Search"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/AdvancedSearchDialog.js:137
 msgctxt "advanced search button"
 msgid "Clear"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/AdvancedSearchDialog.js:154
 msgctxt "advanced search close button title"
 msgid "Close [ESC]"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/AdvancedSearchDialog.js:173
 msgctxt "advanced search content"
 msgid "When"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/AdvancedSearchDialog.js:174
 msgctxt "advanced search option"
 msgid "at least one"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/AdvancedSearchDialog.js:175
 msgctxt "advanced search content"
 msgid "condition groups pass"
 msgstr ""
 
 #: assets/js/admin.js:1
 #: pro/assets/js/smart-manager.js:887
+#: src/views/BulkEditDialog.js:51
 msgctxt "bulk edit option"
 msgid "All Items In Search Results"
 msgstr ""
 
 #: assets/js/admin.js:1
 #: pro/assets/js/smart-manager.js:887
+#: src/views/BulkEditDialog.js:51
 msgctxt "bulk edit option"
 msgid "All Items In Store"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/BulkEditDialog.js:67
 msgctxt "side pannel - modal title"
 msgid "Bulk Edit"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/BulkEditDialog.js:76
 msgctxt "bulk edit button title"
 msgid "Update"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/BulkEditDialog.js:76
 msgctxt "bulk edit button"
 msgid "Update"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/BulkEditDialog.js:107
 msgctxt "bulk edit button"
 msgid "Schedule for later"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/BulkEditDialog.js:120
 msgctxt "bulk edit button"
 msgid "Clear"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/BulkEditDialog.js:133
 msgctxt "bulk edit close button title"
 msgid "Close [ESC]"
 msgstr ""
 
 #: assets/js/admin.js:1
 #: pro/assets/js/smart-manager.js:890
+#: src/views/BulkEditDialog.js:156
 msgctxt "bulk edit option"
 msgid "Selected Items"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/BulkEditDialog.js:214
 msgctxt "process name"
 msgid "Bulk Edit"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/ColumnManagerDialog.js:44
 msgctxt "side panel - modal title"
 msgid "Column Manager - Show/Hide Columns"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/ColumnManagerDialog.js:60
 msgctxt "column manager button title"
 msgid "Update [ENTER]"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/ColumnManagerDialog.js:62
 msgctxt "column manager button"
 msgid "Update"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/ColumnManagerDialog.js:75
 msgctxt "column manager close button title"
 msgid "Close [ESC]"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/SettingsDialog.js:125
 msgctxt "delete button for image type settings"
 msgid "Remove image"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/SettingsDialog.js:157
 msgctxt "side pannel - modal title"
 msgid "Settings"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/SettingsDialog.js:176
 msgctxt "settings button title"
 msgid "Save [ENTER]"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/SettingsDialog.js:178
 msgctxt "settings button"
 msgid "Save"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/SettingsDialog.js:191
 msgctxt "settings close button title"
 msgid "Close [ESC]"
 msgstr ""
@@ -2729,6 +2790,7 @@ msgstr ""
 #: assets/js/smart-manager.js:2120
 #: pro/assets/js/smart-manager.js:1377
 #: pro/assets/js/smart-manager.js:1550
+#: src/views/Modal.js:17
 msgctxt "button"
 msgid "Ok"
 msgstr ""
@@ -2737,26 +2799,31 @@ msgstr ""
 #: assets/js/smart-manager.js:2662
 #: pro/assets/js/smart-manager.js:1402
 #: pro/assets/js/smart-manager.js:1571
+#: src/views/Modal.js:19
 msgctxt "button"
 msgid "Cancel"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/Modal.js:103
 msgctxt "modal close button title"
 msgid "Close [ESC]"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/PrivilegeSettingsDialog.js:71
 msgctxt "access privilege settings side pannel - modal title"
 msgid "Privilege Settings"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/PrivilegeSettingsDialog.js:131
 msgctxt "access privilege settings description"
 msgid "Manage dashboards access for user roles and users"
 msgstr ""
 
 #: assets/js/admin.js:1
+#: src/views/PrivilegeSettingsDialog.js:134
 msgctxt "access privilege settings description"
 msgid "Note: The privilege setting for a user email will always take precedence over a user role"
 msgstr ""

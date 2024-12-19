@@ -7,7 +7,7 @@ Tags: woocommerce advanced bulk edit, wordpress bulk edit, woocommerce inventory
 Requires at least: 5.0
 Tested up to: 6.7.1
 Requires PHP: 5.6
-Stable tag: 8.51.0
+Stable tag: 8.52.0
 License: GPLv2
 
 WooCommerce Advanced Bulk Edit products, orders, & posts in an Excel-like sheet editor. Get advanced WooCommerce stock, pricing, & order management.
@@ -288,6 +288,15 @@ It also gives the warm feeling of supporting further development of the plugin.
 
 == Changelog ==
 
+= 8.52.0 (19.12.2024) =
+* New: WooCommerce 9.5.1 compatible
+* Fix: Advanced search functionality not working for 'Featured' column on WooCommerce Products dashboard
+* Fix: Advanced search functionality not working for 'Catalog Visibility' column with the 'is not' operator on WooCommerce Products dashboard
+* Fix: Pricing page appears blank in some cases
+* Fix: PHP fatal error when saving Access Privilege Settings from taxonomy dashboards (Pro)
+* Fix: 'Restrict by users' option in Access Privilege Settings not working (Pro)
+* Update: POT file
+
 = 8.51.0 (05.12.2024) =
 * New: WooCommerce 9.4.3 compatible
 * Fix: 'save_post' hook doesn't trigger when updating meta or taxonomy data
@@ -470,6 +479,9 @@ It also gives the warm feeling of supporting further development of the plugin.
 [See changelog for all versions](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 8.52.0 =
+WooCommerce 9.5.1 compatible, Fixes related to Advanced search functionality not working for 'Featured' column on WooCommerce Products dashboard, Advanced search functionality not working for 'Catalog Visibility' column with the 'is not' operator on WooCommerce Products dashboard, Pricing page appears blank in some cases, PHP fatal error when saving Access Privilege Settings from taxonomy dashboards (Pro), 'Restrict by users' option in Access Privilege Settings not working (Pro). Recommended upgrade.
 
 = 8.51.0 =
 WooCommerce 9.4.3 compatible, Fixes related to 'save_post' hook doesn't trigger when updating meta or taxonomy data, Move to Trash not working for WooCommerce Orders dashboard, Bulk Edit functionality not working when multiple actions are applied to the same field (Pro), Delete Permanently and Move to Trash not working for WooCommerce Orders, Users and taxonomy dashboards (Pro). Recommended upgrade.
