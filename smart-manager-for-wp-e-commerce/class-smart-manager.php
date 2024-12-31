@@ -1725,8 +1725,10 @@ class Smart_Manager {
 	}
 
 	function update_footer_text( $sm_version_text ) {
-
-		$sm_plugin_data = get_plugin_data( WP_PLUGIN_DIR.'/smart-manager-for-wp-e-commerce/smart-manager.php' );
+		if ( ! function_exists( 'get_plugin_data' ) ) {
+			include_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+		$sm_plugin_data = get_plugin_data( SM_PLUGIN_FILE );
 		$sm_current_version = $sm_plugin_data['Version'];
 
 		if ( is_admin() && ! empty( $_GET['page'] ) && ( 'smart-manager-woo' === $_GET['page'] || 'smart-manager-wpsc' === $_GET['page'] || ( !empty( $_GET['sm_old'] ) && ( 'woo' === $_GET['sm_old'] || 'wpsc' === $_GET['sm_old'] ) && 'smart-manager' === $_GET['page'] ) || 'smart-manager' === $_GET['page'] || 'smart-manager-settings' === $_GET['page'] || 'smart-manager-pricing' === $_GET['page'] || 'sm-storeapps-plugins' === $_GET['page'] ) ) {

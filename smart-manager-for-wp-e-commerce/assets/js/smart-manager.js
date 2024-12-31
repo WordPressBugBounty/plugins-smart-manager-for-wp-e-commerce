@@ -358,7 +358,7 @@ Smart_Manager.prototype.createOptGroups = function(args={}) {
 		return;
 	}
 
-	if(!args.parent || !args.child){
+	if(!args.parent || !args.child || !args.label){
 		return
 	}
 
@@ -366,15 +366,32 @@ Smart_Manager.prototype.createOptGroups = function(args={}) {
 		child = (!Array.isArray(args.child)) ? Object.keys(args.child) : args.child,
 		options = '',
 		count = 0;
+		
+	// Create the navbarComboboxSelect2 object
+	let parentId = args.label.toLowerCase().replace(/\s+/g, '_');
+	let dashboardSelect2Item = {
+		id: parentId,
+		text: args.label,
+		children: []
+	};
 
 	child.map((key) => {
 		if((parent.includes(key) && args['is_recently_accessed']) || (!parent.includes(key) && !args['is_recently_accessed']) || args['isParentChildSame']){
 			count++;
 			options += '<option value="'+key+'" '+ ((key == window.smart_manager.dashboard_key) ? "selected" : "") +'>'+((args['is_recently_accessed']) ? args.parent[key] : args.child[key]) +'</option>';
+			dashboardSelect2Item.children.push({id:key,text:((args['is_recently_accessed']) ? args.parent[key] : args.child[key])})
 		}
 	});
 
-	window.smart_manager.dashboard_select_options += (options != '') ? '<optgroup style="text-transform:uppercase;" label="'+args.label+' ('+count+')">'+options+'</optgroup>' : '';
+	if (!window.smart_manager.dashboardSelect2Items || (typeof window.smart_manager.dashboardSelect2Items === 'undefined')) {
+		window.smart_manager.dashboardSelect2Items = [];
+	}
+	//Push combox item only if it not exist
+	if (!window.smart_manager.dashboardSelect2Items.some(item => item.id === dashboardSelect2Item.id)) {
+		window.smart_manager.dashboardSelect2Items.push(dashboardSelect2Item);
+	}
+
+	window.smart_manager.dashboard_select_options += (options != '') ? '<optgroup id="'+parentId+'" label="'+args.label+' ('+count+')">'+options+'</optgroup>' : '';
 }
 
 // Function to load top right bar on the page
@@ -421,13 +438,11 @@ Smart_Manager.prototype.loadNavBar = function() {
 
 		// Code for rendering recently accessed views
 		if(window.smart_manager.recentViews.length > 0 && Object.keys(window.smart_manager.sm_views).length > 0){
-			options = '';
-			window.smart_manager.recentViews.map((key) => {
-				if(window.smart_manager.sm_views.hasOwnProperty(key) && window.smart_manager.viewPostTypes.hasOwnProperty(key)){
-					options += '<option value="'+window.smart_manager.viewPostTypes[key]+'" '+ ((key == window.smart_manager.dashboard_key) ? "selected" : "") +'>'+window.smart_manager.sm_views[key]+'</option>';
-				}
+			window.smart_manager.createOptGroups({'parent': window.smart_manager.sm_views,
+				'child': window.smart_manager.recentViews,
+				'label': _x('Recently used views', 'dashboard option groups', 'smart-manager-for-wp-e-commerce'),
+				'is_recently_accessed': true
 			});
-			window.smart_manager.dashboard_select_options += (options != '') ? '<optgroup label="'+_x('Recently used views', 'dashboard option groups', 'smart-manager-for-wp-e-commerce')+' ('+window.smart_manager.recentViews.length+')">'+options+'</optgroup>' : '';
 		}
 
 		// Code for rendering all remaining dashboards
@@ -450,13 +465,17 @@ Smart_Manager.prototype.loadNavBar = function() {
 
 		// Code for rendering all remaining views
 		if(Object.keys(window.smart_manager.sm_views).length > 0){
-			window.smart_manager.dashboard_select_options += '<optgroup label="'+_x('Other saved views', 'dashboard option groups', 'smart-manager-for-wp-e-commerce')+' ('+(Object.keys(window.smart_manager.sm_views).length - window.smart_manager.recentViews.length)+')">';
-			Object.keys(window.smart_manager.sm_views).map((key) => {
-				if(!window.smart_manager.recentViews.includes(key) && window.smart_manager.viewPostTypes.hasOwnProperty(key)){
-					window.smart_manager.dashboard_select_options += '<option value="'+window.smart_manager.viewPostTypes[key]+'" '+ ((key == window.smart_manager.dashboard_key) ? "selected" : "") +'>'+window.smart_manager.sm_views[key]+'</option>';
-				}
+			let otherSavedViews = Object.entries(window.smart_manager.sm_views)
+			.filter(([key]) => !window.smart_manager.recentViews.includes(key))
+			.reduce((acc, [key, value]) => {
+				acc[key] = value;
+				return acc;
+			}, {})
+			window.smart_manager.createOptGroups({'parent': window.smart_manager.sm_views,
+				'child': otherSavedViews,
+				'label': _x('Other saved views', 'dashboard option groups', 'smart-manager-for-wp-e-commerce'),
+				'is_recently_accessed': true
 			});
-			window.smart_manager.dashboard_select_options += '</optgroup>';
 		}
 
 		// Code to change the dashboard key to view post type
@@ -503,7 +522,17 @@ Smart_Manager.prototype.loadNavBar = function() {
 
 	jQuery('#sm_nav_bar .sm_beta_left').append(navBar);
 	jQuery('#sm_dashboard_select').empty().append(window.smart_manager.dashboard_select_options);
-	jQuery('#sm_dashboard_select').select2({ width: '20em', dropdownCssClass: 'sm_beta_dashboard_select', dropdownParent: jQuery('#sm_nav_bar') });
+	jQuery('#sm_dashboard_select').select2({ 
+		width: '20em', 
+		dropdownCssClass: 'sm_beta_dashboard_select', 
+		dropdownParent: jQuery('#sm_nav_bar'),
+		templateResult: function (data) {
+			if (data.element && data.element.tagName === 'OPTGROUP') {
+				return jQuery(`<span id="${data.element.id}" class="select2-group-text">${data.text}</span><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`)
+			}
+			return data.text;
+		},
+	});
 
 	jQuery('#sm_nav_bar #sm_nav_bar_right').append(`<div class="sm_nav_bar_links">
 					<div>
@@ -2227,6 +2256,43 @@ Smart_Manager.prototype.showPannelDialog = function(route = '', currentRoute = '
 }
 
 Smart_Manager.prototype.event_handler = function() {
+	// Detect when the user is typing in the select2 search box
+	jQuery(document).on('input', '#sm_nav_bar .select2-search__field', function (e) {
+		if ((!window.smart_manager.hasOwnProperty('dashboardSelect2Items')) || (typeof window.smart_manager.dashboardSelect2Items === 'undefined')) {
+			return;
+		}
+		let select2SearchResult = window.smart_manager.findSelect2ParentOrChildByText(e.target.value, false);
+		let matchingParentId = select2SearchResult.hasOwnProperty('parentID') ? select2SearchResult.parentID : '';
+		if ((matchingParentId) && (matchingParentId.length)) {
+			window.smart_manager.showSelect2Childs(matchingParentId, jQuery("#sm_nav_bar .select2-results__group").first());//by default set the focus on the first element(parent)
+			return;
+		}
+		jQuery("#select2_childs_section").hide();
+	});
+
+	jQuery(document).on("mouseenter", "#sm_nav_bar .select2-results__group", function () {
+		jQuery("#sm_nav_bar .select2-results__group").removeClass("focus");
+		let parentId = jQuery(this).find(".select2-group-text").attr("id");
+		if ((!parentId) || (parentId.length === 0)) {
+			return;
+		}
+		window.smart_manager.showSelect2Childs(parentId, jQuery(this));
+	});
+
+	// Code to handle select2 child item selection and display
+	jQuery(document).on("click", ".select2-child-item", function () {
+		const childId = jQuery(this).data("id");
+		if ((!childId) || (typeof childId === 'undefined') || (childId.length === 0)) {
+			return;
+		}
+		jQuery("#sm_dashboard_select").val(childId).trigger("change");
+		jQuery("#select2_childs_section").hide();
+	});
+	
+	// Code to handle select2 child items show/hide
+	jQuery("#select2_childs_section").on("mouseenter", function () {
+		jQuery(this).show();
+	});
 
 	// Code to handle width of the grid based on the WP collapsable menu
 	jQuery(document).on('click', '#collapse-menu', function() {
@@ -3566,18 +3632,123 @@ Smart_Manager.prototype.exportButtonHtml = function() {
 	}
 }
 
+Smart_Manager.prototype.showSelect2Childs = function ( parentID = '', parentElement = '' ) {
+    // Check if dashboardSelect2Items exists.
+	if ((!window.smart_manager.hasOwnProperty('dashboardSelect2Items')) || (!parentID ) || (typeof parentID === 'undefined') || (parentID.length === 0) || (!parentElement ) || (typeof parentElement === 'undefined') || (parentElement.length === 0)) {
+		return;
+	}
+	parentElement.addClass("focus")
+    let parent = window.smart_manager.dashboardSelect2Items.find((d) => d.id === parentID);
+	if ((!parent ) || (typeof parentID === 'undefined') || (parentID.length === 0)) {
+		return;
+	}
+    let childs_section = jQuery("#select2_childs_section");
+	if ((!childs_section ) || (typeof childs_section === 'undefined') || (childs_section.length === 0)) {
+		return;
+	}
+    childs_section.html(""); // Clear previous content.
+	// Get the value from the search field.
+	let searchValue = jQuery(".select2-search__field").val().trim().toLowerCase();
+	// Filter children based on the search value if it exists, if not them display all childrens of the parent.
+	let select2SearchResult = window.smart_manager.findSelect2ParentOrChildByText(jQuery("#sm_dashboard_select").val(), false);
+	let selectedChildID = select2SearchResult.hasOwnProperty('childID') ? select2SearchResult.childID : ''; //this is to highlight the current selected child, ie. current dashboard element
+	let matchingChildren = (searchValue && searchValue !== '') ? parent.children.filter((child) => child.text.toLowerCase().includes(searchValue)) : parent.children;
+	if ((!matchingChildren) || (typeof matchingChildren === 'undefined') || (matchingChildren.length === 0)) {
+		matchingChildren = parent.children;
+	}
+	if (matchingChildren.length) {
+		let nestedList = jQuery("<ul>").addClass("nested-list");
+		matchingChildren.forEach((child) => {
+			let childElement = jQuery("<li>").text(child.text).addClass("select2-child-item").attr("data-id", child.id);
+			if(selectedChildID === child.id){
+				childElement.addClass("selected")
+			}
+			nestedList.append(childElement);
+		});
+		childs_section.show().append(nestedList);
+	} else {
+		childs_section.hide();
+	}
+	// Position the childs_section beside the hovered parent element.
+    let offset = parentElement.offset();
+    let rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    childs_section.css({
+        top: `${(offset.top) / rootFontSize}rem`,
+        left: `${(offset.left + parentElement.outerWidth() + 2) / rootFontSize}rem`,
+    });
+};
+
+Smart_Manager.prototype.findSelect2ParentOrChildByText = function ( ParentOrChildText = '', matchExactChild = false ) {
+	if((!ParentOrChildText ) || (typeof ParentOrChildText === 'undefined') || (ParentOrChildText.length === 0)){
+		return false;
+	}
+	ParentOrChildText = ParentOrChildText.trim().toLowerCase();
+	let parentID = window.smart_manager.dashboardSelect2Items.find((item) => {return item.text.trim().toLowerCase().startsWith(ParentOrChildText)})?.id;
+	let childID = '';
+	// If matching parent is not found, search within children.
+	if ((!parentID) || (typeof parentID === 'undefined') || (parentID.length === 0)) {
+		window.smart_manager.dashboardSelect2Items.some((item) => {
+			let matchingChild = item.children.find((child) => {
+				if(matchExactChild){
+					if ((child.id === ParentOrChildText) || (child.text === ParentOrChildText)){
+						childID = child.id;
+						return true;
+					}
+				}else{
+					if ((child.text.trim().toLowerCase().includes(ParentOrChildText)) || (child.id.includes(ParentOrChildText.toLowerCase()))){
+						childID = child.id;
+						return true;
+					}
+				}
+				return false;
+			});
+			if (matchingChild) {
+				parentID = item.id;
+				return true;
+			}
+			return false;
+		});
+	}
+	return {parentID,childID};
+}
+
 if(typeof window.smart_manager === 'undefined'){
 	window.smart_manager = new Smart_Manager();
 }
 
 //Events to be handled on document ready
 jQuery(document).ready(function() {
+	jQuery("body").append('<div id="select2_childs_section"></div>');
+
 	if('#!/pricing' != document.location.hash){
 		window.smart_manager.init();
 	}
-	jQuery(document).on('select2:open', function() {
+
+	jQuery(document).on('select2:open', function(event) {
+  		if(event.target.id === 'sm_dashboard_select'){
+			setTimeout(() => {
+				let select2SearchResult = window.smart_manager.findSelect2ParentOrChildByText(event.target.value, true);
+				let select2ParentId = (!select2SearchResult || !select2SearchResult.hasOwnProperty('parentID')) ? false : select2SearchResult.parentID;
+				if(!select2ParentId){
+					return;
+				}
+				let Select2ParentElement = jQuery(`span#${select2ParentId}`).parent(".select2-results__group");
+				if((!Select2ParentElement) || (!Select2ParentElement.length)){
+					return;
+				}
+				window.smart_manager.showSelect2Childs(select2ParentId, Select2ParentElement);
+			}, 10);
+		}
 		jQuery('.select2-search__field').focus();
-   	});   
+   	});
+	   
+	jQuery(document).on('select2:close', function(event) {
+		if(event.target.id === 'sm_dashboard_select'){
+			setTimeout(() => {
+				jQuery("#select2_childs_section").hide();
+			}, 150);
+		}
+	});
 });
 
 jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, { 

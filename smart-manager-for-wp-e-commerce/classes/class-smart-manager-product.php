@@ -233,9 +233,9 @@ if ( ! class_exists( 'Smart_Manager_Product' ) ) {
 		public function sm_search_postmeta_cond($postmeta_cond = '', $search_params = array()) {
 			if ( !empty($search_params) && !empty($search_params['search_col']) && $search_params['search_col'] == '_product_attributes' ) {
 				if ($search_params['search_operator'] == 'is') {
-					$postmeta_cond = " ( ". $search_params['search_string']['table_name'].".meta_key LIKE '". $search_params['search_col'] . "' AND ". $search_params['search_string']['table_name'] .".meta_value LIKE '%" . $search_params['search_value'] . "%'" . " )";
+					$postmeta_cond = " ( ". $search_params['search_string']['table_name'].".meta_key LIKE '". $search_params['search_col'] . "' AND ". $search_params['search_string']['table_name'] .".meta_value LIKE %s" . " )";
 				} else if ($search_params['search_operator'] == 'is not') {
-					$postmeta_cond = " ( ". $search_params['search_string']['table_name'].".meta_key LIKE '". $search_params['search_col'] . "' AND ". $search_params['search_string']['table_name'] .".meta_value NOT LIKE '%" . $search_params['search_value'] . "%'" . " )";
+					$postmeta_cond = " ( ". $search_params['search_string']['table_name'].".meta_key LIKE '". $search_params['search_col'] . "' AND ". $search_params['search_string']['table_name'] .".meta_value NOT LIKE %s" . " )";
 				}
 			}
 
@@ -304,7 +304,7 @@ if ( ! class_exists( 'Smart_Manager_Product' ) ) {
 							$operator = ( 'yes' === $search_params['search_value'] ) ? '!=' : '=';
 							$terms_cond = " ( ". $wpdb->prefix ."term_taxonomy.taxonomy $operator 'product_visibility' AND ". $wpdb->prefix ."terms.slug $operator 'featured' ) ";
                         } else {
-                            $terms_cond = " ( ". $wpdb->prefix ."term_taxonomy.taxonomy NOT LIKE '". $search_params['search_col'] . "' ". $attr_cond ." AND ". $wpdb->prefix ."terms.slug NOT LIKE '" . $search_params['search_value'] . "'" . " )";
+                            $terms_cond = " ( ". $wpdb->prefix ."term_taxonomy.taxonomy NOT LIKE '". $search_params['search_col'] . "' ". $attr_cond ." AND ". $wpdb->prefix ."terms.slug NOT LIKE %s" . " )";
                         }
 					}
 				}	
@@ -517,11 +517,11 @@ if ( ! class_exists( 'Smart_Manager_Product' ) ) {
 					if( strpos( $query_params['from'], $from_join_str ) !== false ) {
 						$query_params['from'] = str_replace( $from_join_str, 'sm_advanced_search_temp.product_id = '.$wpdb->prefix.'posts.post_parent', $query_params['from'] );
 					}
-					
-					$query_postmeta_search = "REPLACE INTO {$wpdb->base_prefix}sm_advanced_search_temp
+					$search_val = ( ! empty( $search_params['cond_postmeta_col_value'] ) ) ? $search_params['cond_postmeta_col_value'] : '';
+					$query_postmeta_search = $wpdb->prepare( "REPLACE INTO {$wpdb->base_prefix}sm_advanced_search_temp
 													(". $query_params['select'] ."
 													". $query_params['from'] ."
-													".$query_params['where'].")";
+													".$query_params['where'].")", $search_val );
 					$result_postmeta_search = $wpdb->query ( $query_postmeta_search );
 				}
 			}

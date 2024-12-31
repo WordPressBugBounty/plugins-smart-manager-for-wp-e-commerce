@@ -1790,3 +1790,63 @@ input#sm_add_title{
 .handsontable thead th {
     height: 50px !important;
 }
+/* dashboard select2 css */
+#select2_childs_section .nested-list {
+	list-style-type: none;
+	padding-left: 0;
+	margin: 0;
+	padding: 0.18rem 0.18rem 0rem 0.18rem;
+}
+#select2_childs_section .select2-child-item {
+	cursor: pointer;
+	padding-left: 1rem;
+	padding: 0.375rem;
+	margin-bottom: 0.125rem;
+	padding: 0.3rem 0.3rem;
+}
+#select2_childs_section .select2-child-item:hover {
+	background-color: #0073aa !important;
+	color: white !important;
+}
+#select2_childs_section .select2-child-item.selected{
+	background-color: #ddd;
+}
+/* Select2 childs floating box */
+#select2_childs_section {
+	position: absolute;
+	background-color: #ffffff;
+	border: 0.0625rem solid #ccc;
+	border-radius: 0.25rem;
+	width: 15.6rem;
+	box-shadow: 0.31rem 0.31rem 0.5rem #ccc;
+	z-index: 9999;
+	display: none;
+	max-height: 10rem;
+    overflow-y: auto;
+}
+#sm_nav_bar ul.select2-results__options.select2-results__options--nested {
+    display: none;
+}
+#sm_nav_bar .select2-results__group{
+	cursor: pointer;
+	display: flex !important;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.31rem;
+}
+#sm_nav_bar .select2-results__group:hover, #sm_nav_bar .select2-results__group.focus{
+	background-color:#0073aa4a
+}
+#sm_nav_bar .select2-results__group svg {
+	transform: rotate(-90deg);
+}
+#sm_nav_bar .select2-group-text{
+	text-transform: capitalize;
+}
+#sm_nav_bar .select2-results__group svg {
+    stroke: rgba(0, 0, 0, 0.5);
+    transition: stroke 0.3s ease;
+}
+#sm_nav_bar .select2-results__group.focus svg {
+    stroke: rgba(0, 0, 0, 0.8);
+}
