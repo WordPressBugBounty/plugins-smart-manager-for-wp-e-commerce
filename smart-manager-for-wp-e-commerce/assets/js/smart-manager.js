@@ -3723,8 +3723,8 @@ jQuery(document).ready(function() {
 	if('#!/pricing' != document.location.hash){
 		window.smart_manager.init();
 	}
-
-	jQuery(document).on('select2:open', function(event) {
+	jQuery(document)
+	.on('select2:open', function(event) {
   		if(event.target.id === 'sm_dashboard_select'){
 			setTimeout(() => {
 				let select2SearchResult = window.smart_manager.findSelect2ParentOrChildByText(event.target.value, true);
@@ -3740,15 +3740,22 @@ jQuery(document).ready(function() {
 			}, 10);
 		}
 		jQuery('.select2-search__field').focus();
-   	});
-	   
-	jQuery(document).on('select2:close', function(event) {
-		if(event.target.id === 'sm_dashboard_select'){
-			setTimeout(() => {
-				jQuery("#select2_childs_section").hide();
-			}, 150);
+		jQuery("#select2_childs_section").addClass("visible");
+   	})
+	.on('click','#select2-sm_dashboard_select-container',function (event) {
+		if(!(jQuery("#select2_childs_section").hasClass("visible"))){
+			jQuery('#select2_childs_section').hide();
 		}
-	});
+	})
+	.on('click', function (event) {
+		if (!jQuery(event.target).closest('.select2-container').length && !jQuery(event.target).closest('#select2_childs_section').length) {
+			jQuery('#select2_childs_section').hide();
+		}
+	})
+	.on('select2:close', function(event) {
+		//not hiding #select2_childs_section here because click event will not work on this.
+		jQuery("#select2_childs_section").removeClass("visible");
+	})
 });
 
 jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, { 

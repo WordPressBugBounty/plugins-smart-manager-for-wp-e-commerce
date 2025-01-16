@@ -7,7 +7,7 @@ Tags: woocommerce advanced bulk edit, wordpress bulk edit, woocommerce inventory
 Requires at least: 5.0
 Tested up to: 6.7.1
 Requires PHP: 5.6
-Stable tag: 8.53.0
+Stable tag: 8.54.0
 License: GPLv2
 
 WooCommerce Advanced Bulk Edit products, orders, & posts in an Excel-like sheet editor. Get advanced WooCommerce stock, pricing, & order management.
@@ -288,6 +288,13 @@ It also gives the warm feeling of supporting further development of the plugin.
 
 == Changelog ==
 
+= 8.54.0 (16.01.2025) =
+* New: WooCommerce 9.5.2 compatible
+* Fix: Dashboard selection not working in some cases
+* Update: 10x boost in loading speed for the WooCommerce Products dashboard
+* Update: 10x speed improvement for updating taxonomy fields using Inline edit and Bulk edit (Pro)
+* Update: POT file
+
 = 8.53.0 (31.12.2024) =
 * New: Compatibility with [Germanized for WooCommerce Pro](https://vendidero.de/woocommerce-germanized) (Pro)
 * Fix: SQL vulnerability in Advanced Search functionality [Thanks to Patchstack team]
@@ -485,6 +492,9 @@ It also gives the warm feeling of supporting further development of the plugin.
 [See changelog for all versions](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 8.54.0 =
+WooCommerce 9.5.2 compatible, Fixes related to Dashboard selection not working in some cases, Updates related to 10x boost in loading speed for the WooCommerce Products dashboard, 10x speed improvement for updating taxonomy fields using Inline edit and Bulk edit (Pro) along with other important fixes and updates. Recommended upgrade.
 
 = 8.53.0 =
 Compatibility with [Germanized for WooCommerce Pro](https://vendidero.de/woocommerce-germanized) (Pro), Fixes related to SQL vulnerability in Advanced Search functionality [Thanks to Patchstack team], Updates related to UI/UX for dashboard combo box along with other important fixes and updates. Recommended upgrade.
