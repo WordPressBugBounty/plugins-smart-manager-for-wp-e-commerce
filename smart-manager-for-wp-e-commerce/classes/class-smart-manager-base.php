@@ -2701,7 +2701,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 							foreach ($updated_data as $key => $value) {
 								if( empty( $key ) ) continue;
 								$key      = wp_unslash( $key );
-								$value    = wp_unslash( $value );
+								$value    = esc_sql( wp_unslash( $value ) );
 								$prev_val = ( ( ! empty( $this->prev_postmeta_values[$id] ) ) && ( ! empty($this->prev_postmeta_values[$id][$key]) ) ) ? $this->prev_postmeta_values[$id][$key] : '';
 								update_post_meta( $id, $key, $value, $prev_val );
 							}
@@ -2747,9 +2747,9 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				$time_saved_details = Smart_Manager::sm_get_time_saved_with_additional_savings( $is_advanced_search ? 'advanced_search_inline' : 'inline', sizeof( $edited_data ), 'mins' );
 				if( ! empty( $time_saved_details ) && is_array( $time_saved_details )  ){
 					$modal_message = sprintf(
-								/* translators: %1$s: time saved in minutes/hours, %2$s: additional savings possible, %3$s: Pro upgrade link */
+								/* translators: %1$s: time saved in minutes/hours, %2$s: Pro upgrade link, %3$s: additional savings possible */
 								__(
-									'You saved <strong>%1$s</strong>, and you can save more <strong>%2$s</strong> by upgrading to %3$s.',
+									'You saved <strong>%1$s</strong>! Upgrade to %2$s to save more <strong>%3$s</strong> and unlock undo.',
 									'smart-manager-for-wp-e-commerce'
 								),
 								__(
@@ -2757,16 +2757,16 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 									' ' . 
 									( ( ! empty( $time_saved_details['unit'] ) ) ? $time_saved_details['unit'] : '' )
 								), // Time saved in mins/hrs.
-								__(
-									( ( ! empty( $time_saved_details['additional_savings'] ) ) ? $time_saved_details['additional_savings'] : '' ) . 
-									' ' . 
-									( ( ! empty( $time_saved_details['unit'] ) ) ? $time_saved_details['unit'] : '' )
-								), // Additional savings in mins/hrs.
 								sprintf(
 									'<a href="%s" target="_blank">%s</a>',
 									esc_url( SM_APP_ADMIN_URL . "-pricing" ),
 									esc_html__( 'Pro', 'smart-manager-for-wp-e-commerce' )
-								)
+								),
+								__(
+									( ( ! empty( $time_saved_details['additional_savings'] ) ) ? $time_saved_details['additional_savings'] : '' ) . 
+									' ' . 
+									( ( ! empty( $time_saved_details['unit'] ) ) ? $time_saved_details['unit'] : '' )
+								) // Additional savings in mins/hrs.
 							);
 				}
 				$resp = array( 
@@ -2782,8 +2782,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			} else {
 				$msg = sprintf(
 					/* translators: %1$d: number of updated record %2$s: record update message */
-					esc_html__( '%1$d record%2$s updated successfully!', 'smart-manager-for-wp-e-commerce' ), sizeof( $edited_data ), $msg_str );
-				
+					esc_html__( '%1$d record%2$s updated successfully! %3$s', 'smart-manager-for-wp-e-commerce' ), sizeof( $edited_data ), $msg_str, '<a href="#" id="undo_action" data-task-id="'.$this->task_id.'">Undo last update.</a>');
 			}
 
 			echo $msg;
@@ -2871,16 +2870,16 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			}
 			if( in_array( $search_params['search_data_type'], array( "number", "numeric" ) ) ) {
 				$val = ( empty( $search_value ) && '0' != $search_value ) ? "''" : $search_value;
-				$cond = "( ".$params['rule']['table_name'].".".$search_col . " ". $search_params['search_operator'] ." %f )";
+				$cond = "( ".$params['rule']['table_name'].".".$search_col . " ". $search_params['search_operator'] .( empty( $params['skip_placeholders'] ) ? " %f" : " '".$search_params['search_value']."'" )." )";
 			} else if ( $search_params['search_data_type'] == "date" || $search_params['search_data_type'] == "sm.datetime" ) {
 				$cond = "( ".$params['rule']['table_name'].".".$search_col . " ". $search_params['search_operator'] ." %s AND ". $params['rule']['table_name'] .".". $search_col ." NOT IN ('0', '1970-01-01 00:00:00', '1970-01-01', '', 0) )";
 			} else {
 				if ($search_params['search_operator'] == 'is') {
-					$cond = "( ".$params['rule']['table_name'].".".$search_col . " LIKE %s )";
+					$cond = "( ".$params['rule']['table_name'].".".$search_col . " LIKE ".( empty( $params['skip_placeholders'] ) ? "%s" : "'".$search_params['search_value']."'" )." )";
 				} else if ($search_params['search_operator'] == 'is not') {
-					$cond = "( ".$params['rule']['table_name'].".".$search_col . " NOT LIKE %s )";
+					$cond = "( ".$params['rule']['table_name'].".".$search_col . " NOT LIKE ". ( empty( $params['skip_placeholders'] ) ? "%s" : "'".$search_params['search_value']."'" ) ." )";
 				} else {
-					$cond = "( ".$params['rule']['table_name'].".".$search_col . " ". $search_params['search_operator'] ." %s )";
+					$cond = "( ".$params['rule']['table_name'].".".$search_col . " ". $search_params['search_operator'] .( empty( $params['skip_placeholders'] ) ? " %s" : " '".$search_params['search_value']."'" ). " )";
 				}
 			}
 
@@ -2928,7 +2927,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 					$val = "'". $val . "'";
 				}
 				
-				$meta_cond = "( ". $params['rule']['table_name'].".meta_key LIKE '". $search_params['search_col'] . "' AND ". $params['rule']['table_name'] .".meta_value ". $search_params['search_operator'] ." %f )";
+				$meta_cond = "( ". $params['rule']['table_name'].".meta_key LIKE '". $search_params['search_col'] . "' AND ". $params['rule']['table_name'] .".meta_value ". $search_params['search_operator']. " " . ( empty( $params['skip_placeholders'] ) ? "%f" : $search_params['search_value'] )." )";
 				
 				$params['search_query']['cond_'.$meta_table.'_operator'] .= $search_params['search_operator'];
 			} else if( $search_params['search_data_type'] == "date" || $search_params['search_data_type'] == "sm.datetime" ) {
@@ -2937,15 +2936,14 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			} else {
 				if ($search_params['search_operator'] == 'is') {
 					$params['search_query']['cond_'.$meta_table.'_operator'] .= 'LIKE';
-					$meta_cond = "( ". $params['rule']['table_name'].".meta_key LIKE '". $search_params['search_col'] . "' AND ". $params['rule']['table_name'] .".meta_value LIKE %s" . " )";
+					$meta_cond = "( ". $params['rule']['table_name'].".meta_key LIKE '". $search_params['search_col'] . "' AND ". $params['rule']['table_name'] .".meta_value LIKE ".( empty( $params['skip_placeholders'] ) ? "%s" : "'".$search_params['search_value']."'" )." )";
 				} else if ($search_params['search_operator'] == 'is not') {
 
 					$params['search_query']['cond_'.$meta_table.'_operator'] .= 'NOT LIKE';
-					$meta_cond = "( ". $params['rule']['table_name'].".meta_key LIKE '". $search_params['search_col'] . "' AND ". $params['rule']['table_name'] .".meta_value NOT LIKE %s" . " )";
-
+					$meta_cond = "( ". $params['rule']['table_name'].".meta_key LIKE '". $search_params['search_col'] . "' AND ". $params['rule']['table_name'] .".meta_value NOT LIKE ".( empty( $params['skip_placeholders'] ) ? "%s" : "'".$search_params['search_value']."'" )." )";
 				} else {
 					$params['search_query']['cond_'.$meta_table.'_operator'] .= $search_params['search_operator'];
-					$meta_cond = "( ". $params['rule']['table_name'].".meta_key LIKE '". $search_params['search_col'] . "' AND ". $params['rule']['table_name'] .".meta_value ". $search_params['search_operator'] ." %s )";
+					$meta_cond = "( ". $params['rule']['table_name'].".meta_key LIKE '". $search_params['search_col'] . "' AND ". $params['rule']['table_name'] .".meta_value ". $search_params['search_operator']. ( empty( $params['skip_placeholders'] ) ? " %s" : " '".$search_params['search_value']."'" )." )";
 				}	
 			}
 

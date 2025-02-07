@@ -1543,6 +1543,9 @@ class Smart_Manager {
 									url: (ajaxurl.indexOf('?') !== -1) ? ajaxurl + '&action=sm_update_to_pro' : ajaxurl + '?action=sm_update_to_pro',
 									dataType:"text",
 									async: false,
+									data: {
+										security: '<?php echo esc_attr( wp_create_nonce( 'sm_update_to_pro' ) ); ?>'
+									},
 									success: function(response) {
 	
 										if( response == 'Success' ) {

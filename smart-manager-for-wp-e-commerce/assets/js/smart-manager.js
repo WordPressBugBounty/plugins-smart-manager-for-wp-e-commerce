@@ -252,7 +252,8 @@ Smart_Manager.prototype.init = function() {
 	this.scheduledFor = '0000-00-00 00:00:00';
     this.accessPrivilegeSettings = {};
 	this.isAdmin = (sm_beta_params.hasOwnProperty('is_admin')) ? sm_beta_params.is_admin : false
-
+	this.sm_manage_scheduled_bulk_edits = '';
+    this.taskId = 0;
 	//Function to set all the states on unload
 	window.onbeforeunload = function (evt) { 
 		if ( typeof (window.smart_manager.updateState) !== "undefined" && typeof (window.smart_manager.updateState) === "function" ) {
@@ -412,7 +413,6 @@ Smart_Manager.prototype.loadNavBar = function() {
 
 	//Code for dashboards select2
 	window.smart_manager.dashboard_select_options = '';
-	
 	if( window.smart_manager.sm_beta_pro == 1 ) {
 		
 		let recentDashboards = (!Array.isArray(window.smart_manager.recentDashboards)) ? window.smart_manager.recentDashboards.values() : window.smart_manager.recentDashboards,
@@ -483,6 +483,13 @@ Smart_Manager.prototype.loadNavBar = function() {
 		if(viewSlug){
 			window.smart_manager.dashboard_key = window.smart_manager.viewPostTypes[viewSlug];
 		}
+		window.smart_manager.sm_manage_scheduled_bulk_edits = '<div class="sm_beta_dropdown_content">'+ '<a href="" class="sm_new_bulk_edits" target="_blank">' +
+        _x("New", "button for creating new bulk edit", "smart-manager-for-wp-e-commerce") +
+        '</a>'+
+        '<a href="'+window.smart_manager.scheduledActionAdminUrl+'" class="sm_scheduled_bulk_edits" target="_blank">' +
+        _x("Manage scheduled edits", "manage button for scheduled bulk edit actions", "smart-manager-for-wp-e-commerce") +
+        '</a>' +
+    '</div>';
 	} else {
 		if(Object.keys(window.smart_manager.sm_dashboards).length > 0){
 			window.smart_manager.createOptGroups({'parent': window.smart_manager.sm_dashboards,
@@ -502,7 +509,6 @@ Smart_Manager.prototype.loadNavBar = function() {
 			});
 		}
 	}
-
 	let navBar = "<select id='sm_dashboard_select'> </select>"+
 				"<div id='sm_nav_bar_search'>"+
 					"<div id='search_content_parent'>"+
@@ -553,15 +559,14 @@ Smart_Manager.prototype.loadNavBar = function() {
 						</div>
 					</div>
 				</div>`);
-
 	let sm_top_bar = '<div id="sm_top_bar" style="font-weight:400 !important;width:100%;">'+
 						'<div id="sm_top_bar_left" class="sm_beta_left" style="width:'+ window.smart_manager.grid_width +'px;background-color: white;padding: 0.5em 0em 1em 0em;">'+
 							'<div class="sm_top_bar_action_btns">'+
-								'<div id="batch_update_sm_editor_grid" title="'+_x('Bulk Edit', 'tooltip', 'smart-manager-for-wp-e-commerce')+'">'+
+								'<div id="batch_update_sm_editor_grid" title="'+_x('Bulk Edit', 'tooltip', 'smart-manager-for-wp-e-commerce')+'" class="sm_beta_dropdown">'+
 									'<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">'+
 										'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>'+
 									'</svg>'+
-									'<span>'+_x('Bulk Edit', 'button', 'smart-manager-for-wp-e-commerce')+'</span>'+
+									'<span>'+_x('Bulk Edit', 'button', 'smart-manager-for-wp-e-commerce')+'</span>'+ window.smart_manager.sm_manage_scheduled_bulk_edits +
 								'</div>'+
 							'</div>'+
 							'<div class="sm_top_bar_action_btns">'+
@@ -2786,6 +2791,8 @@ Smart_Manager.prototype.event_handler = function() {
 		let id = jQuery(this).attr('id'),
 			btnText = jQuery(this).text(),
 			className = jQuery(this).attr('class');
+			let clickedElement = jQuery(e.target);
+			let clickedElementclassName = clickedElement.attr('class'); // Get the class of the clicked <a> tag
 		if( jQuery(this).parents('div#del_sm_editor_grid').length > 0 || jQuery(this).parents('div#sm_custom_views').length > 0 ) {
 			return;
 		}
@@ -2793,7 +2800,7 @@ Smart_Manager.prototype.event_handler = function() {
 		isBackgroundProcessRunning = window.smart_manager.backgroundProcessRunningNotification(false);
 		params.btnParams = {};
 		params.title = _x('Attention!', 'modal title', 'smart-manager-for-wp-e-commerce');
-		if(0 === window.smart_manager.selectedRows.length && !window.smart_manager.selectAll && window.smart_manager.recordSelectNotification && className !== 'sm_entire_store'){
+		if(0 === window.smart_manager.selectedRows.length && !window.smart_manager.selectAll && window.smart_manager.recordSelectNotification && ('sm_entire_store' !== className) && ('sm_scheduled_bulk_edits' !== clickedElementclassName)){
 			window.smart_manager.notification = {message: _x('Please select a record', 'notification', 'smart-manager-for-wp-e-commerce')}
 			window.smart_manager.showNotification()
 		} else if(window.smart_manager.exportCSVActions && 'undefined' !== typeof(id) && id && window.smart_manager.exportCSVActions.includes(id) && !isBackgroundProcessRunning){ //code for handling export CSV functionality.
@@ -2806,7 +2813,7 @@ Smart_Manager.prototype.event_handler = function() {
 
 		if(1 == window.smart_manager.sm_beta_pro){
 			if('undefined' !== typeof(id) && id){
-					if(window.smart_manager.selectedRows.length > 0 || window.smart_manager.selectAll || 'sm_entire_store' === className){
+					if((window.smart_manager.selectedRows.length > 0 || window.smart_manager.selectAll || 'sm_entire_store' === className) && ('sm_scheduled_bulk_edits' !== clickedElementclassName)){
 						if( id == 'batch_update_sm_editor_grid' && !isBackgroundProcessRunning ) { //code for handling batch update functionality
 							// window.smart_manager.createBatchUpdateDialog();
 							if((typeof window.smart_manager.dirtyRowColIds !== 'undefined') && Object.getOwnPropertyNames(window.smart_manager.dirtyRowColIds).length > 0){
@@ -2846,7 +2853,6 @@ Smart_Manager.prototype.event_handler = function() {
 						}
 					}
 			}
-			
 		} else {
 
 			if( typeof(id) != 'undefined' ) {
@@ -2898,6 +2904,10 @@ Smart_Manager.prototype.event_handler = function() {
 			}
 		}
 	})
+	.off( 'click', ".sm_scheduled_bulk_edits").on( 'click', ".sm_scheduled_bulk_edits", function(e){
+		window.open(window.smart_manager.scheduledActionAdminUrl, '_blank');
+	})
+
 	.off('mouseover', '.sm_gallery_image > img').on('mouseover','.sm_gallery_image > img', function(e){
 		
 		let params = {
@@ -2920,12 +2930,12 @@ Smart_Manager.prototype.event_handler = function() {
 
 	})
 
-	//Code for handling the dropdown menu for the duplicate button
+	// Code for handling the dropdown menu for the Duplicate and Bulk Edit button.
 	.off('mouseenter', '.sm_beta_dropdown').on('mouseenter','.sm_beta_dropdown', function(){
 		jQuery(this).find('.sm_beta_dropdown_content').show();
 	})
 
-	//Code for handling the dropdown menu for the duplicate button
+	// Code for handling the dropdown menu for the Duplicate and Bulk Edit button.
 	.off('mouseleave', '.sm_beta_dropdown').on('mouseleave','.sm_beta_dropdown', function(){
 		jQuery(this).find('.sm_beta_dropdown_content').hide();
 	})
@@ -3814,24 +3824,17 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 
       // Create datepicker input and update relevant properties
       currObj.TEXTAREA = document.createElement('input');
-      currObj.TEXTAREA.setAttribute('type', 'text');
+      currObj.TEXTAREA.setAttribute('type', 'datetime-local');
       currObj.TEXTAREA.className = cssClass;
       currObj.textareaStyle = currObj.TEXTAREA.style;
       currObj.textareaStyle.width = 0;
       currObj.textareaStyle.height = 0;
 
+	  currObj.TEXTAREA.setSelectionRange = false;
       // Replace textarea with datepicker
       Handsontable.dom.empty(currObj.TEXTAREA_PARENT);
       currObj.TEXTAREA_PARENT.appendChild(currObj.TEXTAREA);
-		if(0 !== window.smart_manager.useDatePickerForDateTimeOrDateCols){
-			jQuery('.'+cssClass).Zebra_DatePicker({ format: format,
-				show_icon: false,
-				show_select_today: false,
-				default_position: 'below',
-				readonly_element: false,
-			})
-		}
-		jQuery('.'+cssClass).attr('placeholder',placeholder);
+	  jQuery('.'+cssClass).attr('placeholder',placeholder);
     };
 
 	function customNumericTextEditor(query, callback) {
@@ -3978,6 +3981,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
         if( typeof(cellProperties.className) != 'undefined' ) { //code to higlight the cell on selection
             td.setAttribute('class',cellProperties.className);
         }
+		value = value.replace(/T/g, ' ');//replace T with space.
 
         td.innerHTML = value;
 

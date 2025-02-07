@@ -7,7 +7,7 @@ Tags: woocommerce advanced bulk edit, wordpress bulk edit, woocommerce inventory
 Requires at least: 5.0
 Tested up to: 6.7.1
 Requires PHP: 5.6
-Stable tag: 8.54.0
+Stable tag: 8.55.0
 License: GPLv2
 
 WooCommerce Advanced Bulk Edit products, orders, & posts in an Excel-like sheet editor. Get advanced WooCommerce stock, pricing, & order management.
@@ -288,6 +288,16 @@ It also gives the warm feeling of supporting further development of the plugin.
 
 == Changelog ==
 
+= 8.55.0 (07.02.2025) =
+* New: WooCommerce 9.6.1 compatible
+* New: Added 'New' and 'Manage scheduled edits' as dropdown options under Bulk Edit (Pro)
+* Fix: In-app plugin update link not converting plugin back to Pro version
+* Fix: Advanced Search in WooCommerce Orders dashboard not filtering WooCommerce product fields like SKU
+* Fix: Validation not working for datetime fields in Inline edit
+* Fix: Update failing for field values containing special characters like single quotes
+* Update: Displayed 'Undo' link in Inline edit success message (Pro)
+* Update: POT file
+
 = 8.54.0 (16.01.2025) =
 * New: WooCommerce 9.5.2 compatible
 * Fix: Dashboard selection not working in some cases
@@ -492,6 +502,9 @@ It also gives the warm feeling of supporting further development of the plugin.
 [See changelog for all versions](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 8.55.0 =
+WooCommerce 9.6.1 compatible, Added 'New' and 'Manage scheduled edits' as dropdown options under Bulk Edit (Pro), Fixes related to In-app plugin update link not converting plugin back to Pro version, Advanced Search in WooCommerce Orders dashboard not filtering WooCommerce product fields like SKU, Validation not working for datetime fields in Inline edit, Update failing for field values containing special characters like single quotes, Updates related to Displayed 'Undo' link in Inline edit success message (Pro) along with other important fixes and updates. Recommended upgrade.
 
 = 8.54.0 =
 WooCommerce 9.5.2 compatible, Fixes related to Dashboard selection not working in some cases, Updates related to 10x boost in loading speed for the WooCommerce Products dashboard, 10x speed improvement for updating taxonomy fields using Inline edit and Bulk edit (Pro) along with other important fixes and updates. Recommended upgrade.
