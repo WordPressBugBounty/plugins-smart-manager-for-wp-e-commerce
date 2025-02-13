@@ -43,7 +43,7 @@
 	border: 1px solid #FF5B5E !important;
 }
 
-#sm_view_error_msg, .sm_beta_select_red {
+#sm_view_error_msg, .sm_beta_select_red, #sm_view_save_options_error_msg {
 	color:#FF5B5E !important;	
 }
 
@@ -1718,7 +1718,7 @@ input#sm_add_title{
 	height: 1.25rem !important;
 	margin-top: 0.05rem;
 }
-.sm-column-title-input{
+.sm-title-input{
 	background-color: transparent !important;
 	text-align: center !important;
 	cursor: pointer !important;
@@ -1728,7 +1728,7 @@ input#sm_add_title{
 	border: 1px solid #8c8f94 !important;
 	cursor: text !important;
 }
-.sm-column-title-input:focus{
+.sm-title-input:focus{
 	box-shadow: none !important;
 }
 .sm-column-title-editor-icon:hover{
@@ -1795,18 +1795,18 @@ input#sm_add_title{
 	list-style-type: none;
 	padding-left: 0;
 	margin: 0;
-	padding: 0.18rem 0.18rem 0rem 0.18rem;
 }
 #select2_childs_section .select2-child-item {
 	cursor: pointer;
 	padding-left: 1rem;
 	padding: 0.375rem;
 	margin-bottom: 0.125rem;
-	padding: 0.3rem 0.3rem;
+	padding: 0.4rem 0.4rem;
+	display: flex;
+	justify-content: space-between;
 }
 #select2_childs_section .select2-child-item:hover {
-	background-color: #0073aa !important;
-	color: white !important;
+	background-color: #AFBBD0 !important;
 }
 #select2_childs_section .select2-child-item.selected{
 	background-color: #ddd;
@@ -1815,7 +1815,6 @@ input#sm_add_title{
 #select2_childs_section {
 	position: absolute;
 	background-color: #ffffff;
-	border: 0.0625rem solid #ccc;
 	border-radius: 0.25rem;
 	width: 15.6rem;
 	box-shadow: 0.31rem 0.31rem 0.5rem #ccc;
@@ -1835,7 +1834,7 @@ input#sm_add_title{
 	gap: 0.31rem;
 }
 #sm_nav_bar .select2-results__group:hover, #sm_nav_bar .select2-results__group.focus{
-	background-color:#0073aa4a
+	background-color:#CFD6E3
 }
 #sm_nav_bar .select2-results__group svg {
 	transform: rotate(-90deg);
@@ -1849,4 +1848,53 @@ input#sm_add_title{
 }
 #sm_nav_bar .select2-results__group.focus svg {
     stroke: rgba(0, 0, 0, 0.8);
+}
+
+.eligible-dashboards-select2-dropdown{
+	z-index: 9999;
+}
+#select2-eligible_dashboards_select-container{
+    font-weight: 500;
+}
+#eligible_dashboards_section .select2-selection__arrow b{
+    border-color: #888 transparent transparent transparent !important;
+}
+#wpbody-content #sa_smart_manager_main .save_advance_search_btn{
+	background-color: #508991 !important;
+}
+.sm_view_save_options {
+	margin-top: 1em;
+}
+.sm_view_save_option label span {
+	margin-left: 0.3em;
+}
+.sm_view_save_option label input[type=checkbox]:checked {
+	background-color: #6366f1;
+}
+.sm_view_save_option.sm_border_red {
+    margin-bottom: 0.3em;
+}
+#select2_childs_section .dashboard-name{
+	width: 90%;
+}
+#select2_childs_section .dashboard-combobox-saved-search-action{
+	width: 10%;
+}
+#select2_childs_section .dashboard-combobox-saved-search-action svg{
+	margin-right: 0.3em;
+    height: 1.3em;
+    margin-top: 0em;
+    cursor: pointer;
+}
+#sm-multilist-data ul.children {
+    margin-left: 1.125rem !important;
+}
+#sm-multilist-data li {
+	word-wrap:break-word;
+}
+input.sm-title-input {
+    background: none !important;
+}
+#sm_editor_grid, #sm_top_bar, #sm_nav_bar, #sm_bottom_bar, #select2_childs_section{
+	font-size: 1.1em !important;
 }

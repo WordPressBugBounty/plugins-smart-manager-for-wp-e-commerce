@@ -32,6 +32,9 @@ class Smart_Manager_Install {
 		),
 		'8.31.0' => array(
 			'update_8310_port_access_privilege_settings'
+		),
+		'8.56.0' => array(
+			'update_856_alter_table'
 		)
 	);
 
@@ -441,6 +444,68 @@ class Smart_Manager_Install {
 			}
 			$wpdb->query( "INSERT INTO {$wpdb->prefix}options ( option_name, option_value, autoload ) VALUES ( 'sa_sm_" . $role . "_dashboards', '" . maybe_serialize( $get_user_role_accessible_dashboards ) ."', 'no' )" );
 			delete_option( "sm_beta_" . $role . "_accessible_dashboards" );
+		}
+	}
+
+	/**
+	 * Check if a specific column exists in a table.
+	 *
+	 * @param string $table_name  The name of the table to check.
+	 * @param string $column_name The name of the column to check for.
+	 *
+	 * @return bool True if the column exists, false otherwise, void if table_name,column_name is empty.
+	*/
+	public static function check_table_column_exists( $table_name = "", $column_name = "" ) {
+		if ( ( empty( $table_name ) ) || ( empty( $column_name ) ) ) {
+			return;
+		}
+		// Check if the table exists.
+		if ( empty( self::check_table_exists( $table_name ) ) ) {
+			return;
+		}
+		global $wpdb;
+		$column_exists = $wpdb->get_var( $wpdb->prepare( "SHOW COLUMNS FROM $table_name LIKE %s", $column_name ) );
+		if ( ( is_wp_error( $column_exists ) ) ) {
+			return;
+		}
+		return ( ( empty( $column_exists ) ) ) ? false : true;
+	}
+
+	/**
+	 * Check if a table exists in the database.
+	 *
+	 * @param string $table_name The name of the table to check.
+	 *
+	 * @return bool True if the table exists, false otherwise, void if table_name in empty.
+	*/
+	public static function check_table_exists( $table_name = "" ) {
+		if ( ( empty( $table_name ) ) ) {
+			return;
+		}
+		global $wpdb;
+		$table_exists = $wpdb->get_var( $wpdb->prepare( "SHOW TABLES LIKE %s", $table_name ) );
+		return ( ( empty( $table_exists ) ) || ( is_wp_error( $table_exists ) ) ) ? false : true;
+	}
+
+	/**
+	 * Update the 'sm_views' table to add the 'type' column if it does not exist.
+	 *
+	 * The 'type' column is added as an ENUM type with default value '0'.
+	 * 
+	 * @return bool Void.
+	*/
+	public static function update_856_alter_table() {
+		global $wpdb;
+		// Check if the 'type' column already exists.
+		if ( false === ( self::check_table_column_exists( $wpdb->prefix . 'sm_views', 'type' ) ) ) {
+			// Add the 'type' column as ENUM type with default value '0'.
+			$wpdb->query( $wpdb->prepare( "
+            	ALTER TABLE  ".$wpdb->prefix . 'sm_views'. "
+            	ADD COLUMN `type` ENUM('0', '1', '2') DEFAULT %s
+            	COMMENT 'ENUM values: 0 - Custom View, 1 - Saved Search, 2 - Saved Bulk Edit'
+            	AFTER `post_type`", 
+            	'0'
+        	) );
 		}
 	}
 }

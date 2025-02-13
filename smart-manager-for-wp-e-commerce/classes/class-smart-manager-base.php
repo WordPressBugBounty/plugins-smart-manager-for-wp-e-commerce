@@ -774,7 +774,6 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 						$view_data = $view_obj->get($view_slug);
 						if( ! empty( $view_data ) ) {
 							$this->dashboard_key = $view_data['post_type'];
-							$column_model_transient = get_user_meta(get_current_user_id(), 'sa_sm_'.$view_slug, true);
 							$column_model_transient = json_decode( $view_data['params'], true );
 							if( !empty( $column_model_transient['search_params'] ) ) {
 								if( ! empty( $column_model_transient['search_params']['isAdvanceSearch'] ) ) { // For advanced search
@@ -1631,7 +1630,6 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 						$view_data = $view_obj->get($view_slug);
 						if( ! empty( $view_data ) ) {
 							$this->dashboard_key = $view_data['post_type'];
-							$column_model_transient = get_user_meta(get_current_user_id(), 'sa_sm_'.$view_slug, true);
 							$column_model_transient = json_decode( $view_data['params'], true );
 							
 							if( !empty( $column_model_transient['search_params'] ) ) {
@@ -1891,10 +1889,13 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 		        }
 
 				// Code for handling sorting of the postmeta
-		        $sort_params = $this->build_query_sort_params( array( 'sort_params' => $this->req_params['sort_params'],
-																		'numeric_meta_cols' => $numeric_postmeta_cols,
-'data_cols' => $data_cols
-															) );
+		        $sort_params = $this->build_query_sort_params( 
+					array( 
+						'sort_params' => $this->req_params['sort_params'],
+						'numeric_meta_cols' => $numeric_postmeta_cols,
+						'data_cols' => $data_cols
+					) 
+				);
 
 				//WP_Query to get all the relevant post_ids
 				$args = array(
@@ -3370,8 +3371,18 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 		 * @return string updated query condition.
 		 */
 		public function modify_posts_advanced_search_condition( $cond = '', $params = array() ){
+			if ( ( empty( $params ) ) || ( ! is_array( $params ) ) || empty( $params['post_type'] ) ) {
+				return '';
+			}
 			global $wpdb;
-			return $cond . ( ( ! empty( $params['post_type'] ) ) ? " AND ".$wpdb->prefix."posts.post_type IN ('". implode( "','", $params['post_type'] ) ."') " : '' );
+			return $cond . ( 
+				! empty( $params['post_type'] ) 
+				? " AND " . $wpdb->prefix . "posts.post_type IN ('" . 
+					( is_array( $params['post_type'] ) ? implode( "','", $params['post_type'] ) : $params['post_type'] ) . 
+				  "')" 
+				: '' 
+			);
+			
 		}
 
 		/**
@@ -3865,7 +3876,6 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 						$view_data = $view_obj->get($view_slug);
 						if( ! empty( $view_data ) ) {
 							$this->dashboard_key = $view_data['post_type'];
-							$column_model_transient = get_user_meta(get_current_user_id(), 'sa_sm_'.$view_slug, true);
 							$column_model_transient = json_decode( $view_data['params'], true );
 							if( !empty( $column_model_transient['search_params'] ) ) {
 								if( ! empty( $column_model_transient['search_params']['isAdvanceSearch'] ) ) { // For advanced search

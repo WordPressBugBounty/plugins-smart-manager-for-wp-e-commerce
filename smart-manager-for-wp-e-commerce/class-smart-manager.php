@@ -19,6 +19,7 @@ class Smart_Manager {
 			$sm_owned_views = array(),
 			$sm_public_views = array(),
 			$sm_view_post_types = array(),
+			$sm_saved_searches = array(),
 			$all_views = array(),
 			$dupdater = '',
 			$dupgrade = '',
@@ -291,6 +292,7 @@ class Smart_Manager {
 					$this->sm_public_views = ( ! empty( $views['public_views'] ) ) ? $views['public_views'] : array();
 					$this->all_views = array_merge( array_keys( $this->sm_accessible_views ), $this->sm_owned_views, $this->sm_public_views );
 					$this->sm_view_post_types = ( ! empty( $views['view_post_types'] ) ) ? $views['view_post_types'] : array();
+					$this->sm_saved_searches = ( ! empty( $views['saved_searches'] ) ) ? $views['saved_searches'] : array();
 				}
 			}
 		}
@@ -1267,6 +1269,7 @@ class Smart_Manager {
 							'sm_owned_views' => json_encode( $this->sm_owned_views ),
 							'sm_public_views' => json_encode( $this->sm_public_views ),
 							'sm_view_post_types' => json_encode( $this->sm_view_post_types ),
+							'sm_saved_searches' => json_encode( $this->sm_saved_searches ),
 							'recent_dashboards' => json_encode( $recent_dashboards ),
 							'recent_views' => json_encode( $recent_views ),
 							'recent_dashboard_type' => $recent_dashboard_type,

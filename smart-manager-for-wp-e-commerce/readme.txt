@@ -5,9 +5,9 @@ Author URI: https://www.storeapps.org/woocommerce-plugins/
 Plugin URI: https://www.storeapps.org/product/smart-manager/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme
 Tags: woocommerce advanced bulk edit, wordpress bulk edit, woocommerce inventory management, woocommerce stock manager, woocommerce product manager
 Requires at least: 5.0
-Tested up to: 6.7.1
+Tested up to: 6.7.2
 Requires PHP: 5.6
-Stable tag: 8.55.0
+Stable tag: 8.56.0
 License: GPLv2
 
 WooCommerce Advanced Bulk Edit products, orders, & posts in an Excel-like sheet editor. Get advanced WooCommerce stock, pricing, & order management.
@@ -288,6 +288,16 @@ It also gives the warm feeling of supporting further development of the plugin.
 
 == Changelog ==
 
+= 8.56.0 (13.02.2025) =
+* New: WordPress 6.7.2 compatible
+* New: Search for WooCommerce Product 'Category' field in Inline edit modal
+* New: Saved searches for Advanced Search and application across multiple dashboards (Pro)
+* Fix: WooCommerce Product 'Category' field is not shown in hierarchical structure in Inline edit modal
+* Fix: Export CSV not working for 'All items in search results - Stock Columns' when using Simple Search and Advanced Search functionalities
+* Fix: Inline edit and Bulk edit not working for Custom Views dashboards (Pro)
+* Update: Grid layout to fully utilize screen space
+* Update: POT file
+
 = 8.55.0 (07.02.2025) =
 * New: WooCommerce 9.6.1 compatible
 * New: Added 'New' and 'Manage scheduled edits' as dropdown options under Bulk Edit (Pro)
@@ -502,6 +512,9 @@ It also gives the warm feeling of supporting further development of the plugin.
 [See changelog for all versions](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 8.56.0 =
+WordPress 6.7.2 compatible, Search for WooCommerce Product 'Category' field in Inline edit modal, Saved searches for Advanced Search and application across multiple dashboards (Pro), Fixes related to WooCommerce Product 'Category' field is not shown in hierarchical structure in Inline edit modal, Export CSV not working for 'All items in search results - Stock Columns' when using Simple Search and Advanced Search functionalities, Inline edit and Bulk edit not working for Custom Views dashboards (Pro), Updates related to Grid layout to fully utilize screen space along with other important fixes and updates. Recommended upgrade.
 
 = 8.55.0 =
 WooCommerce 9.6.1 compatible, Added 'New' and 'Manage scheduled edits' as dropdown options under Bulk Edit (Pro), Fixes related to In-app plugin update link not converting plugin back to Pro version, Advanced Search in WooCommerce Orders dashboard not filtering WooCommerce product fields like SKU, Validation not working for datetime fields in Inline edit, Update failing for field values containing special characters like single quotes, Updates related to Displayed 'Undo' link in Inline edit success message (Pro) along with other important fixes and updates. Recommended upgrade.

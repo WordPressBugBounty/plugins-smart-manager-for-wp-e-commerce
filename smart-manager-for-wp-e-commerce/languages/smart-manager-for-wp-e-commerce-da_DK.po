@@ -1720,7 +1720,7 @@ msgstr ""
 
 #: assets/js/smart-manager.js:2460 assets/js/smart-manager.js:2482
 msgctxt "notification"
-msgid "Custom Views avialable (Only in"
+msgid "Custom Views available (Only in"
 msgstr ""
 
 #: assets/js/smart-manager.js:2590

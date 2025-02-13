@@ -94,6 +94,8 @@ Smart_Manager.prototype.init = function() {
 
 	this.modal = {} //object for handling all modal dialogs
 
+	this.eligibleDashboardSavedSearch = '';
+	this.loadingDashboardForsavedSearch = false;
 	// defining operators for diff datatype for advanced search
 
 	let intOperators = {
@@ -144,6 +146,7 @@ Smart_Manager.prototype.init = function() {
 	this.sm_views = (sm_beta_params.hasOwnProperty('sm_views')) ? JSON.parse(sm_beta_params.sm_views) : {};
 	this.ownedViews = (sm_beta_params.hasOwnProperty('sm_owned_views')) ? JSON.parse(sm_beta_params.sm_owned_views) : [];
 	this.publicViews = (sm_beta_params.hasOwnProperty('sm_public_views')) ? JSON.parse(sm_beta_params.sm_public_views) : []
+	this.savedSearches = (sm_beta_params.hasOwnProperty('sm_saved_searches')) ? JSON.parse(sm_beta_params.sm_saved_searches) : []
 	this.viewPostTypes = (sm_beta_params.hasOwnProperty('sm_view_post_types')) ? JSON.parse(sm_beta_params.sm_view_post_types) : {}
 	this.recentDashboards = (sm_beta_params.hasOwnProperty('recent_dashboards')) ? JSON.parse(sm_beta_params.recent_dashboards) : [];
 	this.recentViews = (sm_beta_params.hasOwnProperty('recent_views')) ? JSON.parse(sm_beta_params.recent_views) : [];
@@ -212,6 +215,17 @@ Smart_Manager.prototype.init = function() {
 		this.current_selected_dashboard = defaultDashboardslug;
 		this.dashboard_key = defaultDashboardslug;
 
+		let savedSearch = (window.smart_manager && typeof window.smart_manager.findSavedSearchBySlug === "function") ? window.smart_manager.findSavedSearchBySlug(defaultDashboardslug) : false;
+		if((parseInt(window.smart_manager.sm_beta_pro) === 1) && (savedSearch) && (savedSearch.hasOwnProperty('parent_post_type')) && (savedSearch.hasOwnProperty('params')) && (savedSearch.hasOwnProperty('title'))){
+			this.current_selected_dashboard = savedSearch?.slug || '';
+			this.dashboard_key = savedSearch?.parent_post_type || '';
+			window.smart_manager.loadingDashboardForsavedSearch = true;
+			window.smart_manager.advancedSearchQuery = savedSearch?.params?.search_params?.params || [];
+			window.smart_manager.savedSearchParams = savedSearch?.params?.search_params || {};
+			window.smart_manager.savedSearchDashboardKey = savedSearch?.parent_post_type || '';
+			let child = window.smart_manager.findSelect2ParentOrChildByText(savedSearch.parent_post_type,true);
+			window.smart_manager.savedSearchDashboardName = child?.childText || '';
+		}
 		this.sm_nonce = this.sm_dashboards['sm_nonce'];
 		delete this.sm_dashboards['sm_nonce'];
 		this.sm_is_woo79 = (sm_beta_params.hasOwnProperty('SM_IS_WOO79')) ? sm_beta_params.SM_IS_WOO79 : '';
@@ -271,8 +285,8 @@ Smart_Manager.prototype.init = function() {
 	let grid_height = contentheight - ( contentheight * 0.20 ); 
 
 	window.smart_manager.grid_width = contentwidth - (contentwidth * 0.01);
-	window.smart_manager.grid_height = ( grid_height < document.body.clientHeight - 400 ) ? document.body.clientHeight - 400 : grid_height;
-
+	let heightDeduction = (window.smart_manager.sm_beta_pro == 1) ? 200 : 400;
+	window.smart_manager.grid_height = ( grid_height < document.body.clientHeight - heightDeduction ) ? document.body.clientHeight - heightDeduction : grid_height;
 	jQuery('#sm_editor_grid').trigger( 'smart_manager_init' ); //custom trigger
 
 	window.smart_manager.load_dashboard();
@@ -349,7 +363,6 @@ Smart_Manager.prototype.load_dashboard = function() {
 	} else {
 		window.smart_manager.getData();
 	}
-
 }
 
 // Function to create optgroups for dashboards
@@ -375,12 +388,22 @@ Smart_Manager.prototype.createOptGroups = function(args={}) {
 		text: args.label,
 		children: []
 	};
-
-	child.map((key) => {
-		if((parent.includes(key) && args['is_recently_accessed']) || (!parent.includes(key) && !args['is_recently_accessed']) || args['isParentChildSame']){
+	child.map((item) => {
+		let key, label;
+		if (typeof item === 'string') {
+			key = item;
+			label = args['is_recently_accessed'] ? args.parent[key] : args.child[key];
+		} else if (typeof item === 'object' && item.slug) {
+			key = item.slug;
+			label = item.title;
+		}
+		if(((parent.includes(key) || ((typeof item === 'object'))) && args['is_recently_accessed']) || (!parent.includes(key) && !args['is_recently_accessed']) || args['isParentChildSame']){
 			count++;
-			options += '<option value="'+key+'" '+ ((key == window.smart_manager.dashboard_key) ? "selected" : "") +'>'+((args['is_recently_accessed']) ? args.parent[key] : args.child[key]) +'</option>';
-			dashboardSelect2Item.children.push({id:key,text:((args['is_recently_accessed']) ? args.parent[key] : args.child[key])})
+			options += `<option value="${key}" ${(((key === window.smart_manager.dashboard_key) && window.smart_manager.loadingDashboardForsavedSearch===false) || ((key === window.smart_manager.current_selected_dashboard) && window.smart_manager.loadingDashboardForsavedSearch===true)) ? "selected" : ""}>${label}</option>`;
+			dashboardSelect2Item.children.push({
+				id: key,
+				text: label,
+			});
 		}
 	});
 
@@ -466,7 +489,7 @@ Smart_Manager.prototype.loadNavBar = function() {
 		// Code for rendering all remaining views
 		if(Object.keys(window.smart_manager.sm_views).length > 0){
 			let otherSavedViews = Object.entries(window.smart_manager.sm_views)
-			.filter(([key]) => !window.smart_manager.recentViews.includes(key))
+			.filter(([key]) => (!window.smart_manager.recentViews.includes(key) && !window.smart_manager.findSavedSearchBySlug(key)))
 			.reduce((acc, [key, value]) => {
 				acc[key] = value;
 				return acc;
@@ -475,6 +498,15 @@ Smart_Manager.prototype.loadNavBar = function() {
 				'child': otherSavedViews,
 				'label': _x('Other saved views', 'dashboard option groups', 'smart-manager-for-wp-e-commerce'),
 				'is_recently_accessed': true
+			});
+		}
+
+		// Code for rendering all Saved searches.
+		if(Object.keys(window.smart_manager.savedSearches).length > 0){
+			window.smart_manager.createOptGroups({'parent': window.smart_manager.savedSearches,
+				'child': window.smart_manager.savedSearches,
+				'label': _x('Saved searches', 'saved searches option groups', 'smart-manager-for-wp-e-commerce'),
+				'is_recently_accessed': true //show in recent access + show in Saved searches section.
 			});
 		}
 
@@ -509,6 +541,7 @@ Smart_Manager.prototype.loadNavBar = function() {
 			});
 		}
 	}
+
 	let navBar = "<select id='sm_dashboard_select'> </select>"+
 				"<div id='sm_nav_bar_search'>"+
 					"<div id='search_content_parent'>"+
@@ -966,7 +999,9 @@ Smart_Manager.prototype.setDashboardModel = function (response) {
 		}
 
 		if(window.smart_manager.sm_beta_pro == 1){
-
+			if((window.smart_manager.loadingDashboardForsavedSearch === true) && (window.smart_manager.hasOwnProperty('savedSearchParams') && window.smart_manager.savedSearchParams)){//set search_params in response when applying saved search to any dashboard.
+				response.search_params =  window.smart_manager.savedSearchParams;
+			}
 			jQuery('#sm_custom_views_update, #sm_custom_views_delete').hide();
 
 			let viewSlug = window.smart_manager.getViewSlug(window.smart_manager.dashboardName);
@@ -1023,6 +1058,12 @@ Smart_Manager.prototype.setDashboardModel = function (response) {
 		}
 		window.smart_manager.exportButtonHtml();
 		jQuery('#sm_editor_grid').trigger( 'smart_manager_post_load_grid' ); //custom trigger
+		if(window.smart_manager.loadingDashboardForsavedSearch === true){//reset the variables used to apply saved searches params.
+			window.smart_manager.loadingDashboardForsavedSearch = false;
+			window.smart_manager.savedSearchParams = {};
+			window.smart_manager.savedSearchDashboardKey = '';
+			window.smart_manager.savedSearchDashboardName = '';
+		}
 	}
 }
 
@@ -1254,7 +1295,7 @@ Smart_Manager.prototype.getDataDefaultParams = function(params) {
 						  sort_params: (window.smart_manager.currentDashboardModel.hasOwnProperty('sort_params') ) ? window.smart_manager.currentDashboardModel.sort_params : '',
 						  table_model: (window.smart_manager.currentDashboardModel.hasOwnProperty('tables') ) ? window.smart_manager.currentDashboardModel.tables : '',
 						  search_text: (window.smart_manager.searchType == 'simple') ? window.smart_manager.simpleSearchText : '',
-						  advanced_search_query: JSON.stringify((window.smart_manager.searchType != 'simple') ? window.smart_manager.advancedSearchQuery : [])
+						  advanced_search_query: JSON.stringify((window.smart_manager.searchType != 'simple' || window.smart_manager.loadingDashboardForsavedSearch===true) ? window.smart_manager.advancedSearchQuery : [])
 					  };
 
 	// Code for passing extra param for view handling
@@ -1737,7 +1778,7 @@ Smart_Manager.prototype.loadGrid = function() {
 		  		}
 
 		  		window.smart_manager.page = 1;
-		  		window.smart_manager.getData();
+					window.smart_manager.getData();
 		  	}
 		  	return false; // The blockade for the default sort action.
 		},
@@ -2071,81 +2112,43 @@ Smart_Manager.prototype.loadGrid = function() {
 			}
 
 			if( typeof (col.type) != 'undefined' && col.type == 'sm.multilist' ) { // code to handle the functionality to handle editing of 'multilist' data types
-					var actual_value = col.values,
-						multiselect_data = new Array(),
-						multiselect_chkbox_list = '',
-						current_value = new Array();
-
-					if( current_cell_value != '' && typeof(current_cell_value) != 'undefined' && current_cell_value !== null ) {
-						current_value = (typeof(current_cell_value) == 'string') ? current_cell_value.split(', ') : new Array(String(current_cell_value));
+				let actual_value = col.values,
+					multiselect_data = new Array(),
+					multiselect_chkbox_list = '',
+					current_value = new Array();
+				// Extracting selected values safely.
+				if('undefined' !== typeof(current_cell_value) && (null !== current_cell_value) && ('' !== current_cell_value)){
+					current_value = ('string' === typeof(current_cell_value)) ? current_cell_value.split(', ') : new Array(String(current_cell_value));
+				}
+				// Initialize all data and assign children to their respective parents.
+				for(let index in actual_value){
+					let title = actual_value[index].hasOwnProperty('title') ? actual_value[index].title : actual_value[index].term;
+					let parent_id = actual_value[index]['parent'];
+					multiselect_data[index] = {
+						id: index,
+						term: actual_value[index].term,
+						title: title,
+						child: {}
+					};
+					if((0 !== parseInt(parent_id)) && multiselect_data[parent_id]){
+						multiselect_data[parent_id].child[index] = multiselect_data[index]; // Assign child
 					}
-					for (var index in actual_value) {
-						let title = (actual_value[index].hasOwnProperty('title')) ? actual_value[index].title : actual_value[index].term;
-						if(0 === parseInt(actual_value[index]['parent'])) {
-							if(undefined !== multiselect_data[index]) {
-								if(false !== multiselect_data[index].hasOwnProperty('child')) {
-									multiselect_data[index].id = index
-									multiselect_data[index].term = actual_value[index].term;
-									multiselect_data[index].title = title; 
-								}
-							} else {
-								multiselect_data[index] = {'id': index, 
-															'term' : actual_value[index].term,
-															'title': title
-														};    
-							}			
-						} else {
-
-							if(!actual_value[actual_value[index]['parent']]){
-								continue;
-							}
-
-							if(undefined === multiselect_data[actual_value[index]['parent']]) {
-								//For hierarchical categories
-								for (var mindex in multiselect_data) {
-									if (false === multiselect_data[mindex].hasOwnProperty('child')) {
-										continue;
-									}
-									for (var cindex in multiselect_data[mindex].child) {
-									}
-								}
-								multiselect_data[actual_value[index]['parent']] = {};
-							}
-							if(false === multiselect_data[actual_value[index]['parent']].hasOwnProperty('child')) {
-								multiselect_data[actual_value[index]['parent']].child = {};
-							}
-							multiselect_data[actual_value[index]['parent']].term = actual_value[actual_value[index]['parent']].term;
-							multiselect_data[actual_value[index]['parent']].child[index] = {term: actual_value[index].term,
-																							title: title,
-																						};
-						}
+				}
+				// Remove orphaned child from root level for search.
+				for(let index in multiselect_data){
+					let parent_id = actual_value[index]['parent'];
+					if(0 !== parseInt(parent_id)){
+						delete multiselect_data[index]; // Remove children that were wrongly placed at the top
 					}
-					multiselect_data.sort(function(a,b){
-						return a.term.localeCompare(b.term);
-					})
-					multiselect_chkbox_list += '<ul>';
-					for (let index in multiselect_data) {
-						let idStr = (multiselect_data[index].id) ? multiselect_data[index].id.toString() : ''
-						let checked = (current_value != '' && (current_value.includes(multiselect_data[index].title) || current_value.includes(idStr))) ? 'checked' : '';
-						multiselect_chkbox_list += '<li> <input type="checkbox" name="chk_multiselect" value="'+ multiselect_data[index].id +'" '+ checked +'>  '+ multiselect_data[index].term +'</li>';
-						
-						if ( false === multiselect_data[index].hasOwnProperty('child') ) continue;
-						let child_val = multiselect_data[index].child;
-						multiselect_chkbox_list += '<ul class="children">';
-						let childValKeys = Object.keys(multiselect_data[index].child);
-						childValKeys.sort(function(a,b){
-							return child_val[a].term.localeCompare(child_val[b].term);
-						})
-						childValKeys.map(function(key) {
-							let term = (child_val[key].hasOwnProperty('term')) ? child_val[key].term : ''
-							let title = (child_val[key].hasOwnProperty('title')) ? child_val[key].title : term
-							let child_checked = (current_value != '' && (current_value.includes(title) || current_value.includes(key.toString()))) ? 'checked' : '';
-							multiselect_chkbox_list += '<li> <input type="checkbox" name="chk_multiselect" value="'+ key +'" '+ child_checked +'>  '+ term +'</li>';
-						});
-						multiselect_chkbox_list += '</ul>';
-					}               
-					multiselect_chkbox_list += '</ul>';
-
+				}
+				// Add the search box before the checkbox list.
+				multiselect_chkbox_list = `
+				<input type="text" data-ul-id="sm-multilist-data" class="sm-search-box" 
+					onkeyup="window.smart_manager.processListSearch(this)" 
+					placeholder="${_x('Search '+(col.key || 'Taxonomy')+'...', 'placeholder', 'smart-manager-for-wp-e-commerce')}">
+				`;
+				// Generate final checkbox list.
+				multiselect_chkbox_list += window.smart_manager.generateCheckboxList(multiselect_data, current_value);
 				window.smart_manager.modal = {
 					title: _x((col.key || 'Taxonomy'), 'modal title', 'smart-manager-for-wp-e-commerce'),
 					content: multiselect_chkbox_list,
@@ -2199,8 +2202,10 @@ Smart_Manager.prototype.reset = function( fullReset = false ){
 		window.smart_manager.currentVisibleColumns = [];
 		window.smart_manager.column_names = [];
 		window.smart_manager.simpleSearchText = '';
-		window.smart_manager.advancedSearchQuery = new Array();
-		window.smart_manager.advancedSearchRuleCount = 0;
+		if(window.smart_manager.loadingDashboardForsavedSearch===false){
+			window.smart_manager.advancedSearchQuery = new Array();
+			window.smart_manager.advancedSearchRuleCount = 0;
+		}
 		window.smart_manager.colModelSearch = {}
 		window.smart_manager.savedBulkEditConditions = []
 	}
@@ -2241,7 +2246,6 @@ Smart_Manager.prototype.refresh = function( dataParams ) {
 			window.smart_manager.disableSelectedRows(false);
 		}
 	}
-
 	window.smart_manager.getData(dataParams);
 }
 
@@ -2285,13 +2289,34 @@ Smart_Manager.prototype.event_handler = function() {
 	});
 
 	// Code to handle select2 child item selection and display
-	jQuery(document).on("click", ".select2-child-item", function () {
-		const childId = jQuery(this).data("id");
+	jQuery(document).on("click", ".select2-child-item .dashboard-name", function () {
+		const childId = jQuery(this).parent().data("id");
 		if ((!childId) || (typeof childId === 'undefined') || (childId.length === 0)) {
 			return;
 		}
-		jQuery("#sm_dashboard_select").val(childId).trigger("change");
 		jQuery("#select2_childs_section").hide();
+		if(parseInt(window.smart_manager.sm_beta_pro)===1){
+			let savedSearch = window.smart_manager.findSavedSearchBySlug(childId);
+			if((savedSearch) && (savedSearch.hasOwnProperty('parent_post_type')) && (savedSearch.hasOwnProperty('slug'))){
+				window.smart_manager.loadingDashboardForsavedSearch = true;
+				window.smart_manager.savedSearchDashboardKey = savedSearch.parent_post_type;
+				window.smart_manager.advancedSearchQuery = savedSearch?.params?.search_params?.params || [];
+				window.smart_manager.savedSearchParams = savedSearch?.params?.search_params || {};
+				let child = window.smart_manager.findSelect2ParentOrChildByText(savedSearch.parent_post_type,true);
+				window.smart_manager.savedSearchDashboardName = child?.childText || '';
+				if((window.smart_manager.checkPostParamsInSavedSearch((savedSearch)))){
+					//show eligible dashboards.
+					let eligibleDashboards = window.smart_manager.GetEligibleDashboardsForSavedSearch(savedSearch);
+					window.smart_manager.eligibleDashboardSavedSearch = savedSearch.slug;
+					window.smart_manager.eligibleDashboardsDialog(eligibleDashboards);
+					if(!eligibleDashboards.length){
+						jQuery("#sm_dashboard_select").val(childId).trigger("change");
+					}
+					return;
+				}
+			}
+		}
+		jQuery("#sm_dashboard_select").val(childId).trigger("change");
 	});
 	
 	// Code to handle select2 child items show/hide
@@ -2323,10 +2348,9 @@ Smart_Manager.prototype.event_handler = function() {
 
 	//Code to handle dashboard change in grid
 	jQuery(document).off('change', '#sm_dashboard_select').on('change', '#sm_dashboard_select',function(){
-
 		var sm_dashboard_valid = 0,
-			sm_selected_dashboard_key = jQuery(this).val(),
-			sm_selected_dashboard_title = jQuery( "#sm_dashboard_select option:selected" ).text();
+			sm_selected_dashboard_key = ((window.smart_manager.loadingDashboardForsavedSearch===true) && (window.smart_manager.hasOwnProperty('savedSearchDashboardKey'))) ? window.smart_manager.savedSearchDashboardKey : jQuery(this).val(),
+			sm_selected_dashboard_title = ((window.smart_manager.loadingDashboardForsavedSearch===true) && (window.smart_manager.hasOwnProperty('savedSearchDashboardName'))) ? window.smart_manager.savedSearchDashboardName : jQuery( "#sm_dashboard_select option:selected" ).text();
 
 		if( window.smart_manager.sm_beta_pro == 0 ) {
 			sm_dashboard_valid = 0;
@@ -2744,18 +2768,27 @@ Smart_Manager.prototype.event_handler = function() {
 		if( window.smart_manager.sm_beta_pro == 1 ) {
 			if ( typeof (window.smart_manager.createUpdateViewDialog) !== "undefined" && typeof (window.smart_manager.createUpdateViewDialog) === "function" ) {
 				let id = jQuery(this).attr('id');
-				let action = (id == 'sm_custom_views_update') ? 'update' : 'create';
+				let action = (id === 'sm_custom_views_update') ? 'update' : 'create';
 				if((typeof window.smart_manager.dirtyRowColIds !== 'undefined') && Object.getOwnPropertyNames(window.smart_manager.dirtyRowColIds).length > 0){
 					window.smart_manager.confirmUnsavedChanges({'yesCallback': window.smart_manager.createUpdateViewDialog, 'yesCallbackParams': action, 'hideOnYes': false})
 				}else if("undefined" !== typeof(window.smart_manager.createUpdateViewDialog) && "function" === typeof(window.smart_manager.createUpdateViewDialog)){
-					window.smart_manager.createUpdateViewDialog(action);
+					let params = {};
+					if((id === 'sm_custom_views_create')){
+						params.dashboardChecked = true;
+						params.advancedSearchChecked = (jQuery('#search_switch').is(':checked')) ? true : false;
+					}
+					if((id === 'sm_custom_views_update')){
+						params.dashboardChecked = (window.smart_manager.findSavedSearchBySlug(window.smart_manager.getViewSlug(window.smart_manager.dashboardName)))?false:true;
+						params.advancedSearchChecked = (window.smart_manager.advancedSearchQuery.length)?true:false;
+					}
+					window.smart_manager.createUpdateViewDialog(action,params);
 				}
 				
 			}
 		}  else {
 			window.smart_manager.notification = {message: sprintf(
 				/* translators: %s: pricing page link */
-				_x('Custom Views avialable (Only in %s)', 'notification', 'smart-manager-for-wp-e-commerce'), '<a href="'+ window.smart_manager.pricingPageURL +'" target="_blank">'+_x('Pro', 'notification', 'smart-manager-for-wp-e-commerce')+'</a>'),hideDelay: window.smart_manager.notificationHideDelayInMs}
+				_x('Custom Views available (Only in %s)', 'notification', 'smart-manager-for-wp-e-commerce'), '<a href="'+ window.smart_manager.pricingPageURL +'" target="_blank">'+_x('Pro', 'notification', 'smart-manager-for-wp-e-commerce')+'</a>'),hideDelay: window.smart_manager.notificationHideDelayInMs}
 			window.smart_manager.showNotification()
 		}
 		
@@ -2780,7 +2813,7 @@ Smart_Manager.prototype.event_handler = function() {
 		}  else {
 			window.smart_manager.notification = {message: sprintf(
 				/* translators: %s: pricing page link */
-				_x('Custom Views avialable (Only in %s)', 'notification', 'smart-manager-for-wp-e-commerce'), '<a href="'+ window.smart_manager.pricingPageURL +'" target="_blank">'+_x('Pro', 'notification', 'smart-manager-for-wp-e-commerce')+'</a>'),hideDelay: window.smart_manager.notificationHideDelayInMs}
+				_x('Custom Views available (Only in %s)', 'notification', 'smart-manager-for-wp-e-commerce'), '<a href="'+ window.smart_manager.pricingPageURL +'" target="_blank">'+_x('Pro', 'notification', 'smart-manager-for-wp-e-commerce')+'</a>'),hideDelay: window.smart_manager.notificationHideDelayInMs}
 			window.smart_manager.showNotification()
 		}
 	})
@@ -2853,6 +2886,7 @@ Smart_Manager.prototype.event_handler = function() {
 						}
 					}
 			}
+			
 		} else {
 
 			if( typeof(id) != 'undefined' ) {
@@ -3000,23 +3034,24 @@ Smart_Manager.prototype.columnVisibilityEqualizeHeight = function() {
 	}
 }
 
-//Function to process Column Visibility Enabled & Disabled Columns Search
-Smart_Manager.prototype.processColumnVisibilitySearch = function(eventObj) {
-	
-	let searchString = jQuery(eventObj).val(),
-		ulId = jQuery(eventObj).attr('data-ul-id');
-	
-	if( ulId != '' ) {
-		jQuery("#"+ulId).find('li').each( function() {
-			let txtValue = jQuery(this).find('.sm-column-title-input').val();
-			if (txtValue.toUpperCase().indexOf(searchString.toUpperCase()) > -1) {
-		      jQuery(this).show();
-		    } else {
-		      jQuery(this).hide();
-		    }
-		});
-	}
-}
+//Function to process search for unorder list of items from 'Column Manager' and Multilist field like 'Category' in inline edit
+Smart_Manager.prototype.processListSearch = function(eventObj) {
+    let searchString = jQuery(eventObj).val(),
+        ulId = jQuery(eventObj).attr('data-ul-id');
+    if('' !== ulId){
+        jQuery("#"+ulId).find('li').each(function () {
+			let txtValue = jQuery(this).find('.sm-title-input').val();
+            let isMatch = txtValue.toUpperCase().indexOf(searchString.toUpperCase()) > -1;
+			(isMatch) ? jQuery(this).css("display", "block") : jQuery(this).hide();
+			// Ensure that if a child is visible, its parent remains visible
+			let isChildVisible = jQuery(this).find('li:visible').length > 0;
+            let isMatched = ('none' !== jQuery(this).css('display'));
+            if(isChildVisible || isMatched){
+				jQuery(this).css("display", "block").parents('ul, li').css("display", "block");
+            }
+        });
+    }
+};
 
 //Function to create column Visibility dialog
 Smart_Manager.prototype.createColumnVisibilityDialog = function() {
@@ -3047,7 +3082,7 @@ Smart_Manager.prototype.createColumnVisibilityDialog = function() {
 
 			temp = `<li>
 						<span class="handle">::</span> 
-						<input type="text" class="sm-column-title-input" title="${colText}" value="${colText}" readonly />
+						<input type="text" class="sm-title-input" title="${colText}" value="${colText}" readonly />
 						<span class="handle sm-column-title-editor-icon">
 							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
 								<path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"></path>
@@ -3077,14 +3112,14 @@ Smart_Manager.prototype.createColumnVisibilityDialog = function() {
 						'<li> '+
 							'<div class="sm-sorter-section"> '+
 								'<h3>'+_x('Enabled', 'columns settings searchbox heading', 'smart-manager-for-wp-e-commerce')+'</h3> '+
-								'<input type="text" id="searchEnabledColumns" data-ul-id="sm-columns-enabled" class="sm-search-box" onkeyup="window.smart_manager.processColumnVisibilitySearch(this)" placeholder="'+_x('Search For Enabled Columns...', 'placeholder', 'smart-manager-for-wp-e-commerce')+'"> '+
+								'<input type="text" id="searchEnabledColumns" data-ul-id="sm-columns-enabled" class="sm-search-box" onkeyup="window.smart_manager.processListSearch(this)" placeholder="'+_x('Search For Enabled Columns...', 'placeholder', 'smart-manager-for-wp-e-commerce')+'"> '+
 								'<ul class="sm-sorter columns-enabled" id="sm-columns-enabled"> '+
 									enabledColumnsArray.join("") +
 								'</ul> '+
 							'</div> '+
 							'<div class="sm-sorter-section"> '+
 								'<h3>'+_x('Disabled', 'columns settings searchbox heading', 'smart-manager-for-wp-e-commerce')+'</h3> '+
-								'<input type="text" id="searchDisabledColumns" data-ul-id="sm-columns-disabled" class="sm-search-box" onkeyup="window.smart_manager.processColumnVisibilitySearch(this)" placeholder="'+_x('Search For Disabled Columns...', 'placeholder', 'smart-manager-for-wp-e-commerce')+'"> '+
+								'<input type="text" id="searchDisabledColumns" data-ul-id="sm-columns-disabled" class="sm-search-box" onkeyup="window.smart_manager.processListSearch(this)" placeholder="'+_x('Search For Disabled Columns...', 'placeholder', 'smart-manager-for-wp-e-commerce')+'"> '+
 								'<ul class="sm-sorter columns-disabled" id="sm-columns-disabled"> '+
 									hiddenColumnsArray.join("") +
 								'</ul> '+
@@ -3594,14 +3629,15 @@ Smart_Manager.prototype.isTaxonomyDashboard = function() {
 
 // Function to get keyId for the dashboard
 Smart_Manager.prototype.getKeyID = function() {
+	let ordersPostTypes = ['shop_order', 'shop_subscription'];
 	switch (true){
 		case ("undefined" !== typeof(window.smart_manager.isTasksEnabled) && "function" === typeof(window.smart_manager.isTasksEnabled) && (1 === window.smart_manager.isTasksEnabled()) || ('product_stock_log' === window.smart_manager.dashboard_key)):
 			return 'sm_tasks_id'
-        case ('undefined' !== typeof window.smart_manager.taxonomyDashboards[window.smart_manager.dashboard_key]):
+		case (('undefined' !== typeof window.smart_manager.taxonomyDashboards[window.smart_manager.dashboard_key]) || (('undefined' !== typeof window.smart_manager.viewPostTypes[window.smart_manager.dashboard_key]) && (('undefined' !== typeof window.smart_manager.taxonomyDashboards[window.smart_manager.viewPostTypes[window.smart_manager.dashboard_key]])))):
 			return 'terms_term_id'
 		case ('user' === window.smart_manager.dashboard_key):
 			return 'users_id'
-		case (['shop_order', 'shop_subscription'].includes(window.smart_manager.dashboard_key) && "undefined" !== typeof(window.smart_manager.sm_is_woo79) && ('true' === window.smart_manager.sm_is_woo79)):
+		case ((ordersPostTypes.includes(window.smart_manager.dashboard_key) || ordersPostTypes.includes(window.smart_manager.viewPostTypes[window.smart_manager.dashboard_key])) && ("undefined" !== typeof(window.smart_manager.sm_is_woo79)) && ('true' === window.smart_manager.sm_is_woo79)):
 			return 'wc_orders_id' 
 		default:
 			return 'posts_id';
@@ -3642,6 +3678,7 @@ Smart_Manager.prototype.exportButtonHtml = function() {
 	}
 }
 
+//Function to show the Select2 Childs for navbar dashboard select2.
 Smart_Manager.prototype.showSelect2Childs = function ( parentID = '', parentElement = '' ) {
     // Check if dashboardSelect2Items exists.
 	if ((!window.smart_manager.hasOwnProperty('dashboardSelect2Items')) || (!parentID ) || (typeof parentID === 'undefined') || (parentID.length === 0) || (!parentElement ) || (typeof parentElement === 'undefined') || (parentElement.length === 0)) {
@@ -3669,9 +3706,14 @@ Smart_Manager.prototype.showSelect2Childs = function ( parentID = '', parentElem
 	if (matchingChildren.length) {
 		let nestedList = jQuery("<ul>").addClass("nested-list");
 		matchingChildren.forEach((child) => {
-			let childElement = jQuery("<li>").text(child.text).addClass("select2-child-item").attr("data-id", child.id);
+			let childElement = jQuery("<li>").html(`<div class="dashboard-name">${child.text}</div>`).addClass("select2-child-item").attr("data-id", child.id);
 			if(selectedChildID === child.id){
 				childElement.addClass("selected")
+			}
+			if(window.smart_manager.findSavedSearchBySlug(child.id)){
+				let savedSearchActions = jQuery("<div>").addClass("dashboard-combobox-saved-search-actions");
+				savedSearchActions.html(`<div class="dashboard-combobox-saved-search-action dashboard-combobox-saved-search-delete" view_slug="${child.id}" title="Delete" view_name="${child.text}"><svg class="sm-error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></div>`)
+				childElement.append(savedSearchActions);
 			}
 			nestedList.append(childElement);
 		});
@@ -3688,13 +3730,15 @@ Smart_Manager.prototype.showSelect2Childs = function ( parentID = '', parentElem
     });
 };
 
+//Function to find navbar dashboard select2 parent or child elements based on matching text.
 Smart_Manager.prototype.findSelect2ParentOrChildByText = function ( ParentOrChildText = '', matchExactChild = false ) {
-	if((!ParentOrChildText ) || (typeof ParentOrChildText === 'undefined') || (ParentOrChildText.length === 0)){
+	if((!ParentOrChildText ) || (typeof ParentOrChildText === 'undefined') || (ParentOrChildText.length === 0) || (!window.smart_manager.hasOwnProperty('dashboardSelect2Items'))){
 		return false;
 	}
 	ParentOrChildText = ParentOrChildText.trim().toLowerCase();
 	let parentID = window.smart_manager.dashboardSelect2Items.find((item) => {return item.text.trim().toLowerCase().startsWith(ParentOrChildText)})?.id;
 	let childID = '';
+	let childText = '';
 	// If matching parent is not found, search within children.
 	if ((!parentID) || (typeof parentID === 'undefined') || (parentID.length === 0)) {
 		window.smart_manager.dashboardSelect2Items.some((item) => {
@@ -3702,11 +3746,13 @@ Smart_Manager.prototype.findSelect2ParentOrChildByText = function ( ParentOrChil
 				if(matchExactChild){
 					if ((child.id === ParentOrChildText) || (child.text === ParentOrChildText)){
 						childID = child.id;
+						childText = child.text;
 						return true;
 					}
 				}else{
 					if ((child.text.trim().toLowerCase().includes(ParentOrChildText)) || (child.id.includes(ParentOrChildText.toLowerCase()))){
 						childID = child.id;
+						childText = child.text;
 						return true;
 					}
 				}
@@ -3719,7 +3765,15 @@ Smart_Manager.prototype.findSelect2ParentOrChildByText = function ( ParentOrChil
 			return false;
 		});
 	}
-	return {parentID,childID};
+	return {parentID,childID,childText};
+}
+
+//Function to Check if a saved search with a specific slug exists.
+Smart_Manager.prototype.findSavedSearchBySlug = function ( slug = "" ) {
+    if ((parseInt(window.smart_manager.sm_beta_pro) !== 1) || (!window.smart_manager.hasOwnProperty("savedSearches")) || (!Array.isArray(window.smart_manager.savedSearches)) || (!slug.length)) {
+        return false;
+    }
+    return (window.smart_manager.savedSearches.find((item) => item.hasOwnProperty("slug") && item.slug === slug) || false);
 }
 
 if(typeof window.smart_manager === 'undefined'){
@@ -3981,7 +4035,9 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
         if( typeof(cellProperties.className) != 'undefined' ) { //code to higlight the cell on selection
             td.setAttribute('class',cellProperties.className);
         }
-		value = value.replace(/T/g, ' ');//replace T with space.
+		if( (typeof(value) != 'undefined') && (value.length) ){
+			value = value.replace(/T/g, ' ');//replace T with space.
+		}
 
         td.innerHTML = value;
 
@@ -4507,6 +4563,25 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
                 });
         	}
         }
+	}
+	// Generate final checkbox list for multilist data for inline edit.
+	Smart_Manager.prototype.generateCheckboxList = function(multiselect_data = {}, selectedValues = []){
+		if(!multiselect_data){
+			return;
+		}
+		let html = '<ul id="sm-multilist-data">';
+		Object.keys(multiselect_data).forEach((key) => {
+			let data = multiselect_data[key];
+			let checked = (selectedValues) && ((selectedValues.includes(data.title) || selectedValues.includes(data.id.toString()))) ? 'checked' : '';
+			html += `<li><input type="hidden" name="chk_multiselect" value="${data.term}" class="sm-title-input"><input type="checkbox" name="chk_multiselect" value="${data.id}" ${checked}> ${data.term}`;
+			// Recursively add child data
+			if(data.child && Object.keys(data.child).length > 0){
+				html += '<ul class="children">'+window.smart_manager.generateCheckboxList(data.child, selectedValues)+'</ul>';
+			}
+			html += '</li>';
+		});
+		html += '</ul>';
+		return html;
 	}
 	// Register an alias for datetime
 	Handsontable.cellTypes.registerCellType('sm.datetime', {
