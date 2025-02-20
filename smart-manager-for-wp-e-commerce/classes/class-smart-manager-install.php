@@ -500,7 +500,7 @@ class Smart_Manager_Install {
 		if ( false === ( self::check_table_column_exists( $wpdb->prefix . 'sm_views', 'type' ) ) ) {
 			// Add the 'type' column as ENUM type with default value '0'.
 			$wpdb->query( $wpdb->prepare( "
-            	ALTER TABLE  ".$wpdb->prefix . 'sm_views'. "
+            	ALTER TABLE {$wpdb->prefix}sm_views
             	ADD COLUMN `type` ENUM('0', '1', '2') DEFAULT %s
             	COMMENT 'ENUM values: 0 - Custom View, 1 - Saved Search, 2 - Saved Bulk Edit'
             	AFTER `post_type`", 

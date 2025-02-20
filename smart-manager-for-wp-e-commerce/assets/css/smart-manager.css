@@ -166,10 +166,6 @@ th {
 	border-color: #F0F0F0 !important;
 }
 
-.sm-grid-dirty-cell {
-	background-color: #f8717152 !important
-}
-
 .multiselect {
 	width: 100%!important;
 }
@@ -318,10 +314,10 @@ ul.children{list-style:none outside;margin:0px 0 0 24px}
 	display: inherit;
 }
 
-#search_content_parent{
+#sm_search_content_parent{
 	width: 70%;
 	overflow-y: auto;
-	padding-left: 1em;
+	padding-left: 0.44em;
 }
 
 #sm_dashboard_select{
@@ -1025,6 +1021,8 @@ input[type=checkbox]:checked{
 
 #sm_view_access{
 	margin-top: 1em;
+	display: flex;
+    flex-direction: column;
 }
 
 #sm_view_descrip {
@@ -1032,8 +1030,9 @@ input[type=checkbox]:checked{
 }
 
 #sm_view_access p {
-	padding-left: 0.5em;
+	padding-left: 0.3em;
 	font-style: italic;
+	margin-top: 0.77em;
 }
 
 @media all
@@ -1366,7 +1365,7 @@ input[type=checkbox]:checked{
 #sm_top_bar_advanced_search {
 	display: flex;
 	padding-top: 0.8em;
-	padding-left: 1rem;
+	padding-left: 0.5rem;
 }
 
 #sm_top_bar_advanced_search label {
@@ -1579,16 +1578,17 @@ div[aria-describedby="sm_inline_dialog"] {
 #sm_advanced_search{
 	font-size: 1rem;
     cursor: pointer;
+	display: flex;
+    align-items: center;
 }
 
 #sm_advanced_search_content {
 	float: left;
-	padding: 0.7em;
-	padding-top: 0em !important;
+	padding: 0 0.7em 0 0;
 }
 
 #sm_advanced_search_icon{
-	margin-top: 0.7em;
+	margin-top: 0.3em;	
 	color: #fff !important;
 }
 
@@ -1775,7 +1775,7 @@ input#sm_add_title{
 #sm_view_access_public:checked{
 	background-color: #5850ec !important;
 }
-#search_content_parent:has(#sm_advanced_search){
+#sm_search_content_parent:has(#sm_advanced_search){
     width: 35% !important;
 }
 #sm_custom_views {
@@ -1791,12 +1791,12 @@ input#sm_add_title{
     height: 50px !important;
 }
 /* dashboard select2 css */
-#select2_childs_section .nested-list {
+#sm_select2_childs_section .nested-list {
 	list-style-type: none;
 	padding-left: 0;
 	margin: 0;
 }
-#select2_childs_section .select2-child-item {
+#sm_select2_childs_section .select2-child-item {
 	cursor: pointer;
 	padding-left: 1rem;
 	padding: 0.375rem;
@@ -1805,14 +1805,14 @@ input#sm_add_title{
 	display: flex;
 	justify-content: space-between;
 }
-#select2_childs_section .select2-child-item:hover {
+#sm_select2_childs_section .select2-child-item:hover {
 	background-color: #AFBBD0 !important;
 }
-#select2_childs_section .select2-child-item.selected{
+#sm_select2_childs_section .select2-child-item.selected{
 	background-color: #ddd;
 }
 /* Select2 childs floating box */
-#select2_childs_section {
+#sm_select2_childs_section {
 	position: absolute;
 	background-color: #ffffff;
 	border-radius: 0.25rem;
@@ -1856,14 +1856,14 @@ input#sm_add_title{
 #select2-eligible_dashboards_select-container{
     font-weight: 500;
 }
-#eligible_dashboards_section .select2-selection__arrow b{
+#sm_eligible_dashboards_section .select2-selection__arrow b{
     border-color: #888 transparent transparent transparent !important;
 }
 #wpbody-content #sa_smart_manager_main .save_advance_search_btn{
 	background-color: #508991 !important;
 }
 .sm_view_save_options {
-	margin-top: 1em;
+	margin-top: 0.7em;
 }
 .sm_view_save_option label span {
 	margin-left: 0.3em;
@@ -1874,13 +1874,13 @@ input#sm_add_title{
 .sm_view_save_option.sm_border_red {
     margin-bottom: 0.3em;
 }
-#select2_childs_section .dashboard-name{
+#sm_select2_childs_section .dashboard-name{
 	width: 90%;
 }
-#select2_childs_section .dashboard-combobox-saved-search-action{
+#sm_select2_childs_section .dashboard-combobox-saved-search-action{
 	width: 10%;
 }
-#select2_childs_section .dashboard-combobox-saved-search-action svg{
+#sm_select2_childs_section .dashboard-combobox-saved-search-action svg{
 	margin-right: 0.3em;
     height: 1.3em;
     margin-top: 0em;
@@ -1895,6 +1895,24 @@ input#sm_add_title{
 input.sm-title-input {
     background: none !important;
 }
-#sm_editor_grid, #sm_top_bar, #sm_nav_bar, #sm_bottom_bar, #select2_childs_section{
+#sm_editor_grid, #sm_top_bar, #sm_nav_bar, #sm_bottom_bar, #sm_select2_childs_section{
 	font-size: 1.1em !important;
+}
+#sm_select2_childs_section.visible{
+	display: block;
+}
+#sm_multiselect_container {
+	height: 24em !important;
+}
+.sm_view_save_option {
+    margin-top: 0.5rem;
+}
+.dashboard-names .select2-selection__choice{
+	margin-bottom: 0rem;
+}
+#sm_editor_grid .handsontable tbody tr:nth-child(even) th, #sm_editor_grid .handsontable tbody tr:nth-child(even) td {
+    background-color: #f6f7f7 !important;
+}
+#sm_editor_grid .handsontable tbody tr td.sm-grid-dirty-cell {
+	background-color: #f8717152 !important
 }

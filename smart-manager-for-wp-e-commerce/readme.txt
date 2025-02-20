@@ -7,7 +7,7 @@ Tags: woocommerce advanced bulk edit, wordpress bulk edit, woocommerce inventory
 Requires at least: 5.0
 Tested up to: 6.7.2
 Requires PHP: 5.6
-Stable tag: 8.56.0
+Stable tag: 8.57.0
 License: GPLv2
 
 WooCommerce Advanced Bulk Edit products, orders, & posts in an Excel-like sheet editor. Get advanced WooCommerce stock, pricing, & order management.
@@ -288,6 +288,15 @@ It also gives the warm feeling of supporting further development of the plugin.
 
 == Changelog ==
 
+= 8.57.0 (20.02.2025) =
+* New: WooCommerce 9.6.2 compatible
+* Fix: Navigation bar height increasing when the Advanced Search checkbox is checked
+* Fix: Slight delay in hiding dashboard combo box dropdown list after selection
+* Fix: Inconsistent modal height when searching for the WooCommerce product 'Category' field in the Inline Edit modal
+* Fix: Selected value does not persist after updating with the 'copy from field' operator in Bulk Edit functionality (Pro)
+* Fix: Improved performance when loading Custom Views and Saved Advanced Search dashboards (Pro)
+* Update: POT file
+
 = 8.56.0 (13.02.2025) =
 * New: WordPress 6.7.2 compatible
 * New: Search for WooCommerce Product 'Category' field in Inline edit modal
@@ -512,6 +521,9 @@ It also gives the warm feeling of supporting further development of the plugin.
 [See changelog for all versions](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 8.57.0 =
+WooCommerce 9.6.2 compatible, Fixes related to Navigation bar height increasing when the Advanced Search checkbox is checked, Slight delay in hiding dashboard combo box dropdown list after selection, Inconsistent modal height when searching for the WooCommerce product 'Category' field in the Inline Edit modal, Selected value does not persist after updating with the 'copy from field' operator in Bulk Edit functionality (Pro), Improved performance when loading Custom Views and Saved Advanced Search dashboards (Pro) along with other important fixes and updates. Recommended upgrade.
 
 = 8.56.0 =
 WordPress 6.7.2 compatible, Search for WooCommerce Product 'Category' field in Inline edit modal, Saved searches for Advanced Search and application across multiple dashboards (Pro), Fixes related to WooCommerce Product 'Category' field is not shown in hierarchical structure in Inline edit modal, Export CSV not working for 'All items in search results - Stock Columns' when using Simple Search and Advanced Search functionalities, Inline edit and Bulk edit not working for Custom Views dashboards (Pro), Updates related to Grid layout to fully utilize screen space along with other important fixes and updates. Recommended upgrade.
