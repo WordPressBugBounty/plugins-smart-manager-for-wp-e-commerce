@@ -2423,7 +2423,8 @@ Smart_Manager.prototype.event_handler = function() {
 				_x('For managing %1$s, %2$s %3$s version', 'modal content', 'smart-manager-for-wp-e-commerce'), sm_selected_dashboard_title, window.smart_manager.sm_success_msg, '<a href="' + window.smart_manager.pricingPageURL + '" target="_blank">'+_x('Pro', 'modal content', 'smart-manager-for-wp-e-commerce')+'</a>'), hideDelay: window.smart_manager.notificationHideDelayInMs}
 			window.smart_manager.showNotification()
 		}
-		
+		delete window.smart_manager.saved_bulk_edits;
+		window.smart_manager.selectedSavedBulkEdit = "";
 	})
 	
 	.off( 'click', '#sm_advanced_search' ).on( 'click', '#sm_advanced_search' ,function(e){
@@ -3479,7 +3480,7 @@ Smart_Manager.prototype.getDefaultRoute = function(isReplaceRoute = false){
 // Function to handle all modal dialog
 Smart_Manager.prototype.showModal = function(){
 	if(window.smart_manager.modal.hasOwnProperty('title') && '' !== window.smart_manager.modal.title && window.smart_manager.modal.hasOwnProperty('content') && '' !== window.smart_manager.modal.content && (typeof (window.smart_manager.showPannelDialog) !== "undefined" && typeof (window.smart_manager.showPannelDialog) === "function" && typeof (window.smart_manager.getDefaultRoute) !== "undefined" && typeof (window.smart_manager.getDefaultRoute) === "function")){
-		window.smart_manager.showPannelDialog(window.smart_manager.getDefaultRoute())
+		window.smart_manager.showPannelDialog(window.smart_manager.modal?.route || window.smart_manager.getDefaultRoute())
 	}
 }
 
@@ -3530,6 +3531,7 @@ Smart_Manager.prototype.showConfirmDialog = function( params ) {
 			title: ( params.hasOwnProperty('title') !== false && params.title != '' ) ? params.title : _x('Warning', 'modal title', 'smart-manager-for-wp-e-commerce'),
 			content: ( params.hasOwnProperty('content') !== false && params.content != '' ) ? params.content : _x('Are you sure?', 'modal content', 'smart-manager-for-wp-e-commerce'),
 			autoHide: false,
+			showCloseIcon: (params.hasOwnProperty('showCloseIcon')) ? params.showCloseIcon : true,
 			cta: {
 				title: ( (params.btnParams.hasOwnProperty('yesText')) ? params.btnParams.yesText : _x('Yes', 'button', 'smart-manager-for-wp-e-commerce') ),
 				closeModalOnClick: (params.btnParams.hasOwnProperty('hideOnYes')) ? params.btnParams.hideOnYes : true,
@@ -3551,6 +3553,7 @@ Smart_Manager.prototype.showConfirmDialog = function( params ) {
 					}
 				}
 			},
+			route: params?.route || ""
 		}
 		window.smart_manager.showModal()
 }
@@ -3793,6 +3796,18 @@ Smart_Manager.prototype.findSavedSearchBySlug = function ( slug = "" ) {
     }
     return (window.smart_manager.savedSearches.find((item) => item.hasOwnProperty("slug") && item.slug === slug) || false);
 }
+Smart_Manager.prototype.hideElementOnClickOutside = function (event = {}, elementId = "") {
+    if (!event || typeof event !== "object" || !event.target || !elementId) {
+        return;
+    }
+    let element = document.getElementById(elementId);
+    if (!element) {
+        return;
+    }
+    if (!element.contains(event.target)) {
+        element?.classList?.add("hidden")
+    }
+};
 
 if(typeof window.smart_manager === 'undefined'){
 	window.smart_manager = new Smart_Manager();

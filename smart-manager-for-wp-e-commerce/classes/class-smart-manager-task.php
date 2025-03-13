@@ -83,7 +83,7 @@ if ( ! class_exists( 'Smart_Manager_Task' ) ) {
 			if ( file_exists(SM_PLUGIN_DIR_PATH . '/pro/classes/class-smart-manager-pro-base.php') ) {
 				include_once SM_PLUGIN_DIR_PATH . '/pro/classes/class-smart-manager-pro-base.php';
 				$this->pro_base = new Smart_Manager_Pro_Base( $dashboard_key );
-				$this->advance_search_operators = ( ! empty( $this->pro_base->advance_search_operators ) ) ? $this->pro_base->advance_search_operators : $this->advance_search_operators;
+				$this->advanced_search_operators = ( ! empty( $this->pro_base->advance_search_operators ) ) ? $this->pro_base->advance_search_operators : $this->advanced_search_operators;
 			}
 			
 			$this->store_col_model_transient_option_nm = 'sa_sm_' . $this->dashboard_key . '_tasks';
@@ -235,7 +235,7 @@ if ( ! class_exists( 'Smart_Manager_Task' ) ) {
 			if ( ! empty( $this->req_params['advanced_search_query'] ) && ( '[]' !== $this->req_params['advanced_search_query'] ) ) {
 				$this->req_params['advanced_search_query'] = json_decode( stripslashes( $this->req_params['advanced_search_query'] ), true );
 				if ( ! empty( $this->req_params['advanced_search_query'] ) ) {
-					$this->advance_search_operators = ( ! empty( $data_col_params['advance_search_operators'] ) ) ? $data_col_params['advance_search_operators'] : $this->advance_search_operators;
+					$this->advanced_search_operators = ( ! empty( $data_col_params['advanced_search_operators'] ) ) ? $data_col_params['advanced_search_operators'] : $this->advanced_search_operators;
 					if ( ! empty( $this->req_params['table_model']['posts']['where']['post_type'] ) ) {
 						$post_type = ( is_array( $this->req_params['table_model']['posts']['where']['post_type'] ) ) ? $this->req_params['table_model']['posts']['where']['post_type'] : array( $this->req_params['table_model']['posts']['where']['post_type'] );
 					}

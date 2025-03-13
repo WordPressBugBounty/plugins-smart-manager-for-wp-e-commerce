@@ -7,7 +7,7 @@ Tags: woocommerce advanced bulk edit, wordpress bulk edit, woocommerce inventory
 Requires at least: 5.0
 Tested up to: 6.7.2
 Requires PHP: 5.6
-Stable tag: 8.57.0
+Stable tag: 8.58.0
 License: GPLv2
 
 WooCommerce Advanced Bulk Edit products, orders, & posts in an Excel-like sheet editor. Get advanced WooCommerce stock, pricing, & order management.
@@ -288,6 +288,17 @@ It also gives the warm feeling of supporting further development of the plugin.
 
 == Changelog ==
 
+= 8.58.0 (13.03.2025) =
+* New: WooCommerce 9.7.1 compatible
+* New: Save and reuse Bulk Edit actions (Pro)
+* New: Support for 'set to regular price and decrease by number' & 'set to regular price and decrease by %' actions using Bulk Edit for WooCommerce Products dashboard (Pro)
+* New: Predefined Custom Views for 'Customers' and 'Pending for Shipping Orders' (Pro)
+* Fix: 'save_post' hook doesn't trigger when updating meta or taxonomy data using Inline edit functionality
+* Fix: Database error when creating products using 'Add Row' functionality in WooCommerce Products dashboard
+* Fix: Advanced Search operators like 'any of', 'not any of', 'starts with', 'not starts with', 'ends with', 'not ends with', 'is not' and 'not contains' not working for WooCommerce Orders dashboard
+* Fix: Incorrect record count in success message when updating 'All Items in Store' using Bulk Edit functionality in some cases (Pro)
+* Update: POT file
+
 = 8.57.0 (20.02.2025) =
 * New: WooCommerce 9.6.2 compatible
 * Fix: Navigation bar height increasing when the Advanced Search checkbox is checked
@@ -521,6 +532,9 @@ It also gives the warm feeling of supporting further development of the plugin.
 [See changelog for all versions](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 8.58.0 =
+WooCommerce 9.7.1 compatible, Save and reuse Bulk Edit actions (Pro), Support for 'set to regular price and decrease by number' & 'set to regular price and decrease by %' actions using Bulk Edit for WooCommerce Products dashboard (Pro), Predefined Custom Views for 'Customers' and 'Pending for Shipping Orders' (Pro), Fixes related to 'save_post' hook doesn't trigger when updating meta or taxonomy data using Inline edit functionality, Database error when creating products using 'Add Row' functionality in WooCommerce Products dashboard, Advanced Search operators like 'any of', 'not any of', 'starts with', 'not starts with', 'ends with', 'not ends with', 'is not' and 'not contains' not working for WooCommerce Orders dashboard, Incorrect record count in success message when updating 'All Items in Store' using Bulk Edit functionality in some cases (Pro) along with other important fixes and updates. Recommended upgrade.
 
 = 8.57.0 =
 WooCommerce 9.6.2 compatible, Fixes related to Navigation bar height increasing when the Advanced Search checkbox is checked, Slight delay in hiding dashboard combo box dropdown list after selection, Inconsistent modal height when searching for the WooCommerce product 'Category' field in the Inline Edit modal, Selected value does not persist after updating with the 'copy from field' operator in Bulk Edit functionality (Pro), Improved performance when loading Custom Views and Saved Advanced Search dashboards (Pro) along with other important fixes and updates. Recommended upgrade.

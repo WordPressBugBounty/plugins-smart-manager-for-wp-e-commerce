@@ -12,7 +12,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			$terms_val_parent = array(),
 			$req_params = array(),
 			$terms_sort_join = false,
-			$advance_search_operators = array(
+			$advanced_search_operators = array(
 												'eq'=> '=',
 												'neq'=> '!=',
 												'lt'=> '<',
@@ -783,7 +783,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 										if( empty( $search_query[0]['condition'] ) ){
 
 											$rule_groups = array();
-											$search_operators = array_flip( $this->advance_search_operators );
+											$search_operators = array_flip( $this->advanced_search_operators );
 
 											foreach( $search_query as $query ) {
 
@@ -1476,7 +1476,9 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 
                             $search_col = (!empty($rule['col_name'])) ? $rule['col_name'] : '';
 							$selected_search_operator = (!empty($rule['operator'])) ? $rule['operator'] : '';
-							$search_operator = ( ! empty( $this->advance_search_operators[$selected_search_operator] ) ) ? $this->advance_search_operators[$selected_search_operator] : $selected_search_operator;
+							// Modify advanced search operators.
+							$this->advanced_search_operators = apply_filters( 'sm_modified_advanced_search_operators', $this->advanced_search_operators );
+							$search_operator = ( ! empty( $this->advanced_search_operators[$selected_search_operator] ) ) ? $this->advanced_search_operators[$selected_search_operator] : $selected_search_operator;
                             $search_data_type = ( ! empty( $search_cols_type[$rule['type']] ) ) ? $search_cols_type[$rule['type']] : 'text';
                             $search_value = (isset($rule['value']) && $rule['value'] != "''") ? $rule['value'] : ( ( in_array( $search_data_type, array( "number", "numeric" ) ) ) ? "''" : '');
 
@@ -1820,7 +1822,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 										'search_cols_type'							=> $search_cols_type,
 										'visible_cols'								=> $visible_cols,
 										'terms_visible_cols'                        => $terms_visible_cols,
-										'advance_search_operators'					=> $this->advance_search_operators
+										'advanced_search_operators'					=> $this->advanced_search_operators
 									);
 
 			if( $load_default_data_model ) { //condition to skip the default data model
@@ -2397,6 +2399,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			$numeric_cols_decimal_places = array();
 			$taxonomies		           = array();
 			$taxonomy_data_to_update   = array();
+			$posts_updated_data   = array();
 			//Code for storing the serialized cols
 			foreach ($col_model as $col) {
 				$col_exploded = (!empty($col['src'])) ? explode("/", $col['src']) : array();
@@ -2533,6 +2536,10 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 						} else {
 							continue;
 						}
+					}else{
+						$posts_updated_data[$id] = array();
+						$posts_updated_data[$id]['meta_input'] = array();
+						$posts_updated_data[$id]['tax_input'] = array();
 					}
 
 					// if (empty($edited_row['posts/ID'])) continue;
@@ -2583,9 +2590,12 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 							}
 
 							$data_col_params['posts_fields'][$id][$update_column] = $value;
+							$posts_updated_data[ $id ][ $update_column ] = $value;
 							if ( ( ! empty( $update_column ) ) && ( 'post_date' === $update_column ) ) {
-								$data_col_params['posts_fields'][ $id ]['post_date_gmt'] = get_gmt_from_date( $value );
+								$data_col_params['posts_fields'][ $id ]['post_date_gmt'] = $posts_updated_data[ $id ]['post_date_gmt'] = get_gmt_from_date( $value );
+
 								$data_col_params['posts_fields'][ $id ]['edit_date'] = true;
+								$posts_updated_data[ $id ]['edit_date'] = true;
 							}
 							$this->prev_post_values[ $id ][ $update_column ] = $prev_val;
 						} else if ( $update_params_meta_flag === true ) {
@@ -2639,6 +2649,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 							}
 
 							$meta_data_edited[$update_table][$id][$update_cond['meta_key']] = $updated_val;
+							$posts_updated_data[ $id ][ 'meta_input' ][ $update_cond[ 'meta_key' ] ] = $updated_val;
 							$meta_keys_edited [$update_cond['meta_key']] = '';
 
 						} else if($update_table == 'terms') {
@@ -2661,9 +2672,25 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 								$taxonomy_data_to_update = ( ! empty( $args['taxonomy_data_to_update'] ) ) ? $args['taxonomy_data_to_update'] : $taxonomy_data_to_update;
 								$this->prev_postmeta_values = ( ! empty( $args['prev_postmeta_values'] ) ) ? $args['prev_postmeta_values'] : $this->prev_postmeta_values;
 								$meta_data_edited = ( ! empty( $args['meta_data_edited'] ) ) ? $args['meta_data_edited'] : $meta_data_edited;
+								if( ( ! empty( $args['meta_data_edited']['postmeta'][$id] ) ) ){
+									$posts_updated_data[$id]['meta_input'] = array_merge( $posts_updated_data[$id]['meta_input'], $args['meta_data_edited']['postmeta'][$id] );
+								}
 								$meta_keys_edited = ( ! empty( $args['meta_keys_edited'] ) ) ? $args['meta_keys_edited'] : $meta_keys_edited;
 								$taxonomies = ( ! empty( $args['taxonomies'] ) ) ? $args['taxonomies'] : $taxonomies;
-							} else {
+								if ( ! empty( $taxonomy_data_to_update[ $id ][ $update_column ] ) ) {
+									$posts_updated_data[ $id ]['tax_input'][ $update_column ][] = array( 
+										'operator'         => 'set_to',
+										'value'            => ( ! empty( $taxonomy_data_to_update[ $id ][ $update_column ]['term_ids_set'] ) ) 
+																? $taxonomy_data_to_update[ $id ][ $update_column ]['term_ids_set'] 
+																: array(),
+										'remove_all_terms' => ( ! empty( $taxonomy_data_to_update[ $id ][ $update_column ]['remove_all_terms'] ) ) 
+																? $taxonomy_data_to_update[ $id ][ $update_column ]['remove_all_terms'] 
+																: false,
+									);
+								}
+								
+								
+							} else { //update terms data.
 								$this->update_terms_table_data( array(
 									'update_column' => $update_column,//taxonomy.
 									'data_cols_multiselect' => $data_cols_multiselect,
@@ -2678,22 +2705,8 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 						}
 					}
 				}
-				//Code for updating the terms data.
-				do_action( 'sm_inline_update_post_terms', array(
-					'taxonomy_data_to_update'=> $taxonomy_data_to_update,
-					'taxonomies' => $taxonomies,
-					'task_id' => ( ! empty( $this->task_id ) ) ? $this->task_id : 0,
-				) );
 
-				//Code for updating the meta data.
-				do_action( 'sm_inline_update_post_meta', 
-					array(
-						'meta_data_edited' => ( ! empty( $meta_data_edited ) ) ? $meta_data_edited : array(),
-						'meta_keys_edited' => ( ! empty( $meta_keys_edited ) ) ? array_keys( $meta_keys_edited ) : array(),
-						'task_id' => ( ! empty( $this->task_id ) ) ? $this->task_id : 0, 
-						'prev_postmeta_values'=> ( ! empty( $this->prev_postmeta_values ) ) ? $this->prev_postmeta_values : array(), 
-					)
-				);
+				//update meta data.
 				if ( ( ! empty( $meta_data_edited ) ) && ( ! empty( $meta_keys_edited ) ) && ( defined('SMPRO') && empty( SMPRO ) ) ) {
 					foreach ( $meta_data_edited as $update_params ) {
 						if( empty( $update_params ) || !is_array( $update_params ) ) continue;
@@ -2710,13 +2723,16 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 					}
 				}
 
-				// Code for updating the posts data.
 				do_action( 'sm_inline_update_post_data',
 					array( 
-						'posts_data' => $data_col_params['posts_fields'], 
-						'task_id' => ( ! empty( $this->task_id ) ) ? $this->task_id : 0, 
+						'posts_data' => $posts_updated_data,
+						'taxonomies' => $taxonomies,
+						'task_id' => ( ! empty( $this->task_id ) ) ? $this->task_id : 0,
+						'prev_postmeta_values' => $this->prev_postmeta_values
 					) 
 				);
+
+				//update post data.
 				if ( ( ! empty( $data_col_params['posts_fields'] ) ) && ( defined('SMPRO') && empty( SMPRO ) ) ) {
 					foreach ( $data_col_params['posts_fields'] as $id => $post_params ) {
 						if ( empty( $id ) || empty( $post_params ) ) {
@@ -2869,6 +2885,10 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			if ( empty( $params['search_query']['cond_'.$table_nm.'_selected_search_operators'] ) ) {
 				$params['search_query']['cond_'.$table_nm.'_selected_search_operators'] = array();
 			}
+			if ( empty( $params['search_query']['cond_'.$table_nm.'_formatted_search_operator'] ) ) {
+				$params['search_query']['cond_'.$table_nm.'_formatted_search_operator'] = '';
+			}
+			$formatted_search_operator = '';
 			if( in_array( $search_params['search_data_type'], array( "number", "numeric" ) ) ) {
 				$val = ( empty( $search_value ) && '0' != $search_value ) ? "''" : $search_value;
 				$cond = "( ".$params['rule']['table_name'].".".$search_col . " ". $search_params['search_operator'] .( empty( $params['skip_placeholders'] ) ? " %f" : " '".$search_params['search_value']."'" )." )";
@@ -2877,10 +2897,13 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			} else {
 				if ($search_params['search_operator'] == 'is') {
 					$cond = "( ".$params['rule']['table_name'].".".$search_col . " LIKE ".( empty( $params['skip_placeholders'] ) ? "%s" : "'".$search_params['search_value']."'" )." )";
+					$formatted_search_operator = " LIKE %s ";
 				} else if ($search_params['search_operator'] == 'is not') {
 					$cond = "( ".$params['rule']['table_name'].".".$search_col . " NOT LIKE ". ( empty( $params['skip_placeholders'] ) ? "%s" : "'".$search_params['search_value']."'" ) ." )";
+					$formatted_search_operator = " NOT LIKE %s ";
 				} else {
 					$cond = "( ".$params['rule']['table_name'].".".$search_col . " ". $search_params['search_operator'] .( empty( $params['skip_placeholders'] ) ? " %s" : " '".$search_params['search_value']."'" ). " )";
+					$formatted_search_operator = " " . $search_params['search_operator'] ." %s ";
 				}
 			}
 
@@ -2889,6 +2912,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			$params['search_query']['cond_'.$table_nm] .= $cond ." && ";
 			$params['search_query']['cond_'.$table_nm.'_col_vals'][] = $search_value;
 			$params['search_query']['cond_'.$table_nm.'_selected_search_operators'][] = $search_params['selected_search_operator'];
+			$params['search_query']['cond_'.$table_nm.'_formatted_search_operator'] = $formatted_search_operator;
 			return $params['search_query'];
 		}
 

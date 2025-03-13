@@ -2041,7 +2041,9 @@ if ( ! class_exists( 'Smart_Manager_Product' ) ) {
 
 				//Code to update the '_price' for the products
 				if ( isset($edited_row['postmeta/meta_key=_regular_price/meta_value=_regular_price']) || isset($edited_row['postmeta/meta_key=_sale_price/meta_value=_sale_price']) || isset($edited_row['postmeta/meta_key=_sale_price_dates_from/meta_value=_sale_price_dates_from']) || isset($edited_row['postmeta/meta_key=_sale_price_dates_to/meta_value=_sale_price_dates_to']) ) {
-					$price_update_ids[] = $id;
+					if ( false === strpos( $id, 'sm_temp_' ) ) {// Skip IDs that contain "sm_temp_" as these are temporary product IDs for creation.
+						$price_update_ids[] = $id;
+					}
 				}
 
 				$sm_update_lookup_table_meta_keys = array( 'postmeta/meta_key=_sku/meta_value=_sku',  'postmeta/meta_key=_regular_price/meta_value=_regular_price', 'postmeta/meta_key=_price/meta_value=_price', 'postmeta/meta_key=_sale_price/meta_value=_sale_price', 'postmeta/meta_key=_virtual/meta_value=_virtual', 'postmeta/meta_key=_downloadable/meta_value=_downloadable', 'postmeta/meta_key=_stock/meta_value=_stock', 'postmeta/meta_key=_manage_stock/meta_value=_manage_stock', 'postmeta/meta_key=_stock_status/meta_value=_stock_status', 'postmeta/meta_key=_wc_rating_count/meta_value=_wc_rating_count', 'postmeta/meta_key=_wc_average_rating/meta_value=_wc_average_rating', 'postmeta/meta_key=total_sales/meta_value=total_sales');
@@ -2050,12 +2052,16 @@ if ( ! class_exists( 'Smart_Manager_Product' ) ) {
 
 				if ( ! empty( Smart_Manager::$sm_is_woo36 ) && Smart_Manager::$sm_is_woo36 == 'true' && ! empty( $sm_update_lookup_table_meta_keys ) && ( ! empty( $edited_row ) ) ) {
 					if ( ! empty( array_intersect( array_keys( $edited_row ), $sm_update_lookup_table_meta_keys ) ) ) {
-						$sm_update_lookup_table_ids[] = $id;
+						if ( false === strpos( $id, 'sm_temp_' ) ) {// Skip IDs that contain "sm_temp_" as these are temporary product IDs for creation.
+							$sm_update_lookup_table_ids[] = $id;
+						}
 					}
 				}
 
 				if( isset( $edited_row['postmeta/meta_key=_product_attributes/meta_value=_product_attributes'] ) ) {
-					$sm_update_attribute_lookup_table_ids[] = $id;
+					if ( false === strpos( $id, 'sm_temp_' ) ) {// Skip IDs that contain "sm_temp_" as these are temporary product IDs for creation.
+						$sm_update_attribute_lookup_table_ids[] = $id;
+					}
 				}  
 
 

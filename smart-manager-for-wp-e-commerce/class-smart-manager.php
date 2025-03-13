@@ -367,8 +367,12 @@ class Smart_Manager {
 				include_once 'pro/classes/class-smart-manager-pro-access-privilege.php';
 			}
 
-			if ( !class_exists( 'Smart_Manager_Pro_Views' ) && file_exists( (dirname( SM_PLUGIN_FILE )) . '/pro/classes/class-smart-manager-pro-views.php' ) ) {
+			if ( !class_exists( 'Smart_Manager_Pro_Views' ) && file_exists( ( dirname( SM_PLUGIN_FILE ) ) . '/pro/classes/class-smart-manager-pro-views.php' ) ) {
 				require_once 'pro/classes/class-smart-manager-pro-views.php';
+			}
+
+			if ( ( ( ! empty( $_GET['post_type'] ) ) && ( 'product' === sanitize_text_field( $_GET['post_type'] ) ) ) && ( ( ! empty( $_GET['page'] ) ) && ( 'product_importer' === sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) ) && ! class_exists( 'Smart_Manager_Pro_Product_Import_CSV' ) && file_exists( ( dirname( SM_PLUGIN_FILE ) ) . '/pro/classes/class-smart-manager-pro-product-import-csv.php' ) ) {
+				require_once 'pro/classes/class-smart-manager-pro-product-import-csv.php';
 			}
 		}
 
@@ -456,12 +460,6 @@ class Smart_Manager {
 		add_action( 'before_woocommerce_init', array( $this, 'declare_hpos_compatibility' ) );
 		add_filter( 'plugin_row_meta', array( $this, 'add_additonal_links' ), 99, 4 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'sa_sm_dequeue_styles' ), 999 );
-		// hooks to overwrite slug when importing the csv with updated data.
-		if( ( defined('SMPRO') && true === SMPRO ) ){
-			add_filter( 'woocommerce_csv_product_import_mapping_options', array( $this, 'add_slug_import_option' ) );
-			add_filter( 'woocommerce_csv_product_import_mapping_default_columns', array( $this, 'add_default_slug_column_mapping' ) );
-			add_filter( 'woocommerce_product_import_pre_insert_product_object', array( $this, 'process_import_product_slug_column' ), 10, 2 );
-		}
 	}
 
 	// Find latest StoreApps Upgrade file
@@ -1977,43 +1975,6 @@ class Smart_Manager {
 			wp_dequeue_style( $handle );
 			wp_deregister_style( $handle );
 		}
-	}
-
-	/**
-	 * Adds a 'Slug' option to the import options array.
-	 *
-	 * @param array $options Existing import options.
-	 * @return array Updated options array with 'Slug'.
-	*/
-	public function add_slug_import_option( $options = array() ) {
-		$options['slug'] = 'Slug';
-		return $options;
-	}
-
-	/**
-	 * Maps the 'Slug' column to the corresponding field in the import data.
-	 *
-	 * @param array $columns Existing column mappings.
-	 * @return array Updated column mappings with 'Slug' mapped to 'slug'.
-	*/
-	public function add_default_slug_column_mapping( $columns = array() ) {
-		$columns['Slug'] = 'slug';
-		return $columns;
-	}
-
-	/**
-	 * Processes the import for the product slug column and sets the slug.
-	 *
-	 * @param object|null $object The product object to be updated.
-	 * @param array       $data Import data containing the slug.
-	 * @return object|null The updated product object or null if slug is empty or method is not callable.
-	*/
-	public function process_import_product_slug_column( $object = null, $data = array() ) {
-		if ( ( ! is_array( $data ) ) || empty( $data['slug'] ) || ( ! is_callable( array( $object, 'set_slug' ) ) ) ) {
-			return $object;
-		}
-		$object->set_slug( $data['slug'] );
-		return $object;
 	}
 
 	/**

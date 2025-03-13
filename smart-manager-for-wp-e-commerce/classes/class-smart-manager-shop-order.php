@@ -1532,7 +1532,7 @@ if ( ! class_exists( 'Smart_Manager_Shop_Order' ) ) {
 				unset($col_name[0]);
 				$search_params['search_col'] = implode( '_', $col_name );
 					if( ( $wpdb->prefix . 'wc_order_addresses' ) === $search_params['search_string']['table_name'] ) {
-						$advanced_search_query['cond_wc_order_addresses'] = $search_params['search_string']['table_name'] . '.' . $search_params['search_col'] . " LIKE %s AND address_type LIKE '" . $adress_type . "'";
+						$advanced_search_query['cond_wc_order_addresses'] = $search_params['search_string']['table_name'] . '.' . $search_params['search_col'] . $advanced_search_query['cond_wc_order_addresses_formatted_search_operator'] . " AND address_type LIKE '" . $adress_type . "'";
 					}
 			}
 			return $advanced_search_query;
