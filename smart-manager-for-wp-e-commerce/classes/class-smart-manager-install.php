@@ -39,6 +39,9 @@ class Smart_Manager_Install {
 		'8.58.0' => array(
 			'create_predefined_custom_views'
 		),
+		'8.59.0' => array(
+			'create_predefined_custom_views'
+		),
 	);
 
 	/**
@@ -485,7 +488,7 @@ class Smart_Manager_Install {
 			return;
 		}
 		$user_id = $user->ID;
-		$data    = array(
+		$views    = array(
 			array(
 				'title'     => 'Product Stock',
 				'slug'      => 'product-stock',
@@ -514,29 +517,49 @@ class Smart_Manager_Install {
 				'post_type' => 'shop_order',
 				'is_public' => 1,
 			),
-			);
-			// Fetch all existing slugs for predefined Custom Views in a single query.
-			$existing_slugs = $wpdb->get_col( "SELECT slug FROM {$wpdb->prefix}sm_views" );
-			$existing_slugs = array_flip( $existing_slugs );
-			foreach ( $data as $view ) {
-				if ( ! empty( $existing_slugs[ $view['slug'] ] ) ) {
-					continue; // Skip if slug already exists
-				}
-				$wpdb->query(
-					$wpdb->prepare(
-						"INSERT INTO {$wpdb->prefix}sm_views ( author, title, slug, params, is_public, post_type, created_date, modified_date )
-						VALUES ( %d, %s, %s, %s, %d, %s, %d, %d )",
-						$user_id,
-						$view['title'],
-						$view['slug'],
-						$view['params'],
-						$view['is_public'],
-						$view['post_type'],
-						time(),
-						time()
-					)
-				);
+			array(
+				'title'     => 'Draft Products',
+				'slug'      => 'draft-products',
+				'params'    => '{"columns":{"posts_id":{"width":141,"position":1},"postmeta_meta_key__thumbnail_id_meta_value__thumbnail_id":{"width":206,"position":2},"postmeta_meta_key__product_image_gallery_meta_value__product_image_gallery":{"width":324,"position":3},"posts_post_date":{"width":188,"position":4},"posts_post_author":{"width":142,"position":5},"posts_post_title":{"width":275,"position":6},"postmeta_meta_key__sku_meta_value__sku":{"width":185,"position":7},"postmeta_meta_key__regular_price_meta_value__regular_price":{"width":155,"position":8},"postmeta_meta_key__sale_price_meta_value__sale_price":{"width":145,"position":9},"postmeta_meta_key__manage_stock_meta_value__manage_stock":{"width":154,"position":10},"postmeta_meta_key__stock_status_meta_value__stock_status":{"width":184,"position":11},"postmeta_meta_key__stock_meta_value__stock":{"width":140,"position":12},"posts_post_content":{"width":280,"position":13},"posts_post_excerpt":{"width":299,"position":14},"terms_product_cat":{"width":238,"position":15},"custom_product_attributes":{"width":306,"position":16},"terms_product_type":{"width":191,"position":17},"custom_edit_link":{"width":88,"position":18},"custom_view_link":{"width":90,"position":19}},"sort_params":{"orderby":"ID","order":"DESC","default":true},"search_params":{"isAdvanceSearch":"true","params":[{"condition":"OR","rules":[{"condition":"AND","rules":[{"type":"'.$wpdb->prefix.'posts.post_status","operator":"is","value":"draft"}]}]}]}}',
+				'post_type' => 'product',
+				'is_public' => 1,
+			),
+			array(
+				'title'     => 'Expired Coupons',
+				'slug'      => 'expired-coupons',
+				'params'    => '{"columns":{"posts_id":{"width":112,"position":1},"posts_post_title":{"width":229,"position":2},"postmeta_meta_key_date_expires_meta_value_date_expires":{"width":257,"position":3},"postmeta_meta_key_discount_type_meta_value_discount_type":{"width":260,"position":4},"postmeta_meta_key__used_by_meta_value__used_by":{"width":204,"position":5},"postmeta_meta_key_coupon_amount_meta_value_coupon_amount":{"width":212,"position":6},"posts_post_excerpt":{"width":366,"position":7},"postmeta_meta_key_product_ids_meta_value_product_ids":{"width":256,"position":8},"postmeta_meta_key_product_categories_meta_value_product_categories":{"width":216,"position":9},"postmeta_meta_key_customer_email_meta_value_customer_email":{"width":200,"position":10},"postmeta_meta_key_usage_count_meta_value_usage_count":{"width":146,"position":11},"postmeta_meta_key_usage_limit_meta_value_usage_limit":{"width":234,"position":12},"postmeta_meta_key_free_shipping_meta_value_free_shipping":{"width":195,"position":13},"postmeta_meta_key_individual_use_meta_value_individual_use":{"width":209,"position":14},"postmeta_meta_key_exclude_sale_items_meta_value_exclude_sale_items":{"width":210,"position":15},"postmeta_meta_key_usage_limit_per_user_meta_value_usage_limit_per_user":{"width":225,"position":16}},"sort_params":{"orderby":"ID","order":"DESC","default":true},"search_params":{"isAdvanceSearch":"true","params":[{"condition":"OR","rules":[{"condition":"AND","rules":[{"type":"' . $wpdb->prefix . 'postmeta.date_expires","operator":"lt","value":"'. date('Y-m-d') . '"}]}]}]}}',
+				'post_type' => 'shop_coupon',
+				'is_public' => 1,
+			),
+		);
+		// Fetch already existing slugs for predefined Custom Views in a single query.
+		$predefined_custom_views_slugs = array_column( $views, 'slug' );
+		$placeholders = ( ( ! empty( $predefined_custom_views_slugs ) ) && ( is_array( $predefined_custom_views_slugs ) ) ) ? implode( ',', array_fill( 0, count( $predefined_custom_views_slugs ), '%s' ) ) : '';
+		$existing_slugs = $wpdb->get_col( 
+			$wpdb->prepare(
+			"SELECT slug FROM {$wpdb->prefix}sm_views WHERE slug IN ( $placeholders )",
+			...$predefined_custom_views_slugs
+			)
+		);
+		foreach ( $views as $view ) {
+			if ( ! empty( $existing_slugs ) && is_array( $existing_slugs ) && in_array( $view['slug'], $existing_slugs, true ) ) {
+				continue;
 			}
+			$wpdb->query(
+				$wpdb->prepare(
+					"INSERT INTO {$wpdb->prefix}sm_views ( author, title, slug, params, is_public, post_type, created_date, modified_date )
+					VALUES ( %d, %s, %s, %s, %d, %s, %d, %d )",
+					$user_id,
+					$view['title'],
+					$view['slug'],
+					$view['params'],
+					$view['is_public'],
+					$view['post_type'],
+					time(),
+					time()
+				)
+			);
+		}		
 	}
 }
 

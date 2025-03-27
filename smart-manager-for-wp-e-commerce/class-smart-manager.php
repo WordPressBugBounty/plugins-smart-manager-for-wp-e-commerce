@@ -1257,9 +1257,13 @@ class Smart_Manager {
 			}
 		}
 
-		//Filter for disabling the 'Move to trash' and 'Delete Permanently' functionalities
+		// Filter for disabling the 'Move to trash' and 'Delete Permanently' functionalities.
 		$disable_trash_and_delete_permanently = apply_filters( 'sm_disable_trash_and_delete_permanently', false );
 		$trash_and_delete_permanently_disable_message = apply_filters( 'sm_trash_and_delete_permanently_disable_message', __( 'This functionality has been disabled. Please contact store administrator for enabling the same.', 'smart-manager-for-wp-e-commerce' ) );
+
+		// Filter to disable editing some columns.
+		$disable_col_edit = apply_filters( 'sm_disable_col_edit', false );
+		$col_edit_disable_message = apply_filters( 'sm_col_edit_disable_message', _x( 'This column edit has been disabled. Please contact store administrator for enabling the same.', 'Column edit disable message', 'smart-manager-for-wp-e-commerce' ) );
 
 		$sm_beta_params = array( 
 							'sm_dashboards' => json_encode(self::$sm_dashboards_final),
@@ -1295,6 +1299,7 @@ class Smart_Manager {
 							'trashEnabled' => $trash_enabled,
 							'background_process_running_message' => __( 'In the meanwhile, you can use Smart Manager. But before using actions like ', 'smart-manager-for-wp-e-commerce') .' <strong>'. __( 'Bulk Edit', 'smart-manager-for-wp-e-commerce') .'</strong>/ <strong>'. __('Duplicate Records', 'smart-manager-for-wp-e-commerce') .'</strong>/ <strong>'. __( 'Delete Records', 'smart-manager-for-wp-e-commerce') .'</strong>/ <strong>'. __( 'Undo Tasks', 'smart-manager-for-wp-e-commerce') .'</strong>/ <strong>'. __( 'Delete Tasks', 'smart-manager-for-wp-e-commerce') .'</strong>/ <strong>'. __( 'Export CSV', 'smart-manager-for-wp-e-commerce') .'</strong>, '. __('you will have to wait for the current background process to finish.', 'smart-manager-for-wp-e-commerce' ),
 							'trashAndDeletePermanently' => array( 'disable' => $disable_trash_and_delete_permanently, 'error_message' => $trash_and_delete_permanently_disable_message ),
+							'colEditDisableMessage' => array( 'disable' => $disable_col_edit, 'error_message' => $col_edit_disable_message ),
 							'forceCollapseAdminMenu' => ( 'no' === Smart_Manager_Settings::get( 'wp_force_collapse_admin_menu' ) ) ? 0 : 1,
 							'rowHeight' => Smart_Manager_Settings::get( 'grid_row_height' ),
 							'defaultImagePlaceholder' => SM_IMG_URL.'image-placeholder.png',

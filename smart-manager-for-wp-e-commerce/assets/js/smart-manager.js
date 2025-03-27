@@ -231,6 +231,7 @@ Smart_Manager.prototype.init = function() {
 		this.sm_is_woo79 = (sm_beta_params.hasOwnProperty('SM_IS_WOO79')) ? sm_beta_params.SM_IS_WOO79 : '';
 		this.modalVals = {}
 		this.savedSearchConds = {}
+		this.colEditDisableMessage = (sm_beta_params.colEditDisableMessage) ? sm_beta_params.colEditDisableMessage : []
 	}
 	
 	window.smart_manager.setDashboardDisplayName();
@@ -2202,6 +2203,16 @@ Smart_Manager.prototype.loadGrid = function() {
 			if ( "undefined" !== typeof (window.smart_manager.refreshColumnsTitleAttribute) && "function" === typeof (window.smart_manager.refreshColumnsTitleAttribute) ) {
 				window.smart_manager.refreshColumnsTitleAttribute();
 			}
+		},
+		afterOnCellMouseDown: function (e, coords, td) {
+			if((!coords) || (coords && (coords.row === -1) && (coords.col !== -1))){
+				return;
+			}
+			let col = this.getCellMeta(coords.row, coords.col);
+			if((!col) || (!col.prop) || ("users_user_pass" !== col.prop) || (!window.smart_manager.colEditDisableMessage) || (!window.smart_manager.colEditDisableMessage.disable) || (!window.smart_manager.colEditDisableMessage.error_message)){
+				return;
+			}
+			window.smart_manager.disableErrorMessage(window.smart_manager.colEditDisableMessage.error_message);
 		}
 	});
 }
@@ -2423,7 +2434,7 @@ Smart_Manager.prototype.event_handler = function() {
 				_x('For managing %1$s, %2$s %3$s version', 'modal content', 'smart-manager-for-wp-e-commerce'), sm_selected_dashboard_title, window.smart_manager.sm_success_msg, '<a href="' + window.smart_manager.pricingPageURL + '" target="_blank">'+_x('Pro', 'modal content', 'smart-manager-for-wp-e-commerce')+'</a>'), hideDelay: window.smart_manager.notificationHideDelayInMs}
 			window.smart_manager.showNotification()
 		}
-		delete window.smart_manager.saved_bulk_edits;
+		window.smart_manager.saved_bulk_edits = false;
 		window.smart_manager.selectedSavedBulkEdit = "";
 	})
 	
@@ -2607,9 +2618,11 @@ Smart_Manager.prototype.event_handler = function() {
 			return false;
 		}
 
-		if( ( deletePermanently || moveToTrash ) && window.smart_manager.trashAndDeletePermanently.disable ) {
-			window.smart_manager.notification = {status:'error',message: window.smart_manager.trashAndDeletePermanently.error_message,hideDelay: window.smart_manager.notificationHideDelayInMs}
-			window.smart_manager.showNotification()
+		if(((deletePermanently || moveToTrash) && window.smart_manager.trashAndDeletePermanently.disable)){
+			if(!(window.smart_manager.trashAndDeletePermanently.error_message)){
+				return false;
+			}
+			window.smart_manager.disableErrorMessage(window.smart_manager.trashAndDeletePermanently.error_message);
 			return false;
 		}
 			
@@ -2825,6 +2838,7 @@ Smart_Manager.prototype.event_handler = function() {
 			params.height = 200;
 
 			if ( typeof (window.smart_manager.deleteView) !== "undefined" && typeof (window.smart_manager.deleteView) === "function" ) {
+				params.btnParams.yesCallbackParams = {success_msg: _x('View deleted successfully!', 'notification', 'smart-manager-for-wp-e-commerce')}
 				params.btnParams.yesCallback = window.smart_manager.deleteView;
 			}
 			
@@ -3553,7 +3567,7 @@ Smart_Manager.prototype.showConfirmDialog = function( params ) {
 					}
 				}
 			},
-			route: params?.route || ""
+			route: params?.route || false
 		}
 		window.smart_manager.showModal()
 }
@@ -3808,6 +3822,15 @@ Smart_Manager.prototype.hideElementOnClickOutside = function (event = {}, elemen
         element?.classList?.add("hidden")
     }
 };
+
+// Function to display disable error message.
+Smart_Manager.prototype.disableErrorMessage = function(disableErrorMessage = ''){
+	if(!disableErrorMessage){
+		return;
+	}
+	window.smart_manager.notification = {status:'error',message: disableErrorMessage,hideDelay: window.smart_manager.notificationHideDelayInMs}
+	window.smart_manager.showNotification()
+}
 
 if(typeof window.smart_manager === 'undefined'){
 	window.smart_manager = new Smart_Manager();

@@ -1277,6 +1277,11 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 					$store_model_transient = false;
 					update_option( '_sm_update_8430_' . $this->dashboard_key, 1, 'no' );
 				}
+				if ( false === get_option( '_sm_update_8590_user' ) ) {
+					delete_transient( 'sa_sm_user' );
+					$store_model_transient = false;
+					update_option( '_sm_update_8590_user', 1, 'no' );
+				}
 			}
 
 			$store_model = $store_model_transient;
@@ -2716,7 +2721,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 								if( empty( $key ) ) continue;
 								$key      = wp_unslash( $key );
 								$value    = esc_sql( wp_unslash( $value ) );
-								$prev_val = ( ( ! empty( $this->prev_postmeta_values[$id] ) ) && ( ! empty($this->prev_postmeta_values[$id][$key]) ) ) ? $this->prev_postmeta_values[$id][$key] : '';
+								$prev_val = ( ( ! empty( $this->prev_postmeta_values[$id] ) ) && ( ! empty($this->prev_postmeta_values[$id][$key]) ) ) ? maybe_unserialize( $this->prev_postmeta_values[$id][$key] ) : '';
 								update_post_meta( $id, $key, $value, $prev_val );
 							}
 						}

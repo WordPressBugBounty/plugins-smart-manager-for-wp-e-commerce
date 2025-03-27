@@ -1873,24 +1873,23 @@ if ( ! class_exists( 'Smart_Manager_Product' ) ) {
 							$attr_previous_vals['term_id'][ $prev_val ] = 'custom/product_attributes_add';
 						}
 						if ( empty( $attr_previous_vals['term_id'] ) ) continue;
-						switch ( ( ! empty( $term_ids[ $taxonomy_nm ] ) ) && is_array( $attr_previous_vals['term_id'] ) && ( ! empty( $term_ids ) ) ) {
-							case ( count( $term_ids[ $taxonomy_nm ] ) > count( $attr_previous_vals['term_id'] ) ) :
+						if ( isset( $term_ids[ $taxonomy_nm ] ) && is_array( $term_ids[ $taxonomy_nm ] ) ) {
+							if ( count( $term_ids[ $taxonomy_nm ] ) > count( $attr_previous_vals['term_id'] ) ) {
 								$prev_vals = array_diff( $term_ids[ $taxonomy_nm ], array_keys( $attr_previous_vals['term_id'] ) );
 								if ( ( ! empty( $prev_vals ) ) && is_array( $prev_vals ) ) {
 									foreach ( $prev_vals as $prev_val ) {
 										$attr_previous_vals['term_id'][ $prev_val ] = 'custom/product_attributes_remove';
 									}
 								}
-								break;
-							case ( count( $term_ids[ $taxonomy_nm ] ) < count( $attr_previous_vals['term_id'] ) ):
+                            }elseif ( count( $term_ids[ $taxonomy_nm ] ) < count( $attr_previous_vals['term_id'] ) ) {
 								$prev_vals = array_diff( array_keys( $attr_previous_vals['term_id'] ), $term_ids[ $taxonomy_nm ] );
 								if ( ( ! empty( $prev_vals ) ) && is_array( $prev_vals ) ) {
 									foreach ( $prev_vals as $prev_val ) {
 										$attr_previous_vals['term_id'][ $prev_val ] = 'custom/product_attributes_add';
 									}
 								}			
-								break;		
-						}		
+							}
+						}	
 						foreach ( $attr_previous_vals['term_id'] as $term_id => $field_name ) {
 							if ( ( defined('SMPRO') && ( ! empty( SMPRO ) ) ) && ( ! empty( $this->task_id ) ) && ( ! empty( $taxonomy_nm ) ) && ( ! empty( $key ) ) && ( ! empty( $field_name ) ) && ( ! empty( property_exists( 'Smart_Manager_Base', 'update_task_details_params' ) ) ) ) {
 								Smart_Manager_Base::$update_task_details_params[] = array(

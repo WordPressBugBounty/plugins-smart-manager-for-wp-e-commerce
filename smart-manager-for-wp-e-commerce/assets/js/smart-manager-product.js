@@ -344,7 +344,7 @@ Smart_Manager.prototype.prodAttributeInlineEdit = function(params){
 	window.smart_manager.editedAttribueSlugs = '';
 	jQuery('#edit_product_attributes input[name^="attribute_names"]').each( function(){
 		let index = jQuery(this).attr('index'),
-			attrNm = jQuery(this).val(),
+			attrExactNm = attrNm = jQuery(this).val(),
 			isTaxonomy = parseInt(jQuery("input[name='attribute_taxonomy["+index+"]']" ).val()),
 			editedValue = '',
 			editedText = '',
@@ -401,7 +401,7 @@ Smart_Manager.prototype.prodAttributeInlineEdit = function(params){
 			attributesEditedText += ( ( window.smart_manager.prodAttributeActualValues.hasOwnProperty(attrNm) && window.smart_manager.prodAttributeActualValues[attrNm].hasOwnProperty('lbl') ) ? window.smart_manager.prodAttributeActualValues[attrNm].lbl : '' ) + ': [' + selectedText + ']';
 		}
 		productAttributesPostmeta [attrNm] = {};
-		productAttributesPostmeta [attrNm]['name'] = attrNm;
+		productAttributesPostmeta [attrNm]['name'] = attrExactNm;
 		productAttributesPostmeta [attrNm]['value'] = editedValue;
 		productAttributesPostmeta [attrNm]['position'] = jQuery( "input[name='attribute_position["+index+"]']" ).val();
 
