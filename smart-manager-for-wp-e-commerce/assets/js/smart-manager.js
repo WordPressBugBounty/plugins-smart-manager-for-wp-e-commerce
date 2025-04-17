@@ -232,6 +232,8 @@ Smart_Manager.prototype.init = function() {
 		this.modalVals = {}
 		this.savedSearchConds = {}
 		this.colEditDisableMessage = (sm_beta_params.colEditDisableMessage) ? sm_beta_params.colEditDisableMessage : []
+		this.orderStatuses = sm_beta_params?.orderStatuses || []
+		this.scheduledExportActionAdminUrl = sm_beta_params?.scheduled_export_actions_admin_url || ''
 	}
 	
 	window.smart_manager.setDashboardDisplayName();
@@ -524,7 +526,7 @@ Smart_Manager.prototype.loadNavBar = function() {
         _x("New", "button for creating new bulk edit", "smart-manager-for-wp-e-commerce") +
         '</a>'+
         '<a href="'+window.smart_manager.scheduledActionAdminUrl+'" class="sm_scheduled_bulk_edits" target="_blank">' +
-        _x("Manage scheduled edits", "manage button for scheduled bulk edit actions", "smart-manager-for-wp-e-commerce") +
+        _x("Manage Scheduled Edits", "manage button for scheduled bulk edit actions", "smart-manager-for-wp-e-commerce") +
         '</a>' +
     '</div>';
 	} else {
@@ -2866,7 +2868,7 @@ Smart_Manager.prototype.event_handler = function() {
 		isBackgroundProcessRunning = window.smart_manager.backgroundProcessRunningNotification(false);
 		params.btnParams = {};
 		params.title = _x('Attention!', 'modal title', 'smart-manager-for-wp-e-commerce');
-		if(0 === window.smart_manager.selectedRows.length && !window.smart_manager.selectAll && window.smart_manager.recordSelectNotification && ('sm_entire_store' !== className) && ('sm_scheduled_bulk_edits' !== clickedElementclassName)){
+		if('sm_schedule_export_btns' !== className && 0 === window.smart_manager.selectedRows.length && !window.smart_manager.selectAll && window.smart_manager.recordSelectNotification && ('sm_entire_store' !== className) && ('sm_scheduled_bulk_edits' !== clickedElementclassName)){
 			window.smart_manager.notification = {message: _x('Please select a record', 'notification', 'smart-manager-for-wp-e-commerce')}
 			window.smart_manager.showNotification()
 		} else if(window.smart_manager.exportCSVActions && 'undefined' !== typeof(id) && id && window.smart_manager.exportCSVActions.includes(id) && !isBackgroundProcessRunning){ //code for handling export CSV functionality.
@@ -2922,7 +2924,7 @@ Smart_Manager.prototype.event_handler = function() {
 			
 		} else {
 
-			if( typeof(id) != 'undefined' ) {
+			if( typeof(id) != 'undefined' && !['sm_schedule_export', 'sm_manage_schedule_export'].includes(id) ) {
 
 				if(!['sm_beta_dup_entire_store', 'sm_beta_dup_selected'].includes(id) && (window.smart_manager.stockCols && !window.smart_manager.stockCols.includes(id))) {
 					
@@ -3709,7 +3711,13 @@ Smart_Manager.prototype.saveSettings = function(settings = {}){
 // Function to change export CSV button text.
 Smart_Manager.prototype.exportButtonHtml = function() {
 	if(document.getElementById('sm_export_csv') !== null){
-		document.getElementById('sm_export_csv').innerHTML = '<a id="sm_export_selected_records" href="#">'+_x('Selected Records', 'export button', 'smart-manager-for-wp-e-commerce')+'</a>'+'<a id="sm_export_entire_store" class="sm_entire_store" href="#">'+_x('Entire Store', 'export button', 'smart-manager-for-wp-e-commerce')+'</a>';
+		document.getElementById('sm_export_csv').innerHTML = `
+		<a id="sm_export_selected_records" href="#">${_x('Selected Records', 'export button', 'smart-manager-for-wp-e-commerce')}</a>
+		<a id="sm_export_entire_store" class="sm_entire_store" href="#">${_x('Entire Store', 'export button', 'smart-manager-for-wp-e-commerce')}</a>
+		${window.smart_manager.current_selected_dashboard === 'shop_order'?`
+			<a id="sm_schedule_export" class="sm_schedule_export_btns" href="#">${_x('Schedule Export', 'schedule export button', 'smart-manager-for-wp-e-commerce')}</a>
+			<a id="sm_manage_schedule_export" class="sm_schedule_export_btns" target="_blank" href="${window.smart_manager?.scheduledExportActionAdminUrl || ''}">${_x('Manage Scheduled Exports', 'manage scheduled exports button', 'smart-manager-for-wp-e-commerce')}</a>`:''
+		}`;
 	}
 }
 
@@ -4499,7 +4507,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 	// EXPORT CSV
 	// ========================================================================
 
-	Smart_Manager.prototype.generateCsvExport = function() {
+	Smart_Manager.prototype.generateCsvExport = function(data = {}) {
 
 	    let params = {
 	                            cmd: 'get_export_csv',
@@ -4525,6 +4533,13 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 	        params['active_module'] = (window.smart_manager.viewPostTypes.hasOwnProperty(viewSlug)) ? window.smart_manager.viewPostTypes[viewSlug] : window.smart_manager.dashboard_key;
 	    }
 
+		if(data.hasOwnProperty('isScheduledExport') && data.isScheduledExport === true && data.hasOwnProperty('scheduleParams') && data.hasOwnProperty('scheduleExportAjaxCallback') && typeof data.scheduleExportAjaxCallback === 'function'){
+			params.is_scheduled_export = data?.isScheduledExport || false;
+			params.scheduled_export_params = data?.scheduleParams || false;
+			params.selected_ids = params.storewide_option = params.advanced_search_query = params.search_text = '';
+			window.smart_manager.send_request({data:params,data_type: 'json'},data.scheduleExportAjaxCallback)
+			return;
+		}
 	    let export_url = window.smart_manager.sm_ajax_url + '&cmd='+ params['cmd'] +'&active_module='+ params['active_module'] +'&security='+ params['security'] +'&pro='+ params['pro'] +'&SM_IS_WOO30='+ params['SM_IS_WOO30'] +'&is_taxonomy='+ params['is_taxonomy'] +'&sort_params='+ encodeURIComponent(JSON.stringify(params['sort_params'])) +'&table_model='+ encodeURIComponent(JSON.stringify(params['table_model'])) +'&advanced_search_query='+params['advanced_search_query']+'&search_text='+ params['search_text'] + '&storewide_option=' + params['storewide_option'] + '&selected_ids=' + params['selected_ids'] + '&columnsToBeExported=' + params['columnsToBeExported'];
 	    export_url += ( window.smart_manager.date_params && window.smart_manager.date_params.hasOwnProperty('date_filter_params') ) ? '&date_filter_params='+ window.smart_manager.date_params['date_filter_params'] : '';
 	    export_url += ( window.smart_manager.date_params && window.smart_manager.date_params.hasOwnProperty('date_filter_query') ) ? '&date_filter_query='+ window.smart_manager.date_params['date_filter_query'] : '';

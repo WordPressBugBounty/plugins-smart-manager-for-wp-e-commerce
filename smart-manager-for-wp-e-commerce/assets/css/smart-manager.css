@@ -1850,8 +1850,8 @@ input#sm_add_title{
     stroke: rgba(0, 0, 0, 0.8);
 }
 
-.eligible-dashboards-select2-dropdown{
-	z-index: 9999;
+.sm-eligible-dashboards-select2-dropdown{
+	z-index: 9999 !important;
 }
 #select2-eligible_dashboards_select-container{
     font-weight: 500;

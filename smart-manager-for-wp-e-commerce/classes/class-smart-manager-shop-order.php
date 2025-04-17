@@ -650,6 +650,14 @@ if ( ! class_exists( 'Smart_Manager_Shop_Order' ) ) {
 			if( empty( $data_col_params ) || ! is_array( $data_col_params ) || empty( $curr_obj ) || ( ! empty( $curr_obj ) && empty( $curr_obj->dashboard_key ) ) ){
 				return $data_model;
 			}
+			
+			//if scheduled export then set the scheduled export params to req_params.
+			if( ( ! empty ( $data_col_params['is_scheduled_export'] ) && ( 'true' === $data_col_params['is_scheduled_export'] ) ) && ( ! empty( $data_col_params['advanced_search_query'] ) ) ) {
+				$curr_obj->req_params['advanced_search_query'] = $data_col_params['advanced_search_query'];
+			}
+			if( ( ! empty ( $data_col_params['is_scheduled_export'] ) && ( 'true' === $data_col_params['is_scheduled_export'] ) ) && ( ! empty( $data_col_params['sort_params'] ) ) ) {
+				$curr_obj->req_params['sort_params'] = $data_col_params['sort_params'];
+			}
 
 			global $wpdb;
 			if ( ! empty( Smart_Manager::$sm_is_woo79 ) ) {
@@ -668,7 +676,7 @@ if ( ! class_exists( 'Smart_Manager_Shop_Order' ) ) {
 
 				$query_args = array(
 					'type' => $curr_obj->dashboard_key,
-					'orderby' => 'id',
+					'orderby' => ( ! empty ( $data_col_params['is_scheduled_export'] ) && ( 'true' === $data_col_params['is_scheduled_export'] ) ) ? 'date' : 'id',
 					'order' => 'DESC',
 					'offset' => ( ! empty( $data_col_params['offset'] ) ) ? intval( $data_col_params['offset'] ) : 0,
 					'paginate' => true,

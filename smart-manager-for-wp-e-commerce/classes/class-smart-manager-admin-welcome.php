@@ -446,7 +446,7 @@ class Smart_Manager_Admin_Welcome {
 									'ans' => sprintf(
 										/* translators: %s: contact us link */
 										__( 'Smart Manager is actively developed. If you can\'t find your favorite feature (or have a suggestion) %s. We\'d love to hear from you.', 'smart-manager-for-wp-e-commerce' ),
-										'<a class="thickbox" href="' . admin_url('#TB_inline?inlineId=sa_smart_manager_beta_post_query_form&height=550') .'" title="' . __( 'Submit your query', 'smart-manager-for-wp-e-commerce' ) .'">' . __( 'contact us', 'smart-manager-for-wp-e-commerce' ) . '</a>' )
+										'<a target="_blank" href="https://www.storeapps.org/support/contact-us/?utm_source=sm&utm_medium=welcome_page&utm_campaign=sm_faqs" title="' . __( 'Submit your query', 'smart-manager-for-wp-e-commerce' ) .'">' . __( 'contact us', 'smart-manager-for-wp-e-commerce' ) . '</a>' )
 								);
 				} else {
 					$faqs[] = array(

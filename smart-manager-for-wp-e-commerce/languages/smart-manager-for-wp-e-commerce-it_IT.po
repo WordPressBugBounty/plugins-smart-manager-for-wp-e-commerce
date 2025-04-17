@@ -150,7 +150,7 @@ msgstr "Un intero pomeriggio di lavoro in pochi secondi"
 msgid "Acrom"
 msgstr ""
 
-#: pro/templates/email.php:43
+#: pro/templates/emails/bulk-edit.php:43
 msgid "Action"
 msgstr "Azione"
 
@@ -410,7 +410,7 @@ msgctxt "batch update option"
 msgid "All"
 msgstr ""
 
-#: pro/templates/email.php:39
+#: pro/templates/emails/bulk-edit.php:39
 msgid "Below are the lists of updates done:"
 msgstr "Di seguito gli elenchi degli aggiornamenti effettuati:"
 
@@ -979,7 +979,7 @@ msgstr "Duplica records"
 msgid "Duplicate single / multiple records"
 msgstr "Duplica record singoli / multipli"
 
-#: pro/templates/email.php:7
+#: pro/templates/emails/bulk-edit.php:7
 msgid "Duplicated"
 msgstr "Duplicato"
 
@@ -1090,7 +1090,7 @@ msgstr "Immagine in evidenza aggiornata correttamente"
 msgid "Features"
 msgstr "Caratteristiche"
 
-#: pro/templates/email.php:42
+#: pro/templates/emails/bulk-edit.php:42
 msgid "Field"
 msgstr "Campo"
 
@@ -1172,7 +1172,7 @@ msgstr ""
 msgid "Hey %1s, you just unlocked %2s on Smart Manager Pro!"
 msgstr "Ehi %1s, hai appena sbloccato %2s su Smart Manager Pro!"
 
-#: pro/templates/email.php:35
+#: pro/templates/emails/bulk-edit.php:35
 msgid "Hi there!"
 msgstr "Ehilà!"
 
@@ -1233,7 +1233,7 @@ msgstr ""
 "Manager Pro mi consente di farlo molto più velocemente. Probabilmente 20 o "
 "30 volte più veloce. È uno strumento assolutamente prezioso."
 
-#: pro/templates/email.php:62
+#: pro/templates/emails/bulk-edit.php:62
 msgid "If you like"
 msgstr "Se ti piace"
 
@@ -1988,7 +1988,7 @@ msgctxt "placeholder"
 msgid "Type to search..."
 msgstr ""
 
-#: pro/templates/email.php:62
+#: pro/templates/emails/bulk-edit.php:62
 msgid "please leave us a"
 msgstr "per favore lasciaci una"
 
@@ -2098,11 +2098,11 @@ msgstr "Feedback rapido per il plugin Smart Manager"
 msgid "Rank Math SEO Score"
 msgstr "Classifica matematica punteggio SEO"
 
-#: pro/templates/email.php:62
+#: pro/templates/emails/bulk-edit.php:62
 msgid "rating. A huge thank you from StoreApps in advance!"
 msgstr "valutazione. Un enorme grazie da StoreApps in anticipo!"
 
-#: pro/templates/email.php:45
+#: pro/templates/emails/bulk-edit.php:45
 msgid "Records Updated"
 msgstr "Records aggiornati"
 
@@ -2333,7 +2333,7 @@ msgstr "COD"
 msgid "Slug"
 msgstr ""
 
-#: pro/templates/email.php:62
+#: pro/templates/emails/bulk-edit.php:62
 msgid "Smart Manager"
 msgstr ""
 
@@ -2343,7 +2343,7 @@ msgstr ""
 "Smart Manager per WooCommerce – Gestione magazzino, Editor in blocco e altro."
 ".."
 
-#: pro/templates/email.php:36
+#: pro/templates/emails/bulk-edit.php:36
 msgid "Smart Manager has successfully completed"
 msgstr "Smart Manager è stato completato con successo"
 
@@ -2624,7 +2624,7 @@ msgstr "Unità di prezzo unitario"
 msgid "Unlimited"
 msgstr "Illimitato"
 
-#: pro/templates/email.php:7
+#: pro/templates/emails/bulk-edit.php:7
 msgid "Updated"
 msgstr "Aggiornato"
 
@@ -2654,7 +2654,7 @@ msgstr "utilizzando la ricerca semplice” o la ricerca avanzata"
 msgid "Validity Suffix"
 msgstr "Suffisso validità"
 
-#: pro/templates/email.php:44
+#: pro/templates/emails/bulk-edit.php:44
 msgid "Value"
 msgstr "Valore"
 

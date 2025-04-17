@@ -219,6 +219,9 @@ class Smart_Manager {
 		$this->upgrade = (defined('SM_UPGRADE')) ? SM_UPGRADE : 3;
 		$this->dupgrade = (defined('SM_DUPGRADE')) ? SM_DUPGRADE : 25;
 		$this->success_msg   = (defined('SM_UPDATE')) ? SM_UPDATE : '';
+		if ( ! defined( 'SM_PRO_EMAIL_TEMPLATE_PATH' ) ) {
+			define( 'SM_PRO_EMAIL_TEMPLATE_PATH', SM_PRO_URL . 'templates/emails' );
+		}
 	}
 
 	//Function for defining dashboards
@@ -1311,10 +1314,12 @@ class Smart_Manager {
 							'SM_IS_WOO79' => ( ! empty( self::$sm_is_woo79 ) ) ? 'true' : 'false',
 							'isSAOfferVisible' => SA_OFFER_VISIBLE,
 							'isSAOfferBannerVisible' => ( 'yes' === get_option( 'sa_sm_offer_bfcm_2024', 'yes' ) ) ? true : false,
-							'scheduled_action_admin_url' => admin_url( 'tools.php?page=action-scheduler&orderby=schedule&order=desc&action=-1&action2=-1&status=pending&s=storeapps_smart_manager_scheduled_actions&paged=1' ),
+							'scheduled_action_admin_url' => self::get_scheduled_actions_search_url('storeapps_smart_manager_scheduled_actions'),
+							'scheduled_export_actions_admin_url' => self::get_scheduled_actions_search_url('storeapps_smart_manager_scheduled_export_actions'),
 							'is_admin' => ( 'administrator' === self::get_current_user_role() ) ? true : false,
 							'manHoursData' => self::sm_get_man_hours_data(),
-							'userName' => self::sm_get_current_user_display_name()
+							'userName' => self::sm_get_current_user_display_name(),
+							'orderStatuses' => ( function_exists( 'wc_get_order_statuses' ) ) ? wc_get_order_statuses() : array()
 						);
 
 		$active_plugins = (array) get_option( 'active_plugins', array() );
@@ -2166,6 +2171,16 @@ class Smart_Manager {
 		}
 		$display_name = $current_user->display_name;
 		return ( ( ! empty( $display_name ) ) ) ? $display_name : __( $fallback, 'smart-manager-for-wp-e-commerce' );
+	}
+
+	/**
+	 * Get Action Scheduler admin URL.
+	 *
+	 * @param string $search Search query string for Action Scheduler.
+	 * @return string
+	*/
+	public static function get_scheduled_actions_search_url( $search = '' ) {
+		return ( empty( $search ) ) ? '' : esc_url( admin_url( 'tools.php?page=action-scheduler&orderby=schedule&order=desc&action=-1&action2=-1&status=pending&paged=1' ) . '&s=' . urlencode( $search ) );
 	}
 }
 

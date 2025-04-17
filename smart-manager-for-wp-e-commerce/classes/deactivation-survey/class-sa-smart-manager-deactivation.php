@@ -34,7 +34,7 @@ if ( ! class_exists( 'SA_Smart_Manager_Deactivation' ) ) {
 			self::$plugin_name         = $sa_plugin_name;
 			self::$sa_plugin_url       = untrailingslashit( plugin_dir_path ( __FILE__ ) );
 
-			self::sa_load_all_str();
+			add_action( 'init', array( __CLASS__, 'sa_load_all_str' ) );
 			add_action( 'admin_footer', array( $this, 'maybe_load_deactivate_options' ) );
 			add_action( 'wp_ajax_sm_submit_survey', array( $this, 'sa_submit_deactivation_reason_action' ) );
 

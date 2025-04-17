@@ -57,12 +57,17 @@ if ( ! class_exists( 'Smart_Manager_Controller' ) ) {
 				$this->sm_beta_pro_background_updater = Smart_Manager_Pro_Background_Updater::instance();
 			}
 
-			// Code for scheduling action for deleting older tasks after x no. of days
-			if ( defined('SMPRO') && SMPRO === true && function_exists( 'as_has_scheduled_action' ) && ! as_has_scheduled_action( 'sm_schedule_tasks_cleanup' ) && file_exists( SM_PRO_URL . 'classes/class-smart-manager-pro-task.php' ) ) {
+			// Code for scheduling action for deleting older tasks and export CSV file after x no. of days.
+			if ( defined('SMPRO') && SMPRO === true && function_exists( 'as_has_scheduled_action' ) && function_exists( 'as_next_scheduled_action' ) && ( ! as_has_scheduled_action( 'sm_schedule_tasks_cleanup' ) || ! as_next_scheduled_action( 'storeapps_smart_manager_scheduled_export_cleanup' ) ) && ( file_exists( SM_PRO_URL . 'classes/class-smart-manager-pro-base.php' ) ) && ( file_exists( $this->plugin_path . '/class-smart-manager-base.php' ) ) ) {
 				include_once $this->plugin_path . '/class-smart-manager-base.php';
 				include_once SM_PRO_URL . 'classes/class-smart-manager-pro-base.php';
-				include_once SM_PRO_URL . 'classes/class-smart-manager-pro-task.php';
-				( is_callable( array( 'Smart_Manager_Pro_Task', 'schedule_task_deletion' ) ) ) ? Smart_Manager_Pro_Task::schedule_task_deletion() : '';
+				if ( ! as_has_scheduled_action( 'sm_schedule_tasks_cleanup' ) && file_exists( SM_PRO_URL . 'classes/class-smart-manager-pro-task.php' ) ) {
+					include_once SM_PRO_URL . 'classes/class-smart-manager-pro-task.php';
+					( is_callable( array( 'Smart_Manager_Pro_Task', 'schedule_task_deletion' ) ) ) ? Smart_Manager_Pro_Task::schedule_task_deletion() : '';
+				}
+				if ( ! as_next_scheduled_action( 'storeapps_smart_manager_scheduled_export_cleanup' ) ) {
+					( is_callable( array( 'Smart_Manager_Pro_Base', 'schedule_scheduled_exports_cleanup' ) ) ) ? Smart_Manager_Pro_Base::schedule_scheduled_exports_cleanup() : '';
+				}
 			}
 		}
 
@@ -228,7 +233,7 @@ if ( ! class_exists( 'Smart_Manager_Controller' ) ) {
 			if( !empty( $this->sm_beta_pro_background_updater ) && !empty( $_REQUEST['cmd'] ) && $_REQUEST['cmd'] == 'get_background_progress' ) {
 				is_callable( array( $this->sm_beta_pro_background_updater, $func_nm ) ) ? $this->sm_beta_pro_background_updater->$func_nm() : Smart_Manager::log( 'error', _x( "Method $func_nm is not callable in class Smart_Manager_Pro_Background_Updater.", 'Smart Manager - Ajax request handler background progress', 'smart-manager-for-wp-e-commerce' ) );
 			} else if( class_exists( $class_name ) ) {
-				$handler_obj = new $class_name($this->dashboard_key);
+				$handler_obj = is_callable( array( $class_name, 'get_instance' ) ) ? $class_name::get_instance( $this->dashboard_key) : new $class_name( $this->dashboard_key );
 				( is_callable( array( $handler_obj, $func_nm ) ) ) ? $handler_obj->$func_nm() : Smart_Manager::log( 'error', _x( "Method $func_nm is not callable in class $class_name.", 'Smart Manager - Ajax request handler', 'smart-manager-for-wp-e-commerce' ) );
 			}
 		}

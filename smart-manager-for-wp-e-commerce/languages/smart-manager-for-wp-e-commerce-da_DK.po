@@ -150,7 +150,7 @@ msgstr ""
 msgid "Acrom"
 msgstr "Fra"
 
-#: pro/templates/email.php:43
+#: pro/templates/emails/bulk-edit.php:43
 msgid "Action"
 msgstr ""
 
@@ -403,7 +403,7 @@ msgctxt "batch update option"
 msgid "All"
 msgstr ""
 
-#: pro/templates/email.php:39
+#: pro/templates/emails/bulk-edit.php:39
 msgid "Below are the lists of updates done:"
 msgstr ""
 
@@ -974,7 +974,7 @@ msgstr ""
 msgid "Duplicate single / multiple records"
 msgstr ""
 
-#: pro/templates/email.php:7
+#: pro/templates/emails/bulk-edit.php:7
 msgid "Duplicated"
 msgstr ""
 
@@ -1085,7 +1085,7 @@ msgstr ""
 msgid "Features"
 msgstr ""
 
-#: pro/templates/email.php:42
+#: pro/templates/emails/bulk-edit.php:42
 msgid "Field"
 msgstr ""
 
@@ -1167,7 +1167,7 @@ msgstr ""
 msgid "Hey %1s, you just unlocked %2s on Smart Manager Pro!"
 msgstr ""
 
-#: pro/templates/email.php:35
+#: pro/templates/emails/bulk-edit.php:35
 msgid "Hi there!"
 msgstr ""
 
@@ -1223,7 +1223,7 @@ msgid ""
 "quicker. It is an absolutely invaluable tool."
 msgstr ""
 
-#: pro/templates/email.php:62
+#: pro/templates/emails/bulk-edit.php:62
 msgid "If you like"
 msgstr ""
 
@@ -1970,7 +1970,7 @@ msgctxt "placeholder"
 msgid "Type to search..."
 msgstr ""
 
-#: pro/templates/email.php:62
+#: pro/templates/emails/bulk-edit.php:62
 msgid "please leave us a"
 msgstr ""
 
@@ -2082,11 +2082,11 @@ msgstr ""
 msgid "Rank Math SEO Score"
 msgstr ""
 
-#: pro/templates/email.php:62
+#: pro/templates/emails/bulk-edit.php:62
 msgid "rating. A huge thank you from StoreApps in advance!"
 msgstr ""
 
-#: pro/templates/email.php:45
+#: pro/templates/emails/bulk-edit.php:45
 msgid "Records Updated"
 msgstr ""
 
@@ -2311,7 +2311,7 @@ msgstr "Varenummer"
 msgid "Slug"
 msgstr ""
 
-#: pro/templates/email.php:62
+#: pro/templates/emails/bulk-edit.php:62
 msgid "Smart Manager"
 msgstr "Smart Manager"
 
@@ -2319,7 +2319,7 @@ msgstr "Smart Manager"
 msgid "Smart Manager For WooCommerce – Stock Management, Bulk Edit & more..."
 msgstr ""
 
-#: pro/templates/email.php:36
+#: pro/templates/emails/bulk-edit.php:36
 msgid "Smart Manager has successfully completed"
 msgstr ""
 
@@ -2588,7 +2588,7 @@ msgstr ""
 msgid "Unlimited"
 msgstr ""
 
-#: pro/templates/email.php:7
+#: pro/templates/emails/bulk-edit.php:7
 msgid "Updated"
 msgstr ""
 
@@ -2616,7 +2616,7 @@ msgstr ""
 msgid "Validity Suffix"
 msgstr ""
 
-#: pro/templates/email.php:44
+#: pro/templates/emails/bulk-edit.php:44
 msgid "Value"
 msgstr ""
 

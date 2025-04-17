@@ -5,6 +5,12 @@ if ( !defined( 'ABSPATH' ) ) exit;
 if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 	class Smart_Manager_Base {
 
+		/**
+		 * Singleton class
+		 *
+		 * @var object
+		*/
+        protected static $_instance = null;
 		public $dashboard_key = '',
 			$dashboard_title = '',
 			$post_type = '',
@@ -37,6 +43,17 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			$previous_vals = array();
 		// include_once $this->plugin_path . '/class-smart-manager-utils.php';
 
+		 /**
+		 * Instance of the class
+		 *
+		 * @return object
+		 */
+		public static function instance( $dashboard_key ) {
+			if ( is_null( self::$_instance ) ) {
+				self::$_instance = new self( $dashboard_key );
+			}
+			return self::$_instance;
+		}
 		function __construct($dashboard_key) {
 			$this->dashboard_key = $dashboard_key;
 			$this->post_type = $dashboard_key;
@@ -1677,7 +1694,9 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			if( !empty( $column_model_transient ) && !empty( $store_model_transient ) ) {
 				$store_model_transient = $this->map_column_to_store_model( $store_model_transient, $column_model_transient );
 			}
-			$col_model = ( ! empty( $this->req_params[ 'columnsToBeExported' ] ) && ! empty( $col_model ) && is_array( $col_model ) ) ? $col_model : ( ( ! empty( $store_model_transient['columns'] ) ) ? $store_model_transient['columns'] : array() );
+			if( ( empty( $this->req_params['is_scheduled_export'] ) || 'true' !== $this->req_params['is_scheduled_export'] ) ){
+				$col_model = ( ! empty( $this->req_params[ 'columnsToBeExported' ] ) && ! empty( $col_model ) && is_array( $col_model ) ) ? $col_model : ( ( ! empty( $store_model_transient['columns'] ) ) ? $store_model_transient['columns'] : array() );
+			}
 
 			$required_cols = apply_filters('sm_required_cols', array());
 
@@ -2236,10 +2255,15 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 	        	$data_model ['total_count'] = $total_count;
 			}
 
-			$data_model ['meta'] = array( 'is_view_contain_search_params' => $is_view_contain_search_params ); //added to pass any meta to FE
-        	//Filter to modify the data model
+			$data_model ['meta'] = array( 'is_view_contain_search_params' => $is_view_contain_search_params ); //added to pass any meta to FE.
+			if ( ( ! empty( $this->req_params['is_scheduled_export'] ) && 'true' === $this->req_params['is_scheduled_export'] ) && ( ! empty( $this->req_params['scheduled_export_params'] ) ) && ( is_array( $this->req_params['scheduled_export_params'] ) ) && ( is_array( $data_col_params ) ) ) {
+				$data_col_params['advanced_search_query'] = ( ! empty( $this->req_params['advanced_search_query'] ) ) ? $this->req_params['advanced_search_query'] : array();
+				$data_col_params['sort_params'] = ( ! empty( $this->req_params['sort_params'] ) ) ? $this->req_params['sort_params'] : array();
+				$data_col_params['is_scheduled_export'] = $this->req_params['is_scheduled_export'];
+			}
+        	//Filter to modify the data model.
 			$data_model = apply_filters( 'sm_data_model', $data_model, $data_col_params );
-			if( !empty( $this->req_params['cmd'] ) && ( $this->req_params['cmd'] == 'get_export_csv' || $this->req_params['cmd'] == 'get_print_invoice' ) ) {
+			if( ( ! empty( $this->req_params['cmd'] ) ) && ( 'get_export_csv' === $this->req_params['cmd'] || 'get_print_invoice' === $this->req_params['cmd'] ) ) {
 				return $data_model;
 			} else {
 				wp_send_json( $data_model );
@@ -3880,22 +3904,60 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 	     * Function to generate and export the CSV data.
 		 * @return void
 		 */
-		public function get_export_csv() {
+		public function get_export_csv( $params = array() ) {
 
 			global $current_user;
 
 			ini_set('memory_limit','-1');
 			set_time_limit(0);
+			$params = ( ( ! empty( $params ) ) && is_array( $params ) ) ? $params : $this->req_params;
+			if( ( empty( $params ) ) || ( ! is_array( $params ) ) || ( empty( $params['sort_params'] ) && ( ( empty( $params['scheduled_export_params'] ) ) || !( is_array( $params['scheduled_export_params'] ) ) || ( empty( $params['scheduled_export_params']['is_new_schedule_export'] ) ) ) ) || ( empty( $params['table_model'] ) ) ) {
+				return;
+			}
+			if( ( ! empty( $params['sort_params'] ) ) ){
+				$params['sort_params'] = ( ! is_array( $params['sort_params'] ) ) ? json_decode( stripslashes( $params['sort_params'] ), true ) : $params['sort_params'];
+			}
 
-			$this->req_params['sort_params'] = json_decode( stripslashes( $this->req_params['sort_params'] ), true );
-			$this->req_params['table_model'] = json_decode( stripslashes( $this->req_params['table_model'] ), true );
+			$params['table_model'] = ( ! is_array( $params['table_model'] ) ) ? json_decode( stripslashes( $params['table_model'] ), true ) : $params['table_model'];
+			
+			$is_scheduled_export = false;
+			$scheduled_export_params = array();
+			if( ( defined('SMPRO') && true === SMPRO ) && ( ! empty( $params['is_scheduled_export'] ) ) && ( ! empty( $params['scheduled_export_params'] ) ) && ( is_array( $params['scheduled_export_params'] ) ) ) {
+				$is_scheduled_export = true;
+				$params['dashboard_key'] = $this->dashboard_key;
+				$scheduled_export_params =  $params['scheduled_export_params'];
+				//Condition for creating the scheduled exports.
+				if( ( ! empty( $scheduled_export_params['is_new_schedule_export'] ) ) || ( ! is_callable( array( 'Smart_Manager_Pro_Base', 'get_scheduled_export_action_params' ) ) ) ){
+					$timestamp = ( ! empty( $scheduled_export_params['schedule_export_start_time'] ) ) ? strtotime( date( $scheduled_export_params['schedule_export_start_time'] ) ) : '';
 
+					$params['scheduled_export_params']['is_new_schedule_export'] = false;
+
+					$params['sort_params'] = ( empty( Smart_Manager::$sm_is_wc_hpos_tables_exists ) ) ? array( 'column' => 'posts/post_date', 'sortOrder' => 'desc' ) : ( ! empty( $params['table_model']['wc_orders'] ) ? array( 'column' => 'wc_orders/date_created_gmt', 'sortOrder' => 'wc_orders/desc' ) : $params['sort_params'] );
+
+					if( ( empty( $timestamp ) ) || ( empty( $scheduled_export_params['schedule_export_interval'] ) ) ){
+						return;
+					}
+					//setup scheduled exports recurring action.
+					as_schedule_recurring_action( $timestamp, (int) $scheduled_export_params['schedule_export_interval'] * DAY_IN_SECONDS, 'storeapps_smart_manager_scheduled_export_actions', array( Smart_Manager_Pro_Base::get_scheduled_export_action_params( $params ) ) );
+					wp_send_json( 
+						array( 
+							'ACK' => 'success', 
+							'data' => array(
+								'msg' => sprintf(
+								/* translators: %1$s: exports schedule success message */ 
+								_x( "Export scheduled successfully. Check all your scheduled export actions <a target='_blank' href='%s'>here</a>.", 'success notification', 'smart-manager-for-wp-e-commerce' ), ! empty( $scheduled_export_params['scheduledExportActionAdminUrl'] ) ? $scheduled_export_params['scheduledExportActionAdminUrl'] : ''
+								)
+							) 
+						) 
+					);
+				}
+			}
+			$this->req_params = $params;
 			$current_store_model = get_transient( 'sa_sm_'.$this->dashboard_key );
 			if( ! empty( $current_store_model ) && !is_array( $current_store_model ) ) {
 				$current_store_model = json_decode( $current_store_model, true );
 			}
-			$column_model_transient = get_user_meta(get_current_user_id(), 'sa_sm_'.$this->dashboard_key, true);
-
+			$column_model_transient = ( empty( $is_scheduled_export ) ) ? get_user_meta( get_current_user_id(), 'sa_sm_'.$this->dashboard_key, true ) : array(); // use default columns when its scheduled export.
 			// Code for handling views
 			if( ( defined('SMPRO') && true === SMPRO ) && ! empty( $this->req_params['is_view'] ) && ! empty( $this->req_params['active_view'] ) ) {
 				if( class_exists( 'Smart_Manager_Pro_Views' ) ) {
@@ -3961,8 +4023,12 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			$each_field = array_keys( $columns_header );
 
 			$view_name = ( ! empty( $this->req_params['active_view'] ) ) ? $this->req_params['active_view'] . '-view_' : '';
-			$csv_file_name = sanitize_title(get_bloginfo( 'name' )) . '_' . $this->dashboard_key . '_' . $view_name . gmdate('d-M-Y_H:i:s');
-			$csv_file_name = ( ! empty( $this->req_params[ 'storewide_option' ] ) ) ? ( ( 'entire_store' === $this->req_params[ 'storewide_option' ] ? $csv_file_name : $csv_file_name . '_all_products_stock_columns') ) . ".csv" : $csv_file_name . ( ( ! empty( $this->req_params[ 'columnsToBeExported' ] ) && 'visible' === $this->req_params[ 'columnsToBeExported' ] ) ? '_selected_records' : '_selected_products_' . $this->req_params[ 'columnsToBeExported' ] . '_columns' ) . ".csv";
+			$csv_file_name = sanitize_title(get_bloginfo( 'name' )) . '_' . $this->dashboard_key . '_' . $view_name . gmdate('d-M-Y_H-i-s');
+			if( $is_scheduled_export ) {
+				$csv_file_name .= '_scheduled.csv';
+			} else{
+				$csv_file_name = ( ! empty( $this->req_params[ 'storewide_option' ] ) ) ? ( ( 'entire_store' === $this->req_params[ 'storewide_option' ] ? $csv_file_name : $csv_file_name . '_all_products_stock_columns') ) . ".csv" : $csv_file_name . ( ( ! empty( $this->req_params[ 'columnsToBeExported' ] ) && 'visible' === $this->req_params[ 'columnsToBeExported' ] ) ? '_selected_records' : '_selected_products_' . $this->req_params[ 'columnsToBeExported' ] . '_columns' ) . ".csv";
+			}
 			$escaped_html_columns = apply_filters( 'sa_sm_escaped_html_columns', array( 'posts_post_excerpt', 'posts_post_content' ) );
 			foreach( (array) $data['items'] as $row ){
 
@@ -3990,28 +4056,37 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				}	
 				$fields = substr_replace($fields, '', -1); 
 			}
-
+			// Prepare file data.
 			$upload_dir = wp_upload_dir();
-			$file_data = array();
-			$file_data['wp_upload_dir'] = $upload_dir['path'] . '/';
-			$file_data['file_name'] = $csv_file_name;
-			$file_data['file_content'] = $fields;
+			$file_data = array(
+				'upload_dir' => $upload_dir,
+				'file_name'     => $csv_file_name,
+				'file_content'  => $fields
+			);
+			// Log error if no file data is present.
 			if ( empty( $file_data ) && is_callable( array( 'Smart_Manager', 'log' ) ) ) {
-				Smart_Manager::log( 'error', _x( 'Export CSV: no file data found ', 'export file data', 'smart-manager-for-wp-e-commerce' ) );
+				Smart_Manager::log( 'error', _x( 'Export CSV: no file data found', 'export file data', 'smart-manager-for-wp-e-commerce' ) );
 			}
-
-			header("Content-type: text/x-csv; charset=UTF-8"); 
-			header("Content-Transfer-Encoding: binary");
-			header("Content-Disposition: attachment; filename=".$file_data['file_name']); 
-			header("Pragma: no-cache");
-			header("Expires: 0");
-
-			while(ob_get_contents()) {
-				ob_clean();
+			//if scheduled export then send the csv to email.
+			if( $is_scheduled_export && ( defined('SMPRO') && true === SMPRO ) && is_callable( 'Smart_Manager_Pro_Base', 'process_scheduled_csv_email_export' ) ){
+				Smart_Manager_Pro_Base::process_scheduled_csv_email_export( array(
+					'csv_file_name' => $csv_file_name,
+					'file_data' => $file_data,
+					'scheduled_export_params' => $scheduled_export_params
+				) );
+				return;
 			}
-
+			// Set appropriate headers for CSV download.
+			header( "Content-Type: text/x-csv; charset=UTF-8" );
+			header( "Content-Transfer-Encoding: binary" );
+			header( "Content-Disposition: attachment; filename=" . $file_data['file_name'] );
+			header( "Pragma: no-cache" );
+			header( "Expires: 0" );
+			while ( ob_get_level() ) {
+				ob_end_clean();
+			}
+			// Output the CSV file content.
 			echo $file_data['file_content'];
-			
 			exit;
 		}
 
