@@ -2,14 +2,14 @@
 # This file is distributed under the GNU General Public License v2.0.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce Advanced Bulk Edit Products, Orders, Coupons, Any WordPress Post Type - Smart Manager 8.60.0\n"
+"Project-Id-Version: WooCommerce Advanced Bulk Edit Products, Orders, Coupons, Any WordPress Post Type - Smart Manager 8.61.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/smart-manager-for-wp-e-commerce\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-04-17T13:13:05+00:00\n"
+"POT-Creation-Date: 2025-05-09T12:58:20+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.10.0\n"
 "X-Domain: smart-manager-for-wp-e-commerce\n"
@@ -313,7 +313,7 @@ msgstr ""
 
 #: classes/class-smart-manager-admin-welcome.php:350
 #: classes/class-smart-manager-admin-welcome.php:372
-#: classes/class-smart-manager-base.php:2809
+#: classes/class-smart-manager-base.php:2828
 msgid "Pro"
 msgstr ""
 
@@ -457,37 +457,37 @@ msgid "Trash"
 msgstr ""
 
 #. translators: %1$s: time saved in minutes/hours, %2$s: Pro upgrade link, %3$s: additional savings possible
-#: classes/class-smart-manager-base.php:2797
+#: classes/class-smart-manager-base.php:2816
 msgid "You saved <strong>%1$s</strong>! Upgrade to %2$s to save more <strong>%3$s</strong> and unlock undo."
 msgstr ""
 
 #. translators: %1$d: number of updated record %2$s: record update message
-#: classes/class-smart-manager-base.php:2823
+#: classes/class-smart-manager-base.php:2842
 msgid "%1$d record%2$s updated successfully!"
 msgstr ""
 
 #. translators: %1$d: number of updated record %2$s: record update message
-#: classes/class-smart-manager-base.php:2831
+#: classes/class-smart-manager-base.php:2850
 msgid "%1$d record%2$s updated successfully! %3$s"
 msgstr ""
 
 #. translators: %1$d: number of updated record %2$s: record update message
-#: classes/class-smart-manager-base.php:2878
+#: classes/class-smart-manager-base.php:2897
 msgid "%1$d record%2$s deleted successfully!"
 msgstr ""
 
 #. translators: %1$s: exports schedule success message
-#: classes/class-smart-manager-base.php:3948
+#: classes/class-smart-manager-base.php:3967
 msgctxt "success notification"
 msgid "Export scheduled successfully. Check all your scheduled export actions <a target='_blank' href='%s'>here</a>."
 msgstr ""
 
-#: classes/class-smart-manager-base.php:3998
+#: classes/class-smart-manager-base.php:4017
 msgctxt "export data model"
 msgid "Export CSV: no data found "
 msgstr ""
 
-#: classes/class-smart-manager-base.php:4068
+#: classes/class-smart-manager-base.php:4087
 msgctxt "export file data"
 msgid "Export CSV: no file data found"
 msgstr ""
@@ -636,7 +636,7 @@ msgid "No shipping class"
 msgstr ""
 
 #: classes/class-smart-manager-product.php:991
-#: pro/templates/order-invoice.php:172
+#: pro/templates/order-invoice.php:176
 msgid "SKU"
 msgstr ""
 
@@ -713,12 +713,12 @@ msgid "Edit"
 msgstr ""
 
 #: classes/class-smart-manager-shop-order.php:232
-#: pro/classes/class-smart-manager-pro-shop-subscription.php:216
+#: pro/classes/class-smart-manager-pro-shop-subscription.php:219
 msgid "Date"
 msgstr ""
 
 #: classes/class-smart-manager-shop-order.php:234
-#: pro/classes/class-smart-manager-pro-shop-subscription.php:218
+#: pro/classes/class-smart-manager-pro-shop-subscription.php:221
 msgid "Status"
 msgstr ""
 
@@ -731,7 +731,7 @@ msgid "Qty"
 msgstr ""
 
 #: classes/class-smart-manager-shop-order.php:499
-#: pro/templates/order-invoice.php:173
+#: pro/templates/order-invoice.php:177
 msgid "Price"
 msgstr ""
 
@@ -1113,96 +1113,96 @@ msgid "Bulk edit / Batch update"
 msgstr ""
 
 #. translators: %s process name
-#: pro/classes/class-smart-manager-pro-base.php:976
+#: pro/classes/class-smart-manager-pro-base.php:978
 msgctxt "update status"
 msgid "%s failed"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-base.php:1046
+#: pro/classes/class-smart-manager-pro-base.php:1048
 msgctxt "batch process"
 msgid "No batch process params found"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-base.php:1123
+#: pro/classes/class-smart-manager-pro-base.php:1125
 msgctxt "process name"
 msgid "Duplicate Records"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-base.php:1252
+#: pro/classes/class-smart-manager-pro-base.php:1254
 msgctxt "duplicate process"
 msgid "Duplicate process failed"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-base.php:1268
+#: pro/classes/class-smart-manager-pro-base.php:1270
 msgctxt "process name"
 msgid "Move to trash"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-base.php:1272
+#: pro/classes/class-smart-manager-pro-base.php:1274
 msgctxt "process name"
 msgid "Delete All Records"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-base.php:1278
+#: pro/classes/class-smart-manager-pro-base.php:1280
 msgctxt "process name"
 msgid "Delete "
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-base.php:1330
+#: pro/classes/class-smart-manager-pro-base.php:1332
 msgctxt "move to trash process"
 msgid "Move to trash failed"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-base.php:1770
+#: pro/classes/class-smart-manager-pro-base.php:1772
 msgctxt "delete permanently"
 msgid "Delete records permanently failed"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-base.php:1884
+#: pro/classes/class-smart-manager-pro-base.php:1886
 msgctxt "delete process"
 msgid "Delete process failed"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-base.php:2860
+#: pro/classes/class-smart-manager-pro-base.php:2865
 msgctxt "bulk update process"
 msgid "Bulk update posts batch failed"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-base.php:3801
+#: pro/classes/class-smart-manager-pro-base.php:3807
 msgctxt "process scheduled export file data"
 msgid "Export CSV: Missing required CSV file data."
 msgstr ""
 
 #. translators: %s: Directory path
-#: pro/classes/class-smart-manager-pro-base.php:3808
+#: pro/classes/class-smart-manager-pro-base.php:3814
 msgctxt "export file data"
 msgid "Export CSV: unable to create directory %s"
 msgstr ""
 
 #. translators: %s: File path
-#: pro/classes/class-smart-manager-pro-base.php:3817
+#: pro/classes/class-smart-manager-pro-base.php:3823
 msgctxt "process scheduled export file data"
 msgid "Export CSV: unable to write file to %s"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-base.php:3823
+#: pro/classes/class-smart-manager-pro-base.php:3829
 msgctxt "process scheduled export file data"
 msgid "Export CSV: error in checking file type"
 msgstr ""
 
 #. translators: %s: File path
-#: pro/classes/class-smart-manager-pro-base.php:3835
+#: pro/classes/class-smart-manager-pro-base.php:3841
 msgctxt "process scheduled export file data"
 msgid "Export CSV: failed to insert attachment for file %s"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-base.php:3843
+#: pro/classes/class-smart-manager-pro-base.php:3849
 msgctxt "process scheduled export file data"
 msgid "Export CSV: error in getting csv url"
 msgstr ""
 
 #. translators: 1: Site title, 2: Date
-#: pro/classes/class-smart-manager-pro-base.php:3850
+#: pro/classes/class-smart-manager-pro-base.php:3856
 msgctxt "Email subject for scheduled export"
 msgid "Your Scheduled Orders Export from %1$s on %2$s Is Ready"
 msgstr ""
@@ -1620,7 +1620,7 @@ msgid "Billing"
 msgstr ""
 
 #: pro/classes/class-smart-manager-pro-shop-coupon.php:364
-#: pro/templates/order-invoice.php:207
+#: pro/templates/order-invoice.php:211
 msgid "Shipping"
 msgstr ""
 
@@ -1646,6 +1646,39 @@ msgstr ""
 
 #: pro/classes/class-smart-manager-pro-shop-coupon.php:464
 msgid "Click to copy"
+msgstr ""
+
+#. translators: %s: list of item names
+#: pro/classes/class-smart-manager-pro-shop-order.php:818
+#: pro/classes/class-smart-manager-pro-shop-order.php:1021
+msgctxt "order note"
+msgid "Added line items: %s"
+msgstr ""
+
+#: pro/classes/class-smart-manager-pro-shop-order.php:846
+msgctxt "order note"
+msgid "Deleted %1$s and adjusted stock (%2$s)"
+msgstr ""
+
+#: pro/classes/class-smart-manager-pro-shop-order.php:846
+msgctxt "order note"
+msgid "Deleted %s"
+msgstr ""
+
+#: pro/classes/class-smart-manager-pro-shop-order.php:936
+msgctxt "order note"
+msgid "Coupon applied: \"%s\"."
+msgstr ""
+
+#: pro/classes/class-smart-manager-pro-shop-order.php:936
+msgctxt "order note"
+msgid "Coupon removed: \"%s\"."
+msgstr ""
+
+#. translators: 1: product name, 2: quantity
+#: pro/classes/class-smart-manager-pro-shop-order.php:1051
+msgctxt "order note"
+msgid "%1$s (×%2$d)"
 msgstr ""
 
 #: pro/classes/class-smart-manager-pro-task.php:108
@@ -1846,100 +1879,100 @@ msgid "Orders Export for %s"
 msgstr ""
 
 #. translators: %s: user display name
-#: pro/templates/emails/scheduled-export.php:61
+#: pro/templates/emails/scheduled-export.php:62
 msgctxt "scheduled export email content"
 msgid "Hi %s,"
 msgstr ""
 
 #. translators: 1: Site title, 2: Date
-#: pro/templates/emails/scheduled-export.php:63
+#: pro/templates/emails/scheduled-export.php:64
 msgctxt "scheduled export email message"
 msgid "Smart Manager has successfully completed your scheduled orders export for <strong>%1$s</strong>  on <strong>%2$s</strong>."
 msgstr ""
 
-#: pro/templates/emails/scheduled-export.php:64
+#: pro/templates/emails/scheduled-export.php:65
 msgctxt "scheduled export email content"
 msgid "You can download your CSV file using the link below:"
 msgstr ""
 
-#: pro/templates/emails/scheduled-export.php:67
+#: pro/templates/emails/scheduled-export.php:68
 msgctxt "scheduled export email content"
 msgid "Download CSV File"
 msgstr ""
 
 #. translators: %s: contact us link
-#: pro/templates/emails/scheduled-export.php:71
+#: pro/templates/emails/scheduled-export.php:72
 msgctxt "scheduled export email content"
 msgid "If you have any questions or need help, feel free to reach out to our <a href=\"%s\">support team</a>."
 msgstr ""
 
-#: pro/templates/emails/scheduled-export.php:72
+#: pro/templates/emails/scheduled-export.php:73
 msgctxt "scheduled export email content"
 msgid "Best regards,"
 msgstr ""
 
-#: pro/templates/emails/scheduled-export.php:73
+#: pro/templates/emails/scheduled-export.php:74
 msgctxt "scheduled export email content"
 msgid "The Smart Manager Team"
 msgstr ""
 
-#: pro/templates/emails/scheduled-export.php:76
+#: pro/templates/emails/scheduled-export.php:77
 msgctxt "scheduled export email content"
 msgid "If you like"
 msgstr ""
 
-#: pro/templates/emails/scheduled-export.php:76
+#: pro/templates/emails/scheduled-export.php:77
 msgctxt "scheduled export email content"
 msgid "Smart Manager"
 msgstr ""
 
-#: pro/templates/emails/scheduled-export.php:76
+#: pro/templates/emails/scheduled-export.php:77
 msgctxt "scheduled export email content"
 msgid ", please leave us a"
 msgstr ""
 
-#: pro/templates/emails/scheduled-export.php:76
+#: pro/templates/emails/scheduled-export.php:77
 msgctxt "scheduled export email content"
 msgid "rating. A huge thank you from StoreApps in advance!"
 msgstr ""
 
-#: pro/templates/order-invoice.php:154
+#: pro/templates/order-invoice.php:158
 msgid "Billing Address"
 msgstr ""
 
-#: pro/templates/order-invoice.php:161
+#: pro/templates/order-invoice.php:165
 msgid "Shipping Address"
 msgstr ""
 
-#: pro/templates/order-invoice.php:168
+#: pro/templates/order-invoice.php:172
 msgid "Email id"
 msgstr ""
 
-#: pro/templates/order-invoice.php:169
+#: pro/templates/order-invoice.php:173
 msgid "Tel"
 msgstr ""
 
-#: pro/templates/order-invoice.php:172
+#: pro/templates/order-invoice.php:176
 msgid "Product"
 msgstr ""
 
-#: pro/templates/order-invoice.php:173
+#: pro/templates/order-invoice.php:177
 msgid "Quantity"
 msgstr ""
 
-#: pro/templates/order-invoice.php:205
+#: pro/templates/order-invoice.php:209
 msgid "Order Notes"
 msgstr ""
 
-#: pro/templates/order-invoice.php:211
+#: pro/templates/order-invoice.php:215
 msgid "Order Discount"
 msgstr ""
 
-#: pro/templates/order-invoice.php:218
+#: pro/templates/order-invoice.php:222
 msgid "Tax"
 msgstr ""
 
-#: pro/templates/order-invoice.php:219
+#: pro/templates/order-invoice.php:223
 msgid "Total"
 msgstr ""
 
@@ -1980,8 +2013,8 @@ msgid "minutes"
 msgstr ""
 
 #: assets/js/admin.js:1
-#: src/views/Rule.js:67
-#: src/views/Rule.js:576
+#: src/views/Rule.js:68
+#: src/views/Rule.js:587
 msgctxt "placeholder"
 msgid "Enter value"
 msgstr ""
@@ -1989,31 +2022,43 @@ msgstr ""
 #. translators: %s: dashboard display name
 #: assets/js/admin.js:1
 #: pro/assets/js/smart-manager.js:1309
-#: src/views/Rule.js:270
+#: src/views/Rule.js:276
 msgctxt "placeholder"
 msgid "Select %s"
 msgstr ""
 
 #: assets/js/admin.js:1
-#: src/views/Rule.js:274
+#: src/views/Rule.js:281
+msgctxt "placeholder"
+msgid "Select Product"
+msgstr ""
+
+#: assets/js/admin.js:1
+#: src/views/Rule.js:286
+msgctxt "placeholder"
+msgid "Select Coupon"
+msgstr ""
+
+#: assets/js/admin.js:1
+#: src/views/Rule.js:290
 msgctxt "placeholder"
 msgid "Select Notes"
 msgstr ""
 
 #: assets/js/admin.js:1
-#: src/views/Rule.js:314
+#: src/views/Rule.js:325
 msgctxt "placeholder"
 msgid "Search user roles"
 msgstr ""
 
 #: assets/js/admin.js:1
-#: src/views/Rule.js:314
+#: src/views/Rule.js:325
 msgctxt "placeholder"
 msgid "Search user"
 msgstr ""
 
 #: assets/js/admin.js:1
-#: src/views/Rule.js:348
+#: src/views/Rule.js:359
 msgctxt "placeholder"
 msgid "Select Dashboards"
 msgstr ""
@@ -2026,7 +2071,7 @@ msgstr ""
 #: assets/js/smart-manager.js:3035
 #: assets/js/smart-manager.js:3043
 #: assets/js/smart-manager.js:3524
-#: src/views/Rule.js:427
+#: src/views/Rule.js:438
 #: src/views/RuleGroup.js:59
 msgctxt "modal content"
 msgid "This feature is available only in the %s version"
@@ -2041,41 +2086,41 @@ msgstr ""
 #: assets/js/smart-manager.js:3035
 #: assets/js/smart-manager.js:3043
 #: assets/js/smart-manager.js:3524
-#: src/views/Rule.js:427
+#: src/views/Rule.js:438
 #: src/views/RuleGroup.js:59
 msgctxt "modal content"
 msgid "Pro"
 msgstr ""
 
 #: assets/js/admin.js:1
-#: src/views/Rule.js:576
+#: src/views/Rule.js:587
 msgctxt "placeholder"
 msgid "Enter \"|\" separated values"
 msgstr ""
 
 #: assets/js/admin.js:1
 #: pro/assets/js/smart-manager.js:1345
-#: src/views/Rule.js:675
+#: src/views/Rule.js:686
 msgctxt "placeholder"
 msgid "Search for..."
 msgstr ""
 
 #: assets/js/admin.js:1
-#: src/views/Rule.js:675
+#: src/views/Rule.js:686
 msgctxt "placeholder"
 msgid "Enter attribute name..."
 msgstr ""
 
 #: assets/js/admin.js:1
 #: pro/assets/js/smart-manager.js:1346
-#: src/views/Rule.js:676
+#: src/views/Rule.js:687
 msgctxt "placeholder"
 msgid "Replace with..."
 msgstr ""
 
 #: assets/js/admin.js:1
 #: pro/assets/js/smart-manager-product.js:220
-#: src/views/Rule.js:676
+#: src/views/Rule.js:687
 msgctxt "placeholder"
 msgid "Enter values..."
 msgstr ""
@@ -4101,12 +4146,47 @@ msgctxt "tooltip"
 msgid "For more than one values, use pipe (|) as delimiter"
 msgstr ""
 
-#: pro/assets/js/smart-manager-shop-order.js:8
+#: pro/assets/js/smart-manager-shop-order.js:6
+msgctxt "Bulk Edit option for WooCommerce order line items"
+msgid "Line items"
+msgstr ""
+
+#: pro/assets/js/smart-manager-shop-order.js:12
+msgctxt "Bulk Edit option for WooCommerce order line items"
+msgid "add coupon"
+msgstr ""
+
+#: pro/assets/js/smart-manager-shop-order.js:13
+msgctxt "Bulk Edit option for WooCommerce order line items"
+msgid "remove coupon"
+msgstr ""
+
+#: pro/assets/js/smart-manager-shop-order.js:14
+msgctxt "Bulk Edit option for WooCommerce order line items"
+msgid "copy coupon from"
+msgstr ""
+
+#: pro/assets/js/smart-manager-shop-order.js:15
+msgctxt "Bulk Edit option for WooCommerce order line items"
+msgid "add product"
+msgstr ""
+
+#: pro/assets/js/smart-manager-shop-order.js:16
+msgctxt "Bulk Edit option for WooCommerce order line items"
+msgid "remove product"
+msgstr ""
+
+#: pro/assets/js/smart-manager-shop-order.js:17
+msgctxt "Bulk Edit option for WooCommerce order line items"
+msgid "copy product from"
+msgstr ""
+
+#: pro/assets/js/smart-manager-shop-order.js:26
 msgctxt "Bulk Edit option for WooCommerce shop order - order notes"
 msgid "add to"
 msgstr ""
 
-#: pro/assets/js/smart-manager-shop-order.js:8
+#: pro/assets/js/smart-manager-shop-order.js:26
 msgctxt "Bulk Edit option for WooCommerce shop order - order notes"
 msgid "remove from"
 msgstr ""

@@ -2283,7 +2283,9 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				$dashboards = ( !empty( $this->req_params['table_model']['posts']['where']['post_type'] ) && empty( $args['dashboard_key'] ) ) ? $this->req_params['table_model']['posts']['where']['post_type'] : $dashboard_key;
 				$dashboards = ( is_array( $dashboards ) ) ? $dashboards : array( $dashboards );
 				$search_term = ( ! empty( $this->req_params['search_term'] ) ) ? $this->req_params['search_term'] : ( ( ! empty( $args['search_term'] ) ) ? $args['search_term'] : '' );
-
+				if ( ( ! empty( $this->req_params['load_variations'] ) ) && ( 'true' === $this->req_params['load_variations'] ) ) {
+					array_push( $dashboards, "product_variation" );
+				}
 
 				$select = apply_filters( 'sm_batch_update_copy_from_ids_select', "SELECT ID AS id, post_title AS title", $args );
 
@@ -2291,14 +2293,31 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 
 				$search_cond_ids = ( !empty( $args['search_ids'] ) ) ? " AND id IN ( ". implode(",", $args['search_ids']) ." ) " : '';
 
-				$results = $wpdb->get_results( $select . " FROM {$wpdb->prefix}posts WHERE post_status != 'trash' ". $search_cond ." ". $search_cond_ids ." AND post_type IN ('". implode("','", $dashboards) ."') ", 'ARRAY_A' );
+				$results = $wpdb->get_results( $select . " FROM {$wpdb->prefix}posts WHERE post_status " . ( ( ! empty( $this->req_params['load_published_only'] ) ) && ( 'true' === $this->req_params['load_published_only'] ) ? "= 'publish'" : "!= 'trash'" ) . $search_cond . " " . $search_cond_ids . " AND post_type IN ('" . implode( "','", array_map( 'esc_sql', $dashboards ) ) . "')", 'ARRAY_A' );
 
 				if( count( $results ) > 0 ) {
 					foreach( $results as $result ) {
+						if ( empty( $result ) || ! is_array( $result ) || empty( $result['id'] ) || empty( $result['title'] ) ) {
+							continue;
+						}
+						if ( ( ( ! empty( $this->req_params['load_variations'] ) ) && ( 'true' === $this->req_params['load_variations'] ) ) && ( ( ! empty( $this->req_params['skip_variation_parent'] ) ) && ( 'true' === $this->req_params['skip_variation_parent'] ) ) ) {
+							$product_object = wc_get_product( absint( $result['id'] ) );
+							if ( ( ! is_object( $product_object ) ) || ( ! is_a( $product_object, 'WC_Product' ) ) || ( is_callable( array( $product_object, 'get_type' ) ) && 'variable' === $product_object->get_type() ) ) {
+								continue;
+							}
+							$formatted_name = is_callable( array( $product_object, 'get_formatted_name' ) ) ? $product_object->get_formatted_name() : '';
+							if ( is_callable( array( $product_object, 'managing_stock' ) ) && ( ! empty( $product_object->managing_stock() ) ) ) {
+								$stock_amount = is_callable( array( $product_object, 'get_stock_quantity' ) ) ? $product_object->get_stock_quantity() : 0;
+								$formatted_name .= ' - ' . sprintf( __( 'Stock: %d', 'woocommerce' ), wc_format_stock_quantity_for_display( $stock_amount, $product_object ) );
+							}
+							if ( ( empty( $formatted_name ) ) ) {
+								continue;
+							}
+							$result['title'] = rawurldecode( wp_strip_all_tags( $formatted_name ) );
+						}
 						$data[ $result['id'] ] = trim($result['title']);
 					}
 				}
-
 				$data = apply_filters( 'sm_batch_update_copy_from_ids', $data );
 			}
 

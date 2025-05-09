@@ -1,47 +1,113 @@
-=== WooCommerce Advanced Bulk Edit Products, Orders, Coupons, Any WordPress Post Type - Smart Manager ===
+=== Smart Manager - Advanced WooCommerce Bulk Edit & Inventory Management ===
 Contributors: storeapps, niravmehta, Tarun.Parswani, mansi shah, ratnakar.dubey, gomathip, abhaypatel01
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CPTHCDC382KVA
 Author URI: https://www.storeapps.org/woocommerce-plugins/
 Plugin URI: https://www.storeapps.org/product/smart-manager/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme
 Tags: woocommerce advanced bulk edit, wordpress bulk edit, woocommerce inventory management, woocommerce stock manager, woocommerce product manager
 Requires at least: 5.0
-Tested up to: 6.8
+Tested up to: 6.8.1
 Requires PHP: 5.6
-Stable tag: 8.60.0
+Stable tag: 8.61.0
 License: GPLv2
 
 WooCommerce Advanced Bulk Edit products, orders, & posts in an Excel-like sheet editor. Get advanced WooCommerce stock, pricing, & order management.
 
 == Description ==
 
-**Powerful and advanced WooCommerce bulk edit plugin** to manage your store from one place in a user-friendly, **Excel-like sheet editor**.
+**Manage and bulk edit WooCommerce products, orders, coupons, posts, users, subscriptions; any WordPress post type and taxonomies (including custom) and custom fields using an Excel-like sheet editor**.
 
-> ***Smart Manager is a lifesaver**. Anyone starting a new store or migrating to a new line (perhaps seasonal shifts) should consider this mandatory in their toolbox.*
-> – Envoymatt
+Add products, update prices, edit SKUs, change order statuses, manage coupons, edit blog posts - perform hundreds of store operations from one place, instantly.
 
-**Smart Manager** is a single-screen, excel-like interface to browse and manage these dashboards – **products (all types), orders, blog posts, and coupons**.
+[Smart Manager](https://www.storeapps.org/product/smart-manager/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme) helps you stay in control and scale with ease — whether you manage 100,000+ products or just a small shop.
 
-Select a dashboard and start making edits without leaving the spreadsheet. Speed up the way you create content and manage your store.
+> 🧑 ***An Essential Plugin for WooCommerce – Smart Manager Exceeds All Expectations!**
+> I wholeheartedly recommend Smart Manager. It is an essential plugin for any WooCommerce user looking to streamline their product management and increase efficiency. With its wide range of features, seamless integration and outstanding performance, Smart Manager has exceeded my expectations and **become an indispensable tool in my online store**. Give it a try and experience the benefits of this amazing plugin for yourself!*
+> **– Mio Creativ**
 
-Manage Products, Orders, Coupons, Get endless powerful features with this FREE plugin
+### Why Smart Manager stands out from the rest?
 
-https://www.youtube.com/watch?v=COXCuX2rFrk
+🎯 Saves you time, prevents costly mistakes and manages your store.
+🎯 Works seamlessly with 50+ popular WooCommerce & WordPress plugins.
+🎯 **Eliminates the need for multiple plugins to manage and edit different post types — saving you hundreds of dollars**.
+🎯 All-in-one plugin for WooCommerce order management, stock management, product management…
+🎯 Handles bulk edits of 100,000+ records without breaking a sweat.
+🎯 Trusted by over 18,500 WooCommerce stores worldwide.
+🎯 Built by the creators of Smart Coupons and Affiliate for WooCommerce.
 
-✅ **Bulk edit all WooCommerce product types including custom ones** – simple, variable, product variations, subscriptions, bundles, grouped, and more.
-✅ Smart WooCommerce bulk product editor – Bulk edit **SKUs, weight, quantity, backorders, stock status, tax status, shipping class, product title, gallery images, and all the important stock management-related fields**.
-✅ WooCommerce **bulk edit attributes and categories** – bulk assign/remove categories and attributes to/from products, and also manage them effortlessly.
-✅ WooCommerce **bulk edit price** – change regular price and sale price.
-✅ Bulk edit **WooCommerce orders, coupons, blog posts, users (customers), subscriptions, product addons... any WordPress post type, custom taxonomies, and custom fields**.
-✅ **Do an advanced search and make bulk edits**.
-✅ Perform operations like **append, prepend, increase, decrease, search and replace, etc. in bulk**.
-✅ **Schedule bulk edit** – set a specific date to perform your bulk edit task. For example, increase all product prices tomorrow by 15%.
-✅ **Undo your bulk edit operations** if required.
-✅ **Compatible with WooCommerce High Performance Order Storage (HPOS)**
+### Powerful and advanced WooCommerce bulk edit plugin
 
-**Power-packed lite (free) version**:
+https://youtu.be/dPjlz7IRYdI?si=MnBOiQesOl5cUua0
 
-https://www.youtube.com/watch?v=BrvU6GD9pWU
+**✅ Spreadsheet interface**
+Feels like Excel but works inside your WordPress dashboard. Simple, clean and super fast for managing any data.
+**✅ Bulk edit anything**
+Update thousands of records – products, orders, users, coupons or any post type – in a few clicks. Change prices, stock, statuses, tags, roles and more.
+**✅ Inline editing**
+Edit fields directly in the spreadsheet interface. No page reloads, no delays – just point, type and save instantly.
+**✅ Advanced search & filters**
+Find anything fast with filters by category, SKU, price, date, status, user role, subscription status or any custom field.
+**✅ Duplicate**
+Quickly duplicate selected records based on filters or your entire store. Great for creating product variations.
+**✅ Delete**
+Delete all or specific records based on filters. Move them to trash or get rid of them forever.
+**✅ Print PDF Invoices**
+Generate and print professional invoices for your WooCommerce orders directly from Smart Manager.
+**✅ Export to CSV**
+Export complete or filtered data sets – products, orders, users, posts, product stock log or custom post types – in just one click.
+**✅ Import products**
+Import new products or update existing ones using a CSV file. Perfect for quick catalog updates or migrations.
+**✅ Schedule bulk edits**
+Plan and automate future updates for prices, stock or other fields. Great for running promotions or seasonal changes.
+**✅ Undo changes**
+Mistake in bulk or inline editing? Instantly roll back edits to keep your store error-free and consistent.
+**✅ Custom views**
+Create saved dashboard views tailored to your workflow. Show or hide fields for products, orders, users and more.
+**✅ Scheduled exports**
+Automatically export orders data to CSV at set intervals for backups, reports or integrations.
+**✅ Saved searches**
+Save filtered conditions to quickly reuse them later without setting them up again.
+**✅ WooCommerce HPOS Compatible**
+Works seamlessly with High-Performance Order Storage for better speed and scalability.
 
+> 🧑 ***There is no comparable solution**
+> Smart Manager Pro is an absolutely efficient tool for handling large datasets, especially when you need to delete them from the SQL database.
+> Seamlessly integrated with WooCommerce, it’s always up-to-date. I particularly love its feature of permanently deleting images – it automatically removes them from the server, SQL database and library.
+> Its advanced search methods make it a powerful management plugin.
+> Additionally, it boasts super-fast support that’s truly committed to assisting and resolving issues. Highly recommended for effective management tasks*.
+> **– Felix**
+
+> 🧑 ***Fabulous product – intuitive, practical & a lifesaver**
+> We wanted to move a client’s site from Magento to WooCommerce and update 3000+ products, with oodles and oodles of variations, so the products could be displayed better & more intuitively in WooCommerce. With Smart Manager, we were able to do mass updates and changes*.
+> **– Hughes**
+
+[Try Smart Manager Live Demo](https://demo.storeapps.org/?demo=sm-woo&utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme)
+
+### How different people use Smart Manager
+
+**Store Owners:**
+- Get a complete overview of products, orders and inventory from one screen
+- Save time on routine tasks and focus more on growing the business
+
+**Store Managers / Admins:**
+- Bulk edit prices, stock, SKUs and variations in seconds
+- Quickly update order statuses, customer details and shipping info
+- Check who did some particular changes and when
+
+**Marketers:**
+- Create, update and manage coupons and promotions easily
+- Edit blog posts, landing pages, modify sale prices in bulk before or during campaigns
+
+**Customer Support Teams:**
+- Instantly search and modify orders without switching between pages
+- Resolve order or customer issues quickly using in-grid editing
+
+**Developers / Power Users:**
+- Manage custom post types and custom fields effortlessly
+- Use Smart Manager as a unified admin tool instead of building custom panels
+
+*Smart Manager Lite (Free) and Pro (Paid) are both powerful – each designed to meet different needs. [Click here](https://www.storeapps.org/docs/sm-lite-vs-pro/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme) for comparison*.
+
+### ✨Smart Manager Lite – Fast, efficient store management (Free)
 
 - **Inline edits** – Up to three **direct edits** simultaneously without saving the changes.
 - **Live preview and infinite scrolling** for smoother navigation.
@@ -56,7 +122,7 @@ https://www.youtube.com/watch?v=BrvU6GD9pWU
 - **Add new products, orders, coupons, and posts directly** using the spreadsheet.
 - **Import products CSV**
 - **Export CSV of stock-related data columns for products**.
-- **Delete/Move to trash** single or multiple products, orders, coupons, and posts.
+- **Delete/Move to trash** any records with ease.
 - Search using keywords, categories, attributes, or any other field.
 - **Advanced Search** with AND condition, search operators (<,>,=,<=, >=, is, contains, etc.) and drop-down filters. Makes it **easy to filter inventory** by type, category, - backorders, manage stock, stock status, order status, coupon type, post status, and a lot more...
 Example – Search for SKU is WC09 and price >= $600.
@@ -68,86 +134,58 @@ Example – Search for SKU is WC09 and price >= $600.
 - Image preview for image type fields in the grid for easier identification of your WooCommerce inventory.
 - **Distraction-free mode** when performing store operations.
 
-18300+ users love the Smart Manager WooCommerce bulk editor...
+> 🧑 ***Smart Manager makes our day way more productive**
+> We can now change our stock in just 2 clicks instead of hours of work. Also, the support is really quick and helpful!*
+> **– Jasper Vandiemen**
 
-Embrace the power of next-generation WooCommerce store management. Smart Manager is an **indispensable tool for all WordPress users**.
+## 🏋️ Smart Manager Pro – More powerful and advanced bulk editor for maximum efficiency
 
-> ***Smart Manager makes our day way more productive.** We now can **change our stock in just 2 clicks** instead of hours of work. Also, the support is really quick and helpful!*
-> – Jasper Vandiemen
+- **Bulk edit/batch update** any post type: products (simple, variable, product variations, subscriptions, bundles, grouped products and even custom ones), orders, coupons, subscriptions, bookings, users, media, courses, events, genres, SEO fields, etc.
+- **Unlimited inline editing** of records directly from the grid – including order statuses, coupon expiry dates, featured images and more.
+- Bulk edit **100,000+ records** quickly and accurately.
+- **Update single/multiple fields** across multiple records in seconds.
+- Perform operations like append, prepend, increase, decrease and search-replace on fields in bulk.
+- Save and reuse Bulk Edit actions.
+- WooCommerce stock management made simple – update inventory, change prices, **bulk edit based on categories**.
+- **Bulk edit order statuses** (including custom ones), export orders to CSV and filter using advanced conditions.
+- **Scheduled export orders** for better productivity.
+- Copy values between fields or from one record to another.
+- **Assign attributes** of one product to multiple others in bulk.
+- Perform **advanced search filters** and bulk edit the results.
+- **Save your advanced searches** for reuse. Works across all dashboards.
+- **Schedule bulk edits** to run automatically at set times.
+- Run bulk edits in the background while you focus on other tasks.
+- Inline update of Product Gallery Images and Featured Images via the media library.
+- **Undo changes** (inline or bulk) using named Tasks for full control.
+- Permanently delete or trash products/orders/coupons/media with filters and conditions.
+- Delete media attached to specific post types directly from the grid.
+- **Duplicate** one, many or all records for any post type.
+- Advanced search using multiple **AND/OR** conditions for precision filtering.
+- Create and save **custom views/column sets** to see only what matters to you.
+- Get some Predefined custom views for quick editing - Draft Products, Expired Coupons, Customers and Pending for Shipping Orders.
+- **Predefined views:** Product Stock and Product Price List.
+- Export filtered data using advanced **CSV export** (by date, search or column filters).
+- Rename admin column titles in the grid for better understanding.
+- Add your logo to packing slips.
+- **Bulk print PDF invoices** for orders.
+- View **customer LTV** (Lifetime Value), total purchases and last order details.
+- **Manage WordPress user roles** – change roles, passwords, etc.
+- Assign dashboard-specific access to specific user roles or emails.
+- Manage and edit **WordPress custom taxonomies** easily.
+- Supports inline edit, advanced filtering and bulk editing of custom fields added by third-party plugins.
 
-> 'An Essential Plugin for WooCommerce – Smart Manager Exceeds All Expectations!'
-> I wholeheartedly recommend Smart Manager. It is an essential plugin for any WooCommerce user looking to streamline their product management and increase efficiency. With its wide range of features, seamless integration, and outstanding performance, Smart Manager has exceeded my expectations and **become an indispensable tool in my online store**. Give it a try and experience the benefits of this amazing plugin for yourself!
-> - Mio Creativ
+> 🧑 ***A massive time saver…flawless export!**
+> We have over 6000 individual lines on our site and this has saved us huge amounts of time.
+> Bulk edit works flawlessly, which is a massive time saver. If you need to change all of your prices on the entire site by a % or value, you can with a couple of clicks! We updated the Tax > class on all products in less than 3 minutes. The CSV export tool actually works unlike some I have tried, with all 6000 odd lines neatly exported in one attempt. No missing or corrupt data*.
+> **– Kevin Goodchild, Obsolete Electronic Components**
 
+> 🧑 ***I would happily pay five times for this product!**
+> What really sold me on this was Bulk Edit. My assistant does not have to do any complex math now (earlier, I always feared she would make a mistake)! With Smart Manager, she has more free time at hand, hence I asked her to set up autoresponder emails for our customers. The response was phenomenal. Our repeat sales were up by 19.5%*.
+> **– Jeff Smith**
 
-##Why should you choose Smart Manager WooCommerce bulk editor?
+## Compatibility with other WordPress plugins
 
-**Powerful features** – Smart Manager is jam-packed with powerful features both in the Lite (free) and the Pro (paid) versions.
-
-**Zero coding chaos** – Update your data within seconds with just a few clicks. No learning curve or tech skills needed.
-
-**Efficiency** – Save hours every week by ditching mundane tasks and embracing advanced WooCommerce bulk editing bliss.
-
-**Error-busting hero** – Say goodbye to calculation errors and inconsistencies with lightning-fast batch processing.
-
-**Data delight** – Export data with ease, keeping your information safe and sound.
-
-**Happy customers, happy life** – Smooth WooCommerce inventory management, WooCommerce orders management, and efficient operations mean happy customers and a thriving business.
-
-**TL;DR:** Smart Manager Lite makes managing your e-commerce store easy. Quickly edit products, orders, coupons, and posts using inline edit. Use advanced search to find and update items, manage stock, and track performance. Bulk edit prices, SKUs, and order statuses, or add new products and orders directly. Simplify store management in one place.
-
-> ***I’m very happy using the free version of the plugin on my WooCommerce site**. No issue with a lot of plugins I have active on my site.
-> The best is the support: **6 stars** I would give them. Keep in mind that I’m talking about the free version and from the first contact they have been very kind and fast. Sure I recommend it!*
-> - FreelanceJose
-
-Smart Manager Pro features:
-
-Stay ahead of your competitors with [Smart Manager Pro](https://www.storeapps.org/product/smart-manager/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
-
-- **WooCommerce advanced bulk edit / batch update / mass update any post type records** – products, variations, orders, coupons, subscriptions, bookings, media, users/customers, courses, events, product add-ons, advanced custom fields, custom meta fields, etc.
-- **Inline edit (direct edit) records from the grid** – Update inventory, modify order status, change the coupon expiry date, add post images, etc.
-- **Bulk edit 100000+ records for any post type within minutes**. Smart Manager has successfully tested these numbers.
-- **Update single/multiple fields for a few or all records at once**...without errors!
-- Quick WooCommerce stock management – **change prices, increase inventory levels, change product categories, attributes, or any other fields, all in bulk quickly**.
-- **Bulk edit order statuses** including custom order statuses, search for orders using advanced filters, export orders to CSV, and more...WooCommerce order management made easy.
-- **Copy any field from any record** using Bulk edit / Batch update.
-- **Copy value from any other field** for any record.
-- **Copy the attributes of a specific product and bulk assign the same to multiple products**.
-- **Filter any post type & perform bulk edit operations** on them.
-- Utilize your time for other business tasks while the **Bulk edit / Batch update runs in the background**.
-- **Inline update** ‘Product Gallery Images, Featured Image’ using the media library.
-- **Undo inline edit and bulk edit changes (Tasks)** you made. Name your tasks and revert the changes at once. It can be a single task or multiple tasks.
-- **Delete all products permanently or move them to trash** – based on filters, categories, and attributes. Delete featured images and media library images directly from the grid.
-- **Delete records** for orders, coupons, and any post type **in bulk**. You can **do it using our search filters** too.
-- **Delete media when any post-type record is deleted**, provided the media is linked with that post-type record only.
-- **Duplicate single, multiple, or all records for any post type**.
-- Perform an advanced search using multiple AND, multiple OR, multiple AND + OR conditions to get very specific results and then make inline edits or bulk edits.
-
-https://www.youtube.com/watch?v=20iodFpP5ow
-
-> **A massive time saver...flawless export!**
-> *We have over 6000 individual lines on our site and this has saved us huge amounts of time.
-> Bulk edit works flawlessly, which is a massive time saver. If you need to change all of your prices on the entire site by a % or value, you can with a couple of clicks! We updated the Tax > class on all products in less than 3 minutes. The CSV export tool actually works unlike some I have tried, with all 6000 odd lines neatly exported in one attempt. No missing or corrupt data.*
-> – Kevin Goodchild, Obsolete Electronic Components
-
-- Create **Excel-like custom views** / segmented views / column sets, i.e. view only the data you want. Enable / disable data columns, make edits, apply filters, and save. - **Supports all post types and custom taxonomies**.
-- **Predefined custom views** – Product Stock & Product Price List
-- **Advanced Export CSV for all post types and custom taxonomies** – access all or filtered data using date, search, or column filters. Perfect for inventory management, reporting, sales, marketing campaigns, and store migration.
-- **Rename the admin columns title at your convenience**. For example, change Stock to Quantity.
-- Add your own logo to packing slips.
-- **Print PDF invoices for orders in bulk**.
-- Know the **lifetime value (LTV) of all your customers** along with their total purchases to date and last order details.
-- **Manage WordPress user roles** – change user role, change password, etc.
-- **Give dashboard-specific access to non-admin users** including any custom user role. You can even give dashboard specific access to any specific user email.
-- **Manage and edit WordPress custom taxonomies**.
-
-
-> **I would happily pay five times for this product!**
-> *What really sold me on this was Bulk Edit. My assistant does not have to do any complex math now (earlier, I always feared she would make a mistake)! With Smart Manager, she has more free time at hand, hence I asked her to set up autoresponder emails for our customers. The response was phenomenal. Our repeat sales were up by 19.5%.*
-> – Jeff Smith
-
-- Import orders, coupons, and any other post type (coming soon).
-- Manage, view, filter, and edit custom fields of top WooCommerce & WordPress plugins. **Smart Manager is compatible with these plugins**. It automatically recognizes all custom fields added by other plugins.
+Manage, view, filter, and edit custom fields of top WooCommerce & WordPress plugins. **Smart Manager is compatible with these plugins**. It automatically recognizes all custom fields added by other plugins.
 -- [Advanced Custom Fields (ACF)](https://wordpress.org/plugins/advanced-custom-fields/)
 -- [WooCommerce Subscriptions](http://automattic.pxf.io/5gN9zb)
 -- [Affiliate For WooCommerce](https://woocommerce.com/products/affiliate-for-woocommerce/)
@@ -173,36 +211,22 @@ https://www.youtube.com/watch?v=20iodFpP5ow
 -- [File Uploads Addon for WooCommerce](https://wordpress.org/plugins/woo-addon-uploads/)
 -- [Pods – Custom Content Types and Fields](https://wordpress.org/plugins/pods/)
 -- [Meta Box](https://wordpress.org/plugins/meta-box/)
-- And all other features of the Smart Manager Lite version...
 
 **TL;DR:** With Smart Manager, quickly search and delete expired subscriptions, bulk edit bookings, inline edit memberships, search and edit posts by keyword, adjust product costs in bulk, manage courses, and more.
-Effortlessly handle suppliers, vendors, warehouses, and WooCommerce inventory.
-
-Get priority support from plugin developers and receive plugin updates till your license period.
-
-[Try all these features in the Smart Manager Pro Live Demo](https://demo.storeapps.org/?demo=sm-woo&utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme)
-
-> **There is no comparable solution**
-> *Smart Manager Pro is an absolutely efficient tool for handling large datasets, especially when you need to delete them from the SQL database.
-> Seamlessly integrated with WooCommerce, it’s always up-to-date. I particularly love its feature of permanently deleting images – it automatically removes them from the server, SQL database, and library.
-> Its advanced search methods make it a powerful management plugin. Additionally, **it boasts super fast support that’s truly committed to assisting and resolving issues**. Highly recommended for effective management tasks.*
-> – Felix
-
-> **This software is indispensable!**
-> *It is possible to operate in bulk on anything: categories, attributes, tags, moving products from one category to another...
-> We had a problem and support walked us through the resolution, even creating a software update to test the resolution.
-> **In 20 years of working on the web, I have never found an assistance that does not abandon you and does not attribute the problem to other causes.***
-> – Lolopo
-
-[Get Smart Manager Pro](https://www.storeapps.org/product/smart-manager/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme)
-
-[Click here](https://www.storeapps.org/docs/sm-lite-vs-pro/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme) to know the difference between Lite & Pro versions.
 
 It’s your smart WordPress bulk edit plugin that won’t fail you!
 
-The plugin is also **GDPR-ready – it doesn’t collect personal data**.
+The plugin is also GDPR-ready – it doesn’t collect personal data.
 
-**How to use Smart Manager?**
+> 🧑 ***This software is indispensable!**
+> It is possible to operate in bulk on anything: categories, attributes, tags, moving products from one category to another…
+> We had a problem and support walked us through the resolution, even creating a software update to test the resolution.
+> In 20 years of working on the web, I have never found an assistance that does not abandon you and does not attribute the problem to other causes*.
+> **– Lolopo**
+
+[Get Smart Manager Pro](https://www.storeapps.org/smart-manager-pricing/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme)
+
+## Best Smart Manager use cases
 
 * [Bulk edit attributes](https://www.storeapps.org/woocommerce-bulk-edit-attributes/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme)
 * [Bulk edit WordPress posts and pages](https://www.storeapps.org/bulk-edit-wordpress-posts-pages/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme)
@@ -267,20 +291,15 @@ Yes, you can but export feature is available in [Pro](https://www.storeapps.org/
 
 = Can I import data ? =
 
-Smart Manager does not currently support import.
+You can import *"WooCommerce"* Products data to Smart Manager
 
 = Which browser to choose for best performance? =
 
 Smart Manager works best in Chrome, Firefox. Currently it is not compatible with IE.
 
-= What do I get in this Lite version? =
+= How do I bulk edit Products in WooCommerce? =
 
-Spreadsheet like view of products, orders and posts. Search and navigation, limited inline editing, ability to delete multiple items at once, a quick edit link to WooCommerce / WP e-Commerce editing screen.
-
-= What do I get in the Pro? =
-
-[Pro](https://www.storeapps.org/product/smart-manager/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme) version has unlimited managing of product variations, full inline editing right within the spreadsheet view and a powerful Batch Update screen where you can apply multiple smart update actions to selected / all items. You can also add / duplicate products or the entire store. For Customers, you can see total sales for each customer and their last order details. You can also export data into CSV and print orders / packing slips. And not just WooCommerce, you can manage any WordPress custom post type.
-It also gives the warm feeling of supporting further development of the plugin.
+Open Smart Manager Products dashboard, select required products, click on Bulk Edit, enter required conditions and update them now or schedule for later.
 
 == Screenshots ==
 
@@ -289,6 +308,17 @@ It also gives the warm feeling of supporting further development of the plugin.
 2. Bulk edit / Batch update (only in Pro version)
 
 == Changelog ==
+
+= 8.61.0 (09.05.2025) =
+* New: WordPress 6.8.1 compatible
+* New: WooCommerce 9.8.4 compatible
+* New: Add/Remove product and coupon line items for WooCommerce Orders and Subscriptions using Bulk Edit (Pro)
+* New: Copy product and coupon line items for WooCommerce Orders and Subscriptions using Bulk Edit (Pro)
+* Fix: Adding/Removing terms from WooCommerce Products not working in some cases when using inline edit functionality
+* Fix: Adding/Removing terms to WooCommerce Products not working in some cases when using bulk edit functionality (Pro)
+* Fix: PHP Fatal Error: 'Cannot redeclare sm_beta_pro_set_scheduled_export_content_type' when using the 'Schedule Export' functionality from the WooCommerce Orders dashboard (Pro)
+* Fix: PHP Fatal Error: 'Call to a member function date() on null' occurs when using the 'Print Invoice' functionality from the WooCommerce Orders dashboard (Pro)
+* Update: POT file
 
 = 8.60.0 (17.04.2025) =
 * New: WordPress 6.8 compatible
@@ -557,6 +587,9 @@ It also gives the warm feeling of supporting further development of the plugin.
 [See changelog for all versions](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 8.61.0 =
+WordPress 6.8.1 compatible, WooCommerce 9.8.4 compatible, Add/Remove product and coupon line items for WooCommerce Orders and Subscriptions using Bulk Edit (Pro), Copy product and coupon line items for WooCommerce Orders and Subscriptions using Bulk Edit (Pro), Fixes related to Adding/Removing terms from WooCommerce Products not working in some cases when using inline edit functionality, Adding/Removing terms to WooCommerce Products not working in some cases when using bulk edit functionality (Pro), PHP Fatal error: 'Cannot redeclare sm_beta_pro_set_scheduled_export_content_type' when using the 'Schedule Export' functionality from the WooCommerce Orders dashboard (Pro), PHP Fatal Error: 'Call to a member function date() on null' occurs when using the 'Print Invoice' functionality from the WooCommerce Orders dashboard (Pro), along with other important fixes and updates. Recommended upgrade.
 
 = 8.60.0 =
 WordPress 6.8 compatible, WooCommerce 9.8.1 compatible, Automated scheduled CSV exports for WooCommerce Orders (Pro), Compatibility with [Pods – Custom Content Types and Fields](https://wordpress.org/plugins/pods/) (Pro), Compatibility with [Meta Box](https://wordpress.org/plugins/meta-box/) (Pro), Fixes related to 'No Access' rules in Access Privilege Settings not working correctly (Pro), 'Pending for Shipping Orders' predefined custom view not working for non-HPOS stores on the WooCommerce Orders dashboard (Pro), Script to show Bulk Edit progress loaded on all admin pages (Pro), WooCommerce Product SKUs not updating when both SKU and stock fields are edited using Inline Edit (Pro), Internationalization related warnings on WordPress v6.8, Updates related to UI/UX enhancements for Bulk Edit, Advanced search & Access Privilege Settings value fields (Pro), Pricing page related changes along with other important fixes and updates. Recommended upgrade.
