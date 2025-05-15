@@ -1289,7 +1289,7 @@ class Smart_Manager {
 							'SM_BETA_PRO' => SMPRO,
 							'SM_APP_ADMIN_URL' => SM_APP_ADMIN_URL,
 							'record_per_page' => Smart_Manager_Settings::get( 'per_page_record_limit' ),
-							'sm_admin_email' => get_option('admin_email'),
+							'sm_admin_email' => apply_filters( 'sm_admin_email', get_option( 'admin_email' ) ),
 							'batch_background_process' => $batch_background_process,
 							'background_process_name' => $background_process_name,
 							'updated_successful' => $successful,

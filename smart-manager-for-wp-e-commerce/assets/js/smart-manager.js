@@ -3884,6 +3884,12 @@ jQuery(document).ready(function() {
 		//not hiding #sm_select2_childs_section here because click event will not work on this.
 		jQuery("#sm_select2_childs_section").removeClass("visible");
 	})
+	// Prevent closing dashboard select2 if mouse is over select2_childs_section scroller part.
+	jQuery('#sm_dashboard_select').on('select2:closing', function(event) {
+		if (jQuery('#sm_select2_childs_section:hover').length > 0 && !jQuery('#sm_select2_childs_section .select2-child-item:hover').length > 0) {
+			event.preventDefault();
+		}
+	});
 });
 
 jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, { 
@@ -4157,9 +4163,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 			if( typeof(cellProperties.className) != 'undefined' ) { //code to higlight the cell on selection
 				td.setAttribute('class',cellProperties.className);
 			}
-			
-			td.innerHTML = '<div class="wrapper">' + td.innerHTML + '</div>';
-
+			td.innerHTML = '<div class="wrapper">' + window.smart_manager?.decodeHTMLString(td.innerHTML, ('terms_product_cat'===prop)) + '</div>';
 			return td;
 		}
 		
@@ -4653,6 +4657,16 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 		});
 		html += '</ul>';
 		return html;
+	}
+	//Function to convert special characters into HTML characters.
+	Smart_Manager.prototype.decodeHTMLString = function(str = '', isCategoryName = false) {
+		if ('' === str.trim()) {
+			return str;
+		}
+		// Decode HTML entities using DOMParser.
+		const decodedStr = new DOMParser().parseFromString(str, 'text/html').documentElement.textContent;
+		// Replace the ? sequence with >
+		return (isCategoryName === true) ? decodedStr.replace(/\u0080\?/g, '>') : decodedStr;
 	}
 	// Register an alias for datetime
 	Handsontable.cellTypes.registerCellType('sm.datetime', {
