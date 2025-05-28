@@ -373,10 +373,6 @@ class Smart_Manager {
 			if ( !class_exists( 'Smart_Manager_Pro_Views' ) && file_exists( ( dirname( SM_PLUGIN_FILE ) ) . '/pro/classes/class-smart-manager-pro-views.php' ) ) {
 				require_once 'pro/classes/class-smart-manager-pro-views.php';
 			}
-
-			if ( ( ( ! empty( $_GET['post_type'] ) ) && ( 'product' === sanitize_text_field( $_GET['post_type'] ) ) ) && ( ( ! empty( $_GET['page'] ) ) && ( 'product_importer' === sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) ) && ! class_exists( 'Smart_Manager_Pro_Product_Import_CSV' ) && file_exists( ( dirname( SM_PLUGIN_FILE ) ) . '/pro/classes/class-smart-manager-pro-product-import-csv.php' ) ) {
-				require_once 'pro/classes/class-smart-manager-pro-product-import-csv.php';
-			}
 		}
 
 		if ( is_admin() ) {
@@ -463,6 +459,13 @@ class Smart_Manager {
 		add_action( 'before_woocommerce_init', array( $this, 'declare_hpos_compatibility' ) );
 		add_filter( 'plugin_row_meta', array( $this, 'add_additonal_links' ), 99, 4 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'sa_sm_dequeue_styles' ), 999 );
+		//To extend woocommerce_product_import_process_item_data hook on importer screen.
+		add_action('wp_ajax_woocommerce_do_ajax_product_import', function () {
+			if ( ( defined('SMPRO') ) && ( SMPRO === true ) && ! class_exists( 'Smart_Manager_Pro_Product_Import_CSV' ) && file_exists( ( dirname( SM_PLUGIN_FILE ) ) . '/pro/classes/class-smart-manager-pro-product-import-csv.php' ) ) {
+				require_once 'pro/classes/class-smart-manager-pro-product-import-csv.php';
+			}
+		});
+		add_action( 'wp_ajax_dismiss_generate_sku_feature_notice', array( $this, 'dismiss_generate_sku_feature_notice' ) );
 	}
 
 	// Find latest StoreApps Upgrade file
@@ -888,11 +891,16 @@ class Smart_Manager {
 		if (version_compare ( $wp_version, '4.0', '>=' )) {
 			define ( 'IS_WP40', true);
 		}
+		if ( ( defined('SMPRO') ) && ( SMPRO === true ) && ( ( ! empty( $_GET['post_type'] ) ) && ( 'product' === sanitize_text_field( $_GET['post_type'] ) ) && ( ( ! empty( $_GET['page'] ) ) && ( 'product_importer' === sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) ) ) && ! class_exists( 'Smart_Manager_Pro_Product_Import_CSV' ) && file_exists( ( dirname( SM_PLUGIN_FILE ) ) . '/pro/classes/class-smart-manager-pro-product-import-csv.php' ) ) {
+			require_once 'pro/classes/class-smart-manager-pro-product-import-csv.php';
+		}
 	}
 
 	// Function to handle SM admin notices
 	function add_admin_notices() {
-
+		if ( ( ! empty( $_GET['page'] ) ) && ( defined('SMPRO') ) && ( SMPRO === true ) && ( 'sm-storeapps-plugins' === $_GET['page'] || ( ( 'smart-manager' === $_GET['page'] ) && ( ! empty( $_GET['landing-page'] ) && ( 'sm-about' ===  $_GET['landing-page'] ) ) ) ) ) {
+			$this->add_sku_generation_feature_notice();
+		}
 		if( !( !empty( $_GET['page'] ) && ( 'smart-manager' === $_GET['page'] ) ) ) {
 			return;
 		}
@@ -900,6 +908,38 @@ class Smart_Manager {
 		if (SMPRO === false) {
 			$this->add_promo_notices();
 		}
+	}
+
+	/**
+	 * Function to Show admin notice about the new auto-SKU generation feature on Smart Manager pages.
+	 * 
+	 * @return void
+	 */
+	public function add_sku_generation_feature_notice(){
+		if ( ( ! defined('SMPRO') ) || ( SMPRO !== true ) || ( empty( $_GET['page'] ) ) || ( ! in_array( sanitize_text_field( wp_unslash( $_GET['page'] ) ), array( 'smart-manager', 'sm-storeapps-plugins' ), true ) ) || get_option( 'sa_sm_hide_generate_sku_feature_notice' ) ) {
+			return;
+		}
+		?>
+		<script>
+			jQuery(document).on('click', '.generate-sku-feature-notice .notice-dismiss', function(){
+				jQuery.ajax({
+					url: '<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>',
+					type: 'post',
+					dataType: 'json',
+					data: {
+						action: 'dismiss_generate_sku_feature_notice',
+						security: '<?php echo esc_html( wp_create_nonce( 'sa-dismiss-generate-sku-feature-notice' ) ); ?>'
+					}
+				});
+			})
+		</script>
+		<?php
+		echo sprintf(
+			'<div class="notice notice-success is-dismissible generate-sku-feature-notice" style="display:block !important;"><p>🎉 <strong>%s</strong> %s %s</p></div>',
+			_x( 'New Feature Alert:', 'admin notice title for sku generation feature', 'smart-manager-for-wp-e-commerce' ),
+			_x( 'Automatically generate SKUs for WooCommerce products with blank SKUs during CSV import.', 'admin notice description for sku generation feature', 'smart-manager-for-wp-e-commerce' ),
+			_x( 'Enable this by turning on the <strong>“Automatically generate SKUs for WooCommerce products with blank values during CSV import”</strong> setting in <strong>Settings > General Settings.</strong>', 'admin notice instructions for sku generation feature', 'smart-manager-for-wp-e-commerce' )
+		);
 	}
 
 	// Function to handle SM In App Promo
@@ -1666,6 +1706,10 @@ class Smart_Manager {
 			if( is_callable( array( $this, 'show_upgrade_notifications' ) ) ) {
 				$this->show_upgrade_notifications();
 			}
+			if( is_callable( array( $this, 'add_sku_generation_feature_notice' ) ) ) {
+				$this->add_sku_generation_feature_notice();
+			}
+
 			if( ! $is_pricing_page ) {
 		?>
 				<div id="sm_editor_grid" ></div>		
@@ -2181,6 +2225,16 @@ class Smart_Manager {
 	*/
 	public static function get_scheduled_actions_search_url( $search = '' ) {
 		return ( empty( $search ) ) ? '' : esc_url( admin_url( 'tools.php?page=action-scheduler&orderby=schedule&order=desc&action=-1&action2=-1&status=pending&paged=1' ) . '&s=' . urlencode( $search ) );
+	}
+
+	/**
+	 * AJAX handler to dismiss the Generate SKU feature notice.
+	 *
+	 */
+	public function dismiss_generate_sku_feature_notice() {
+		// Check nonce.
+		check_ajax_referer( 'sa-dismiss-generate-sku-feature-notice', 'security' );
+		return update_option( 'sa_sm_hide_generate_sku_feature_notice', true );
 	}
 }
 

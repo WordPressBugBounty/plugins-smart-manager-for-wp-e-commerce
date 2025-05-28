@@ -7,7 +7,7 @@ Tags: woocommerce advanced bulk edit, wordpress bulk edit, woocommerce inventory
 Requires at least: 5.0
 Tested up to: 6.8.1
 Requires PHP: 5.6
-Stable tag: 8.62.0
+Stable tag: 8.63.0
 License: GPLv2
 
 WooCommerce Advanced Bulk Edit products, orders, & posts in an Excel-like sheet editor. Get advanced WooCommerce stock, pricing, & order management.
@@ -247,7 +247,7 @@ The plugin is also GDPR-ready – it doesn’t collect personal data.
 
 * [Smart Manager Detailed Documentation](https://www.storeapps.org/knowledgebase_category/smart-manager/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme)
 * Compatible with latest versions of both [WooCommerce](https://wordpress.org/plugins/woocommerce/) and [WP e-Commerce](https://wordpress.org/plugins/wp-e-commerce/)
-* Available Translations: Dutch, Brazilian Portuguese, Chinese, French, Romanian, Italian and Spanish.
+* Available Translations: Brazilian Portuguese, Chinese, Dutch, French, German, Italian, Japanese, Polish, Romanian and Spanish.
 * Want to add a new language to Smart Manager? Contribute via [translate.wordpress.org](https://translate.wordpress.org/projects/wp-plugins/smart-manager-for-wp-e-commerce/).
 * Questions? [Contact us](https://www.storeapps.org/support/contact-us/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme)
 
@@ -308,6 +308,14 @@ Open Smart Manager Products dashboard, select required products, click on Bulk E
 2. Bulk edit / Batch update (only in Pro version)
 
 == Changelog ==
+
+= 8.63.0 (28.05.2025) =
+* New: German, Japanese and Polish translations (AI-generated)
+* New: Auto generate SKUs for WooCommerce products with empty values during CSV import (Pro)
+* New: Predefined Custom Views for 'Unattached Media' (Pro)
+* Fix: 'File' column in the Media dashboard displays the file name along with its path (Pro)
+* Update: Renamed the 'WP Attached File' column to 'File' in the Media dashboard (Pro)
+* Update: POT file
 
 = 8.62.0 (15.05.2025) =
 * New: WooCommerce 9.8.5 compatible
@@ -599,6 +607,9 @@ Open Smart Manager Products dashboard, select required products, click on Bulk E
 [See changelog for all versions](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 8.63.0 =
+German, Japanese and Polish translations (AI-generated), Auto generate SKUs for WooCommerce products with empty values during CSV import (Pro), Predefined Custom Views for 'Unattached Media' (Pro), Fixes related to 'File' column in the Media dashboard displays the file name along with its path (Pro), Updates related to Renamed the 'WP Attached File' column to 'File' in the Media dashboard (Pro), along with other important fixes and updates. Recommended upgrade.
 
 = 8.62.0 =
 WooCommerce 9.8.5 compatible, Copy entire line items for WooCommerce Orders and Subscriptions using Bulk Edit (Pro), Chinese and Spanish translations (AI-generated), Fixes related to Taxonomies containing special characters not displaying correctly in the grid and Advanced Search panel, Scroll not working in the submenu list within the dashboard combo box, Changing operator value affects the value field display in certain cases when using bulk edit (Pro), Bulk edit for adding custom attributes to WooCommerce Products not working (Pro), Taxonomies containing special characters not displaying correctly in Bulk Edit panel (Pro), Updates related to Improved UI/UX of the inline edit modal for WooCommerce Product Attributes, along with other important fixes and updates. Recommended upgrade.

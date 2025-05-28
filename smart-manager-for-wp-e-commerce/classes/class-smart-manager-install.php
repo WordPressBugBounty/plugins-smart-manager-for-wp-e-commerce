@@ -45,6 +45,10 @@ class Smart_Manager_Install {
 		'8.60.0' => array(
 			'create_predefined_custom_views'
 		),
+		'8.63.0' => array(
+			'create_predefined_custom_views',
+			'rename_attachment_columns'
+		)
 	);
 
 	/**
@@ -528,6 +532,12 @@ class Smart_Manager_Install {
 				'post_type' => 'shop_coupon',
 				'is_public' => 1,
 			),
+			'unattached-media' => array(
+				'title'     => 'Unattached Media',
+				'params'    => '{"columns":{"postmeta_meta_key__wp_attached_file_meta_value__wp_attached_file":{"width":130,"position":1},"posts_post_author":{"width":299,"position":2},"posts_post_date":{"width":277,"position":3},"custom_edit_link":{"width":120,"position":4},"custom_view_link":{"width":120,"position":5}},"sort_params":{"orderby":"ID","order":"DESC","default":true},"search_params":{"isAdvanceSearch":"true","params":[{"condition":"OR","rules":[{"condition":"AND","rules":[{"type":"' . $wpdb->prefix . 'posts.post_parent","operator":"eq","value":"0"}]}]}]}}',
+				'post_type' => 'attachment',
+				'is_public' => 1,
+			)
 		);
 		$views['pending-for-shipping-orders']['params'] = ( empty( Smart_Manager::$sm_is_wc_hpos_tables_exists ) ) ? '{"columns":{"posts_id":{"width":122,"position":1},"posts_post_date_gmt":{"width":199,"position":2},"woocommerce_order_items_shipping_method":{"width":215,"position":3},"postmeta_meta_key__order_total_meta_value__order_total":{"width":136,"position":4},"custom_line_items":{"width":390,"position":5},"postmeta_meta_key__billing_email_meta_value__billing_email":{"width":281,"position":6},"postmeta_meta_key__billing_first_name_meta_value__billing_first_name":{"width":261,"position":7},"postmeta_meta_key__billing_last_name_meta_value__billing_last_name":{"width":224,"position":8},"postmeta_meta_key__billing_address_index_meta_value__billing_address_index":{"width":349,"position":9},"postmeta_meta_key__shipping_address_index_meta_value__shipping_address_index":{"width":372,"position":10},"postmeta_meta_key__payment_method_meta_value__payment_method":{"width":207,"position":11},"postmeta_meta_key__order_currency_meta_value__order_currency":{"width":199,"position":12},"custom_note_for_customer":{"width":250,"position":13}},"sort_params":{"orderby":"ID","order":"DESC","default":true},"search_params":{"isAdvanceSearch":"true","params":[{"condition":"OR","rules":[{"condition":"AND","rules":[{"type":"'.$wpdb->prefix.'posts.post_status","operator":"is","value":"wc-processing"}]}]}]}}' : $views['pending-for-shipping-orders']['params'];
 		// Fetch already existing slugs for predefined Custom Views in a single query.
@@ -566,6 +576,23 @@ class Smart_Manager_Install {
 				)
 			);
 		}
+	}
+
+	/**
+	 * Rename attachment post type columns
+	 * 
+	 * @return void
+	 */
+	public static function rename_attachment_columns() {
+		if ( ( ! ( defined('SMPRO') ) || ( true !== SMPRO ) ) ) {
+			return;
+		}
+		$columns = get_option( 'sa_sm_attachment_columns', array() );
+		if( ( ! is_array( $columns ) ) || ( ( is_array( $columns ) ) && ( ! empty( $columns[ 'postmeta_meta_key__wp_attached_file_meta_value__wp_attached_file' ] ) ) ) ) {
+			return;
+		}
+		$columns[ 'postmeta_meta_key__wp_attached_file_meta_value__wp_attached_file' ] = 'File';
+		update_option( 'sa_sm_attachment_columns', $columns );
 	}
 }
 

@@ -504,7 +504,20 @@ Smart_Manager.prototype.handleShowVariations = function(){
 }
 //Function for redirecting to WC product import
 Smart_Manager.prototype.handleProductImportCSV = function(){
-	if(window.smart_manager.WCProductImportURL){
-		window.open(window.smart_manager.WCProductImportURL, '_blank');
+	if(!window.smart_manager.WCProductImportURL || "undefined" === typeof(window.smart_manager.WCProductImportURL)){
+		return;
 	}
+	if((window.smart_manager?.allSettings?.general?.toggle?.generate_sku === 'yes') && ("undefined" !== typeof(window.smart_manager.showConfirmDialog) && "function" === typeof(window.smart_manager.showConfirmDialog))){
+		window.smart_manager.showConfirmDialog({
+			content:_x("<strong>Note:</strong> Auto-generation of SKUs is enabled. Products with blank SKUs in your CSV will have SKUs automatically assigned during import.<br><br> To disable this, uncheck the <strong>“Automatically generate SKUs for WooCommerce products with blank values during CSV import”</strong>, setting under <strong>Settings > General Settings</strong>, then re-try the import.",'product import csv modal content','smart-manager-for-wp-e-commerce'),
+			btnParams:{
+				yesCallback: function(){
+					window.open(window.smart_manager.WCProductImportURL, '_blank');
+				}
+			},
+			title:'<span class="sm-error-icon"><span class="dashicons dashicons-warning" style="vertical-align: text-bottom;"></span>&nbsp;'+_x('Attention!', 'modal title', 'smart-manager-for-wp-e-commerce')+'</span>'
+		});
+		return;
+	}
+	window.open(window.smart_manager.WCProductImportURL, '_blank');
 }
