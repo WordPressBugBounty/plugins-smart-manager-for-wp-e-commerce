@@ -184,16 +184,16 @@ jQuery(function($) {
 
                 this.options.ajax = {
                                         dataType: "json",
-                                        url: window.smart_manager.sm_ajax_url,
+                                        url: window.smart_manager.commonManagerAjaxUrl,
                                         data: function(params) {
                                             let reqParams = {
                                                             searchTerm: params.term,
                                                             // selectedTerm: 
                                                             searchPage: params.page || 1,
                                                             cmd: currentObj.options.func_nm,
-                                                            security: window.smart_manager.sm_nonce,
-                                                            active_module: window.smart_manager.dashboard_key,
-                                                            is_public: ( window.smart_manager.sm_dashboards_public.indexOf(window.smart_manager.dashboard_key) != -1 ) ? 1 : 0,
+                                                            security: window.smart_manager.saCommonNonce,
+                                                            active_module: window.smart_manager.dashboardKey,
+                                                            is_public: ( window.smart_manager.sm_dashboards_public.indexOf(window.smart_manager.dashboardKey) != -1 ) ? 1 : 0,
                                                             active_module_title: window.smart_manager.dashboardName
                                                         };
 

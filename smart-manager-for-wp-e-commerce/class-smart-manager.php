@@ -31,8 +31,8 @@ class Smart_Manager {
 	public static $taxonomy_dashboards = array();
 	// Time saved per record in hours.
 	public static $time_saved_per_record = array(
-		'inline'                  => ( 2 / 60 ),    
-		'advanced_search_inline'  => ( 3 / 60 ),    
+		'inline'                  => ( 2 / 60 ),
+		'advanced_search_inline'  => ( 3 / 60 ),
 		'bulk'                    => ( 4.5 / 60 ),
 	);
 	public static function instance() {
@@ -65,7 +65,7 @@ class Smart_Manager {
 								if ( version_compare( WOOCOMMERCE_VERSION , '3.6.0', '<' ) ) {
 
 									if (version_compare ( WOOCOMMERCE_VERSION, '3.0.0', '<' )) {
-											
+
 										if (version_compare ( WOOCOMMERCE_VERSION, '2.2.0', '<' )) {
 
 											if (version_compare ( WOOCOMMERCE_VERSION, '2.1.0', '<' )) {
@@ -73,7 +73,7 @@ class Smart_Manager {
 												if (version_compare ( WOOCOMMERCE_VERSION, '2.0', '<' )) {
 													define ( 'SM_IS_WOO16', "true" );
 												} else {
-													define ( 'SM_IS_WOO16', "false" );	
+													define ( 'SM_IS_WOO16', "false" );
 												}
 												define ( 'SM_IS_WOO21', "false" );
 											} else {
@@ -192,7 +192,7 @@ class Smart_Manager {
 		}
 
 		if ( ! defined( 'SMPRO' ) ) {
-			if (file_exists ( (dirname ( SM_PLUGIN_FILE )) . '/pro/assets/js/smart-manager.js' )) { 
+			if (file_exists ( (dirname ( SM_PLUGIN_FILE )) . '/pro/assets/js/smart-manager.js' )) {
 				define ( 'SMPRO', true );
 			} else {
 				define ( 'SMPRO', false );
@@ -208,7 +208,6 @@ class Smart_Manager {
 		self::$prefix = (defined('SM_PREFIX')) ? SM_PREFIX : 'sa_smart_manager';
 		self::$sku = (defined('SM_SKU')) ? SM_SKU : 'sm';
 		self::$plugin_file = (defined('SM_PLUGIN_FILE')) ? SM_PLUGIN_FILE : '';
-		
 		if ( ! function_exists( 'get_plugins' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
@@ -219,8 +218,8 @@ class Smart_Manager {
 		$this->upgrade = (defined('SM_UPGRADE')) ? SM_UPGRADE : 3;
 		$this->dupgrade = (defined('SM_DUPGRADE')) ? SM_DUPGRADE : 25;
 		$this->success_msg   = (defined('SM_UPDATE')) ? SM_UPDATE : '';
-		if ( ! defined( 'SM_PRO_EMAIL_TEMPLATE_PATH' ) ) {
-			define( 'SM_PRO_EMAIL_TEMPLATE_PATH', SM_PRO_URL . 'templates/emails' );
+		if (! defined('SM_EMAIL_TEMPLATE_PATH')) {
+			define('SM_EMAIL_TEMPLATE_PATH', SM_PRO_URL . 'templates/emails');
 		}
 	}
 
@@ -276,7 +275,7 @@ class Smart_Manager {
 		}
 
 		return self::$sm_dashboards_final = apply_filters( 'sm_active_dashboards', self::$sm_dashboards_final );
-	} 
+	}
 
 	//Function for getting all eligible views
 	public function get_views() {
@@ -301,7 +300,7 @@ class Smart_Manager {
 		}
 
 		$this->sm_accessible_views = apply_filters( 'sm_accessible_views', $this->sm_accessible_views );
-	} 
+	}
 
 	//Function for defining taxonomies dashboards
 	public static function get_taxonomies() {
@@ -316,7 +315,7 @@ class Smart_Manager {
 			    }
 			    $dashboard_taxonomies[ $label ][] = $slug;
 			}
-			
+
 			if ( is_callable( array( 'Smart_Manager', 'handle_duplicate_dashboard_names' ) ) ) {
 				self::handle_duplicate_dashboard_names( $dashboard_taxonomies, 'taxonomy' );
 			}
@@ -342,17 +341,25 @@ class Smart_Manager {
 			}
 		}
 
-		if( file_exists( $this->plugin_path . '/classes/class-smart-manager-install.php' ) ) { 
+		if( file_exists( $this->plugin_path . '/classes/class-smart-manager-install.php' ) ) {
 			include_once $this->plugin_path . '/classes/class-smart-manager-install.php';
 		}
-
-		if( file_exists( $this->plugin_path . '/classes/class-smart-manager-controller.php' ) ) { 
+		if( file_exists( $this->plugin_path . '/classes/class-smart-manager-utils.php' ) ) {
+			include_once $this->plugin_path . '/classes/class-smart-manager-utils.php';
+		}
+		if( file_exists( $this->plugin_path . '/common-core/classes/class-sa-manager-utils.php' ) ) {
+			include_once $this->plugin_path . '/common-core/classes/class-sa-manager-utils.php';
+		}
+		if ( file_exists( $this->plugin_path . '/common-core/classes/class-sa-manager-controller.php' ) ) {
+			include_once $this->plugin_path . '/common-core/classes/class-sa-manager-controller.php';
+			$sa_manager_common_params = ( is_callable( 'get_sa_manager_common_params' ) && function_exists( 'get_sa_manager_common_params' ) ) ? get_sa_manager_common_params() : array();
+			$GLOBALS['common_core_controller'] = new SA_Manager_Controller(
+				$sa_manager_common_params
+			);
+		}
+		if( file_exists( $this->plugin_path . '/classes/class-smart-manager-controller.php' ) ) {
 			include_once $this->plugin_path . '/classes/class-smart-manager-controller.php';
 			$GLOBALS['smart_manager_controller'] = new Smart_Manager_Controller();
-		}
-
-		if( file_exists( $this->plugin_path . '/classes/class-smart-manager-utils.php' ) ) { 
-			include_once $this->plugin_path . '/classes/class-smart-manager-utils.php';
 		}
 
 		//for including background updater & other libraries
@@ -362,10 +369,12 @@ class Smart_Manager {
 				include_once 'pro/libraries/action-scheduler/action-scheduler.php';
 			}
 
+			if (file_exists((dirname(SM_PLUGIN_FILE)) . '/pro/common-pro/classes/class-sa-manager-pro-background-updater.php')) {
+				include_once 'pro/common-pro/classes/class-sa-manager-pro-background-updater.php';
+			} // include common background updater file.
 			if( file_exists( (dirname( SM_PLUGIN_FILE )) . '/pro/classes/class-smart-manager-pro-background-updater.php') ) {
 				include_once 'pro/classes/class-smart-manager-pro-background-updater.php';
 			}
-
 			if( !class_exists( 'Smart_Manager_Pro_Access_Privilege' ) && file_exists( (dirname( SM_PLUGIN_FILE )) . '/pro/classes/class-smart-manager-pro-access-privilege.php' ) ) {
 				include_once 'pro/classes/class-smart-manager-pro-access-privilege.php';
 			}
@@ -376,16 +385,16 @@ class Smart_Manager {
 		}
 
 		if ( is_admin() ) {
-			if( file_exists( $this->plugin_path . '/classes/class-smart-manager-admin-welcome.php' ) ) { 
+			if( file_exists( $this->plugin_path . '/classes/class-smart-manager-admin-welcome.php' ) ) {
 				include_once $this->plugin_path . '/classes/class-smart-manager-admin-welcome.php';
 			}
 
-			if( file_exists( $this->plugin_path . '/classes/class-storeapps-marketplace.php' ) ) { 
+			if( file_exists( $this->plugin_path . '/classes/class-storeapps-marketplace.php' ) ) {
 				include_once $this->plugin_path . '/classes/class-storeapps-marketplace.php';
 			}
 
-			if( file_exists( $this->plugin_path . '/classes/deactivation-survey/class-sa-smart-manager-deactivation.php' ) ) { 
-				include_once $this->plugin_path . '/classes/deactivation-survey/class-sa-smart-manager-deactivation.php';		
+			if( file_exists( $this->plugin_path . '/classes/deactivation-survey/class-sa-smart-manager-deactivation.php' ) ) {
+				include_once $this->plugin_path . '/classes/deactivation-survey/class-sa-smart-manager-deactivation.php';
 			}
 
 			if ( class_exists( 'SA_Smart_Manager_Deactivation' ) ) {
@@ -413,15 +422,15 @@ class Smart_Manager {
 		add_filter( 'sa_is_page_for_notifications', array( &$this, 'is_page_for_notifications' ), 10, 2 );
 
 		add_action ( 'admin_head', array(&$this,'remove_help_tab_and_hiding_admin_notices') ); // For removing the help tab and hiding admin notices
-		
+
 		add_filter( 'site_transient_update_plugins', array( &$this, 'overwrite_site_transient' ), 11, 1 );
 		add_filter( 'pre_set_site_transient_update_plugins', array( &$this, 'overwrite_site_transient' ), 11, 1 );
-		
+
 		add_action( 'admin_enqueue_scripts', array( $this, 'sa_sm_dequeue_scripts' ), 999 );
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ), 999 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_styles' ) );
-		
+
 		add_action( 'admin_init', array( $this, 'on_admin_init' ) );
 		add_action( 'admin_init', array( $this, 'localize_smart_manager' ) ); //Language loader
 
@@ -459,6 +468,9 @@ class Smart_Manager {
 		add_action( 'before_woocommerce_init', array( $this, 'declare_hpos_compatibility' ) );
 		add_filter( 'plugin_row_meta', array( $this, 'add_additonal_links' ), 99, 4 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'sa_sm_dequeue_styles' ), 999 );
+		add_filter('sa_plugin_key', function () {
+			return 'smart_manager'; // For using in JS code inside background_hearbeat().
+		});
 		//To extend woocommerce_product_import_process_item_data hook on importer screen.
 		add_action('wp_ajax_woocommerce_do_ajax_product_import', function () {
 			if ( ( defined('SMPRO') ) && ( SMPRO === true ) && ! class_exists( 'Smart_Manager_Pro_Product_Import_CSV' ) && file_exists( ( dirname( SM_PLUGIN_FILE ) ) . '/pro/classes/class-smart-manager-pro-product-import-csv.php' ) ) {
@@ -517,7 +529,7 @@ class Smart_Manager {
 		if( self::$sm_is_woo79 && function_exists( 'wc_get_container' ) && class_exists( 'Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer' ) && wc_get_container()->get( Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer::class )->check_orders_table_exists() ){
 			self::$sm_is_wc_hpos_tables_exists = true;
 		}
-		
+
 		//Code for handling the in app offer
 		if ( ! class_exists( 'SA_SM_In_App_Offer' ) && file_exists( (dirname( SM_PLUGIN_FILE )) . '/classes/sa-includes/class-sa-sm-in-app-offer.php' ) ) {
 			include_once 'classes/sa-includes/class-sa-sm-in-app-offer.php';
@@ -555,7 +567,7 @@ class Smart_Manager {
 				update_option('sm_wp_dashboard_post_type_'.get_current_user_id(), $_GET['dashboard'], 'no' );
 				wp_safe_redirect( remove_query_arg('dashboard', wp_unslash( $_SERVER['REQUEST_URI'] ) ) );
 			}
-			
+
 			exit;
 		}
 	}
@@ -575,24 +587,24 @@ class Smart_Manager {
 
 	// function to handle the display of quick help widget
 	public function quick_help_widget( $active_plugins, $upgrader ) {
-		
+
 		if ( is_admin() && !empty( $_GET['page'] ) && ( 'smart-manager-settings' === $_GET['page'] ) ) {
 			$active_plugins[SM_SKU] = 'smart-manager';
 		} elseif ( array_key_exists( SM_SKU, $active_plugins ) ) {
 			unset( $active_plugins[SM_SKU] );
 		}
-			
+
 		return $active_plugins;
 	}
 
 	public function is_page_for_notifications( $is_page, $upgrader ) {
-		
+
 		$landing_page = ( !empty( $_GET['landing-page'] ) ) ? $_GET['landing-page'] : '';
 
 		if ( is_admin() && ! empty( $_GET['page'] ) && ( ( 'smart-manager' === $_GET['page'] && 'sm-about' !== $landing_page ) || 'smart-manager-settings' === $_GET['page'] ) ) {
 			return true;
 		}
-			
+
 		return $is_page;
 	}
 
@@ -602,23 +614,23 @@ class Smart_Manager {
 		if ( ! defined('SM_SKU') ) {
 			return $plugin_info;
 		}
-	
+
 		$data = get_option( '_storeapps_connector_data', array() );
 		$sm_license_key = !empty($data[SM_SKU]) ? $data[SM_SKU]['license_key'] : '';
-	
+
 		$sm_download_url = $this->get_pro_download_url();
-	
+
 		if ( file_exists((dirname( SM_PLUGIN_FILE )) . '/pro/sm.js') && (empty($sm_license_key) || empty($sm_download_url)) ) {
 			$plugin_base_file = plugin_basename( SM_PLUGIN_FILE );
-	
+
 			$live_version = !empty($data[SM_SKU]['live_version']) ? $data[SM_SKU]['live_version'] : '';
 			$installed_version = !empty($data[SM_SKU]['installed_version']) ? $data[SM_SKU]['installed_version'] : '';
-	
+
 			if ( version_compare( $live_version, $installed_version, '>' ) ) {
 				$plugin_info->response[$plugin_base_file]->package = '';
-			}		
+			}
 		}
-	
+
 		return $plugin_info;
 	}
 
@@ -635,7 +647,7 @@ class Smart_Manager {
 		$sm_download_url = ( ! empty( $sm_new_download_url ) ) ? $sm_new_download_url : $sm_old_download_url;
 		return $sm_download_url;
 	}
-	
+
 	public function is_pro_available() {
 		$sm_download_url = $this->get_pro_download_url();
 		if ( ! file_exists( ( dirname( SM_PLUGIN_FILE ) ) . '/pro/assets/js/smart-manager.js' ) && ! empty( $sm_download_url ) ) {
@@ -646,7 +658,7 @@ class Smart_Manager {
 
 	/*
 	* Function to to handle media links on plugin page
-	*/ 
+	*/
 	public function add_plugin_social_links() {
 		$is_pro_available = $this->is_pro_available();
 		if( $is_pro_available === true ) { //request ftp credentials form
@@ -679,13 +691,13 @@ class Smart_Manager {
 
 	public function localize_smart_manager() {
 		$text_domain = SM_TEXT_DOMAIN;
-	
+
 		$plugin_dirname = dirname( plugin_basename(SM_PLUGIN_FILE) );
-	
+
 		$locale = apply_filters( 'plugin_locale', get_locale(), $text_domain );
-	
-		$loaded = load_textdomain( $text_domain, WP_LANG_DIR . '/plugins/' . $text_domain . '-' . $locale . '.mo' );    
-	
+
+		$loaded = load_textdomain( $text_domain, WP_LANG_DIR . '/plugins/' . $text_domain . '-' . $locale . '.mo' );
+
 		if ( ! $loaded ) {
 			$loaded = load_plugin_textdomain( $text_domain, false, $plugin_dirname . '/languages/' );
 		}
@@ -712,7 +724,7 @@ class Smart_Manager {
 				if ($response_code == 200) {
 					$storeapps_response = wp_remote_retrieve_body( $response_info );
 					$decoded_response = json_decode( $storeapps_response );
-					if ($decoded_response->is_valid == 1) {               
+					if ($decoded_response->is_valid == 1) {
 						update_site_option( SM_PREFIX.'_download_url', $decoded_response->download_url );
 						define('SMPROTOLITE', true);
 					} else {
@@ -737,9 +749,9 @@ class Smart_Manager {
 		foreach ($GLOBALS['menu'] as $key => $menu) {
 			$menus_positions[] = $key;
 		}
-	
+
 		if (!in_array($start, $menus_positions)) return $start;
-	
+
 		/* the position is already reserved find the closet one */
 		while (in_array($start, $menus_positions)) {
 			$start += $increment;
@@ -778,28 +790,28 @@ class Smart_Manager {
 
 		$current_user_role = ( is_callable( array( 'Smart_Manager', 'get_current_user_role' ) ) ) ? self::get_current_user_role() : '';
 		$position = (string) $this->get_free_menu_position(56.00001);
-	
+
 		if( ( defined( 'SMPRO' ) && true === SMPRO  ) || ( ( ! empty( $current_user_role ) && 'administrator' === $current_user_role ) ) ) {
 			$page = add_menu_page( 'Smart Manager', 'Smart Manager','read', 'smart-manager', array( $this, 'add_admin_page' ), 'dashicons-performance', $position );
-	
+
 			if( defined( 'SMPRO' ) && true !== SMPRO || ! empty( $this->show_pricing_page ) ) {
 				add_submenu_page( 'smart-manager', __( '<span class="sm_pricing_icon"> 🔥 </span> Go Pro', 'smart-manager-for-wp-e-commerce' ), __( '<span class="sm_pricing_icon"> 🔥 </span> Go Pro', 'smart-manager-for-wp-e-commerce' ), 'manage_options', 'smart-manager-pricing', array( $this, 'add_admin_page' ) );
 			}
-	
+
 			add_submenu_page( 'smart-manager', __( 'Docs & Support', 'smart-manager-for-wp-e-commerce' ),  __( 'Docs & Support', 'smart-manager-for-wp-e-commerce' ), 'manage_options', 'smart-manager&landing-page=sm-about', array( $this, 'add_admin_page' ) );
-	
+
 			$show_sa_plugins_page = true;
 			$show_sa_plugins_page = apply_filters('sm_show_sa_plugins_page', $show_sa_plugins_page);
-	
+
 			if( !empty( $show_sa_plugins_page ) ) {
-				add_submenu_page( 'smart-manager', __( 'StoreApps Plugins', 'smart-manager-for-wp-e-commerce' ),  __( 'StoreApps Plugins', 'smart-manager-for-wp-e-commerce' ), 'manage_options', 'sm-storeapps-plugins', array( $this, 'add_admin_page' ) );	
+				add_submenu_page( 'smart-manager', __( 'StoreApps Plugins', 'smart-manager-for-wp-e-commerce' ),  __( 'StoreApps Plugins', 'smart-manager-for-wp-e-commerce' ), 'manage_options', 'sm-storeapps-plugins', array( $this, 'add_admin_page' ) );
 			}
-		}	
+		}
 	}
 
 	function add_menu_access() {
 		global $wpdb;
-	
+
 		$current_user_role = ( is_callable( array( 'Smart_Manager', 'get_current_user_role' ) ) ) ? self::get_current_user_role() : '';
 		if( ( empty( $current_user_role ) ) ) return;
 
@@ -810,10 +822,10 @@ class Smart_Manager {
 
 		$query = "SELECT option_value FROM {$wpdb->prefix}options WHERE option_name = 'sm_" . $current_user_role . "_dashboard'";
 		$result_old = $wpdb->get_results( $query );
-	
+
 		$user_role_accessible_dashboards = array();
 		$user_accessible_dashboards = array();
-	
+
 		if( class_exists('Smart_Manager_Pro_Access_Privilege') ) {
 			$option_nm = Smart_Manager_Pro_Access_Privilege::$access_privilege_option_start."".$current_user_role."".Smart_Manager_Pro_Access_Privilege::$access_privilege_option_end;
 			$user_role_accessible_dashboards = $wpdb->get_results( $wpdb->prepare( "SELECT option_name, option_value FROM {$wpdb->prefix}options WHERE option_name = %s", $option_nm ), 'ARRAY_A' );
@@ -828,15 +840,15 @@ class Smart_Manager {
 	public static function get_current_user_role() {
 
 		global $current_user;
-	
+
 		if ( ! function_exists('wp_get_current_user') ) {
 			require_once (ABSPATH . 'wp-includes/pluggable.php'); // Sometimes conflict with SB-Welcome Email Editor
 		}
-	
+
 		$current_user = wp_get_current_user(); // Sometimes conflict with SB-Welcome Email Editor
 		$current_user_role = '';
 		$current_user_caps = '';
-		
+
 		$roles = ( ! empty( $current_user->roles[0] ) ) ? array_values( $current_user->roles ) : $current_user->roles;
 		if( ! empty( $roles ) && sizeof( $roles ) > 0 ) {
 			$user_role = array_search( 'administrator', $roles );
@@ -846,7 +858,7 @@ class Smart_Manager {
 		$caps = ( ! empty( $current_user->caps ) ) ? array_keys( $current_user->caps ) : array();
 		if( ! empty( $caps ) && sizeof( $caps ) > 0 ) {
 			$user_caps = array_search( 'administrator', $roles );
-			$current_user_caps = ( false !== $user_caps ) ? $caps[ $user_caps ] : $caps[0];	
+			$current_user_caps = ( false !== $user_caps ) ? $caps[ $user_caps ] : $caps[0];
 		}
 
 		return ( ( ! empty( $current_user_role ) && 'administrator' === $current_user_role ) || ( ! empty( $current_user_caps ) && 'administrator' === $current_user_caps ) ) ? 'administrator' : ( !empty( $current_user_caps ) ? $current_user_caps : $current_user_role );
@@ -868,7 +880,7 @@ class Smart_Manager {
 			$action_url = "plugins.php?action=activate&plugin=$plugin&plugin_status=all&paged=1";
 			$url = wp_nonce_url( $action_url, 'activate-plugin_' . $plugin );
 			update_option( 'recently_activated', array ($plugin => time() ) + ( array ) get_option( 'recently_activated' ), 'no' );
-			
+
 			if (headers_sent())
 				echo "<meta http-equiv='refresh' content='" . esc_attr( "0;url=plugins.php?deactivate=true&plugin_status=$status&paged=$page" ) . "' />";
 			else {
@@ -879,14 +891,14 @@ class Smart_Manager {
 		// Including Scripts for using the wordpress new media manager
 		if (version_compare ( $wp_version, '3.5', '>=' )) {
 			define ( 'IS_WP35', true);
-	
+
 			if ( !empty( $_GET['page'] ) && ( 'smart-manager' === $_GET['page'] || 'smart-manager-settings' === $_GET['page'] ) ) {
 				wp_enqueue_media();
 				wp_enqueue_script( 'custom-header' );
 				// wp_enqueue_script( 'media-upload' );
 			}
 		}
-	
+
 		//Flag for handling changes since WP 4.0+
 		if (version_compare ( $wp_version, '4.0', '>=' )) {
 			define ( 'IS_WP40', true);
@@ -910,43 +922,11 @@ class Smart_Manager {
 		}
 	}
 
-	/**
-	 * Function to Show admin notice about the new auto-SKU generation feature on Smart Manager pages.
-	 * 
-	 * @return void
-	 */
-	public function add_sku_generation_feature_notice(){
-		if ( ( ! defined('SMPRO') ) || ( SMPRO !== true ) || ( empty( $_GET['page'] ) ) || ( ! in_array( sanitize_text_field( wp_unslash( $_GET['page'] ) ), array( 'smart-manager', 'sm-storeapps-plugins' ), true ) ) || get_option( 'sa_sm_hide_generate_sku_feature_notice' ) ) {
-			return;
-		}
-		?>
-		<script>
-			jQuery(document).on('click', '.generate-sku-feature-notice .notice-dismiss', function(){
-				jQuery.ajax({
-					url: '<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>',
-					type: 'post',
-					dataType: 'json',
-					data: {
-						action: 'dismiss_generate_sku_feature_notice',
-						security: '<?php echo esc_html( wp_create_nonce( 'sa-dismiss-generate-sku-feature-notice' ) ); ?>'
-					}
-				});
-			})
-		</script>
-		<?php
-		echo sprintf(
-			'<div class="notice notice-success is-dismissible generate-sku-feature-notice" style="display:block !important;"><p>🎉 <strong>%s</strong> %s %s</p></div>',
-			_x( 'New Feature Alert:', 'admin notice title for sku generation feature', 'smart-manager-for-wp-e-commerce' ),
-			_x( 'Automatically generate SKUs for WooCommerce products with blank SKUs during CSV import.', 'admin notice description for sku generation feature', 'smart-manager-for-wp-e-commerce' ),
-			_x( 'Enable this by turning on the <strong>“Automatically generate SKUs for WooCommerce products with blank values during CSV import”</strong> setting in <strong>Settings > General Settings.</strong>', 'admin notice instructions for sku generation feature', 'smart-manager-for-wp-e-commerce' )
-		);
-	}
-
 	// Function to handle SM In App Promo
 	function add_promo_notices() {
 
 		if ( !empty($_GET['page']) && ( 'smart-manager' === $_GET['page'] ) ) {
-			
+
 			$sm_dismiss_admin_notice = '';
 			$sm_promo_msg = '';
 
@@ -1022,7 +1002,7 @@ class Smart_Manager {
 				}else{
 					echo '<div class="sm_design_notice">
 						<div class="sm_container">
-							<div class="sm_main_headline"><span class="dashicons dashicons-awards"></span><span>'. ( ( self::show_halloween_offer() ) ? sprintf( 
+							<div class="sm_main_headline"><span class="dashicons dashicons-awards"></span><span>'. ( ( self::show_halloween_offer() ) ? sprintf(
 								/* translators: %1$s: current user display name %2$s: HTML of Pro price discount */
 								__( 'Hey %1$s, grab your %2$s Halloween discount!', 'smart-manager-for-wp-e-commerce' ),
 								$sm_current_user_display_name,
@@ -1030,7 +1010,7 @@ class Smart_Manager {
 								/* translators: %1$s: current user display name %2$s: HTML of Pro price discount */
 									__( 'Hey %1$s, you just unlocked %2$s on Smart Manager Pro!', 'smart-manager-for-wp-e-commerce' ), $sm_current_user_display_name,
 									'<span style="font-weight: bold;font-size: 2rem;color: rgb(20 184 166);color: #508991;color: rgb(55 65 81);">'. __( "25% off", "smart-manager-for-wp-e-commerce" ) .'</span>' ) ) .'</span></div>
-							<div class="sm_sub_headline" style="margin: 0.75rem 0 0 .5em !important;">' . sprintf( 
+							<div class="sm_sub_headline" style="margin: 0.75rem 0 0 .5em !important;">' . sprintf(
 								/* translators: %s: pricing page link */
 								__( '%s to check Smart Manager Pro features/benefits and claim your discount.', 'smart-manager-for-wp-e-commerce' ), '<a style="color: rgb(55 65 81);" href="'. admin_url( 'admin.php?page=smart-manager-pricing' ) .'" target="_blank">' . __( 'Click here', 'smart-manager-for-wp-e-commerce' ) . '</a>' ) .'</div>
 						</div>
@@ -1054,7 +1034,7 @@ class Smart_Manager {
 					if ( wp_script_is( $handle ) ) {
 						wp_dequeue_script( $handle );
 						wp_deregister_script( $handle );
-					}		
+					}
 				}
 			}
 		}
@@ -1081,68 +1061,88 @@ class Smart_Manager {
 		if ( function_exists('wp_enqueue_editor') ) {
 			wp_enqueue_editor();
 		}
-		
+
 		$deps = array('jquery', 'jquery-ui-core' , 'jquery-ui-widget' , 'jquery-ui-accordion' , 'jquery-ui-autocomplete' , 'jquery-ui-button' , 'jquery-ui-datepicker' ,
 						'jquery-ui-dialog' , 'jquery-ui-draggable' , 'jquery-ui-droppable' , 'jquery-ui-menu' , 'jquery-ui-mouse' , 'jquery-ui-position' , 'jquery-ui-progressbar'
-						, 'jquery-ui-selectable' , 'jquery-ui-resizable' , 'jquery-ui-sortable' , 'jquery-ui-slider' , 'jquery-ui-tooltip' ,'jquery-ui-tabs' , 'jquery-ui-spinner' , 
+						, 'jquery-ui-selectable' , 'jquery-ui-resizable' , 'jquery-ui-sortable' , 'jquery-ui-slider' , 'jquery-ui-tooltip' ,'jquery-ui-tabs' , 'jquery-ui-spinner' ,
 						'jquery-effects-core' , 'jquery-effects-blind' , 'jquery-effects-bounce' , 'jquery-effects-clip' , 'jquery-effects-drop' ,
 						'jquery-effects-explode' , 'jquery-effects-fade' , 'jquery-effects-fold' , 'jquery-effects-highlight' , 'jquery-effects-pulsate' , 'jquery-effects-scale' ,
 						'jquery-effects-shake' , 'jquery-effects-slide' , 'jquery-effects-transfer', 'underscore');
 
-		// if ( isset($_GET['page']) && $_GET['page'] == "smart-manager" ) {
-			wp_register_script ( 'sm_select2', plugins_url ( '/assets/js/select2/select2.full.min.js', SM_PLUGIN_FILE ), $deps, '4.0.5' );
-			wp_enqueue_script( 'sm_select2' );
-		// }
-					
-		//Registering scripts for jqgrid lib.
-	//       wp_register_script ( 'sm_jquery_ui_multiselect', plugins_url ( '/assets/js/jqgrid/ui.multiselect.js', SM_PLUGIN_FILE ), $deps, '1.10.2' );
-		// wp_register_script ( 'sm_jqgrid_locale', plugins_url ( '/assets/js/jqgrid/grid.locale-en.js', SM_PLUGIN_FILE ), array ('sm_jquery_ui_multiselect'), '1.10.2' );
-		// wp_register_script ( 'sm_select2', plugins_url ( '/assets/js/select2/select2.full.min.js', SM_PLUGIN_FILE ), $deps, '4.0.5' );
-		// wp_register_script ( 'sm_jsoneditor', plugins_url ( '/assets/js/jsoneditor/jsoneditor.min.js', SM_PLUGIN_FILE ), array ('sm_select2'), '5.29.1' );
-		// wp_register_script ( 'sm_handsontable', plugins_url ( '/assets/js/handsontable/handsontable.full.min.js', SM_PLUGIN_FILE ), array ('sm_jsoneditor'), '6.2.0' );
-		// wp_register_script ( 'sm_handsontable_select2', plugins_url ( '/assets/js/handsontable/select2-editor.js', SM_PLUGIN_FILE ), array ('sm_handsontable'), '6.2.0' );
-		// wp_register_script ( 'sm_chosen', plugins_url ( '/assets/js/chosen/chosen.jquery.min.js', SM_PLUGIN_FILE ), array ('sm_handsontable_select2'), '1.3.0' );
-		// wp_register_script ( 'sm_sortable', plugins_url ( '/assets/js/sortable/sortable.min.js', SM_PLUGIN_FILE ), array ('sm_chosen'), '1.8.1' );
-
-		wp_register_script ( 'sm_mithril', plugins_url ( '/assets/js/mithril/mithril.min.js', SM_PLUGIN_FILE ), $deps, $this->version );
-		wp_register_script ( 'sm_search_styles', plugins_url ( '/assets/js/styles.js', SM_PLUGIN_FILE ), array( 'sm_mithril' ), $this->version );
-		
+		wp_register_script ( 'sm_select2', plugins_url ( '/assets/js/select2/select2.full.min.js', SM_PLUGIN_FILE ), $deps, '4.0.5' );
+		wp_enqueue_script( 'sm_select2' );
+		wp_register_script ( 'sm_mithril', plugins_url ( '/common-core/assets/js/mithril/mithril.min.js', SM_PLUGIN_FILE ), $deps, $this->version );
+		wp_register_script ( 'sm_search_styles', plugins_url ( '/common-core/assets/js/core-styles.js', SM_PLUGIN_FILE ), array( 'sm_mithril' ), $this->version );
 		wp_register_script ( 'sm_dashboard_js', plugins_url ( '/assets/js/admin.js', SM_PLUGIN_FILE ), array( 'sm_search_styles', 'wp-i18n'), $this->version );
-
 		$last_reg_script = 'sm_mithril';
-
 		//Code for loading custom js automatically
-		$custom_lib_js_lite = glob( $this->plugin_path .'/assets/js/*/*.js' );
-		$custom_lib_js_pro = ( SMPRO === true ) ? glob( $this->plugin_path .'/pro/assets/js/*/*.js' ) : array();
-		$custom_lib_js = ( !empty( $custom_lib_js_pro ) && SMPRO === true ) ? array_merge( $custom_lib_js_lite, $custom_lib_js_pro ) : $custom_lib_js_lite;
+		$custom_lib_js = array();
+		$js_paths       = array(
+			'/assets/js/*/*.js',
+			'/common-core/assets/js/*/*.js',
+		);
+		if ( true === SMPRO && ! empty( $js_paths ) && is_array( $js_paths ) ) {
+			$js_paths = array_merge(
+				$js_paths,
+				array(
+					'/pro/assets/js/*/*.js',
+					'/pro/common-pro/assets/js/*/*.js',
+				)
+			);
+		}
+		if ( ! empty( $js_paths ) && is_array( $js_paths ) ) {
+			foreach ( $js_paths as $path ) {
+				$files = glob( $this->plugin_path . $path );
 
-		if( !empty( $custom_lib_js ) ) {
+				if ( empty( $files ) || ! is_array( $files ) ) {
+					continue;
+				}
+
+				$custom_lib_js = array_merge( $custom_lib_js, $files );
+			}
+		}
+		if ( ! empty( $custom_lib_js ) ) {
 			$index = 0;
 
 			foreach ( $custom_lib_js as $file ) {
+				$folder_path = substr( $file, 0, strrpos( $file, '/', -3 ) );
+				$folder_name = substr( $folder_path, strrpos( $folder_path, '/', -3 ) + 1 );
 
-				$folder_path = substr($file, 0, (strrpos($file, '/', -3)));
-				$folder_name = substr($folder_path, (strrpos($folder_path, '/', -3) + 1));
-
-				if( 'mithril' === $folder_name ) {
+				if ( 'mithril' === $folder_name ) {
 					continue;
 				}
 
-				$pro_flag = ( !empty( $custom_lib_js_pro ) && in_array($file, $custom_lib_js_pro) ) ? 'pro' : '';
+				$pro_flag    = ( true === SMPRO && false !== strpos( $file, '/pro/' ) ) ? 'pro' : '';
+				$folder_flag = '';
 
-				$file_nm = 'sm_'. ( !empty( $pro_flag ) ? $pro_flag.'_' : '' ) .'custom_'.preg_replace('/[\s\-.]/','_',substr($file, (strrpos($file, '/', -3) + 1)));
+				if ( true === SMPRO && false !== strpos( $file, '/pro/' ) ) {
+					$folder_flag = ( false !== strpos( $file, '/pro/common-pro/' ) ) ? 'pro/common-pro' : 'pro';
+				} elseif ( false !== strpos( $file, '/common-core/' ) ) {
+					$folder_flag = 'common-core';
+				}
 
-				if ( $file_nm == 'sm_pro_custom_smart_manager_js' ) {
+				$file_nm = 'sm_' . ( ! empty( $pro_flag ) ? $pro_flag . '_' : '' ) . 'custom_' . preg_replace( '/[\s\-.]/', '_', substr( $file, strrpos( $file, '/', -3 ) + 1 ) );
+
+				if ( 'sm_pro_custom_smart_manager_js' === $file_nm ) {
 					continue;
 				}
 
-				wp_register_script ( $file_nm, plugins_url ( ( !empty( $pro_flag ) ? '/'.$pro_flag : '' ).'/assets/js/'.$folder_name.'/'.substr($file, (strrpos($file, '/', -3) + 1)), SM_PLUGIN_FILE ), array ($last_reg_script), $this->version );
+				$script_path = ( $folder_flag ? '/' . $folder_flag : '' ) . '/assets/js/' . $folder_name . '/' . substr( $file, strrpos( $file, '/', -3 ) + 1 );
+				wp_register_script( $file_nm, plugins_url( $script_path, SM_PLUGIN_FILE ), array( $last_reg_script ), $this->version );
+
 				$last_reg_script = $file_nm;
 				$index++;
 			}
 		}
-
-		wp_register_script ( 'sm_custom_smart_manager_js', plugins_url ( '/assets/js/smart-manager.js', SM_PLUGIN_FILE ), array ($last_reg_script), $this->version );
+		$sm_common_core_base = 'sm_custom_core_base_js';
+		wp_register_script(
+			$sm_common_core_base,
+			plugins_url( '/common-core/assets/js/core-base.js', SM_PLUGIN_FILE ),
+			array ($last_reg_script),
+			$this->version,
+			true
+		);
+		wp_register_script ( 'sm_custom_smart_manager_js', plugins_url ( '/assets/js/smart-manager.js', SM_PLUGIN_FILE ), array( $last_reg_script, $sm_common_core_base ), $this->version );
 		$last_reg_script = 'sm_custom_smart_manager_js';
 
 		if( SMPRO === true ) {
@@ -1151,48 +1151,81 @@ class Smart_Manager {
 		}
 
 		// Code for loading custom js automatically
-		$custom_js = glob( $this->plugin_path .'/assets/js/*.js' );
-		$index = 0;
-
-		foreach ( $custom_js as $file ) {
-
-			$file_nm = 'sm_custom_'.preg_replace('/[\s\-.]/','_',substr($file, (strrpos($file, '/', -3) + 1)));
-			array_push( $registered_scripts, $file_nm );
-
-			if ( $file_nm == 'sm_custom_smart_manager_js' || $file_nm == 'sm_custom_styles_js' || $file_nm == 'sm_custom_admin_js' ) {
-				continue;
+		$custom_js = array();
+		$js_paths   = array(
+			'/common-core/assets/js/*.js',
+			'/assets/js/*.js'
+		);
+		if ( is_array( $js_paths ) && ! empty( $js_paths ) ) {
+			foreach ( $js_paths as $path ) {
+				$files = glob( $this->plugin_path . $path );
+				if ( empty( $files ) || ! is_array( $files ) ) {
+					continue;
+				}
+				$custom_js = array_merge( $custom_js, $files );
 			}
-
-			if ( empty($last_reg_script) && $index == 0 ) {
-				wp_register_script ( $file_nm, plugins_url ( '/assets/js/'.substr($file, (strrpos($file, '/', -3) + 1)), SM_PLUGIN_FILE ), array ('sm_custom_smart_manager_js'), $this->version );
-			} else {	        		
-				wp_register_script ( $file_nm, plugins_url ( '/assets/js/'.substr($file, (strrpos($file, '/', -3) + 1)), SM_PLUGIN_FILE ), array ($last_reg_script), $this->version );
-			}
-
-			$last_reg_script = $file_nm;
-			$index++;
 		}
+		if ( ! empty( $custom_js ) && is_array( $custom_js ) ) {
+			$index = 0;
 
+			foreach ( $custom_js as $file ) {
+				if ( empty( $file ) ) {
+					continue;
+				}
+
+				$file_nm = 'sm_custom_' . preg_replace( '/[\s\-.]/', '_', substr( $file, strrpos( $file, '/', -3 ) + 1 ) );
+				array_push( $registered_scripts, $file_nm );
+
+				if ( in_array( $file_nm, array( 'sm_custom_smart_manager_js', 'sm_custom_styles_js', 'sm_custom_admin_js', 'sm_custom_core_base_js' ), true ) ) {
+					continue;
+				}
+
+				$folder_flag = false !== strpos( $file, '/common-core/' ) ? '/common-core' : '';
+
+				if ( 0 === $index && empty( $last_reg_script ) ) {
+					wp_register_script( $file_nm, plugins_url( $folder_flag . '/assets/js/' . substr( $file, strrpos( $file, '/', -3 ) + 1 ), SM_PLUGIN_FILE ), array( 'sm_custom_smart_manager_js' ), $this->version );
+				} else {
+					wp_register_script( $file_nm, plugins_url( $folder_flag . '/assets/js/' . substr( $file, strrpos( $file, '/', -3 ) + 1 ), SM_PLUGIN_FILE ), array( $last_reg_script ), $this->version );
+				}
+
+				$last_reg_script = $file_nm;
+				$index++;
+			}
+		}
 		//Updating The Files Recieved in SM Beta
 		$successful = ($this->updater * $this->upgrade)/$this->updater;
 
 		// Code for loading custom js for PRO automatically
-		if( SMPRO === true ) {
-			$custom_js = glob( $this->plugin_path .'/pro/assets/js/*.js' );
-
-			foreach ( $custom_js as $file ) {
-
-				$file_nm = 'sm_pro_custom_'.preg_replace('/[\s\-.]/','_',substr($file, (strrpos($file, '/', -3) + 1)));
-				array_push( $registered_scripts, $file_nm );
-
-				if ( $file_nm == 'sm_pro_custom_smart_manager_js' ) {
-					continue;
+		if ( true === SMPRO ) {
+			$custom_js = glob( $this->plugin_path . '/pro/assets/js/*.js' );
+			$custom_js = array_merge( $custom_js, glob( $this->plugin_path . '/pro/common-pro/assets/js/*.js' ) );
+			if ( ! empty( $custom_js ) && is_array( $custom_js ) ) {
+				foreach ( $custom_js as $file ) {
+					if ( ! is_string( $file ) || empty( $file ) ) {
+						continue;
+					}
+					$file_nm = 'sm_pro_custom_' . preg_replace( '/[\s\-.]/', '_', substr( $file, ( strrpos( $file, '/', -3 ) + 1 ) ) );
+					array_push( $registered_scripts, $file_nm );
+					if ( 'sm_pro_custom_smart_manager_js' === $file_nm ) {
+						continue;
+					}
+					$folder_flag = '';
+					if ( true === SMPRO && false !== strpos( $file, '/pro/' ) ) {
+						$folder_flag = ( false !== strpos( $file, '/pro/common-pro/' ) ) ? '/pro/common-pro' : '/pro';
+					} elseif ( false !== strpos( $file, '/common-core/' ) ) {
+						$folder_flag = 'common-core';
+					}
+					if ( ! empty( $folder_flag ) ) {
+						wp_register_script(
+							$file_nm,
+							plugins_url( $folder_flag . '/assets/js/' . substr( $file, ( strrpos( $file, '/', -3 ) + 1 ) ), SM_PLUGIN_FILE ),
+							array( $last_reg_script ),
+							$this->version
+						);
+						$last_reg_script = $file_nm;
+						$index++;
+					}
 				}
-
-				wp_register_script ( $file_nm, plugins_url ( '/pro/assets/js/'.substr($file, (strrpos($file, '/', -3) + 1)), SM_PLUGIN_FILE ), array ($last_reg_script), $this->version );
-
-				$last_reg_script = $file_nm;
-				$index++;
 			}
 		}
 		( is_callable( array( 'Smart_Manager', 'set_script_translations' ) ) ) ? self::set_script_translations( $registered_scripts ) : '';
@@ -1201,7 +1234,7 @@ class Smart_Manager {
 
 		// set the default dashboard
 		$search_type = get_transient( 'sa_sm_'.$current_user->user_email.'_search_type' );
-		
+
 		$recent_dashboards = get_option('sm_wp_dashboard_post_type_'.get_current_user_id(), false);
 		$is_redirect = false;
 
@@ -1237,7 +1270,7 @@ class Smart_Manager {
 		$recent_dashboard_type = ( empty( $recent_dashboards ) && 'post_type' === $recent_dashboard_type ) ? '' : $recent_dashboard_type;
 
 		$recent_views = get_option('sm_wp_dashboard_view_'.get_current_user_id(), false);
-		
+
 		if( empty( $recent_views ) ) {
 			$recent_views = get_user_meta( get_current_user_id(), 'sa_sm_recent_views', true );
 		} else {
@@ -1281,7 +1314,7 @@ class Smart_Manager {
 		//Updating The Files Recieved in SM Beta
 		$deleted_successful = ( ($this->dupdater * $this->dupgrade)/$this->dupdater ) * 2;
 
-		self::$sm_dashboards_final ['sm_nonce'] = wp_create_nonce( 'smart-manager-security' );
+		self::$sm_dashboards_final ['sm_nonce'] = wp_create_nonce( 'sa-manager-security' );
 		$batch_background_process = false;
 		$background_process_name = '';
 
@@ -1308,7 +1341,7 @@ class Smart_Manager {
 		$disable_col_edit = apply_filters( 'sm_disable_col_edit', false );
 		$col_edit_disable_message = apply_filters( 'sm_col_edit_disable_message', _x( 'This column edit has been disabled. Please contact store administrator for enabling the same.', 'Column edit disable message', 'smart-manager-for-wp-e-commerce' ) );
 
-		$sm_beta_params = array( 
+		$sm_beta_params = array(
 							'sm_dashboards' => json_encode(self::$sm_dashboards_final),
 							'sm_views' => json_encode($this->sm_accessible_views),
 							'sm_owned_views' => json_encode( $this->sm_owned_views ),
@@ -1354,7 +1387,7 @@ class Smart_Manager {
 							'SM_IS_WOO79' => ( ! empty( self::$sm_is_woo79 ) ) ? 'true' : 'false',
 							'isSAOfferVisible' => SA_OFFER_VISIBLE,
 							'isSAOfferBannerVisible' => ( 'yes' === get_option( 'sa_sm_offer_bfcm_2024', 'yes' ) ) ? true : false,
-							'scheduled_action_admin_url' => self::get_scheduled_actions_search_url('storeapps_smart_manager_scheduled_actions'),
+							'scheduled_action_admin_url' => self::get_scheduled_actions_search_url('storeapps_sm_scheduled_actions'),
 							'scheduled_export_actions_admin_url' => self::get_scheduled_actions_search_url('storeapps_smart_manager_scheduled_export_actions'),
 							'is_admin' => ( 'administrator' === self::get_current_user_role() ) ? true : false,
 							'manHoursData' => self::sm_get_man_hours_data(),
@@ -1396,51 +1429,69 @@ class Smart_Manager {
 		}
 
 		wp_enqueue_style( 'wp-jquery-ui-dialog' );
-		
+
 		//Registering styles for visualsearch lib.
-		wp_register_style ( 'sm_search', plugins_url ( '/assets/css/styles.css', SM_PLUGIN_FILE ), array(), $this->version );
+		wp_register_style ( 'sm_search', plugins_url ( '/common-core/assets/css/styles.css', SM_PLUGIN_FILE ), array(), $this->version );
 
 		//Code for loading custom js for PRO automatically
-		$custom_css_lite = glob( $this->plugin_path .'/assets/css/*/*.css' );
-		$custom_css_pro = array();
-		if( SMPRO === true ) {
-			$custom_css = glob( $this->plugin_path .'/pro/assets/css/*.css' );
-			$custom_lib_css = glob( $this->plugin_path .'/pro/assets/css/*/*.css' );
-			$custom_css_pro = array_merge($custom_lib_css,$custom_css);
+		$custom_css = array();
+		$css_paths = array(
+			'/assets/css/*/*.css',
+			'/common-core/assets/css/*/*.css',
+		);
+
+		if ( ( true === SMPRO ) && ( ! empty( $css_paths ) ) && is_array( $css_paths ) ) {
+			$css_paths = array_merge(
+				$css_paths,
+				array(
+					'/pro/assets/css/*.css',
+					'/pro/assets/css/*/*.css',
+					'/pro/common-pro/assets/css/*.css'
+				)
+			);
 		}
 
-		$custom_css = ( !empty( $custom_css_pro ) ) ? array_merge($custom_css_lite, $custom_css_pro) : $custom_css_lite;
-
-		if( !empty( $custom_css ) ) {
-			$index = 0;
-			$last_reg_script = 'sm_search';
-			foreach ( $custom_css as $file ) {
-
-				$folder_name = '';
-
-				$folder_path = substr($file, 0, (strrpos($file, '/', -3)));
-				$folder_name = substr($folder_path, (strrpos($folder_path, '/', -3) + 1));
-
-				$pro_flag = ( !empty( $custom_css_pro ) && in_array($file, $custom_css_pro) ) ? 'pro' : '';
-
-				$file_nm = 'sm_'. ( !empty( $pro_flag ) ? $pro_flag.'_' : '' ) .'custom_'.preg_replace('/[\s\-.]/','_',substr($file, (strrpos($file, '/', -3) + 1)));
-
-				if( $file_nm == 'sm_pro_custom_smart_manager_css' || $file_nm == 'sm_pro_custom_styles_css' ) {
+		if ( ( ! empty( $css_paths ) ) && is_array( $css_paths ) ) {
+			foreach ( $css_paths as $path ) {
+				$files = glob( $this->plugin_path . $path );
+				if ( ( empty( $files ) ) || ( ! is_array( $files ) ) ) {
 					continue;
 				}
+				$custom_css = array_merge( $custom_css, $files );
+			}
+		}
 
-				wp_register_style ( $file_nm, plugins_url ( ( !empty( $pro_flag ) ? '/'.$pro_flag : '' ).'/assets/css/'.$folder_name.'/'.substr($file, (strrpos($file, '/', -3) + 1)), SM_PLUGIN_FILE ), array($last_reg_script), $this->version );
-
+		if ( ( ! empty( $custom_css ) ) && is_array( $custom_css ) ) {
+			$index           = 0;
+			$last_reg_script = 'sm_search';
+			$folder_flag = '';
+			$folder_name = '';
+			foreach ( $custom_css as $file ) {
+				$folder_path = substr( $file, 0, strrpos( $file, '/', -3 ) );
+				$folder_name = substr( $folder_path, strrpos( $folder_path, '/', -3 ) + 1 );
+				$pro_flag    = ( ( true === SMPRO ) && ( false !== strpos( $file, '/pro/' ) ) ) ? 'pro' : '';
+				if ( ( true === SMPRO ) && ( false !== strpos( $file, '/pro/' ) ) ) {
+					$folder_flag = ( false !== strpos( $file, '/pro/common-pro/' ) ) ? 'pro/common-pro' : 'pro';
+				} elseif ( false !== strpos( $file, '/common-core/' ) ) {
+					$folder_flag = 'common-core';
+				}
+				$file_nm = 'sm_' . ( ! empty( $pro_flag ) ? $pro_flag . '_' : '' ) . 'custom_' . preg_replace( '/[\s\-.]/', '_', substr( $file, strrpos( $file, '/', -3 ) + 1 ) );
+				if ( in_array( $file_nm, array( 'sm_pro_custom_smart_manager_css', 'sm_pro_custom_styles_css', 'sm_pro_custom_admin_css' ) ) ) {
+					continue;
+				}
+				$folder_name = ( 'sm_pro_custom_sa_manager_css' === $file_nm ) ? "" : $folder_name;
+				$script_path = ( $folder_flag ? '/' . $folder_flag : '' ) . '/assets/css/' . $folder_name . '/' . substr( $file, strrpos( $file, '/', -3 ) + 1 );
+				wp_register_style( $file_nm, plugins_url( $script_path, SM_PLUGIN_FILE ), array( $last_reg_script ), $this->version );
 				$last_reg_script = $file_nm;
 				$index++;
 			}
 		}
 
-		wp_register_style ( 'sm_main_style', plugins_url ( '/assets/css/smart-manager.css', SM_PLUGIN_FILE ), array($last_reg_script), $this->version );			
+		wp_register_style ( 'sm_main_style', plugins_url ( '/assets/css/smart-manager.css', SM_PLUGIN_FILE ), array($last_reg_script), $this->version );
 		$last_reg_script = 'sm_main_style';
 
 		if( SMPRO === true ) {
-			wp_register_style ( 'sm_pro_main_style', plugins_url ( '/pro/assets/css/smart-manager.css', SM_PLUGIN_FILE ), array($last_reg_script), $this->version );			
+			wp_register_style ( 'sm_pro_main_style', plugins_url ( '/pro/assets/css/smart-manager.css', SM_PLUGIN_FILE ), array($last_reg_script), $this->version );
 			$last_reg_script = 'sm_pro_main_style';
 		}
 
@@ -1530,11 +1581,11 @@ class Smart_Manager {
 			) );
 
 			if( !empty($result) ) {
-				die('Success');	
+				die('Success');
 			} else {
 				die('Failed');
 			}
-			
+
 		}
 	}
 
@@ -1543,17 +1594,17 @@ class Smart_Manager {
 
 		?>
 			<script type="text/javascript">
-	
+
 					jQuery(document).ready(function(){
 						var current_url = "<?php echo admin_url('admin.php?&page=smart-manager'); ?>";
 						jQuery('.request-filesystem-credentials-dialog-content').find('form').attr('action',current_url+'&action=sm_update_to_pro');
-	
+
 						jQuery('.request-filesystem-credentials-dialog-content').find('form').on('submit', function(e){
 							e.preventDefault();
-	
+
 							jQuery( '#request-filesystem-credentials-dialog' ).hide();
 							jQuery( 'body' ).removeClass( 'modal-open' );
-	
+
 							let params = jQuery(this).serializeArray();
 							params.security =  '<?php echo esc_attr( wp_create_nonce( 'sm_update_to_pro' ) ); ?>';
 							setTimeout(function(){ jQuery.ajax({
@@ -1564,31 +1615,31 @@ class Smart_Manager {
 														data: params,
 														success: function(response) {
 															jQuery('#sm_pro_to_lite_msg').removeClass('notice-error').addClass('notice-success').html('<div style="margin:.5em 0;"><?php echo __( 'Upgraded successfully!!!', SM_TEXT_DOMAIN ); ?></div>');
-	
+
 															// Remove navigation prompt
 															window.onbeforeunload = null;
-	
+
 															setTimeout(function(){ window.location.replace(current_url); }, 3000);
 														}
 													});
 								}, 1000);
-							
+
 						});
 					});
-	
+
 					jQuery(document).on('click','#sm_update_to_pro_link',function(e){
 						e.preventDefault();
-	
+
 						var current_url = "<?php echo admin_url('admin.php?&page=smart-manager'); ?>";
 						var $modal = jQuery( '#request-filesystem-credentials-dialog' );
 						jQuery('#sm_pro_to_lite_msg_hidden').html(jQuery('#sm_pro_to_lite_msg').html());
 						jQuery('#sm_pro_to_lite_msg').html('<div style="margin:.5em 0;"><span style="margin-right:6px;color:#f56e28;animation:rotation 2s infinite linear;" class="dashicons dashicons-update"></span><?php echo __( 'Upgrading to Smart Manager Pro...', SM_TEXT_DOMAIN ); ?></div>');
-	
+
 						// Enable navigation prompt
 						window.onbeforeunload = function() {
 							return true;
 						};
-	
+
 						setTimeout(function(){ jQuery.ajax({
 									type : 'POST',
 									url: (ajaxurl.indexOf('?') !== -1) ? ajaxurl + '&action=sm_update_to_pro' : ajaxurl + '?action=sm_update_to_pro',
@@ -1598,13 +1649,13 @@ class Smart_Manager {
 										security: '<?php echo esc_attr( wp_create_nonce( 'sm_update_to_pro' ) ); ?>'
 									},
 									success: function(response) {
-	
+
 										if( response == 'Success' ) {
 											jQuery('#sm_pro_to_lite_msg').removeClass('notice-error').addClass('notice-success').html('<div style="margin:.5em 0;"><?php echo __( 'Upgraded successfully!!!', SM_TEXT_DOMAIN ); ?></div>');
-											
+
 											// Remove navigation prompt
 											window.onbeforeunload = null;
-											
+
 											setTimeout(function(){ window.location.replace(current_url); }, 3000);
 										} else {
 											jQuery( 'body' ).addClass( 'modal-open' );
@@ -1614,28 +1665,28 @@ class Smart_Manager {
 									}
 								});
 						}, 1000);
-							
+
 					});
-	
+
 					jQuery(document).on('click', '[data-js-action="close"], .notification-dialog-background',function(e){
 						e.preventDefault();
-	
+
 						// Remove navigation prompt
 						window.onbeforeunload = null;
-	
+
 						jQuery('#sm_pro_to_lite_msg').html(jQuery('#sm_pro_to_lite_msg_hidden').html());
-	
+
 						jQuery( '#request-filesystem-credentials-dialog' ).hide();
 						jQuery( 'body' ).removeClass( 'modal-open' );
-	
+
 					});
-	
+
 		</script>
-	
+
 		<?php
 			$is_pro_available = $this->is_pro_available();
 			if( $is_pro_available === true ) { ?>
-	
+
 				<div id="sm_pro_to_lite_msg" class="update-message notice inline notice-error notice-alt" style="display:block !important;">
 					<p>
 						<?php
@@ -1644,30 +1695,30 @@ class Smart_Manager {
 					</p>
 				</div>
 				<div id="sm_pro_to_lite_msg_hidden" style="display:none;"></div>
-	
+
 				<?php
-	
+
 			} else if ( SMPRO === false && get_option('sm_dismiss_admin_notice') == '1') { ?>
 					<div id="message" class="updated fade" style="display:block !important;">
 						<p> <?php
-								printf( ('<b>' . __( 'Important:', SM_TEXT_DOMAIN ) . '</b> ' . __( 'Upgrade to Pro to get features like \'<i>Manage any Custom Post Type</i>\' , \'<i>Bulk Edit</i>\' , \'<i>Export CSV </i>\' , \'<i>Duplicate Products</i>\' &amp; many more...', SM_TEXT_DOMAIN ) . " " . '<br /><a href="%1s" target=_storeapps>' . " " .__( 'Learn more about Pro version', SM_TEXT_DOMAIN ) . '</a> ' . __( 'or take a', SM_TEXT_DOMAIN ) . " " . '<a href="%2s" target=_livedemo>' . " " . __( 'Live Demo', SM_TEXT_DOMAIN ) . '</a>'), 'https://www.storeapps.org/product/smart-manager', 'http://demo.storeapps.org/?demo=sm-woo' );							
+								printf( ('<b>' . __( 'Important:', SM_TEXT_DOMAIN ) . '</b> ' . __( 'Upgrade to Pro to get features like \'<i>Manage any Custom Post Type</i>\' , \'<i>Bulk Edit</i>\' , \'<i>Export CSV </i>\' , \'<i>Duplicate Products</i>\' &amp; many more...', SM_TEXT_DOMAIN ) . " " . '<br /><a href="%1s" target=_storeapps>' . " " .__( 'Learn more about Pro version', SM_TEXT_DOMAIN ) . '</a> ' . __( 'or take a', SM_TEXT_DOMAIN ) . " " . '<a href="%2s" target=_livedemo>' . " " . __( 'Live Demo', SM_TEXT_DOMAIN ) . '</a>'), 'https://www.storeapps.org/product/smart-manager', 'http://demo.storeapps.org/?demo=sm-woo' );
 							?>
 						</p>
 					</div>
 				<?php
-			} 
+			}
 	}
 
 	//function for showing the sm page
 	function show_console_beta() {
-	
+
 		global $wpdb;
 
 		$latest_version = $this->get_latest_version();
 		$is_pro_updated = $this->is_pro_updated();
 		$is_pricing_page = ( ! empty( $_GET['tab'] ) && 'upgrade' === $_GET['tab'] ) ? true : false;
 		?>
-		<div id="sa_smart_manager_main"> </div>
+		<div id="sa_manager_main"> </div>
 		<?php
 			wp_enqueue_script( 'sm_dashboard_js' );
 		?>
@@ -1677,17 +1728,17 @@ class Smart_Manager {
 					div#TB_window {
 						background: lightgrey;
 					}
-				</style>    
-				<?php if ( SMPRO === true && function_exists( 'smart_support_ticket_content' ) ) smart_support_ticket_content();  ?>    
-					
+				</style>
+				<?php if ( SMPRO === true && function_exists( 'smart_support_ticket_content' ) ) smart_support_ticket_content();  ?>
+
 				<div id="sm_nav_bar" style="margin-bottom:1em;">
-					<div class='sm_beta_left'>	
+					<div class='sm_beta_left'>
 						<span class="sm-h2">
 						<?php
 								echo 'Smart Manager';
 								echo ' <sup style="vertical-align: super;background-color: #EC8F1C;background-color:#508991;font-size: 0.7em !important;padding: 2px 3px;border-radius: 2px;font-weight: 600;letter-spacing:0.1em;"><span>'.((SMPRO === true) ? __('PRO', 'smart-manager-for-wp-e-commerce') : __('LITE', 'smart-manager-for-wp-e-commerce')).'</span></sup>';
 								$plug_page = '';
-								
+
 						?>
 						</span>
 					</div>
@@ -1709,13 +1760,12 @@ class Smart_Manager {
 			if( is_callable( array( $this, 'add_sku_generation_feature_notice' ) ) ) {
 				$this->add_sku_generation_feature_notice();
 			}
-
 			if( ! $is_pricing_page ) {
 		?>
-				<div id="sm_editor_grid" ></div>		
+				<div id="sm_editor_grid" ></div>
 				<div id="sm_pagging_bar"></div>
 				<div id="sm_inline_dialog"></div>
-				<div class="sm-loader-container">
+				<div class="sa-loader-container">
 					<div class="sm-loader">
 						<div></div>
 						<div></div>
@@ -1825,26 +1875,26 @@ class Smart_Manager {
 	public static function get_data() {
 		return get_plugin_data( SM_PLUGIN_FILE );
 	}
-	
+
 	public static function get_version() {
-	
+
 		$version = '';
-	
+
 		if( is_callable( array( 'Smart_Manager', 'get_data' ) ) ) {
 			$plugin_data = self::get_data();
 			$version = $plugin_data['Version'];
 		}
-	
+
 		return $version;
 	}
 
 	function manage_with_smart_manager() {
 		$current_post_type = get_current_screen()->post_type;
 		$current_screen_id = get_current_screen()->id;
-		
+
 		if ( ( ! empty( $current_post_type ) && 'edit-'.$current_post_type === $current_screen_id ) || 'users' === $current_screen_id  ) {
 			$dashboard = ( ( ! empty( $current_post_type ) ) ? $current_post_type : 'user' );
-		
+
 			wp_register_script( 'manage_with_sm', plugins_url( '/assets/js/manage-with-smart-manager.js', SM_PLUGIN_FILE ), array(), self::get_version(), true );
 			wp_enqueue_script( 'manage_with_sm' );
 			$sm_params = array(
@@ -1891,7 +1941,7 @@ class Smart_Manager {
 		if ( empty( $wp_admin_bar ) ) {
 			return;
 		}
-		
+
 		$current_user_role = ( is_callable( array( 'Smart_Manager', 'get_current_user_role' ) ) ) ? self::get_current_user_role() : '';
 		if( ! ( ( defined( 'SMPRO' ) && true === SMPRO  ) || ( ( ! empty( $current_user_role ) && 'administrator' === $current_user_role ) ) ) ) {
 			return;
@@ -1951,7 +2001,7 @@ class Smart_Manager {
 			return ( ( is_array( $slugs ) ) && ( count( $slugs ) > 1 ) ) ? array_merge( $merged_slugs, $slugs ) : $merged_slugs;
 		}, [] ) );
 	}
-	
+
 	/**
 	 * Function to add additional links under plugins meta on plugins page for 5-star and Go Pro in case of lite version installed.
 	 *
@@ -1985,51 +2035,7 @@ class Smart_Manager {
 	public static function show_halloween_offer(){
 		return ( ( time() >= strtotime( '2023-10-26 11:30:00' ) ) && ( time() <= strtotime( '2023-11-02 07:00:00' ) ) ) ? true : false;
 	}
-	
-	/**
-	* Function to log messages generated by Smart Manager plugin
-	*
-	* @param  string $level   Message type. Valid values: debug, info, notice, warning, error, critical, alert, emergency.
-	* @param  string $message The message to log.
-	*/
-   public static function log( $level = 'notice', $message = '' ) {
-       $is_logging_enabled = get_option( 'sa_sm_enable_logging', 'yes' );
-	   if ( ( empty( $level ) && empty( $message ) ) || ( 'no' === $is_logging_enabled ) ) {
-		   return;
-	   }
-	   if ( defined( 'WC_PLUGIN_FILE' ) && ! empty( WC_PLUGIN_FILE ) ) {
-			if ( function_exists( 'wc_get_logger' ) ) {
-				wc_get_logger()->log( $level, $message, array( 'source' => 'smart-manager-for-wp-e-commerce' ) );
-			} elseif ( file_exists( plugin_dir_path( WC_PLUGIN_FILE ) . 'includes/class-wc-logger.php' ) ) {
-				include_once plugin_dir_path( WC_PLUGIN_FILE ) . 'includes/class-wc-logger.php';
-				$logger = new WC_Logger();
-				$logger->add( 'smart-manager-for-wp-e-commerce', $message );
-			}
-		} else {
-			error_log( 'smart-manager-for-wp-e-commerce' . ' ' . $message ); // phpcs:ignore
-		}
-   }
 
-   /**
-	* Function to dequeue styles in Smart Manager page
-	*
-	* @return void
-	*/
-	public function sa_sm_dequeue_styles() {
-		
-		global $wp_styles;
-		if (  ! is_admin() || empty( $_GET['page'] ) || ( ! empty( $_GET['page'] ) && ( 'smart-manager' !== $_GET['page'] ) ) || empty( $wp_styles->queue ) || ( ! is_array( $wp_styles->queue ) ) ) {
-			return;
-		}
-		$dequeue_handles = array( 'adl-lp-bootstrap' );
-		foreach ( $wp_styles->queue as $handle ) {
-			if ( empty( $handle ) || empty( $dequeue_handles ) || ( ! is_array( $dequeue_handles ) ) || ( ! in_array( $handle, $dequeue_handles ) ) || ( ! wp_style_is( $handle ) ) ) {
-				continue;
-			}
-			wp_dequeue_style( $handle );
-			wp_deregister_style( $handle );
-		}
-	}
 
 	/**
 	 * Calculate saved time and additional savings using bulk edit calculation.
@@ -2065,7 +2071,7 @@ class Smart_Manager {
 	 *
 	 * @param string $edit_type Type of edit ('inline', 'advanced_search_inline', 'bulk').
 	 * @param int    $records_updated Number of records updated.
-	 * @return void 
+	 * @return void
 	*/
 	public static function sm_update_man_hours_data( $edit_type = '', $records_updated = 0 ) {
 		if ( empty( $edit_type ) || empty( $records_updated ) ) {
@@ -2079,7 +2085,7 @@ class Smart_Manager {
 		if ( empty( $time_saved_details['time_saved'] ) ) {
 			return;
 		}
-		
+
 		$man_hours_saved = floatval( $time_saved_details['time_saved'] );
 		if ( empty( $man_hours_saved ) ) {
 			return;
@@ -2113,7 +2119,7 @@ class Smart_Manager {
 				'display_man_hours' => false,
 				'additional_savings' => 0,
 			);
-		} 
+		}
 		return array(
 			'man_hours_saved'    => floatval( $man_hours_data['inline'] ),
 			'display_man_hours'  => ( floatval( $man_hours_data['inline'] ) >= 0.25 ) ? true : false,
@@ -2133,7 +2139,7 @@ class Smart_Manager {
 		}
 		return round( ( ( floatval( $man_hours_inline ) ) / ( floatval( self::$time_saved_per_record['inline'] ) ) ) * ( ( floatval( self::$time_saved_per_record['bulk'] ) ) - ( floatval( self::$time_saved_per_record['inline'] ) ) ), 2 );
 	}
-	
+
 	/**
 	 * Display a notice summarizing the saved man-hours and available discounts.
 	 *
@@ -2222,9 +2228,64 @@ class Smart_Manager {
 	 *
 	 * @param string $search Search query string for Action Scheduler.
 	 * @return string
-	*/
-	public static function get_scheduled_actions_search_url( $search = '' ) {
-		return ( empty( $search ) ) ? '' : esc_url( admin_url( 'tools.php?page=action-scheduler&orderby=schedule&order=desc&action=-1&action2=-1&status=pending&paged=1' ) . '&s=' . urlencode( $search ) );
+	 */
+	public static function get_scheduled_actions_search_url($search = '')
+	{
+		return (empty($search)) ? '' : esc_url(admin_url('tools.php?page=action-scheduler&orderby=schedule&order=desc&action=-1&action2=-1&status=pending&paged=1') . '&s=' . urlencode($search));
+	}
+
+	/**
+	 * Function to dequeue styles in Smart Manager page
+	 *
+	 * @return void
+	 */
+	public function sa_sm_dequeue_styles()
+	{
+
+		global $wp_styles;
+		if (! is_admin() || empty($_GET['page']) || (! empty($_GET['page']) && ('smart-manager' !== $_GET['page'])) || empty($wp_styles->queue) || (! is_array($wp_styles->queue))) {
+			return;
+		}
+		$dequeue_handles = array('adl-lp-bootstrap');
+		foreach ($wp_styles->queue as $handle) {
+			if (empty($handle) || empty($dequeue_handles) || (! is_array($dequeue_handles)) || (! in_array($handle, $dequeue_handles)) || (! wp_style_is($handle))) {
+				continue;
+			}
+			wp_dequeue_style($handle);
+			wp_deregister_style($handle);
+		}
+	}
+
+	/**
+	 * Function to Show admin notice about the new auto-SKU generation feature on Smart Manager pages.
+	 *
+	 * @return void
+	 */
+	public function add_sku_generation_feature_notice(){
+		if ( ( ! defined('SMPRO') ) || ( SMPRO !== true ) || ( empty( $_GET['page'] ) ) || ( ! in_array( sanitize_text_field( wp_unslash( $_GET['page'] ) ), array( 'smart-manager', 'sm-storeapps-plugins' ), true ) ) || get_option( 'sa_sm_hide_generate_sku_feature_notice' ) ) {
+			return;
+		}
+		?>
+		<script>
+			jQuery(document).on('click', '#sm_generate_sku_feature_notice .notice-dismiss', function(){
+				jQuery.ajax({
+					url: '<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>',
+					type: 'post',
+					dataType: 'json',
+					data: {
+						action: 'dismiss_generate_sku_feature_notice',
+						security: '<?php echo esc_html( wp_create_nonce( 'sa-dismiss-generate-sku-feature-notice' ) ); ?>'
+					}
+				});
+			})
+		</script>
+		<?php
+		echo sprintf(
+			'<div class="notice notice-success is-dismissible" id="sm_generate_sku_feature_notice" style="display:block !important;"><p>🎉 <strong>%s</strong> %s %s</p></div>',
+			_x( 'New Feature Alert:', 'admin notice title for sku generation feature', 'smart-manager-for-wp-e-commerce' ),
+			_x( 'Automatically generate SKUs for WooCommerce products with blank SKUs during CSV import.', 'admin notice description for sku generation feature', 'smart-manager-for-wp-e-commerce' ),
+			_x( 'Enable this by turning on the <strong>“Automatically generate SKUs for WooCommerce products with blank values during CSV import”</strong> setting in <strong>Settings > General Settings.</strong>', 'admin notice instructions for sku generation feature', 'smart-manager-for-wp-e-commerce' )
+		);
 	}
 
 	/**

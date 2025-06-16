@@ -79,24 +79,30 @@ if ( ! class_exists( 'Smart_Manager_Task' ) ) {
 			); // should be kept before calling the parent class constructor.
 			parent::__construct( $dashboard_key );
 			$this->dashboard_key = $dashboard_key;
-			
+
 			if ( file_exists(SM_PLUGIN_DIR_PATH . '/pro/classes/class-smart-manager-pro-base.php') ) {
 				include_once SM_PLUGIN_DIR_PATH . '/pro/classes/class-smart-manager-pro-base.php';
 				$this->pro_base = new Smart_Manager_Pro_Base( $dashboard_key );
 				$this->advanced_search_operators = ( ! empty( $this->pro_base->advance_search_operators ) ) ? $this->pro_base->advance_search_operators : $this->advanced_search_operators;
 			}
-			
+
 			$this->store_col_model_transient_option_nm = 'sa_sm_' . $this->dashboard_key . '_tasks';
 			add_filter( 'sm_default_dashboard_model', array( &$this, 'generate_dashboard_model' ) );
 			add_filter( 'sm_data_model', array( &$this, 'generate_data_model' ), 10, 2 );
 			add_filter(
-				'sm_beta_load_default_store_model',
+				'sm_load_default_store_model',
 				function() {
 					return false;
 				}
 			);
 			add_filter(
 				'sm_beta_load_default_data_model',
+				function() {
+					return false;
+				}
+			);
+			add_filter(
+				'sa_can_apply_dashboard_model_filter',
 				function() {
 					return false;
 				}
@@ -180,7 +186,7 @@ if ( ! class_exists( 'Smart_Manager_Task' ) ) {
 			$current_user_role = ( is_callable( array( 'Smart_Manager', 'get_current_user_role' ) ) ) ? Smart_Manager::get_current_user_role() : '';
 			$where = apply_filters(
 				'sm_where_tasks_cond',
-				' AND '. $wpdb->prefix . 'sm_tasks.post_type = %s' . 
+				' AND '. $wpdb->prefix . 'sm_tasks.post_type = %s' .
 				( (!empty( $current_user_role ) && 'administrator' === $current_user_role) ? '' : ' AND author = %d')
 			);
 			$order_by            = apply_filters( 'sm_orderby_tasks_cond', $wpdb->prefix . 'sm_tasks.id DESC ' );
@@ -272,7 +278,7 @@ if ( ! class_exists( 'Smart_Manager_Task' ) ) {
 						$this->dashboard_key,
 						$user_id_constraint
 					),
-					array_fill( 0, sizeof( $simple_search_where_cond ), '%' . $wpdb->esc_like( $search_text ) . '%' ) 
+					array_fill( 0, sizeof( $simple_search_where_cond ), '%' . $wpdb->esc_like( $search_text ) . '%' )
 				) : array( 1, $this->dashboard_key, $user_id_constraint )
 				);
 			$ids              = $wpdb->get_col(
@@ -338,8 +344,8 @@ if ( ! class_exists( 'Smart_Manager_Task' ) ) {
 		public static function task_update( $params = array() ) {
 			global $wpdb;
 			if ( empty( $params ) && ( ! is_array( $params ) ) ) {
-				if ( is_callable( array( 'Smart_Manager', 'log' ) ) ) {
-					Smart_Manager::log( 'error', _x( 'No params found for updating task ', 'task update params', 'smart-manager-for-wp-e-commerce' ) );
+				if ( is_callable( 'sa_manager_log' ) ) {
+					sa_manager_log( 'error', _x( 'No params found for updating task ', 'task update params', 'smart-manager-for-wp-e-commerce' ) );
 				}
 				return;
 			}

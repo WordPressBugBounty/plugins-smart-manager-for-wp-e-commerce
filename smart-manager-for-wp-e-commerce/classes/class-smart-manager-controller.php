@@ -3,17 +3,15 @@
 if ( !defined( 'ABSPATH' ) ) exit;
 
 if ( ! class_exists( 'Smart_Manager_Controller' ) ) {
-	class Smart_Manager_Controller {
+	class Smart_Manager_Controller extends SA_Manager_Controller {
 		public $dashboard_key = '',
 				$plugin_path = '',
-				$sm_beta_pro_background_updater = '';
+				$sm_beta_pro_background_updater = null;
 
 		function __construct() {
-			if (is_admin() ) {
-				add_action ( 'wp_ajax_sm_beta_include_file', array(&$this,'request_handler') );
-			}
+			add_filter( 'sa_manager_handler', array( $this, 'req_handler' ), 10, 2 );
+			add_action( 'sa_manager_func_handler', array( $this, 'func_handler' ) );
 			$this->plugin_path  = untrailingslashit( plugin_dir_path( __FILE__ ) );
-
 			add_action('admin_init',array(&$this,'call_custom_actions'),11);
 			add_action('admin_footer',array(&$this,'sm_footer'));
 			//Filter for setting the wp_editor default tab
@@ -22,6 +20,40 @@ if ( ! class_exists( 'Smart_Manager_Controller' ) ) {
 			// Code for resetting the 'Shop_Order' and 'Shop_Subscription' col models on WC setting update
 			add_action( 'woocommerce_update_options_advanced_custom_data_stores', array( &$this, 'migrate_wc_orders_subscriptions_col_model' ) );
 			add_action( 'woocommerce_update_options_advanced_features', array( &$this, 'migrate_wc_orders_subscriptions_col_model' ) );
+			add_filter( 'sa_common_module_available', array( $this, 'is_common_module_available' ), 10, 2 );
+		}
+
+		/**
+		 * Checks if the common module is available for the given dashboard.
+		 *
+		 * @param bool   $is_common_module_available Optional. Default value indicating if the common module is available. Default false.
+		 * @param string $current_dashboard          Optional. The current dashboard identifier. Default 'posts'.
+		 *
+		 * @return bool True if the current dashboard is 'product', false otherwise.
+		 */
+		public function is_common_module_available( $is_common_module_available = false, $current_dashboard = 'posts' ) {
+			return ( 'product' === $current_dashboard ) ? true :false;
+		}
+
+		/**
+		 * Handles dynamic method invocation on a given handler object.
+		 *
+		 * @param array $params {
+		 *     Optional. Parameters for the handler.
+		 *
+		 *     @type object $handler_obj The object on which the method should be called.
+		 *     @type string $func_nm     The name of the method to call.
+		 * }
+		 * @return void
+		 */
+		public function func_handler( $params = array() ) {
+			if ( empty( $params ) || empty( $params['handler_obj'] ) || empty( $params['func_nm'] ) ) {
+				return;
+			}
+			$func_nm = $params['func_nm'];
+			if ( is_object( $params['handler_obj'] ) && method_exists( $params['handler_obj'], $func_nm ) && is_callable( [$params['handler_obj'], $func_nm] ) ) {
+				$params['handler_obj']->$func_nm();
+			}
 		}
 
 		public function sm_wp_default_editor( $tab ) {
@@ -39,26 +71,17 @@ if ( ! class_exists( 'Smart_Manager_Controller' ) ) {
 			}
 		}
 
-		//Function to call custom actions on admin_init		
+		//Function to call custom actions on admin_init
 		public function call_custom_actions() {
-			do_action('sm_admin_init');
-
-			add_action( 'edited_term',array( &$this,'terms_added' ), 10, 3 );
-			add_action( 'created_term',array( &$this,'terms_added' ), 10, 3 );
-			add_action( 'delete_term',array( &$this,'terms_deleted' ), 10, 5 );
-			add_action( 'woocommerce_attribute_added',array( &$this,'woocommerce_attributes_updated' ) );
-			add_action( 'woocommerce_attribute_updated',array( &$this,'woocommerce_attributes_updated' ) );
-			add_action( 'woocommerce_attribute_deleted',array( &$this,'woocommerce_attributes_updated' ) );
-			add_action( 'added_post_meta', array( &$this, 'added_post_meta' ), 10, 4 );
-
 			//for background updater
 			if( defined('SMPRO') && SMPRO === true && file_exists(SM_PRO_URL . 'classes/class-smart-manager-pro-background-updater.php') ) {
 				include_once SM_PRO_URL . 'classes/class-smart-manager-pro-background-updater.php';
 				$this->sm_beta_pro_background_updater = Smart_Manager_Pro_Background_Updater::instance();
 			}
-
 			// Code for scheduling action for deleting older tasks and export CSV file after x no. of days.
 			if ( defined('SMPRO') && SMPRO === true && function_exists( 'as_has_scheduled_action' ) && function_exists( 'as_next_scheduled_action' ) && ( ! as_has_scheduled_action( 'sm_schedule_tasks_cleanup' ) || ! as_next_scheduled_action( 'storeapps_smart_manager_scheduled_export_cleanup' ) ) && ( file_exists( SM_PRO_URL . 'classes/class-smart-manager-pro-base.php' ) ) && ( file_exists( $this->plugin_path . '/class-smart-manager-base.php' ) ) ) {
+				include_once SM_PLUGIN_DIR_PATH . '/common-core/classes/class-sa-manager-base.php';
+				include_once SM_PLUGIN_DIR_PATH . '/pro/common-pro/classes/class-sa-manager-pro-base.php';
 				include_once $this->plugin_path . '/class-smart-manager-base.php';
 				include_once SM_PRO_URL . 'classes/class-smart-manager-pro-base.php';
 				if ( ! as_has_scheduled_action( 'sm_schedule_tasks_cleanup' ) && file_exists( SM_PRO_URL . 'classes/class-smart-manager-pro-task.php' ) ) {
@@ -71,52 +94,21 @@ if ( ! class_exists( 'Smart_Manager_Controller' ) ) {
 			}
 		}
 
-		public function woocommerce_attributes_updated() {
-			$this->delete_transients( array( 'product' ) );
-		}
-
-		public function terms_added( $term, $tt_id, $taxonomy ) {
-			global $wp_taxonomies;
-
-			$post_types = ( !empty( $wp_taxonomies[$taxonomy] ) ) ? $wp_taxonomies[$taxonomy]->object_type : array();
-			$this->delete_transients( $post_types );
-		}
-
-		public function terms_deleted( $term, $tt_id, $taxonomy, $deleted_term, $object_ids ) {
-			global $wp_taxonomies;
-
-			$post_types = ( !empty( $wp_taxonomies[$taxonomy] ) ) ? $wp_taxonomies[$taxonomy]->object_type : array();
-			$this->delete_transients( $post_types );
-		}
-
-		public function added_post_meta( $meta_id, $object_id, $meta_key, $_meta_value ) {
-			$post_type = get_post_type( $object_id );
-			$post_types = ( !empty( $post_type ) ) ? array( $post_type ) : array();
-			$this->delete_transients( $post_types );
-		}
-
-		public function delete_transients( $post_types = array() ) {
-			if( !empty( $post_types ) ) {
-				foreach( $post_types as $post_type ) {
-					if( get_transient( 'sa_sm_'.$post_type ) ) {
-						delete_transient( 'sa_sm_'.$post_type );
-					}
-				}
-			}
-		}
-
-		//Function to handle the wp-admin ajax request
-		public function request_handler() {
-			if (empty($_REQUEST) || empty($_REQUEST['active_module']) || empty($_REQUEST['cmd'])) return;
-
-			check_ajax_referer('smart-manager-security','security');
-
-			if ( !is_user_logged_in() || !is_admin() ) {
+		/**
+		 * Handles AJAX and internal requests.
+		 *
+		 * @param array $params      Optional. Additional parameters to pass to the handler. Default empty array.
+		 * @param array $req_params  Required. Request parameters, must include 'active_module' and 'cmd'.
+		 *
+		 * @return mixed Returns an array with handler object and request parameters on success,
+		 *               sends JSON response for settings update,
+		 *               or returns null if request is invalid or not handled.
+		 */
+		public function req_handler( $params = array(), $req_params = array()) {
+			if ( empty( $req_params ) || empty( $req_params['active_module'] ) || empty($req_params['cmd'] ) || ( ! is_user_logged_in() ) || ( ! is_admin() ) ) {
 				return;
 			}
-
 			$pro_flag_class_path = $pro_flag_class_nm = $sm_pro_class_nm = '';
-
 			if( defined('SMPRO') && SMPRO === true ) {
 				$plugin_path = SM_PRO_URL .'classes';
 				$pro_flag_class_path = 'pro-';
@@ -124,11 +116,10 @@ if ( ! class_exists( 'Smart_Manager_Controller' ) ) {
 			} else {
 				$plugin_path = $this->plugin_path;
 			}
-
 			//Including the common utility functions class
 			include_once $plugin_path . '/class-smart-manager-'.$pro_flag_class_path.'utils.php';
-			$func_nm = $_REQUEST['cmd'];
-			if( !empty( $_REQUEST['module'] ) && 'custom_views' === $_REQUEST['module'] ){
+			$func_nm = $req_params['cmd'];
+			if( !empty( $req_params['module'] ) && 'custom_views' === $req_params['module'] ){
 				if( class_exists( 'Smart_Manager_Pro_Views' ) ){
 					$views_obj = Smart_Manager_Pro_Views::get_instance();
 					if( is_callable( array( $views_obj, $func_nm ) ) ) {
@@ -139,15 +130,16 @@ if ( ! class_exists( 'Smart_Manager_Controller' ) ) {
 			}
 
 			// Code to handle saving of settings
-			if( 'smart_manager_settings' === $_REQUEST['active_module'] && is_callable( 'Smart_Manager_Settings', 'update' ) ){
-				$settings = ( ! empty( $_REQUEST['settings'] ) ) ? json_decode( stripslashes( $_REQUEST['settings'] ), true ) : array();
+			if( 'smart_manager_settings' === $req_params['active_module'] && is_callable( 'Smart_Manager_Settings', 'update' ) ){
+				$settings = ( ! empty( $req_params['settings'] ) ) ? json_decode( stripslashes( $req_params['settings'] ), true ) : array();
 				$result = Smart_Manager_Settings::update( $settings );
 				wp_send_json( array( 'ACK'=> ( ( ! empty( $result ) ) ? 'Success' : 'Failure' ) ) );
 			}
 
 			include_once $this->plugin_path . '/class-smart-manager-base.php';
-			$this->dashboard_key = $_REQUEST['active_module'];
-			$is_taxonomy_dashboard = ( ! empty( $_REQUEST['is_taxonomy'] ) && ! empty( intval( $_REQUEST['is_taxonomy'] ) ) ) ? true : false;
+
+			$this->dashboard_key = $req_params['active_module'];
+			$is_taxonomy_dashboard = ( ! empty( $req_params['is_taxonomy'] ) && ! empty( intval( $req_params['is_taxonomy'] ) ) ) ? true : false;
 
 			$llms_file = $plugin_path . '/'. 'class-smart-manager-'.$pro_flag_class_path.'llms-base.php';
 			$tasks_file = $plugin_path . '/' . 'class-smart-manager-' . $pro_flag_class_path . 'task.php';
@@ -174,12 +166,12 @@ if ( ! class_exists( 'Smart_Manager_Controller' ) ) {
 				if( is_plugin_active( 'lifterlms/lifterlms.php' ) && file_exists( $llms_file ) ){
 					include_once $llms_file;
 				}
-				if ( isset( $_REQUEST['isTasks'] ) && file_exists( $tasks_file ) ) {
-				    include_once $tasks_file;	
+				if ( isset( $req_params['isTasks'] ) && file_exists( $tasks_file ) ) {
+				    include_once $tasks_file;
 				}
 			}
 			if ( file_exists( $this->plugin_path . '/class-smart-manager-task.php' ) ) {
-				include_once $this->plugin_path . '/' . 'class-smart-manager-task.php';	
+				include_once $this->plugin_path . '/' . 'class-smart-manager-task.php';
 			}
 			if ( file_exists( SM_PLUGIN_DIR_PATH . '/classes/class-smart-manager-product-stock-log.php' ) ) {
          		include_once( SM_PLUGIN_DIR_PATH . '/classes/class-smart-manager-product-stock-log.php' );
@@ -214,30 +206,34 @@ if ( ! class_exists( 'Smart_Manager_Controller' ) ) {
 					$class_name = 'Smart_Manager_Pro_LLMS_Base';
 				}
 			}
-			if( !empty( $_REQUEST['cmd'] ) && $_REQUEST['cmd'] == 'get_background_progress' ) {
+			if( !empty( $req_params['cmd'] ) && $req_params['cmd'] == 'get_background_progress' ) {
 				$class_name = 'class-smart-manager-pro-background-updater.php';
 				$sm_pro_class_nm =  'Smart_Manager_Pro_Background_Updater';
-			} elseif ( isset( $_REQUEST['isTasks'] ) && ( ( ! empty( $_REQUEST['cmd'] ) && ( 'save_state' === $_REQUEST['cmd'] ) ) ) || ( ! empty( $_REQUEST['isTasks'] ) ) ) {
+			} elseif ( isset( $req_params['isTasks'] ) && ( ( ! empty( $req_params['cmd'] ) && ( 'save_state' === $req_params['cmd'] ) ) ) || ( ! empty( $req_params['isTasks'] ) ) ) {
 				if ( ! empty( $is_taxonomy_dashboard ) && is_callable( $class_name, 'actions' ) ) {
 					$class_name::actions();
 				}
 				$class_name = 'Smart_Manager_Task';
 			}
-			if ( ! empty( $_REQUEST['isTasks'] ) ) {
+			if ( ! empty( $req_params['isTasks'] ) ) {
 				$class_name = 'Smart_Manager_Pro_Task';
 			} elseif ( 'product_stock_log' === $this->dashboard_key ) {
 				$class_name = 'Smart_Manager_Product_Stock_Log';
 			}
-			$_REQUEST['class_nm'] = $class_name;
-			$_REQUEST['class_path'] = $sm_pro_class_nm;
-			if( !empty( $this->sm_beta_pro_background_updater ) && !empty( $_REQUEST['cmd'] ) && $_REQUEST['cmd'] == 'get_background_progress' ) {
-				is_callable( array( $this->sm_beta_pro_background_updater, $func_nm ) ) ? $this->sm_beta_pro_background_updater->$func_nm() : Smart_Manager::log( 'error', _x( "Method $func_nm is not callable in class Smart_Manager_Pro_Background_Updater.", 'Smart Manager - Ajax request handler background progress', 'smart-manager-for-wp-e-commerce' ) );
+			if ( 'batch_update' !== $req_params['cmd'] ) {
+				$_REQUEST['class_nm'] = $class_name;
+				$_REQUEST['class_path'] = $sm_pro_class_nm;
+			}
+			if( !empty( $this->sm_beta_pro_background_updater ) && !empty( $req_params['cmd'] ) && $req_params['cmd'] == 'get_background_progress' ) {
+				is_callable( array( $this->sm_beta_pro_background_updater, $func_nm ) ) ? $this->sm_beta_pro_background_updater->$func_nm() : sa_manager_log( 'error', _x( "Method $func_nm is not callable in class Smart_Manager_Pro_Background_Updater.", 'Smart Manager - Ajax request handler background progress', 'smart-manager-for-wp-e-commerce' ) );
+				is_callable(array($this->background_updater, $func_nm)) ? $this->background_updater->$func_nm() : sa_manager_log('error', _x("Method $func_nm is not callable in class Smart_Manager_Pro_Background_Updater.", 'Smart Manager - Ajax request handler background progress', 'smart-manager-for-wp-e-commerce'));
 			} else if( class_exists( $class_name ) ) {
-				$handler_obj = is_callable( array( $class_name, 'get_instance' ) ) ? $class_name::get_instance( $this->dashboard_key) : new $class_name( $this->dashboard_key );
-				( is_callable( array( $handler_obj, $func_nm ) ) ) ? $handler_obj->$func_nm() : Smart_Manager::log( 'error', _x( "Method $func_nm is not callable in class $class_name.", 'Smart Manager - Ajax request handler', 'smart-manager-for-wp-e-commerce' ) );
+				$handler_obj = is_callable( array( $class_name, 'get_instance' ) ) ? $class_name::get_instance( $this->dashboard_key ) : new $class_name( $this->dashboard_key );
+				$params['handler_obj'] = $handler_obj;
+				$params['req_params']  = $req_params;
+				return $params;
 			}
 		}
-
 
 		/**
 		 * Function to re-generate the column model for 'Shop_Order' and 'Shop_Subscription' on WC settings update.
@@ -260,6 +256,9 @@ if ( ! class_exists( 'Smart_Manager_Controller' ) ) {
 			}
 
 			if( ! class_exists( 'Smart_Manager_Shop_Order' ) && file_exists( $this->plugin_path . '/class-smart-manager-shop-order.php' ) ){
+				if (! class_exists('SA_Manager_Base') && file_exists($this->plugin_path . '/../common-core/classes/class-sa-manager-base.php')) {
+					include_once $this->plugin_path . '/../common-core/classes/class-sa-manager-base.php';
+				}
 				if( ! class_exists( 'Smart_Manager_Base' ) && file_exists( $this->plugin_path . '/class-smart-manager-base.php' ) ){
 					include_once $this->plugin_path . '/class-smart-manager-base.php';
 				}
@@ -330,12 +329,12 @@ if ( ! class_exists( 'Smart_Manager_Controller' ) ) {
 			}
 
 			$query = "UPDATE {$wpdb->prefix}sm_views
-			SET params = CASE ". implode( ",", $view_update_clauses ) . " END 
+			SET params = CASE ". implode( ",", $view_update_clauses ) . " END
 			WHERE id IN (". implode( ",", array_keys( $view_update_clauses ) ) .")";
-			
+
 			$wpdb->query(
 				"UPDATE {$wpdb->prefix}sm_views
-				SET params = CASE ". implode( " ", $view_update_clauses ) . " END 
+				SET params = CASE ". implode( " ", $view_update_clauses ) . " END
 				WHERE id IN (". implode( ",", array_keys( $view_update_clauses ) ) .")"
 			);
 		}

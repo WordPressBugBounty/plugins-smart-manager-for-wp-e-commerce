@@ -7,7 +7,7 @@ Tags: woocommerce advanced bulk edit, wordpress bulk edit, woocommerce inventory
 Requires at least: 5.0
 Tested up to: 6.8.1
 Requires PHP: 5.6
-Stable tag: 8.63.0
+Stable tag: 8.64.0
 License: GPLv2
 
 WooCommerce Advanced Bulk Edit products, orders, & posts in an Excel-like sheet editor. Get advanced WooCommerce stock, pricing, & order management.
@@ -309,6 +309,16 @@ Open Smart Manager Products dashboard, select required products, click on Bulk E
 
 == Changelog ==
 
+= 8.64.0 (16.06.2025) =
+* New: WooCommerce 9.9.3 compatible
+* New: Advanced Search for 'Plan' column in WooCommerce Memberships 'Members' dashboard (Pro)
+* New: Auto-adjust batch sizes in Bulk Edit functionality based on server capacity (Pro)
+* Fix: Scheduled Bulk Edits not processing successfully for large number of records (Pro)
+* Fix: Undo shows both warning modal and background processing message during active background tasks (Pro)
+* Update: Display warning when applying Bulk Edit to all store items or filtered search results (Pro)
+* Developer: 'sm_dashboard_model' filter renamed to 'sa_dashboard_model'
+* Update: POT file
+
 = 8.63.0 (28.05.2025) =
 * New: German, Japanese and Polish translations (AI-generated)
 * New: Auto generate SKUs for WooCommerce products with empty values during CSV import (Pro)
@@ -607,6 +617,9 @@ Open Smart Manager Products dashboard, select required products, click on Bulk E
 [See changelog for all versions](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 8.64.0 =
+WooCommerce 9.9.3 compatible, Advanced Search for 'Plan' column in WooCommerce Memberships 'Members' dashboard (Pro), Auto-adjust batch sizes in Bulk Edit functionality based on server capacity (Pro), Fixes related to Scheduled Bulk Edits not processing successfully for large number of records (Pro), Undo shows both warning modal and background processing message during active background tasks (Pro), Updates related to Display warning when applying Bulk Edit to all store items or filtered search results (Pro), Developer changes related to 'sm_dashboard_model' filter renamed to 'sa_dashboard_model' along with other important fixes and updates. Recommended upgrade.
 
 = 8.63.0 =
 German, Japanese and Polish translations (AI-generated), Auto generate SKUs for WooCommerce products with empty values during CSV import (Pro), Predefined Custom Views for 'Unattached Media' (Pro), Fixes related to 'File' column in the Media dashboard displays the file name along with its path (Pro), Updates related to Renamed the 'WP Attached File' column to 'File' in the Media dashboard (Pro), along with other important fixes and updates. Recommended upgrade.

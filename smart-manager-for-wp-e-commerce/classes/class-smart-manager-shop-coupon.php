@@ -15,7 +15,7 @@ if ( ! class_exists( 'Smart_Manager_Shop_Coupon' ) ) {
 			$this->post_type = $dashboard_key;
 			$this->req_params  	= (!empty($_REQUEST)) ? $_REQUEST : array();
 			
-			add_filter( 'sm_dashboard_model',array( &$this,'coupons_dashboard_model' ), 10, 2 );
+			add_filter( 'sa_dashboard_model',array( &$this,'coupons_dashboard_model' ), 10, 2 );
 			add_filter( 'sm_data_model', array( &$this, 'coupons_data_model' ), 10, 2 );
 
 		}
@@ -50,7 +50,7 @@ if ( ! class_exists( 'Smart_Manager_Shop_Coupon' ) ) {
 
 			$text_columns = array('product_ids');
 
-			$post_type_col_index = sm_multidimesional_array_search('postmeta_meta_key_discount_type_meta_value_discount_type', 'data', $dashboard_model['columns']);
+			$post_type_col_index = sa_multidimesional_array_search('postmeta_meta_key_discount_type_meta_value_discount_type', 'data', $dashboard_model['columns']);
 
 			$coupon_statuses = ( function_exists('wc_get_coupon_types') ) ? wc_get_coupon_types() : array();
 
@@ -136,7 +136,7 @@ if ( ! class_exists( 'Smart_Manager_Shop_Coupon' ) ) {
 			}
 
 			if (!empty($dashboard_model_saved)) {
-				$col_model_diff = sm_array_recursive_diff($dashboard_model_saved,$dashboard_model);	
+				$col_model_diff = sa_array_recursive_diff($dashboard_model_saved,$dashboard_model);	
 			}
 
 			//clearing the transients before return

@@ -3,7 +3,7 @@
 if ( !defined( 'ABSPATH' ) ) exit;
 
 if ( ! class_exists( 'Smart_Manager_Base' ) ) {
-	class Smart_Manager_Base {
+	class Smart_Manager_Base extends SA_Manager_Base {
 
 		/**
 		 * Singleton class
@@ -42,20 +42,30 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			public static $update_task_details_params = array(),
 			$previous_vals = array();
 		// include_once $this->plugin_path . '/class-smart-manager-utils.php';
-
-		 /**
-		 * Instance of the class
-		 *
-		 * @return object
-		 */
-		public static function instance( $dashboard_key ) {
-			if ( is_null( self::$_instance ) ) {
-				self::$_instance = new self( $dashboard_key );
+			/**
+			 * Instance of the class
+			 *
+			 * @return object
+			 */
+			public static function instance( $dashboard_key ) {
+				if ( is_null( self::$_instance ) ) {
+					self::$_instance = new self( $dashboard_key );
+				}
+				return self::$_instance;
 			}
-			return self::$_instance;
-		}
+
+			/**
+			 * @var array $sa_manager_common_params
+			 *
+			 * This array is used to store and manage data
+			 * required across different functionalities of the plugin.
+			 */
+			public $sa_manager_common_params = array();
 		function __construct($dashboard_key) {
+			$this->sa_manager_common_params = ( is_callable( 'get_sa_manager_common_params' ) && function_exists( 'get_sa_manager_common_params' ) ) ? get_sa_manager_common_params() : array();
 			$this->dashboard_key = $dashboard_key;
+			$this->sa_manager_common_params = ( ! empty( $this->sa_manager_common_params ) ) && ( is_array( $this->sa_manager_common_params ) ) ? array_merge( $this->sa_manager_common_params, array( 'dashboard_key' => $this->dashboard_key ) ) : $this->sa_manager_common_params;
+			parent::__construct( $this->sa_manager_common_params );
 			$this->post_type = $dashboard_key;
 			$this->plugin_path  = untrailingslashit( plugin_dir_path( __FILE__ ) );
 			$this->req_params  	= (!empty($_REQUEST)) ? $_REQUEST : array();
@@ -69,6 +79,14 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			add_action( 'sm_search_posts_conditions_array_complete', array( &$this, 'get_matching_children_advanced_search' ) );
 			add_action( 'sm_search_posts_condition_start', array( &$this, 'modify_posts_advanced_search_condition' ), 10, 2 );
 			add_action( 'sm_search_query_postmeta_from', array( &$this, 'modify_postmeta_advanced_search_from' ), 10, 2 );
+			add_filter( 'get_col_model_transient_data', array( $this, 'get_views_col_model_transient' ) );
+			add_filter( 'get_col_and_store_model_transient_data', array( $this, 'get_col_and_store_model_transient' ) );
+			add_filter( 'port_store_model_old_structure', array( $this, 'port_store_model_old_structure' ) );
+			add_filter( 'port_store_model_new_mapping', array( $this, 'port_store_model_new_mapping' ), 10, 2 );
+			add_filter( 'get_store_model_data', array( $this, 'get_store_model_data' ) );
+			add_filter( 'map_column_for_stored_transient', array( $this, 'map_column_for_stored_transient' ) );
+			add_filter( 'modify_store_model_for_trash_status', array( $this, 'modify_store_model_for_trash_status' ) );
+			add_filter( 'modify_store_model_search_params', array( $this, 'modify_store_model_search_params' ), 10, 2 );
 		}
 
 		/**
@@ -119,598 +137,6 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 		public function sm_query_order_by ( $order_by = '', $wp_query_obj = null ) {
 			return $this->get_order_by_clause_for_sort( array( 'order_by' => $order_by, 'wp_query_obj' => $wp_query_obj ) );
 		}
-
-		public function get_type_from_data_type( $data_type = '' ){
-			
-			$type = 'text';
-
-			if( empty( $data_type ) ){
-				return $type;
-			}
-
-			$type_strpos = strrpos( $data_type,'(' );
-			if( $type_strpos !== false ) {
-				$type = substr( $data_type, 0, $type_strpos );
-			} else {
-				$types = explode( " ", $data_type ); // for handling types with attributes (biginit unsigned)
-				$type = ( ! empty( $types ) ) ? $types[0] : $data_type; 
-			}
-
-			switch( $type ){
-				case (substr($type,-3) == 'int'):
-					$type = 'numeric';
-					break;
-				case (substr($type,-4) == 'char' || substr($type,-4) == 'text'):
-					$type = ( $type == 'longtext' ) ? 'sm.longstring' : 'text';
-					break;
-				case ( substr($type,-4) == 'blob' ):
-					$type = 'sm.longstring';
-					break;
-				case ( $type == 'datetime' || $type == 'timestamp' ):
-					$type = 'sm.datetime';
-					break;
-				case ( $type == 'date' || $type == 'year' ):
-					$type = 'sm.date';
-					break;
-				case ( $type == 'decimal' || $type == 'float' || $type == 'double' || $type == 'real' ):
-					$type = 'numeric';
-					break;
-				case ( $type == 'boolean' ):
-					$type = 'checkbox';
-					break;
-				default:
-					$type = 'text';
-			}
-
-			return $type;
-		}
-
-		public function get_type_from_value( $value = '' ) {
-			$type = 'text';
-
-			if( empty( $value ) ){
-				return $type;
-			}
-
-			$checkbox_values = array( 'yes', 'no', 'true', 'false' );
-
-			switch( $value ){
-				case ( ! empty( in_array( $value, $checkbox_values, true ) ) || ( is_numeric( $value ) && ( $value === '0' || $value === '1' ) ) ):
-					$type = 'checkbox';
-					break;
-				case ( is_numeric( $value ) ):
-					if( function_exists('isTimestamp') ) {
-						if( isTimestamp( $value ) ) {
-							$type = 'sm.datetime';
-							break;
-						}
-					}
-				
-					if( $type != 'sm.datetime' ) {
-						$type = 'numeric';
-					}
-					break;
-				case (is_serialized($value) === true):
-					$type = 'sm.serialized';
-					break;
-				case ( DateTime::createFromFormat('Y-m-d H:i:s', $value) !== false ):
-					$type = 'sm.datetime';
-					break;
-				case ( DateTime::createFromFormat('Y-m-d', $value) !== false ):
-					$type = 'sm.date';
-					break;	
-				default:
-					$type = 'text';
-			}
-			return $type;
-		}
-
-		public function get_col_type( $data_type = '', $value = '' ){
-			return ( !empty( $data_type ) ) ? $this->get_type_from_data_type( $data_type ) : $this->get_type_from_value( $value );
-		}
-
-		public function get_default_column_model( $args = array() ){
-
-			global $wpdb;
-
-			$column = array();
-		
-			if( empty( $args ) ){
-				return $column;
-			}
-		
-			if( empty( $args['table_nm'] ) || empty( $args['col'] ) ){
-				return $column;
-			}
-
-			$col = $args['col'];
-			unset( $args['col'] );
-			$table_nm = $args['table_nm'];
-			unset( $args['table_nm'] );
-			
-			$visible_cols = array();
-			if( ! empty( $args['visible_cols'] ) ){
-				$visible_cols = $args['visible_cols'];
-				unset( $args['visible_cols'] );
-			}
-
-			$is_meta = false;
-			if( ! empty( $args['is_meta'] ) ){
-				$is_meta = true;
-				unset( $args['is_meta'] );
-			}
-
-			$src = $table_nm .'/'. ( ( !empty( $is_meta ) ) ? 'meta_key='.$col.'/meta_value='.$col : $col );
-			$name = ( ! empty( $args['name'] ) ) ? $args['name'] : __( ucwords( str_replace( '_', ' ', $col ) ), 'smart-manager-for-wp-e-commerce' );
-			
-			if( isset( $args['name'] ) ) {
-				unset( $args['name'] );
-			}
-
-			// Code to get the col type
-			$data_type = '';
-			if( ! empty( $args['db_type'] ) ){
-				$data_type = $args['db_type'];
-				unset( $args['db_type'] );
-			}
-
-			$col_value = '';
-			if( ! empty( $args['col_value'] ) ){
-				$col_value = $args['col_value'];
-				unset( $args['col_value'] );
-			}
-			
-			$uneditable_types = array( 'sm.longstring' );
-			$type = $this->get_col_type( $data_type, $col_value );
-
-			if( ! empty( $args['values'] ) && empty( $args['search_values'] ) ) {
-				$args['search_values'] = array();
-				foreach( $args['values'] as $key => $value ) {
-					$args['search_values'][] = array( 'key' => $key, 'value' => $value );
-				}
-			}
-
-			$default_widths = apply_filters( 'sm_default_col_widths', array(
-				'sm.image'		=> 50,
-				'numeric'		=> 50,
-				'checkbox'		=> 30,
-				'sm.datetime'	=> 105,
-				'text'			=> 130,
-				'sm.longstring'	=> 150,
-				'sm.serialized'	=> 200
-			) ); 
-
-			$column = array_merge( array(
-								'src'				=> $src,
-								'data'				=> sanitize_title( str_replace( array( '/', '=' ), '_', $src ) ), // generate slug using the wordpress function if not given 
-								'name'				=> $name,
-								'key'				=> $name,
-								'type'				=> $type,
-								'editor'			=> ( 'numeric' === $type ) ? 'customNumericEditor' : $type,
-								'hidden'			=> false,
-								'editable'			=> ( empty( in_array( $type, $uneditable_types ) ) ) ? true : false,
-								'batch_editable'	=> true,
-								'sortable'			=> true,
-								'resizable'			=> true,
-								'allow_showhide'	=> true,
-								'exportable'		=> true,
-								'searchable'		=> true,
-								'frozen'			=> false,  //For disabling frozen
-								'wordWrap'			=> false,  //For disabling word-wrap
-								'save_state'		=> true,
-								'editor_schema'		=> false,
-								'align'				=> ( 'numeric' === $type ) ? 'right' : 'left',
-								'table_name'		=> $wpdb->prefix . $table_nm,
-								'col_name'			=> ( ! empty( $args['col_name'] ) ) ? $args['col_name'] : $col,
-								'width'				=> ( ! empty( $default_widths[$type] ) ) ? $default_widths[$type] : 200,
-								'values'			=> array(),
-								'search_values'		=> array(),
-								'category'			=> '',
-								'placeholder'		=> ''	
-			), $args );
-
-			if ( strpos($col, '_phone') !== false || strpos($col, '_tel') !== false || strpos($col, 'phone_') !== false || strpos($col, 'tel_') !== false ) {
-				$column['validator'] = 'customPhoneTextEditor';
-			}
-
-			if( ( ! empty( $is_meta ) && ( '_thumbnail_id' === $col || 'thumbnail_id' === $col ) ) || 'sm.image' === $type ){
-				$column['name'] = $args['key'] = __('Featured Image', 'smart-manager-for-wp-e-commerce');
-				$column['type'] = 'sm.image';
-				$column['align']= 'center';
-				$column['search_type']= 'numeric';
-				$column['editable']= false;
-				$column['sortable']= false;
-			}
-
-			if( 'checkbox' === $type ){
-				if( $col_value == 'yes' || $col_value == 'no' ){
-					$column['checkedTemplate'] = 'yes';
-					$column['uncheckedTemplate'] = 'no';
-				} else if( $col_value === '0' || $col_value === '1' ){
-					$column['checkedTemplate'] = 1;
-					$column['uncheckedTemplate'] = 0;
-				}
-			}
-
-			if( function_exists('isTimestamp') ) {
-				if( isTimestamp( $col_value ) && 'sm.datetime' === $type ) {
-					$column['date_type'] = 'timestamp';
-				}
-			}
-
-			if( ! empty( $visible_cols ) && is_array( $visible_cols ) ){
-				if( ! empty( $column['position'] ) ) {
-					unset( $column['position'] );
-				}
-				$position = array_search( $column['data'], $visible_cols );
-				if( false !== $position ) {
-					$column['position'] = $position + 1;
-					$column['hidden'] = false;
-				} else {
-					$column['hidden'] = true;
-				}
-			}
-
-			return $column;
-		}
-
-		public function get_default_store_model() {
-
-			global $wpdb;
-
-			$col_model = array();
-
-			$ignored_col = array('post_type');
-			$default_col_positions = array( 'ID', 'post_title', 'post_content', 'post_status', 'post_date', 'post_name' );
-			$visible_cols = array( 'ID', 'post_title', 'post_date', 'post_name', 'post_status', 'post_content' );
-			$hidden_cols = array( '_edit_lock','_edit_last' );
-			$col_titles = array(
-								'post_date' 	=> $this->dashboard_title . ' Created Date',
-								'post_date_gmt' => $this->dashboard_title . ' Created Date Gmt'
-			);
-
-			$query_posts_col = "SHOW COLUMNS FROM {$wpdb->prefix}posts";
-			$results_posts_col = $wpdb->get_results($query_posts_col, 'ARRAY_A');
-			$posts_num_rows = $wpdb->num_rows;
-			$last_position = 0;
-
-			if ($posts_num_rows > 0) {
-				foreach ($results_posts_col as $posts_col) {
-					
-					$field_nm = (!empty($posts_col['Field'])) ? $posts_col['Field'] : '';
-
-					if( in_array($field_nm, $ignored_col) ) {
-						continue;
-					}
-
-					$args = array(
-						'table_nm' 	=> 'posts',
-						'col'		=> $field_nm,
-						'name'		=> ( ! empty( in_array( $field_nm, $col_titles ) ) ) ? $col_titles[$field_nm] : '',
-						'hidden'	=> ( empty( in_array( $field_nm, $visible_cols ) ) ) ? true : false,
-						'db_type'	=> ( ! empty( $posts_col['Type'] ) ) ? $posts_col['Type'] : ''
-					);
-
-					//Code for handling extra meta for the columns
-					if ($field_nm == 'ID') {
-						$args['editor'] = false;
-						$args['batch_editable'] = false;
-					}else if ($field_nm == 'post_status') {
-						$args['type'] = 'dropdown';
-						$args['strict'] = true;
-						$args['allowInvalid'] = false;
-
-						if ( 'page' === $this->dashboard_key ) {
-							$args['values'] = get_page_statuses();
-						} else {
-							$statuses = get_post_stati( array(), 'object' );
-							$args['values'] = array();
-
-							// Code for creating unused_statuses array
-							$unused_post_statuses = array( 'inherit', 'trash', 'auto-draft', 'in-progress', 'failed', 'request-pending', 'request-confirmed', 'request-failed', 'request-completed' );
-							if ( function_exists( 'wc_get_order_statuses' ) ) {
-								$unused_post_statuses = array_merge( $unused_post_statuses, array_keys( wc_get_order_statuses() ) );
-							}
-							if ( function_exists( 'wcs_get_subscription_statuses' ) ) {
-								$unused_post_statuses = array_merge( $unused_post_statuses, array_keys( wcs_get_subscription_statuses() ) );
-							}
-							$unused_post_statuses = apply_filters( 'sm_unused_post_statuses', $unused_post_statuses );
-							foreach( $statuses as $status ) {
-								if ( in_array( $status->name, $unused_post_statuses ) ) {
-									continue;
-								}
-								$args['values'][$status->name] = $status->label;
-							}
-						}
-						
-						$args['defaultValue'] = 'draft';
-
-						$args['editor'] = 'select';
-						$args['selectOptions'] = $args['values'];
-						$args['renderer'] = 'selectValueRenderer';
-					}else if ( 'post_excerpt' === $field_nm ) {
-						$args['type'] = 'sm.longstring';
-					}
-
-					// Code for setting the default column positions
-					$position = array_search( $field_nm, $default_col_positions );
-					if( false !== $position ){
-						$args['position'] = $position + 1;
-						$last_position++;
-					}
-
-					$col_model[] = $this->get_default_column_model( $args );
-				}
-			}
-			//Code to get columns from postmeta table
-
-			$post_type_cond = (is_array($this->post_type)) ? " AND {$wpdb->prefix}posts.post_type IN ('". implode("','", $this->post_type) ."')" : " AND {$wpdb->prefix}posts.post_type = '". $this->post_type ."'";
-
-			$query_postmeta_col = "SELECT DISTINCT {$wpdb->prefix}postmeta.meta_key,
-											{$wpdb->prefix}postmeta.meta_value
-										FROM {$wpdb->prefix}postmeta 
-											JOIN {$wpdb->prefix}posts ON ({$wpdb->prefix}posts.id = {$wpdb->prefix}postmeta.post_id)
-										WHERE {$wpdb->prefix}postmeta.meta_key != '' 
-											AND {$wpdb->prefix}postmeta.meta_key NOT LIKE 'free-%'
-											AND {$wpdb->prefix}postmeta.meta_key NOT LIKE '_oembed%'
-											AND {$wpdb->prefix}postmeta.meta_key NOT REGEXP '^[a-f0-9]{32}$'
-											$post_type_cond
-										GROUP BY {$wpdb->prefix}postmeta.meta_key";
-			$results_postmeta_col = $wpdb->get_results ($query_postmeta_col , 'ARRAY_A');
-			$num_rows = $wpdb->num_rows;
-
-			if ($num_rows > 0) {
-
-				$meta_keys = array();
-
-				foreach ($results_postmeta_col as $key => $postmeta_col) {
-					if ( empty( $postmeta_col['meta_value'] ) || $postmeta_col['meta_value'] == '1' || $postmeta_col['meta_value'] == '0.00' ) {
-						$meta_keys [] = $postmeta_col['meta_key']; //TODO: if possible store in db instead of using an array
-					}
-
-					unset($results_postmeta_col[$key]);
-					$results_postmeta_col[$postmeta_col['meta_key']] = $postmeta_col;
-				}
-
-				//not in 0 added for handling empty date columns
-				if (!empty($meta_keys)) {
-					$query_meta_value = "SELECT {$wpdb->prefix}postmeta.meta_key,
-													{$wpdb->prefix}postmeta.meta_value
-												FROM {$wpdb->prefix}postmeta 
-													JOIN {$wpdb->prefix}posts ON ({$wpdb->prefix}posts.id = {$wpdb->prefix}postmeta.post_id)
-												WHERE {$wpdb->prefix}posts.post_type  = '". $this->dashboard_key ."'
-													AND {$wpdb->prefix}postmeta.meta_value NOT IN ('','0','0.00','1')
-													AND {$wpdb->prefix}postmeta.meta_key IN ('".implode("','",$meta_keys)."')
-												GROUP BY {$wpdb->prefix}postmeta.meta_key";
-					$results_meta_value = $wpdb->get_results ($query_meta_value , 'ARRAY_A');
-					$num_rows_meta_value = $wpdb->num_rows;
-
-					if ($num_rows_meta_value > 0) {
-						foreach ($results_meta_value as $result_meta_value) {
-							if (isset($results_postmeta_col [$result_meta_value['meta_key']])) {
-								$results_postmeta_col [$result_meta_value['meta_key']]['meta_value'] = $result_meta_value['meta_value'];
-							}
-						}
-					}
-				}
-
-				//Filter to add custom postmeta columns for custom plugins
-				$results_postmeta_col = apply_filters('sm_default_dashboard_model_postmeta_cols', $results_postmeta_col);
-				$meta_count = 0;
-
-				//Code for pkey column for postmeta
-
-				$col_model[] = $this->get_default_column_model( array(
-					'table_nm' 			=> 'postmeta',
-					'col'				=> 'post_id',
-					'type'				=> 'numeric',
-					'hidden'			=> true,
-					'allow_showhide'	=> false,
-					'editor'			=> false,
-				) );
-
-				foreach ($results_postmeta_col as $postmeta_col) {
-					$meta_key = ( !empty( $postmeta_col['meta_key'] ) ) ? $postmeta_col['meta_key'] : '';
-					$meta_value = ( !empty( $postmeta_col['meta_value'] ) || $postmeta_col['meta_value'] == 0 ) ? $postmeta_col['meta_value'] : '';
-
-					$args = array(
-						'table_nm' 	=> 'postmeta',
-						'col'		=> $meta_key,
-						'is_meta'	=> true,
-						'col_value'	=> $meta_value,
-						'name'		=> ( ! empty( in_array( $meta_key, $col_titles ) ) ) ? $col_titles[$meta_key] : '',
-						'hidden'	=> ( ! empty( in_array( $meta_key, $hidden_cols ) ) || $meta_count > 5 ) ? true : false
-					);
-
-					// Handling for _thumnail_id => image column
-					// if( '_thumbnail_id' === $meta_key ){
-					// 	$args['name'] = $args['key']= __('Featured Image', 'smart-manager-for-wp-e-commerce');
-					// 	$args['align']= 'center';
-					// 	$args['type']= 'sm.image';
-					// 	$args['searchable']= true;
-					// 	$args['search_type']= 'numeric';
-					// 	$args['editable']= false;
-					// 	$args['batch_editable']= true;
-					// 	$args['sortable']= false;
-					// 	$args['resizable']= true;
-					// }
-
-					if( empty( $args['hidden'] ) ){
-						$last_position++;
-					}
-
-					$col_model[] = $this->get_default_column_model( $args );
-
-					$meta_count++;
-				}
-			}
-
-			//Code to get columns from terms
-
-			//Code to get all relevant taxonomy for the post type
-			$taxonomy_nm = get_object_taxonomies($this->post_type);
-
-			if (!empty($taxonomy_nm)) {
-				$terms_count = 0;
-				//Code for pkey column for terms
-				$col_model[] = $this->get_default_column_model( array(
-					'table_nm' 			=> 'terms',
-					'col'				=> 'object_id',
-					'type'				=> 'numeric',
-					'hidden'			=> true,
-					'allow_showhide'	=> false,
-					'editor'			=> false,
-				) );
-
-				$taxonomy_terms = get_terms($taxonomy_nm, array('hide_empty'=> 0,'orderby'=> 'name'));
-				if ( ! empty( $taxonomy_terms ) ) {
-					$results = $this->get_parent_term_values(
-						array(
-							'taxonomy_obj'      => $taxonomy_terms,
-							'include_taxonomy'  => 'all' // include all taxonomy.
-						)
-					);
-				}
-
-				//Code for defining the col model for the terms
-				foreach ($taxonomy_nm as $taxonomy) {
-
-					$args = array(
-						'table_nm' 	=> 'terms',
-						'col'		=> $taxonomy,
-						'name'		=> ( ! empty( in_array( $field_nm, $col_titles ) ) ) ? $col_titles[$field_nm] : '',
-						'hidden'	=> ( $terms_count > 5 ) ? true : false
-					);
-					if ( ! isset( $results['terms_val'] ) || ! isset( $results['terms_val_search'] ) ) {
-						continue;
-					}
-					if ( ! empty( $results['terms_val'][$taxonomy] ) ) {
-						$args['type'] 			= 'sm.multilist';
-						$args['strict'] 		= true;
-						$args['allowInvalid'] 	= false;
-						$args['editable']		= false;
-						$args['values'] 		= $results['terms_val'][$taxonomy];
-
-						if( ! empty( $results['terms_val_search'][$taxonomy] ) ){
-							$args['search_values'] = array();
-							foreach( $results['terms_val_search'][$taxonomy] as $key => $value ) {
-								$args['search_values'][] = array( 'key' => $key, 'value' => $value );
-							}
-						}
-					}
-
-					if( empty( $args['hidden'] ) ){
-						$last_position++;
-					}
-					$col_model[] = $this->get_default_column_model( $args );
-					$terms_count++;
-				}
-			}
-
-			$col_model[] = $this->get_default_column_model( array(
-				'table_nm' 			=> 'custom',
-				'col'				=> 'edit_link',
-				'renderer'			=> 'html',
-				'name'				=> __('Edit', 'smart-manager-for-wp-e-commerce'),
-				'sortable'			=> false,
-				'editor'			=> false,
-				'searchable' 		=> false,
-				'editable' 			=> false,
-				'batch_editable' 	=> false,
-				'position' 			=> ++$last_position,
-				'width'				=> 30
-			) );
-
-			if( !empty( $this->req_params['is_public'] ) ) {
-				$col_model[] = $this->get_default_column_model( array(
-					'table_nm' 			=> 'custom',
-					'col'				=> 'view_link',
-					'renderer'			=> 'html',
-					'name'				=> __('View', 'smart-manager-for-wp-e-commerce'),
-					'sortable'			=> false,
-					'editor'			=> false,
-					'searchable' 		=> false,
-					'editable' 			=> false,
-					'batch_editable' 	=> false,
-					'position' 			=> ++$last_position,
-					'width'				=> 30
-				) );
-			}
-
-			//defining the default col model
-
-			$this->default_store_model =  array( 
-						'display_name' => __(ucwords(str_replace('_', ' ', $this->dashboard_key)), 'smart-manager-for-wp-e-commerce'),
-						'tables' => array(
-										'posts' 				=> array(
-																		'pkey' => 'ID',
-																		'join_on' => '',
-																		'where' => array( 
-																						'post_type' 	=> $this->post_type,
-																						'post_status' 	=> 'any' // will get all post_status except 'trash' and 'auto-draft'
-																						
-																						// 'post_status' 	=> array('publish', 'draft') // comma seperated for multiple values
-																						//For any other whereition specify, colname => colvalue
-																						)
-																	),
-
-										'postmeta' 				=> array(
-																		'pkey' => 'post_id',
-																		'join_on' => 'postmeta.post_ID = posts.ID', // format current_table.pkey = joinning table.pkey
-																		'where' => array( // provide a wp_query [meta_query]
-																					// 'relation' => 'AND', // AND or OR
-																					// 	array(
-																					// 		'key'     => '',
-																					// 		'value'   => '',
-																					// 		'compare' => '',
-																					// 	),
-																					// 	array(
-																					// 		'key'     => '',
-																					// 		'value'   => 0,
-																					// 		'type'    => '',
-																					// 		'compare' => '',
-																					// 	)
-																					)
-																	),
-
-										'term_relationships' 	=> array(
-																		'pkey' => 'object_id',
-																		'join_on' => 'term_relationships.object_id = posts.ID',
-																		'where' => array()
-																	),
-
-										'term_taxonomy' 		=> array(
-																		'pkey' => 'term_taxonomy_id',
-																		'join_on' => 'term_taxonomy.term_taxonomy_id = term_relationships.term_taxonomy_id',
-																		'where' => array()
-																	),
-
-										'terms' 				=> array(
-																		'pkey' => 'term_id',
-																		'join_on' => 'terms.term_id = term_taxonomy.term_id',
-																		'where' => array(
-																				// 'relation' => 'AND', // AND or OR
-																				// array(
-																				// 	'taxonomy' => '',
-																				// 	'field'    => '',
-																				// 	'terms'    => ''
-																				// ),
-																			)
-																	)
-
-										), 
-						'columns' => $col_model,
-						'sort_params' 	=> array ( //WP_Query array structure
-												'orderby' => 'ID', //multiple list separated by space
-												'order' => 'DESC',
-												'default' => true ),
-
-						// 'sort_params' 		=> array( 'post_parent' => 'ASC', 'ID' => 'DESC' ),
-						'per_page_limit' 	=> '', // blank, 0, -1 all values refer to infinite scroll
-						'treegrid'			=> false // flag for setting the treegrid
-			);
-		}
-
 		//Function to handle the user specific column model mapping to store model
 		public function map_column_to_store_model( $store_model = array(), $column_model_transient = array() ) {
 			if( !empty( $store_model['columns'] ) ) {
@@ -743,7 +169,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 					$store_model['columns'][$key]['position'] = ( !empty( $store_model['columns'][$key]['position'] ) ) ? $store_model['columns'][$key]['position'] : '';
 
 					if( !empty( $col_data ) && !empty( $column_transient_formatted[ $col_data ] ) ) {
-						$store_model['columns'][$key]['hidden'] = false; 
+						$store_model['columns'][$key]['hidden'] = false;
 						$store_model['columns'][$key]['width'] = ( !empty( $column_transient_formatted[ $col_data ]['width'] ) ? $column_transient_formatted[ $col_data ]['width'] : $store_model['columns'][$key]['width'] );
 						$store_model['columns'][$key]['position'] = ( !empty( $column_transient_formatted[ $col_data ]['position'] ) ? $column_transient_formatted[ $col_data ]['position'] : $store_model['columns'][$key]['position'] );
 
@@ -752,7 +178,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 						} else {
 							$enabled_cols_position_blank[] = $store_model['columns'][$key];
 						}
-						
+
 					} else {
 						$store_model['columns'][$key]['hidden'] = true;
 						$disabled_cols[] = $store_model['columns'][$key];
@@ -765,7 +191,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				});
 
 				$store_model['columns'] = array_merge( $enabled_cols, $enabled_cols_position_blank, $disabled_cols );
-			}			
+			}
 
 			$store_model['sort_params'] = ( !empty( $store_model['sort_params'] ) ) ? $store_model['sort_params'] : array();
 			$store_model['sort_params'] = ( !empty( $column_model_transient['sort_params'] ) ? $column_model_transient['sort_params'] : $store_model['sort_params'] );
@@ -775,668 +201,671 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			return $store_model;
 		}
 
-		//Function to get the dashboard model
-		public function get_dashboard_model( $return_store_model = false ) {
-			global $wpdb, $current_user;
-			$col_model = array();
-			$old_col_model = array();
-			$search_params = array();
-			$column_model_transient = ( ! empty( $this->store_col_model_transient_option_nm ) ) ? get_user_meta( get_current_user_id(), $this->store_col_model_transient_option_nm, true ) : array();
-			// Code for handling views
-			if( ( defined('SMPRO') && true === SMPRO ) && ! empty( $this->req_params['is_view'] ) && ! empty( $this->req_params['active_view'] ) ) {
-				if( class_exists( 'Smart_Manager_Pro_Views' ) ) {
-					$view_obj = Smart_Manager_Pro_Views::get_instance();
-					if( is_callable( array( $view_obj, 'get' ) ) ){
-						$view_slug = $this->req_params['active_view'];
-						$view_data = $view_obj->get($view_slug);
-						if( ! empty( $view_data ) ) {
-							$this->dashboard_key = $view_data['post_type'];
-							$column_model_transient = json_decode( $view_data['params'], true );
-							if( !empty( $column_model_transient['search_params'] ) ) {
-								if( ! empty( $column_model_transient['search_params']['isAdvanceSearch'] ) ) { // For advanced search
-									if( ! empty( $column_model_transient['search_params']['params'] ) && is_array( $column_model_transient['search_params']['params'] ) ) {
-										// code for porting from old structure
-										$search_query = $column_model_transient['search_params']['params'];
-										if( empty( $search_query[0]['condition'] ) ){
-
-											$rule_groups = array();
-											$search_operators = array_flip( $this->advanced_search_operators );
-
-											foreach( $search_query as $query ) {
-
-												if( empty( $query ) || ! is_array( $query ) ) {
-													continue;
-												}
-
-												$rules = array();
-
-												// iterate over each rule
-												foreach( $query as $rule ) {
-													$rules[] = array(
-																	'type' => $rule['table_name'] .'.'. $rule['col_name'],
-																	'operator' => strtolower( ( ! empty( $search_operators[ $rule['operator'] ] ) ) ? $search_operators[ $rule['operator'] ] : $rule['operator'] ),
-																	'value' => $rule['value']
-													);
-												}
-
-												$rule_groups[] = array( 'condition' => "AND", 'rules' => $rules );
-											}
-
-											$column_model_transient['search_params']['params'] = array( array( 'condition' => 'OR', 'rules' => $rule_groups ) );
-
-											// code to upate the view new structure at db level
-											$result = $wpdb->query( // phpcs:ignore
-												$wpdb->prepare( // phpcs:ignore
-													"UPDATE {$wpdb->prefix}sm_views
-																		SET params = %s
-																		WHERE slug = %s",
-													json_encode( $column_model_transient ),
-													$view_slug
-												)
-											);
-										}
-									}
-								}
-								$search_params = $column_model_transient['search_params'];
-							}
+		/**
+		 * Retrieves the views column model transient.
+		 *
+		 * @param array $params search params and column model transient data.
+		 * @return array The updated search params and column model transient data.
+		 */
+		public function get_views_col_model_transient( $params = array() ) {
+			if ( ( defined( 'SMPRO' ) && true !== SMPRO ) || empty( $this->req_params['is_view'] ) || empty( $this->req_params['active_view'] ) ) {
+				return $params;
+			}
+			global $wpdb;
+			$search_params = $params['search_params'];
+			$view_obj = ( class_exists( 'Smart_Manager_Pro_Views' ) ) ? Smart_Manager_Pro_Views::get_instance() : null;
+			$view_slug = $this->req_params['active_view'];
+			$view_data = ( is_callable( array( $view_obj, 'get' ) ) ) ? $view_obj->get( $view_slug ) : array();
+			if ( empty( $view_data ) ) {
+				return $params;
+			}
+			$this->dashboard_key = $view_data['post_type'];
+			$column_model_transient = json_decode( $view_data['params'], true );
+			if ( empty( $column_model_transient['search_params'] ) ) {
+				return $params;
+			}
+			if ( empty( $column_model_transient['search_params'] ) ) {
+				return $params;
+			}
+			if ( ( ! empty( $column_model_transient['search_params']['isAdvanceSearch'] ) ) && ( ! empty( $column_model_transient['search_params']['params'] ) ) && is_array( $column_model_transient['search_params']['params'] ) ) {  // For advanced search
+				// Code for porting from old structure.
+				$search_query = $column_model_transient['search_params']['params'];
+				if (empty($search_query[0]['condition'])) {
+					$rule_groups = array();
+					$search_operators = array_flip($this->advanced_search_operators);
+					foreach ($search_query as $query) {
+						if (empty($query) || ! is_array($query)) {
+							continue;
 						}
+						$rules = array();
+						// iterate over each rule.
+						foreach ($query as $rule) {
+							$rules[] = array(
+								'type' => $rule['table_name'] . '.' . $rule['col_name'],
+								'operator' => strtolower((! empty($search_operators[$rule['operator']])) ? $search_operators[$rule['operator']] : $rule['operator']),
+								'value' => $rule['value']
+							);
+						}
+						$rule_groups[] = array('condition' => "AND", 'rules' => $rules);
 					}
+					$column_model_transient['search_params']['params'] = array(array('condition' => 'OR', 'rules' => $rule_groups));
+					// code to upate the view new structure at db level
+					$result = $wpdb->query( // phpcs:ignore
+						$wpdb->prepare( // phpcs:ignore
+							"UPDATE {$wpdb->prefix}sm_views
+											SET params = %s
+											WHERE slug = %s",
+							json_encode($column_model_transient),
+							$view_slug
+						)
+					);
 				}
 			}
+			$params['search_params'] = $column_model_transient['search_params'];
+			$params['column_model_transient'] = $column_model_transient;
+			return $params;
+		}
 
-			// Load from cache
-			$store_model_transient = ( ! empty( $this->store_col_model_transient_option_nm ) ) ? get_transient( $this->store_col_model_transient_option_nm ) : '';
-			if( ! empty( $store_model_transient ) && ! is_array( $store_model_transient ) ) {
-				$store_model_transient = json_decode( $store_model_transient, true );
+		/**
+		 * Retrieves and processes column model and store model transient data.
+		 *
+		 * @param array $column_and_store_model_transient Column model and store model transient data.
+		 *
+		 * @return array Processed column model and store model transient data.
+		 */
+		public function get_col_and_store_model_transient( $column_and_store_model_transient = array() ) {
+			if ( empty( $column_and_store_model_transient['column_model_transient'] ) || ( ! is_array( $column_and_store_model_transient['column_model_transient'] ) ) ||  empty( $column_and_store_model_transient['column_model_transient']['tables'] ) ) { // For porting the old structure.
+				return $column_and_store_model_transient;
 			}
+			$column_model_transient = sa_sm_generate_column_state( $column_and_store_model_transient['column_model_transient'] );
+			return array( 'column_model_transient' => $column_model_transient, 'store_model_transient' => empty( $column_and_store_model_transient['store_model_transient'] ) ? $column_model_transient : $column_and_store_model_transient['store_model_transient'] );
+		}
 
-			// Code to move the column transients at user meta level
-			// since v5.0.0
-			if ( empty( $column_model_transient ) && ( empty( $this->req_params['isTasks'] ) ) ) {
-				$key = 'sm_beta_' . $current_user->user_email . '_' . $this->dashboard_key;
-				$column_model_transient  = get_option( $key );
-				if ( ! empty( $column_model_transient ) && ( ! empty( $this->store_col_model_transient_option_nm ) )) {
-					update_user_meta( get_current_user_id(), $this->store_col_model_transient_option_nm, $column_model_transient );
-					delete_option( $key );
-				}
-			}
-			if ( empty( $column_model_transient ) && ( empty( $this->req_params['isTasks'] ) ) ) { //for getting the old structure
-				$column_model_transient = get_transient( 'sa_sm_' . $current_user->user_email . '_' . $this->dashboard_key );
-				if ( ! empty( $column_model_transient ) ) {
-					delete_transient( 'sa_sm_' . $current_user->user_email . '_' . $this->dashboard_key );
-				}
-			}
-
-			if( !empty( $column_model_transient ) && !empty( $column_model_transient['tables'] ) ) { //for porting the old structure
-
-				$saved_col_model = $column_model_transient;
-				$column_model_transient = sa_sm_generate_column_state( $saved_col_model );
-
-				if( empty( $store_model_transient ) ) {
-					$store_model_transient = $saved_col_model;
-				}
-			}
-
+		/**
+		 * Handles the migration and updates of the store model transient with old model structure for various dashboard keys.
+		 *
+		 * @param array $store_model_and_old_model_transient The transient data structure for the store model and the old column model used for reference mapping.
+		 *
+		 * @return array|false $store_model_and_old_model_transient The updated store model and old column model transient or false if certain conditions are met.
+		 *
+		 */
+		public function port_store_model_old_structure( $store_model_and_old_model_transient = array() ) {
+			global $current_user;
 			//Check if upgrading from old mapping
-			if( false !== $store_model_transient ) {
-				if( empty( $store_model_transient['columns'][0]['data'] ) || false === get_option( '_sm_update_414' ) || false === get_option( '_sm_update_419'.'_'.$this->dashboard_key ) ) {
-
-					if( ! empty( $store_model_transient['columns'] ) ) {
-						foreach( $store_model_transient['columns'] as $col ) {
-							if( empty( $col['src'] ) ){
-								continue;
-							}
-							$old_col_model[ $col['src'] ] = $col;
+			$store_model_transient = $store_model_and_old_model_transient['store_model_transient'];
+			if ( false === $store_model_transient ) {
+				return $store_model_and_old_model_transient;
+			}
+			global $wpdb;
+			$old_col_model = $store_model_and_old_model_transient['old_col_model'];
+			if ( empty( $store_model_transient['columns'][0]['data'] ) ||
+			false === get_option( '_sm_update_414' ) ||
+			false === get_option( '_sm_update_419' . '_' . $this->dashboard_key ) ) {
+				if ( ! empty( $store_model_transient['columns'] ) ) {
+					foreach ( $store_model_transient['columns'] as $col ) {
+						if ( empty( $col['src'] ) ) {
+							continue;
 						}
+						$old_col_model[ $col['src'] ] = $col;
+					}
+				}
+				delete_transient( 'sa_sm_' . $this->dashboard_key );
+				if ( false === get_option( '_sm_update_414' ) ) {
+					update_option( '_sm_update_414', 1, 'no' );
+				}
+				if ( false === get_option( '_sm_update_419' . '_' . $this->dashboard_key ) ) {
+					update_option( '_sm_update_419' . '_' . $this->dashboard_key, 1, 'no' );
+				}
+	   		}
+			if ( false === get_option( '_sm_update_411' ) ) { // Code for handling mapping changes in v4.1.1
+				foreach ( $store_model_transient['columns'] as $key => $col ) {
+					if ( $this->dashboard_key == 'user' && ! empty( $col['col_name'] ) &&
+							$col['col_name'] == 'wp_capabilities' ) {
+						$store_model_transient['columns'][ $key ]['col_name'] = $wpdb->prefix . 'capabilities';
 					}
 
-					delete_transient( 'sa_sm_'.$this->dashboard_key );
-
-					if( false === get_option( '_sm_update_414' ) ) {
-						update_option( '_sm_update_414', 1, 'no' );
+					if ( $this->dashboard_key == 'product' && ! empty( $col['col_name'] ) &&
+							$col['col_name'] == 'post_name' ) {
+						$store_model_transient['columns'][ $key ]['key'] =
+							$store_model_transient['columns'][ $key ]['name_display'] = __( 'Slug', 'smart-manager-for-wp-e-commerce' );
 					}
 
-					if( false === get_option( '_sm_update_419'.'_'.$this->dashboard_key ) ) {
-						update_option( '_sm_update_419'.'_'.$this->dashboard_key, 1, 'no' );
+					if ( ! empty( $col['col_name'] ) && $col['col_name'] == 'post_excerpt' ) {
+						$store_model_transient['columns'][ $key ]['type'] =
+							$store_model_transient['columns'][ $key ]['editor'] = 'sm.longstring';
 					}
 				}
 
-				if( false === get_option( '_sm_update_411' ) ) { //Code for handling mapping changes in v4.1.1
-					foreach( $store_model_transient['columns'] as $key => $col ) {
-						if( $this->dashboard_key == 'user' && !empty( $col['col_name'] ) && $col['col_name'] == 'wp_capabilities' ) {
-							$store_model_transient['columns'][$key]['col_name'] = $wpdb->prefix.'capabilities';
-						}
-
-						if( $this->dashboard_key == 'product' && !empty( $col['col_name'] ) && $col['col_name'] == 'post_name' ) {
-							$store_model_transient['columns'][$key]['key'] = $store_model_transient['columns'][$key]['name_display'] = __('Slug', 'smart-manager-for-wp-e-commerce');
-						}
-
-						if( !empty( $col['col_name'] ) && $col['col_name'] == 'post_excerpt' ) {
-							$store_model_transient['columns'][$key]['type'] = $store_model_transient['columns'][$key]['editor'] = 'sm.longstring';
-						}
-					}
-
-					if( !empty( $store_model_transient['sort_params'] ) ) {
-						if( $store_model_transient['sort_params']['orderby'] == 'ID' && $store_model_transient['sort_params']['order'] == 'DESC' ) {
-							$store_model_transient['sort_params']['default'] = true;
-						}
-					}
-
-					delete_transient( 'sa_sm_'.$this->dashboard_key );
-					update_option( '_sm_update_411', 1, 'no' );
-				}
-
-				if( false === get_option( '_sm_update_415' ) ) { //Code for handling mapping changes in v4.1.1
-					
-					$add_view_col = true;
-					foreach( $store_model_transient['columns'] as $key => $col ) {
-						if( $this->dashboard_key == 'product' && !empty( $col['col_name'] ) && $col['col_name'] == 'product_shop_url' ) {
-							unset( $store_model_transient['columns'][$key] );
-							$store_model_transient['columns'] = array_values($store_model_transient['columns']);
-						}
-						
-						if( !empty( $col['data'] ) && $col['data'] == 'custom_view_link' ) {
-							$add_view_col = false;
-						}
-					}
-
-					if( !empty( $add_view_col ) ) {
-
-						$link_type = ( !empty( $this->req_params['is_public'] ) ) ? 'view' : 'edit'; 
-
-						$index = sizeof( $store_model_transient['columns'] );
-
-						$store_model_transient['columns'][$index] = array(
-																		'src' => 'custom/link',
-																		'data' => 'custom_'. $link_type .'_link',
-																		'name' => ucwords($link_type),
-																		'type' => 'text',
-																		'renderer'=> 'html',
-																		'frozen' => false,
-																		'sortable' => false,
-																		'exportable' => true,
-																		'searchable' => false,
-																		'editable' => false,
-																		'batch_editable' => false,
-																		'hidden' => true,
-																		'allow_showhide' => true
-																	);
-					}
-
-					delete_transient( 'sa_sm_'.$this->dashboard_key );
-					update_option( '_sm_update_415', 1, 'no' );
-				}
-
-				if( false === get_option( '_sm_update_425' ) ) { //Code for handling mapping changes in v4.2.5
-					if( $this->dashboard_key == 'product' ) {
-						foreach( $store_model_transient['columns'] as $key => $col ) {
-							if( !empty( $col['data'] ) && $col['data'] == 'custom_product_attributes' ) {
-								$store_model_transient['columns'][$key]['allow_showhide'] = true;
-								$store_model_transient['columns'][$key]['exportable'] = true;
-							}
-
-							if( !empty( $col['data'] ) && $col['data'] == 'postmeta_meta_key__product_attributes_meta_value__product_attributes' ) {
-								$store_model_transient['columns'][$key]['hidden']= true;
-								$store_model_transient['columns'][$key]['allow_showhide']= false;
-								$store_model_transient['columns'][$key]['exportable']= false;
-							}
-						}
-						delete_transient( 'sa_sm_'.$this->dashboard_key );
-						update_option( '_sm_update_425', 1, 'no' );
+				if ( ! empty( $store_model_transient['sort_params'] ) ) {
+					if ( $store_model_transient['sort_params']['orderby'] == 'ID' &&
+							$store_model_transient['sort_params']['order'] == 'DESC' ) {
+						$store_model_transient['sort_params']['default'] = true;
 					}
 				}
 
-				if( false === get_option( '_sm_update_426' ) ) { //Code for handling mapping changes in v4.2.6
-					if( $this->dashboard_key == 'shop_subscription' ) {
-						delete_transient( 'sa_sm_'.$this->dashboard_key );
-						update_option( '_sm_update_426', 1, 'no' );
+				delete_transient( 'sa_sm_' . $this->dashboard_key );
+				update_option( '_sm_update_411', 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_415' ) ) { // Code for handling mapping changes in v4.1.1
+				$add_view_col = true;
+				foreach ( $store_model_transient['columns'] as $key => $col ) {
+					if ( $this->dashboard_key == 'product' && ! empty( $col['col_name'] ) &&
+							$col['col_name'] == 'product_shop_url' ) {
+						unset( $store_model_transient['columns'][ $key ] );
+						$store_model_transient['columns'] = array_values( $store_model_transient['columns'] );
+					}
+
+					if ( ! empty( $col['data'] ) && $col['data'] == 'custom_view_link' ) {
+						$add_view_col = false;
 					}
 				}
 
-				if( false === get_option( '_sm_update_427' ) ) { //Code for handling mapping changes in v4.2.7
-					if( $this->dashboard_key != 'user' ) {
-						foreach( $store_model_transient['columns'] as $key => $col ) {
-							if( !empty( $col['col_name'] ) && $col['col_name'] == 'post_status' && empty( $col['colorCodes'] ) ) {
-		
-								if( $this->dashboard_key == 'shop_order' ) {
+				if ( ! empty( $add_view_col ) ) {
+					$link_type = ( ! empty( $this->req_params['is_public'] ) ) ? 'view' : 'edit';
+					$index     = sizeof( $store_model_transient['columns'] );
 
-									$color_codes = array( 'green' => array( 'wc-completed', 'wc-processing' ),
-															'red' => array( 'wc-cancelled', 'wc-failed', 'wc-refunded' ),
-															'orange' => array( 'wc-on-hold', 'wc-pending' ) );
-
-								} else if( $this->dashboard_key == 'shop_subscription' ) {
-
-									$color_codes = array( 'green' => array( 'wc-active' ),
-															'red' => array( 'wc-expired', 'wc-cancelled' ),
-															'orange' => array( 'wc-on-hold', 'wc-pending' ),
-															'blue' => array( 'wc-switched', 'wc-pending-cancel' ) );
-
-								} else {
-									$color_codes = array();
-								}
-								
-								$store_model_transient['columns'][$key]['colorCodes'] = $color_codes;
-
-								delete_transient( 'sa_sm_'.$this->dashboard_key );
-								update_option( '_sm_update_427', 1, 'no' );
-							}
-
-							if( $this->dashboard_key == 'product' && !empty( $col['col_name'] ) && ( in_array($col['col_name'], array( '_stock_status', '_backorders' )) ) && empty( $col['colorCodes'] ) ) {
-								if( $col['col_name'] == '_stock_status' ) {
-									$color_codes = array( 'green' => array( 'instock' ),
-															'red' => array( 'outofstock' ),
-															'blue' => array( 'onbackorder' ) );
-								} else {
-									$color_codes = array( 'green' => array( 'yes', 'notify' ),
-															'red' => array( 'no' ),
-															'blue' => array() );
-								}
-
-								$store_model_transient['columns'][$key]['colorCodes'] = $color_codes;
-
-								delete_transient( 'sa_sm_'.$this->dashboard_key );
-								update_option( '_sm_update_427', 1, 'no' );
-
-							}
-						}
-					}
+					$store_model_transient['columns'][ $index ] = array(
+						'src'            => 'custom/link',
+						'data'           => 'custom_' . $link_type . '_link',
+						'name'           => ucwords( $link_type ),
+						'type'           => 'text',
+						'renderer'       => 'html',
+						'frozen'         => false,
+						'sortable'       => false,
+						'exportable'     => true,
+						'searchable'     => false,
+						'editable'       => false,
+						'batch_editable' => false,
+						'hidden'         => true,
+						'allow_showhide' => true,
+					);
 				}
 
-				if( false === get_option( '_sm_update_4210'.'_'.$this->dashboard_key ) ) { //Code for handling mapping changes in v4.2.10
-					if( $this->dashboard_key == 'shop_order' ) {
-						$custom_columns = array( 'shipping_method', 'coupons_used', 'line_items', 'details' );
-						foreach( $store_model_transient['columns'] as $key => $col ) {
-							$data = ( !empty( $col['data'] ) ) ? substr( $col['data'], 7 ) : '';
-							if( !empty( $data ) && in_array( $data , $custom_columns ) ) {
-								$store_model_transient['columns'][$key]['editor'] = false;
-							}
+				delete_transient( 'sa_sm_' . $this->dashboard_key );
+				update_option( '_sm_update_415', 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_425' ) ) { // Code for handling mapping changes in v4.2.5
+				if ( $this->dashboard_key == 'product' ) {
+					foreach ( $store_model_transient['columns'] as $key => $col ) {
+						if ( ! empty( $col['data'] ) && $col['data'] == 'custom_product_attributes' ) {
+							$store_model_transient['columns'][ $key ]['allow_showhide'] = true;
+							$store_model_transient['columns'][ $key ]['exportable']    = true;
 						}
 
-						delete_transient( 'sa_sm_'.$this->dashboard_key );
-					} else if( $this->dashboard_key == 'product' ) {
-						delete_transient( 'sa_sm_'.$this->dashboard_key );
-					} else if( $this->dashboard_key == 'wc_booking' ) {
-						delete_transient( 'sa_sm_'.$this->dashboard_key );
-					} else if( $this->dashboard_key == 'wc_membership_plan' ) {
-						delete_transient( 'sa_sm_'.$this->dashboard_key );
-					} else if( $this->dashboard_key == 'wc_user_membership' ) {
-						delete_transient( 'sa_sm_'.$this->dashboard_key );
-					}
-					update_option( '_sm_update_4210'.'_'.$this->dashboard_key, 1, 'no' );
-				}
-
-				// Have to delete transient of those dashboard which are having atleaset on zero_one checkbox model because checkedtemplate & uncheckedtemplate logic is swapped in version 4.2.11
-				if( false === get_option( '_sm_update_4211'.'_'.$this->dashboard_key ) ) { //Code for handling mapping changes in v4.2.11
-					$is_checkbox = false;
-					if ( ! empty( $store_model_transient['columns'] ) ) {
-						foreach( $store_model_transient['columns'] as $key => $col ) {
-							if ( ! empty( $col['type'] ) && 'checkbox' === $col['type'] && isset( $col['checkedTemplate'] ) && absint( $col['checkedTemplate'] ) === 0 ) {
-								$is_checkbox = true;
-								break;
-							}
+						if ( ! empty( $col['data'] ) && $col['data'] == 'postmeta_meta_key__product_attributes_meta_value__product_attributes' ) {
+							$store_model_transient['columns'][ $key ]['hidden']        = true;
+							$store_model_transient['columns'][ $key ]['allow_showhide'] = false;
+							$store_model_transient['columns'][ $key ]['exportable']    = false;
 						}
 					}
-					if ( true === $is_checkbox ) {
-						delete_transient( 'sa_sm_'.$this->dashboard_key );
-					}
-					update_option( '_sm_update_4211'.'_'.$this->dashboard_key, 1, 'no' );
-				}
-
-				if( false === get_option( '_sm_update_44'.'_'.$this->dashboard_key ) ) {
-					delete_transient( 'sa_sm_'.$this->dashboard_key );
-					update_option( '_sm_update_44'.'_'.$this->dashboard_key, 1, 'no' );
-				}
-
-				if( false === get_option( '_sm_update_442_users' ) ) {
-					delete_transient( 'sa_sm_users' );
-					update_option( '_sm_update_442_users', 1, 'no' );
-				}
-
-				if( false === get_option( '_sm_update_443_product' ) ) {
-					delete_transient( 'sa_sm_product' );
-					update_option( '_sm_update_443_product', 1, 'no' );
-				}
-
-				if( false === get_option( '_sm_update_461'.'_'.$this->dashboard_key ) ) { //Code for handling date cols mapping changes in v4.6.1
-					$date_cols = array( 'posts_post_date', 'posts_post_date_gmt', 'posts_post_modified', 'posts_post_modified_gmt' );
-					foreach( $store_model_transient['columns'] as $key => $col ) {
-						$data = ( !empty( $col['data'] ) ) ? $col['data'] : '';
-						if( !empty( $data ) && in_array( $data , $date_cols ) ) {
-							$display_name = $this->dashboard_title . ' '. ( ( strpos( $data, 'modified' ) !== false ) ? 'Modified' : 'Created' ) . ' Date' . ( ( strpos( $data, 'gmt' ) !== false ) ? ' GMT' : '' );
-							$store_model_transient['columns'][$key]['searchable'] = true;
-							$store_model_transient['columns'][$key]['name'] = $display_name;
-							$store_model_transient['columns'][$key]['key'] = $store_model_transient['columns'][$key]['name'];
-						}
-					}
-					delete_transient( 'sa_sm_'.$this->dashboard_key );
-					update_option( '_sm_update_461'.'_'.$this->dashboard_key, 1, 'no' );
-				}
-
-				if( false === get_option( '_sm_update_520'.'_'.$this->dashboard_key ) ) {
-					delete_transient( 'sa_sm_'.$this->dashboard_key );
-					update_option( '_sm_update_520'.'_'.$this->dashboard_key, 1, 'no' );
-				}
-
-				if( false === get_option( '_sm_update_530_shop_order' ) ) {
-					delete_transient( 'sa_sm_shop_order' );
-					update_option( '_sm_update_530_shop_order', 1, 'no' );
-				}
-
-				if( false === get_option( '_sm_update_5110_users' ) ) {
-					delete_transient( 'sa_sm_users' );
-					update_option( '_sm_update_5110_users', 1, 'no' );
-				}
-
-				if( false === get_option( '_sm_update_5120_users' ) ) {
-					delete_transient( 'sa_sm_users' );
-					update_option( '_sm_update_5120_users', 1, 'no' );
-				}
-
-				if( false === get_option( '_sm_update_5120_product' ) ) {
-					delete_transient( 'sa_sm_product' );
-					update_option( '_sm_update_5120_product', 1, 'no' );
-				}
-
-				if( false === get_option( '_sm_update_5140'.'_'.$this->dashboard_key ) ) {
-					delete_transient( 'sa_sm_'.$this->dashboard_key );
-					update_option( '_sm_update_5140'.'_'.$this->dashboard_key, 1, 'no' );
-				}
-
-				if( false === get_option( '_sm_update_5160'.'_'.$this->dashboard_key ) ) {
-					delete_transient( 'sa_sm_'.$this->dashboard_key );
-					update_option( '_sm_update_5160'.'_'.$this->dashboard_key, 1, 'no' );
-				}
-
-				if( false === get_option( '_sm_update_5180'.'_'.$this->dashboard_key ) ) {
-					delete_transient( 'sa_sm_'.$this->dashboard_key );
-					update_option( '_sm_update_5180'.'_'.$this->dashboard_key, 1, 'no' );
-				}
-
-				if( false === get_option( '_sm_update_5190'.'_'.$this->dashboard_key ) ) {
-					delete_transient( 'sa_sm_'.$this->dashboard_key );
-					$store_model_transient = false;
-					update_option( '_sm_update_5190'.'_'.$this->dashboard_key, 1, 'no' );
-				}
-
-				if( false === get_option( '_sm_update_5191'.'_'.$this->dashboard_key ) ) {
-					delete_transient( 'sa_sm_'.$this->dashboard_key );
-					$store_model_transient = false;
-					update_option( '_sm_update_5191'.'_'.$this->dashboard_key, 1, 'no' );
-				}
-
-				if( false === get_option( '_sm_update_5250_product' ) ) {
-					delete_transient( 'sa_sm_product' );
-					update_option( '_sm_update_5250_product', 1, 'no' );
-				}
-
-				if( false === get_option( '_sm_update_5260_product' ) ) {
-					delete_transient( 'sa_sm_product' );
-					update_option( '_sm_update_5260_product', 1, 'no' );
-				}
-				if( false === get_option( '_sm_update_600_user' ) ) {
-					delete_transient( 'sa_sm_user' );
-					$store_model_transient = false;
-					update_option( '_sm_update_600_user', 1, 'no' );
-				}
-				if( false === get_option( '_sm_update_620'.'_'.$this->dashboard_key ) ) {
-					delete_transient( 'sa_sm_'.$this->dashboard_key );
-					$store_model_transient = false;
-					update_option( '_sm_update_620'.'_'.$this->dashboard_key, 1, 'no' );
-				}
-				if( false === get_option( '_sm_update_630'.'_'.$this->dashboard_key ) ) {
-					delete_transient( 'sa_sm_'.$this->dashboard_key );
-					$store_model_transient = false;
-					update_option( '_sm_update_630'.'_'.$this->dashboard_key, 1, 'no' );
-				}
-				if( false === get_option( '_sm_update_670_shop_order' ) ) {
-					delete_transient( 'sa_sm_shop_order' );
-					$store_model_transient = false;
-					update_option( '_sm_update_670_shop_order', 1, 'no' );
-				}
-				if( false === get_option( '_sm_update_700'.'_'.$this->dashboard_key ) ) {
-					delete_transient( 'sa_sm_'.$this->dashboard_key );
-					$store_model_transient = false;
-					update_option( '_sm_update_700'.'_'.$this->dashboard_key, 1, 'no' );
-				}
-				if( false === get_option( '_sm_update_701'.'_'.$this->dashboard_key ) ) {
-					delete_transient( 'sa_sm_'.$this->dashboard_key );
-					$store_model_transient = false;
-					update_option( '_sm_update_701'.'_'.$this->dashboard_key, 1, 'no' );
-				}
-				if ( false === get_option( '_sm_update_740_user' ) ) {
-					delete_transient( 'sa_sm_user' );
-					$store_model_transient = false;
-					update_option( '_sm_update_740_user', 1, 'no' );
-				}
-				if( false === get_option( '_sm_update_820'.'_'.$this->dashboard_key ) ) {
-					delete_transient( 'sa_sm_'.$this->dashboard_key );
-					$store_model_transient = false;
-					update_option( '_sm_update_820'.'_'.$this->dashboard_key, 1, 'no' );
-				}
-				if( false === get_option( '_sm_update_870'.'_'.$this->dashboard_key ) ) {
-					delete_transient( 'sa_sm_'.$this->dashboard_key );
-					$store_model_transient = false;
-					update_option( '_sm_update_870'.'_'.$this->dashboard_key, 1, 'no' );
-				}
-				if( false === get_option( '_sm_update_880'.'_'.$this->dashboard_key ) ) {
-					delete_transient( 'sa_sm_' . $current_user->user_email . '_' . $this->dashboard_key . '_tasks' );
-					$store_model_transient = false;
-					update_option( '_sm_update_880'.'_'.$this->dashboard_key, 1, 'no' );
-				}
-				if ( ! empty( Smart_Manager::$sm_is_woo79 ) && ! empty( Smart_Manager::$sm_is_wc_hpos_tables_exists ) && false === get_option( '_sm_update_813_hpos_migrate' ) && ! empty( $GLOBALS['smart_manager_controller'] ) && $GLOBALS['smart_manager_controller'] instanceof Smart_Manager_Controller && is_callable( array( $GLOBALS['smart_manager_controller'], 'migrate_wc_orders_subscriptions_col_model' ) ) ) {
-					$GLOBALS['smart_manager_controller']->migrate_wc_orders_subscriptions_col_model();
-					update_option( '_sm_update_813_hpos_migrate', 1, 'no' );
-				}
-				if ( false === get_option( '_sm_update_8150_user' ) ) {
-					delete_transient( 'sa_sm_user' );
-					$store_model_transient = false;
-					update_option( '_sm_update_8150_user', 1, 'no' );
-				}
-				if ( in_array( $this->dashboard_key, array( 'user', 'product' ) ) && ( false === get_option( '_sm_update_8160_' . $this->dashboard_key ) ) ) {
 					delete_transient( 'sa_sm_' . $this->dashboard_key );
-					$store_model_transient = false;
-					update_option( '_sm_update_8160_' . $this->dashboard_key, 1, 'no' );
+					update_option( '_sm_update_425', 1, 'no' );
 				}
-				if ( false === get_option( '_sm_update_8190_product_stock_log' ) ) {
-					delete_transient( 'sa_sm_product_stock_log_tasks' );
-					delete_user_meta( get_current_user_id(), 'sa_sm_product_stock_log_tasks' );
-					$store_model_transient = false;
-					update_option( '_sm_update_8190_product_stock_log', 1, 'no' );
-				}
-				if ( false === get_option( '_sm_update_8240_shop_coupon' ) ) {
-					delete_transient( 'sa_sm_shop_coupon' );
-					$store_model_transient = false;
-					update_option( '_sm_update_8240_shop_coupon', 1, 'no' );
-				}
-				if ( false === get_option( '_sm_update_8250_product' ) ) {
-					delete_transient( 'sa_sm_product' );
-					$store_model_transient = false;
-					update_option( '_sm_update_8250_product', 1, 'no' );
-				}
-				if ( false === get_option( '_sm_update_8260_product' ) ) {
-					delete_transient( 'sa_sm_product' );
-					$store_model_transient = false;
-					update_option( '_sm_update_8260_product', 1, 'no' );
-				}
-				if ( false === get_option( '_sm_update_8340_product' ) ) {
-					delete_transient( 'sa_sm_product' );
-					$store_model_transient = false;
-					update_option( '_sm_update_8340_product', 1, 'no' );
-				}
-				if ( false === get_option( '_sm_update_8360_product' ) ) {
-					delete_transient( 'sa_sm_product' );
-					$store_model_transient = false;
-					update_option( '_sm_update_8360_product', 1, 'no' );
-				}
-				if ( false === get_option( '_sm_update_8390_product_stock_log' ) ) {
-					delete_transient( 'sa_sm_product_stock_log_tasks' );
-					$wpdb->query(
-                        $wpdb->prepare(
-                            "DELETE FROM {$wpdb->usermeta} WHERE meta_key = %s",
-                            'sa_sm_product_stock_log_tasks'
-                        )
-                    );
-					$store_model_transient = false;
-					update_option( '_sm_update_8390_product_stock_log', 1, 'no' );
-				}
-				if ( in_array( $this->dashboard_key, array( 'shop_order', 'shop_subscription' ) ) && ( false === get_option( '_sm_update_8400_' . $this->dashboard_key ) ) ) {
+			}
+			if ( false === get_option( '_sm_update_426' ) ) { // Code for handling mapping changes in v4.2.6
+				if ( $this->dashboard_key == 'shop_subscription' ) {
 					delete_transient( 'sa_sm_' . $this->dashboard_key );
-					$store_model_transient = false;
-					update_option( '_sm_update_8400_' . $this->dashboard_key, 1, 'no' );
-				}
-				if ( in_array( $this->dashboard_key, array( 'shop_order', 'shop_subscription' ) ) && ( false === get_option( '_sm_update_8410_' . $this->dashboard_key ) ) ) {
-					delete_transient( 'sa_sm_' . $this->dashboard_key );
-					$store_model_transient = false;
-					update_option( '_sm_update_8410_' . $this->dashboard_key, 1, 'no' );
-				}
-				if ( in_array( $this->dashboard_key, array( 'shop_order', 'shop_subscription' ) ) && ( false === get_option( '_sm_update_8430_' . $this->dashboard_key ) ) ) {
-					delete_transient( 'sa_sm_' . $this->dashboard_key );
-					$store_model_transient = false;
-					update_option( '_sm_update_8430_' . $this->dashboard_key, 1, 'no' );
-				}
-				if ( false === get_option( '_sm_update_8590_user' ) ) {
-					delete_transient( 'sa_sm_user' );
-					$store_model_transient = false;
-					update_option( '_sm_update_8590_user', 1, 'no' );
+					update_option( '_sm_update_426', 1, 'no' );
 				}
 			}
-
-			$store_model = $store_model_transient;
-
-			// Valid cache not found
-			if ( false === $store_model ) {
-				$load_default_store_model = apply_filters('sm_beta_load_default_store_model', true);
-				if( ! empty( $load_default_store_model ) ){
-					$this->get_default_store_model();
-				}
-				
-				//Filter to modify the default dashboard model
-				$this->default_store_model = apply_filters('sm_default_dashboard_model', $this->default_store_model);
-
-				$store_model = ( !empty( $this->default_store_model ) ) ? $this->default_store_model : array();
-
-				if( ! empty( $store_model['columns'] ) ){
-					foreach ($store_model['columns'] as $key => $value) {
-						$store_model['columns'][$key]['save_state'] = true;
-					}
-				}
-			}
-			//Filter to modify the dashboard model
-			$store_model = apply_filters('sm_dashboard_model', $store_model, $store_model_transient);
-			//Code for porting to new mapping
-			if( !empty($old_col_model) ) {
-
-				$new_col_model = $store_model['columns'];
-
-				foreach( $new_col_model as $index => $new_col ) {
-					if( !empty( $new_col['src'] ) && !empty( $old_col_model[$new_col['src']] ) ) {
-						$new_col_model[$index]['width'] = 80;
-
-						$new_col_model[$index]['width'] = ( !empty( $old_col_model[$new_col['src']]['width'] ) ) ? $old_col_model[$new_col['src']]['width'] : $new_col_model[$index]['width'];
-						$new_col_model[$index]['hidden'] = ( !empty( $old_col_model[$new_col['src']]['hidden'] ) ) ? $old_col_model[$new_col['src']]['hidden'] : $new_col_model[$index]['hidden'];
-
-						//Code for posting the column position
-						if( !isset( $old_col_model[$new_col['src']]['position'] ) && isset( $new_col_model[$index]['position'] ) ) { //unset the position if not there
-							unset( $new_col_model[$index]['position'] );
-						} else if( isset( $old_col_model[$new_col['src']]['position'] ) ) {
-							$new_col_model[$index]['position'] = $old_col_model[$new_col['src']]['position'];
-						}
-					}
-				}
-
-				$store_model['columns'] = $new_col_model;
-			}
-
-			//code to show/hide columns as per stored transient only if atleast one column is enabled
-			if( !empty( $column_model_transient ) && ! empty( $column_model_transient['columns'] ) ) {
-				$store_model = $this->map_column_to_store_model( $store_model, $column_model_transient );
-			} else { //for setting the custom column dashboard transient for the user
-				$column_model_transient = sa_sm_generate_column_state( $store_model );
-			}
-			//Code for re-arranging the columns in the final column model based on the set position
-			$final_column_model = (!empty($store_model['columns'])) ? $final_column_model = &$store_model['columns'] : '';
-			if (!empty($final_column_model)) {
-
-				$priority_columns = array();
-
-				foreach ($final_column_model as $key => &$column_model) {
-
-					//checking for multilist datatype
-					if (!empty($column_model['type']) && $column_model['type'] == 'sm.multilist') {
-
-						$col_exploded = (!empty($column_model['src'])) ? explode("/", $column_model['src']) : array();
-						
-						if ( sizeof($col_exploded) > 2) {
-							$col_meta = explode("=",$col_exploded[1]);
-							$col_nm = $col_meta[1];
-						} else {
-							$col_nm = $col_exploded[1];
-						}
-
-						$column_model['values'] = (!empty($this->terms_val_parent[$col_nm])) ? $this->terms_val_parent[$col_nm] : $column_model['values'];
-					}
-
-					if( !isset( $column_model['position']) ) continue;
-						
-					$priority_columns[] = $column_model;
-					unset( $final_column_model[$key] );
-				}
-
-				if ( !empty($priority_columns) || !empty( $final_column_model ) ) {
-
-					usort( $priority_columns, "sm_position_compare" ); //code for sorting as per the position
-
-					$final_column_model = array_values($final_column_model);
-
-					foreach ($final_column_model as $col_model) {
-						$priority_columns[] = $col_model;
-					}
-
-					ksort($priority_columns);
-					$store_model['columns'] = $priority_columns;
-				}
-			}
-			// Valid cache not found
-			if ( ( ! empty( $this->store_col_model_transient_option_nm ) ) && false === get_transient( $this->store_col_model_transient_option_nm ) ) {
-				set_transient( $this->store_col_model_transient_option_nm, wp_json_encode( $store_model ), WEEK_IN_SECONDS );
-			}
-
-			if ( ( ! empty( $this->store_col_model_transient_option_nm ) ) && empty( get_user_meta( get_current_user_id(), $this->store_col_model_transient_option_nm, true ) ) ) {
-				update_user_meta( get_current_user_id(), $this->store_col_model_transient_option_nm, $column_model_transient );
-			}
-
-			// Code to handle display of 'trash' value for 'post_status' -- not to be saved in transient
-			if( ! empty( $this->is_show_trash_records() ) && 'user' !== $this->dashboard_key ) {
-				foreach( $store_model['columns'] as $key => $col ) {
-					if( ! empty( $col['col_name'] ) && 'post_status' === $col['col_name'] ){
-						$store_model['columns'][$key]['values']['trash'] = __( 'Trash', 'smart-manager-for-wp-e-commerce' );
-						$store_model['columns'][$key]['selectOptions']['trash'] = __( 'Trash', 'smart-manager-for-wp-e-commerce' );
-						$store_model['columns'][$key]['search_values'][] = array( 'key' => 'trash', 'value' => __( 'Trash', 'smart-manager-for-wp-e-commerce' ) );
-
-						// Code for handling color code for 'trash' if enabled
-						if( ! empty( $store_model['columns'][$key]['colorCodes'] ) ){
-							if( ! is_array( $store_model['columns'][$key]['colorCodes']['red'] ) ){
-								$store_model['columns'][$key]['colorCodes']['red'] = array();
+			if ( false === get_option( '_sm_update_427' ) ) { // Code for handling mapping changes in v4.2.7
+				if ( $this->dashboard_key != 'user' ) {
+					foreach ( $store_model_transient['columns'] as $key => $col ) {
+						if ( ! empty( $col['col_name'] ) && $col['col_name'] == 'post_status' && empty( $col['colorCodes'] ) ) {
+							if ( $this->dashboard_key == 'shop_order' ) {
+								$color_codes = array(
+									'green'  => array( 'wc-completed', 'wc-processing' ),
+									'red'    => array( 'wc-cancelled', 'wc-failed', 'wc-refunded' ),
+									'orange' => array( 'wc-on-hold', 'wc-pending' ),
+								);
+							} elseif ( $this->dashboard_key == 'shop_subscription' ) {
+								$color_codes = array(
+									'green'  => array( 'wc-active' ),
+									'red'    => array( 'wc-expired', 'wc-cancelled' ),
+									'orange' => array( 'wc-on-hold', 'wc-pending' ),
+									'blue'   => array( 'wc-switched', 'wc-pending-cancel' ),
+								);
+							} else {
+								$color_codes = array();
 							}
-							$store_model['columns'][$key]['colorCodes']['red'][] = 'trash';
+
+							$store_model_transient['columns'][ $key ]['colorCodes'] = $color_codes;
+
+							delete_transient( 'sa_sm_' . $this->dashboard_key );
+							update_option( '_sm_update_427', 1, 'no' );
 						}
-						break;
+
+						if (
+							$this->dashboard_key == 'product' &&
+							! empty( $col['col_name'] ) &&
+							in_array( $col['col_name'], array( '_stock_status', '_backorders' ), true ) &&
+							empty( $col['colorCodes'] )
+						) {
+							if ( $col['col_name'] == '_stock_status' ) {
+								$color_codes = array(
+									'green' => array( 'instock' ),
+									'red'   => array( 'outofstock' ),
+									'blue'  => array( 'onbackorder' ),
+								);
+							} else {
+								$color_codes = array(
+									'green' => array( 'yes', 'notify' ),
+									'red'   => array( 'no' ),
+									'blue'  => array(),
+								);
+							}
+
+							$store_model_transient['columns'][ $key ]['colorCodes'] = $color_codes;
+
+							delete_transient( 'sa_sm_' . $this->dashboard_key );
+							update_option( '_sm_update_427', 1, 'no' );
+						}
 					}
 				}
 			}
+			if ( false === get_option( '_sm_update_4210' . '_' . $this->dashboard_key ) ) { // Code for handling mapping changes in v4.2.10
+				if ( $this->dashboard_key == 'shop_order' ) {
+					$custom_columns = array( 'shipping_method', 'coupons_used', 'line_items', 'details' );
 
-			do_action('sm_dashboard_model_saved');
+					foreach ( $store_model_transient['columns'] as $key => $col ) {
+						$data = ( ! empty( $col['data'] ) ) ? substr( $col['data'], 7 ) : '';
 
-			if( ! empty( $search_params ) ) {
-				$store_model['search_params'] = $search_params;
+						if ( ! empty( $data ) && in_array( $data, $custom_columns, true ) ) {
+							$store_model_transient['columns'][ $key ]['editor'] = false;
+						}
+					}
+
+					delete_transient( 'sa_sm_' . $this->dashboard_key );
+				} elseif ( in_array( $this->dashboard_key, array( 'product', 'wc_booking', 'wc_membership_plan', 'wc_user_membership' ), true ) ) {
+					delete_transient( 'sa_sm_' . $this->dashboard_key );
+				}
+
+				update_option( '_sm_update_4210' . '_' . $this->dashboard_key, 1, 'no' );
+			}
+			// Delete transient for dashboards with at least one zero_one checkbox model
+			// because checkedTemplate & uncheckedTemplate logic swapped in v4.2.11.
+			if ( false === get_option( '_sm_update_4211' . '_' . $this->dashboard_key ) ) { // Code for handling mapping changes in v4.2.11
+				$is_checkbox = false;
+
+				if ( ! empty( $store_model_transient['columns'] ) ) {
+					foreach ( $store_model_transient['columns'] as $key => $col ) {
+						if ( ! empty( $col['type'] ) && 'checkbox' === $col['type'] && isset( $col['checkedTemplate'] ) && absint( $col['checkedTemplate'] ) === 0 ) {
+							$is_checkbox = true;
+							break;
+						}
+					}
+				}
+
+				if ( true === $is_checkbox ) {
+					delete_transient( 'sa_sm_' . $this->dashboard_key );
+				}
+				update_option( '_sm_update_4211' . '_' . $this->dashboard_key, 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_44' . '_' . $this->dashboard_key ) ) {
+				delete_transient( 'sa_sm_' . $this->dashboard_key );
+				update_option( '_sm_update_44' . '_' . $this->dashboard_key, 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_442_users' ) ) {
+				delete_transient( 'sa_sm_users' );
+				update_option( '_sm_update_442_users', 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_443_product' ) ) {
+				delete_transient( 'sa_sm_product' );
+				update_option( '_sm_update_443_product', 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_461' . '_' . $this->dashboard_key ) ) { // Code for handling date column mapping changes in v4.6.1
+				$date_cols = array( 'posts_post_date', 'posts_post_date_gmt', 'posts_post_modified', 'posts_post_modified_gmt' );
+
+				foreach ( $store_model_transient['columns'] as $key => $col ) {
+					$data = ( ! empty( $col['data'] ) ) ? $col['data'] : '';
+
+					if ( ! empty( $data ) && in_array( $data, $date_cols, true ) ) {
+						$display_name = $this->dashboard_title . ' ' .
+							( ( strpos( $data, 'modified' ) !== false ) ? 'Modified' : 'Created' ) .
+							' Date' .
+							( ( strpos( $data, 'gmt' ) !== false ) ? ' GMT' : '' );
+
+						$store_model_transient['columns'][ $key ]['searchable'] = true;
+						$store_model_transient['columns'][ $key ]['name'] = $display_name;
+						$store_model_transient['columns'][ $key ]['key'] = $display_name;
+					}
+				}
+
+				delete_transient( 'sa_sm_' . $this->dashboard_key );
+				update_option( '_sm_update_461' . '_' . $this->dashboard_key, 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_520' . '_' . $this->dashboard_key ) ) {
+				delete_transient( 'sa_sm_' . $this->dashboard_key );
+				update_option( '_sm_update_520' . '_' . $this->dashboard_key, 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_530_shop_order' ) ) {
+				delete_transient( 'sa_sm_shop_order' );
+				update_option( '_sm_update_530_shop_order', 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_5110_users' ) ) {
+				delete_transient( 'sa_sm_users' );
+				update_option( '_sm_update_5110_users', 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_5120_users' ) ) {
+				delete_transient( 'sa_sm_users' );
+				update_option( '_sm_update_5120_users', 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_5120_product' ) ) {
+				delete_transient( 'sa_sm_product' );
+				update_option( '_sm_update_5120_product', 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_5140' . '_' . $this->dashboard_key ) ) {
+				delete_transient( 'sa_sm_' . $this->dashboard_key );
+				update_option( '_sm_update_5140' . '_' . $this->dashboard_key, 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_5160' . '_' . $this->dashboard_key ) ) {
+				delete_transient( 'sa_sm_' . $this->dashboard_key );
+				update_option( '_sm_update_5160' . '_' . $this->dashboard_key, 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_5180' . '_' . $this->dashboard_key ) ) {
+				delete_transient( 'sa_sm_' . $this->dashboard_key );
+				update_option( '_sm_update_5180' . '_' . $this->dashboard_key, 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_5190' . '_' . $this->dashboard_key ) ) {
+				delete_transient( 'sa_sm_' . $this->dashboard_key );
+				$store_model_transient = false;
+				update_option( '_sm_update_5190' . '_' . $this->dashboard_key, 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_5191' . '_' . $this->dashboard_key ) ) {
+				delete_transient( 'sa_sm_' . $this->dashboard_key );
+				$store_model_transient = false;
+				update_option( '_sm_update_5191' . '_' . $this->dashboard_key, 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_5250_product' ) ) {
+				delete_transient( 'sa_sm_product' );
+				update_option( '_sm_update_5250_product', 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_5260_product' ) ) {
+				delete_transient( 'sa_sm_product' );
+				update_option( '_sm_update_5260_product', 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_600_user' ) ) {
+				delete_transient( 'sa_sm_user' );
+				$store_model_transient = false;
+				update_option( '_sm_update_600_user', 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_620' . '_' . $this->dashboard_key ) ) {
+				delete_transient( 'sa_sm_' . $this->dashboard_key );
+				$store_model_transient = false;
+				update_option( '_sm_update_620' . '_' . $this->dashboard_key, 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_630' . '_' . $this->dashboard_key ) ) {
+				delete_transient( 'sa_sm_' . $this->dashboard_key );
+				$store_model_transient = false;
+				update_option( '_sm_update_630' . '_' . $this->dashboard_key, 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_670_shop_order' ) ) {
+				delete_transient( 'sa_sm_shop_order' );
+				$store_model_transient = false;
+				update_option( '_sm_update_670_shop_order', 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_700' . '_' . $this->dashboard_key ) ) {
+				delete_transient( 'sa_sm_' . $this->dashboard_key );
+				$store_model_transient = false;
+				update_option( '_sm_update_700' . '_' . $this->dashboard_key, 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_701' . '_' . $this->dashboard_key ) ) {
+				delete_transient( 'sa_sm_' . $this->dashboard_key );
+				$store_model_transient = false;
+				update_option( '_sm_update_701' . '_' . $this->dashboard_key, 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_740_user' ) ) {
+				delete_transient( 'sa_sm_user' );
+				$store_model_transient = false;
+				update_option( '_sm_update_740_user', 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_820' . '_' . $this->dashboard_key ) ) {
+				delete_transient( 'sa_sm_' . $this->dashboard_key );
+				$store_model_transient = false;
+				update_option( '_sm_update_820' . '_' . $this->dashboard_key, 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_870' . '_' . $this->dashboard_key ) ) {
+				delete_transient( 'sa_sm_' . $this->dashboard_key );
+				$store_model_transient = false;
+				update_option( '_sm_update_870' . '_' . $this->dashboard_key, 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_880' . '_' . $this->dashboard_key ) ) {
+				delete_transient( 'sa_sm_' . $current_user->user_email . '_' . $this->dashboard_key . '_tasks' );
+				$store_model_transient = false;
+				update_option( '_sm_update_880' . '_' . $this->dashboard_key, 1, 'no' );
+			}
+			if (
+				! empty( Smart_Manager::$sm_is_woo79 ) &&
+				! empty( Smart_Manager::$sm_is_wc_hpos_tables_exists ) &&
+				false === get_option( '_sm_update_813_hpos_migrate' ) &&
+				! empty( $GLOBALS['smart_manager_controller'] ) &&
+				$GLOBALS['smart_manager_controller'] instanceof Smart_Manager_Controller &&
+				is_callable( array( $GLOBALS['smart_manager_controller'], 'migrate_wc_orders_subscriptions_col_model' ) )
+			) {
+				$GLOBALS['smart_manager_controller']->migrate_wc_orders_subscriptions_col_model();
+				update_option( '_sm_update_813_hpos_migrate', 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_8150_user' ) ) {
+				delete_transient( 'sa_sm_user' );
+				$store_model_transient = false;
+				update_option( '_sm_update_8150_user', 1, 'no' );
+			}
+			if ( in_array( $this->dashboard_key, array( 'user', 'product' ), true ) && false === get_option( '_sm_update_8160_' . $this->dashboard_key ) ) {
+				delete_transient( 'sa_sm_' . $this->dashboard_key );
+				$store_model_transient = false;
+				update_option( '_sm_update_8160_' . $this->dashboard_key, 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_8190_product_stock_log' ) ) {
+				delete_transient( 'sa_sm_product_stock_log_tasks' );
+				delete_user_meta( get_current_user_id(), 'sa_sm_product_stock_log_tasks' );
+				$store_model_transient = false;
+				update_option( '_sm_update_8190_product_stock_log', 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_8240_shop_coupon' ) ) {
+				delete_transient( 'sa_sm_shop_coupon' );
+				$store_model_transient = false;
+				update_option( '_sm_update_8240_shop_coupon', 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_8250_product' ) ) {
+				delete_transient( 'sa_sm_product' );
+				$store_model_transient = false;
+				update_option( '_sm_update_8250_product', 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_8260_product' ) ) {
+				delete_transient( 'sa_sm_product' );
+				$store_model_transient = false;
+				update_option( '_sm_update_8260_product', 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_8340_product' ) ) {
+				delete_transient( 'sa_sm_product' );
+				$store_model_transient = false;
+				update_option( '_sm_update_8340_product', 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_8360_product' ) ) {
+				delete_transient( 'sa_sm_product' );
+				$store_model_transient = false;
+				update_option( '_sm_update_8360_product', 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_8390_product_stock_log' ) ) {
+				delete_transient( 'sa_sm_product_stock_log_tasks' );
+
+				$wpdb->query(
+					$wpdb->prepare(
+						"DELETE FROM {$wpdb->usermeta} WHERE meta_key = %s",
+						'sa_sm_product_stock_log_tasks'
+					)
+				);
+
+				$store_model_transient = false;
+				update_option( '_sm_update_8390_product_stock_log', 1, 'no' );
 			}
 
-			if( !$return_store_model ) {
-				wp_send_json( $store_model );
-			} else {
+			if ( in_array( $this->dashboard_key, array( 'shop_order', 'shop_subscription' ), true ) && false === get_option( '_sm_update_8400_' . $this->dashboard_key ) ) {
+				delete_transient( 'sa_sm_' . $this->dashboard_key );
+				$store_model_transient = false;
+				update_option( '_sm_update_8400_' . $this->dashboard_key, 1, 'no' );
+			}
+			if ( in_array( $this->dashboard_key, array( 'shop_order', 'shop_subscription' ), true ) && false === get_option( '_sm_update_8410_' . $this->dashboard_key ) ) {
+				delete_transient( 'sa_sm_' . $this->dashboard_key );
+				$store_model_transient = false;
+				update_option( '_sm_update_8410_' . $this->dashboard_key, 1, 'no' );
+			}
+			if ( in_array( $this->dashboard_key, array( 'shop_order', 'shop_subscription' ), true )
+				&& false === get_option( '_sm_update_8430_' . $this->dashboard_key )
+			) {
+				delete_transient( 'sa_sm_' . $this->dashboard_key );
+				$store_model_transient = false;
+				update_option( '_sm_update_8430_' . $this->dashboard_key, 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_8590_user' ) ) {
+				delete_transient( 'sa_sm_user' );
+				$store_model_transient = false;
+				update_option( '_sm_update_8590_user', 1, 'no' );
+			}
+			if ( 'wc_user_membership' === $this->dashboard_key && false === get_option( '_sm_update_8640_' . $this->dashboard_key ) ) {
+				delete_transient( 'sa_sm_' . $this->dashboard_key );
+				$store_model_transient = false;
+				update_option( '_sm_update_8640_' . $this->dashboard_key, 1, 'no' );
+			}
+			$store_model_and_old_model_transient['store_model_transient'] = $store_model_transient;
+			$store_model_and_old_model_transient['old_col_model'] = $old_col_model;
+			return $store_model_and_old_model_transient;
+		}
+
+		/**
+		 * Creates a new mapping for the store model.
+		 *
+		 * @param array $store_model The new store model data to be mapped.
+		 * @param array $old_col_model The old column model used for reference mapping.
+		 * @return array $store_model The processed mapping of the store model.
+		 */
+		public function port_store_model_new_mapping( $store_model = array(), $old_col_model = array() ) {
+			if ( empty( $store_model ) || ( ! is_array( $store_model ) ) ) {
 				return $store_model;
 			}
-			
+			$new_col_model = $store_model['columns'];
+			if ( empty( $new_col_model ) || ( ! is_array( $new_col_model ) ) ) {
+				return $store_model;
+			}
+			foreach( $new_col_model as $index => $new_col ) {
+				if ( empty( $new_col['src'] ) || empty( $old_col_model ) || ( ! is_array( $old_col_model ) ) || empty( $old_col_model[ $new_col['src'] ] ) ) {
+					continue;
+				}
+				$new_col_model[$index]['width'] = 80;
+				$new_col_model[$index]['width'] = ( !empty( $old_col_model[$new_col['src']]['width'] ) ) ? $old_col_model[$new_col['src']]['width'] : $new_col_model[$index]['width'];
+				$new_col_model[$index]['hidden'] = ( !empty( $old_col_model[$new_col['src']]['hidden'] ) ) ? $old_col_model[$new_col['src']]['hidden'] : $new_col_model[$index]['hidden'];
+				// Code for posting the column position.
+				if( !isset( $old_col_model[$new_col['src']]['position'] ) && isset( $new_col_model[$index]['position'] ) ) { //unset the position if not there
+					unset( $new_col_model[$index]['position'] );
+				} else if( isset( $old_col_model[$new_col['src']]['position'] ) ) {
+					$new_col_model[$index]['position'] = $old_col_model[$new_col['src']]['position'];
+				}
+			}
+			$store_model['columns'] = $new_col_model;
+			return $store_model;
+		}
+
+		/**
+		 * Retrieves and processes the store model data.
+		 *
+		 * @param array $store_model An associative array representing the store model.
+		 *
+		 * @return array The processed store model array with 'save_state' set to true for each column.
+		 */
+		public function get_store_model_data( $store_model = array() ) {
+			if ( empty( $store_model ) || ( ! is_array( $store_model ) ) || empty( $store_model['columns'] ) ) {
+				return $store_model;
+			}
+			foreach ( $store_model['columns'] as $key => $value ) {
+				$store_model['columns'][$key]['save_state'] = true;
+			}
+			return $store_model;
+		}
+
+		/**
+		 * Modifies the store model to include support for the 'trash' status in the 'post_status' column.
+		 *
+		 * This function updates the store model to handle the display of the 'trash' value for the 'post_status' column.
+		 * It adds the 'trash' value to the column's values, select options, and search values. Additionally, it applies
+		 * a red color code to the 'trash' status if color coding is enabled for the column.
+		 *
+		 * @param array $store_model The store model array containing column definitions and configurations.
+		 *                           Expected structure:
+		 *                           [
+		 *                               'columns' => [
+		 *                                   [
+		 *                                       'col_name' => string,
+		 *                                       'values' => array,
+		 *                                       'selectOptions' => array,
+		 *                                       'search_values' => array,
+		 *                                       'colorCodes' => array
+		 *                                   ],
+		 *                                   ...
+		 *                               ]
+		 *                           ]
+		 * @return array $store_model The modified store model with the 'trash' status added to the 'post_status' column, if applicable.
+		 */
+		public function modify_store_model_for_trash_status( $store_model = array() ) {
+			if ( empty( $store_model ) || ( ! is_array( $store_model ) ) || empty( $store_model['columns'] ) || empty( $this->is_show_trash_records() ) ||  ( 'user' === $this->dashboard_key ) ) {
+				return $store_model;
+			}
+			// Code to handle display of 'trash' value for 'post_status' -- not to be saved in transient.
+			foreach ( $store_model['columns'] as $key => $col ) {
+				if ( empty( $col['col_name'] ) || ( 'post_status' !== $col['col_name'] ) ) {
+					continue;
+				}
+				$store_model['columns'][$key]['values']['trash'] = __( 'Trash', 'smart-manager-for-wp-e-commerce' );
+				$store_model['columns'][$key]['selectOptions']['trash'] = __( 'Trash', 'smart-manager-for-wp-e-commerce' );
+				$store_model['columns'][$key]['search_values'][] = array( 'key' => 'trash', 'value' => __( 'Trash', 'smart-manager-for-wp-e-commerce' ) );
+
+				// Code for handling color code for 'trash' if enabled
+				if( ! empty( $store_model['columns'][$key]['colorCodes'] ) ){
+					if( ! is_array( $store_model['columns'][$key]['colorCodes']['red'] ) ){
+						$store_model['columns'][$key]['colorCodes']['red'] = array();
+					}
+					$store_model['columns'][$key]['colorCodes']['red'][] = 'trash';
+				}
+				break;
+			}
+			return $store_model;
+		}
+
+		/**
+		 * Modifies the search parameters of a store model.
+		 *
+		 * @param array $store_model   The store model to be modified. Must contain a 'search_params' key.
+		 * @param array $search_params The search parameters to be applied to the store model.
+		 *
+		 * @return array $store_model The modified store model with updated search parameters, or the original store model if inputs are invalid.
+		 */
+		public function modify_store_model_search_params( $store_model = array(), $search_params = array() ) {
+			if ( empty( $store_model ) || ( ! is_array( $store_model ) ) || empty( $search_params ) ) {
+				return $store_model;
+			}
+			$store_model['search_params'] = $search_params;
+			return $store_model;
+		}
+
+		/**
+		 * Maps columns for a stored transient and updates the store model and column model transient.
+		 *
+		 * @param array $column_and_store_model_data_post_mapping  The current store model and the column model transient data
+		 *
+		 * @return array $column_and_store_model_data_post_mapping Returns an array containing the updated 'store_model' and 'column_model_transient'.
+		 */
+		public function map_column_for_stored_transient( $column_and_store_model_data_post_mapping = array() ) {
+			if ( empty( $column_and_store_model_data_post_mapping['store_model'] ) || ( ! is_array( $column_and_store_model_data_post_mapping['store_model'] ) ) ) {
+				return $column_and_store_model_data_post_mapping;
+			}
+			$store_model = $column_and_store_model_data_post_mapping['store_model'];
+			$column_model_transient = $column_and_store_model_data_post_mapping['column_model_transient'];
+			// Code to show/hide columns as per stored transient only if atleast one column is enabled.
+			if ( ! empty( $column_model_transient ) && ( ! empty( $column_model_transient['columns'] ) ) ) {
+				$column_and_store_model_data_post_mapping['store_model'] = $this->map_column_to_store_model( $store_model, $column_model_transient );
+			} else { // For setting the custom column dashboard transient for the user.
+				$column_and_store_model_data_post_mapping['column_model_transient'] = sa_sm_generate_column_state( $store_model );
+			}
+			return $column_and_store_model_data_post_mapping;
 		}
 
 		public function process_search_cond($params = array()) {
@@ -1467,7 +896,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
                 if ( ! empty( $rule_group )) {
 
 						$advanced_search_query[$i] = array();
-						
+
 						if( ! empty( $this->advanced_search_table_types ) ){
 							if( ! empty( $this->advanced_search_table_types['flat'] ) ){
 								foreach( array_keys( $this->advanced_search_table_types['flat'] ) as $table ){
@@ -1508,12 +937,12 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
                             	$search_value = ( in_array( $search_col, $params['data_col_params']['data_cols_timestamp'] ) || in_array( $search_col, $params['data_col_params']['data_date_cols_timestamp'] ) || in_array( $search_col, $params['data_col_params']['data_time_cols_timestamp'] ) ) ? strtotime( $search_value ) : $search_value;
 
 								// Added code to convert value to UTC for data which is displayed in site timezone
-								$search_value = ( in_array( $search_col, $params['data_col_params']['data_cols_display_date_in_site_timezone'] ) ) ? sa_sm_get_utc_timestamp_from_site_date( $search_value ) : $search_value;
+								$search_value = ( in_array( $search_col, $params['data_col_params']['data_cols_display_date_in_site_timezone'] ) ) ? sa_get_utc_timestamp_from_site_date( $search_value ) : $search_value;
                             }
 
 							// Code to create advanced search condition
 							$table_name = ( ! empty( $rule['table_name'] ) ) ? substr( $rule['table_name'], strlen( $wpdb->prefix ) ) : '';
-							
+
 							if( empty( $table_name ) ){
 								continue;
 							}
@@ -1528,11 +957,11 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 										break;
 								}
 							}
-							
+
 							$search_params = array('search_string' => $rule,
 													'search_col' => $search_col,
-													'search_operator' => $search_operator, 
-													'search_data_type' => $search_data_type, 
+													'search_operator' => $search_operator,
+													'search_data_type' => $search_data_type,
 													'search_value' => $search_value,
 													'selected_search_operator' => $selected_search_operator,
 													'SM_IS_WOO30' => (!empty($params['SM_IS_WOO30'])) ? $params['SM_IS_WOO30'] : '',
@@ -1578,7 +1007,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
                 //Code for handling advanced search conditions
 		        if( ! empty( $advanced_search_query ) ) {
 
-		            $index_search_string = 1; // index to keep a track of flags in the advanced search temp 
+		            $index_search_string = 1; // index to keep a track of flags in the advanced search temp
 		            $search_params = array();
 		            foreach( $advanced_search_query as &$advanced_search_query_string ) {
 		            	$this->previous_cond_has_results = true;
@@ -1610,7 +1039,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 									'meta_key_col'			=> $this->advanced_search_table_types['meta'][$key]
 								), $search_params ) );
 							} else if ( !in_array( $key, array_keys( $this->advanced_search_table_types['flat'] ) ) && 'terms' === $key ) {
-								$this->process_terms_table_search_query( array_merge( $params, array( 
+								$this->process_terms_table_search_query( array_merge( $params, array(
 									'search_query' 			=> $advanced_search_query_string,
 									'search_query_index' 	=> $index_search_string
 								), $search_params ) );
@@ -1655,7 +1084,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 						if( ! empty( $view_data ) ) {
 							$this->dashboard_key = $view_data['post_type'];
 							$column_model_transient = json_decode( $view_data['params'], true );
-							
+
 							if( !empty( $column_model_transient['search_params'] ) ) {
 								if( ! empty( $column_model_transient['search_params']['isAdvanceSearch'] ) && "true" == $column_model_transient['search_params']['isAdvanceSearch'] ) { // For advanced search
 									if( ! empty( $column_model_transient['search_params']['params'] ) && is_array( $column_model_transient['search_params']['params'] ) ) {
@@ -1682,7 +1111,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			if( ! empty( $column_model_transient ) && empty( $this->req_params['sort_params'] ) ){
 				$this->req_params['sort_params'] = ( ! empty( $column_model_transient['sort_params'] ) ) ? $column_model_transient['sort_params'] : array();
 			}
-			
+
 			$store_model_transient = ( ! empty( $this->store_col_model_transient_option_nm ) ) ? get_transient( $this->store_col_model_transient_option_nm ) : '';
 
 			if( ! empty( $store_model_transient ) && !is_array( $store_model_transient ) ) {
@@ -1747,7 +1176,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 					$col_exploded = (!empty($col['src'])) ? explode("/", $col['src']) : array();
 
 					if (empty($col_exploded)) continue;
-					
+
 					$visible_cols[] = $col;
 
 					if ( sizeof($col_exploded) > 2) {
@@ -1824,7 +1253,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			$current_page = (!empty($this->req_params['sm_page'])) ? $this->req_params['sm_page'] : '1';
 			$start_offset = ($current_page > 1) ? (($current_page - 1) * $limit) : $start;
 
-			$data_col_params = array( 	
+			$data_col_params = array(
 										'limit'										=> $limit,
 										'offset'									=> $start_offset,
 										'current_page'								=> $current_page,
@@ -1861,7 +1290,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 					$post_cond['post_status'] = ( ! is_array( $post_cond['post_status'] ) ) ? array( $post_cond['post_status'] ) : $post_cond['post_status'];
 					$post_cond['post_status'] = array_merge( $post_cond['post_status'], array( 'trash' ) );
 				}
-
+				$post_type = 'post';
 				//Code for advanced search
 				$search = "";
 				$search_condn = "";
@@ -1885,7 +1314,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 		        // 			$search_string_array = json_decode(stripslashes($search_string_array),true);
 
 		        // 			foreach( $date_filter_array as $date_filter ) {
-				// 				$search_string_array[] = $date_filter;		
+				// 				$search_string_array[] = $date_filter;
 		        // 			}
 
 		        // 			$this->req_params['search_query'][$key] = addslashes(json_encode($search_string_array));
@@ -1893,7 +1322,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 		        // 	}
 		        // }
 
-		        $sm_advanced_search_results_persistent = 0; // flag to handle persistent search results		
+		        $sm_advanced_search_results_persistent = 0; // flag to handle persistent search results
 				if ( ! empty( $this->req_params['table_model']['posts']['where']['post_type'] ) ) {
 					$post_type = ( is_array( $this->req_params['table_model']['posts']['where']['post_type'] ) ) ? $this->req_params['table_model']['posts']['where']['post_type'] : array( $this->req_params['table_model']['posts']['where']['post_type'] );
 				}
@@ -1915,12 +1344,12 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 		        }
 
 				// Code for handling sorting of the postmeta
-		        $sort_params = $this->build_query_sort_params( 
-					array( 
+		        $sort_params = $this->build_query_sort_params(
+					array(
 						'sort_params' => $this->req_params['sort_params'],
 						'numeric_meta_cols' => $numeric_postmeta_cols,
 						'data_cols' => $data_cols
-					) 
+					)
 				);
 
 				//WP_Query to get all the relevant post_ids
@@ -1997,7 +1426,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 							$group_by
 							ORDER BY {$wpdb->prefix}posts.post_date DESC
 						", $params ) );
-						$ids = ( ( ! empty( $ids ) ) && is_array( $ids ) ) ? implode( ",", $ids ) : '';	
+						$ids = ( ( ! empty( $ids ) ) && is_array( $ids ) ) ? implode( ",", $ids ) : '';
 					} else {
 						$search_query_args = array_merge( $args, array( 'posts_per_page' => -1,
 						'fields' => 'ids' ) );
@@ -2024,7 +1453,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 
 	        				if ( is_array( $data_cols ) && !empty( $data_cols ) ) {
 	        					if ( array_search( $post_key, $data_cols ) === false ) {
-	        						continue; //cond for checking col in col model	
+	        						continue; //cond for checking col in col model
 	        					}
 	        				}
 
@@ -2079,7 +1508,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			        				}
 	        					}
 
-	        					$items [$key][$meta_key] = $meta_value;	
+	        					$items [$key][$meta_key] = $meta_value;
 	        				}
 	        			}
 	        		}
@@ -2101,12 +1530,12 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 											                    	AND meta_key IN ('". implode("','", $postmeta_cols) ."')
 											                    	AND 1=%d
 																GROUP BY post_id, meta_key", 1 ), 'ARRAY_A' );
-							
+
 							if( ! empty( $results ) ) {
 								$postmeta_data = array_merge( $postmeta_data, $results );
 							}
 						}
-				
+
 					} else {
 						$postmeta_data = $wpdb->get_results( $wpdb->prepare( "SELECT post_id as post_id,
 											                              meta_key AS meta_key,
@@ -2134,7 +1563,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 	        				if( empty( $meta_key ) ) {
 	        					continue;
 	        				}
-	        				
+
 	        				if( !in_array( $data['meta_key'], $data_cols_checkbox ) ) {
 								$meta_value = ( isset( $data['meta_value'] ) ) ? $data['meta_value'] : '';
 	        				} else {
@@ -2162,7 +1591,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
         								$format = 'H:i';
         							}
 
-									$meta_value = ( in_array( $meta_key, $data_cols_display_date_in_site_timezone ) ) ? sa_sm_get_site_timestamp_from_utc_date( $meta_value ) : $meta_value;
+									$meta_value = ( in_array( $meta_key, $data_cols_display_date_in_site_timezone ) ) ? sa_get_site_timestamp_from_utc_date( $meta_value ) : $meta_value;
 
 									$date = new DateTime();
 									$date->setTimestamp($meta_value);
@@ -2176,13 +1605,13 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
         						if( in_array( $meta_key, $data_cols_datetime ) && empty( $meta_value ) && is_numeric( $meta_value ) ) {
         							$meta_value = '-';
         						}
-							}	
+							}
 
 							// //Code for handling blank numeric fields
         					// if( in_array( $meta_key, $numeric_postmeta_cols ) && ! isset( $numeric_postmeta_cols_decimal_places[$meta_key] ) ) {
         					// 	$meta_value = ( ! empty( $meta_value ) ) ? $meta_value : 0;
         					// }
-							
+
 							//Code for handling image fields
         					if( in_array( $meta_key, $image_postmeta_cols ) ) {
 								if( ! empty( $meta_value ) ){
@@ -2205,7 +1634,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 									}
 								}
 							}
-							
+
         					//Code for rounding of integer fields
         					if( isset( $numeric_postmeta_cols_decimal_places[$meta_key] ) && !empty( $meta_value ) ) {
         						$meta_value = round( intval( $meta_value ), intval( $numeric_postmeta_cols_decimal_places[$meta_key] ) );
@@ -2219,7 +1648,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 	    			}
 	        	}
 	        	// Handling multilist data.
-	        	$items = $this->format_terms_data( 
+	        	$items = $this->format_terms_data(
 	        		array(
 	        			'items'               => $items,
 	        			'terms_visible_cols'  => $terms_visible_cols,
@@ -2271,71 +1700,13 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 
 		}
 
-		public function get_batch_update_copy_from_record_ids( $args = array() ) {
-
-			global $wpdb;
-			$data = array();
-
-			$dashboard_key = ( !empty( $args['dashboard_key'] ) ) ? $args['dashboard_key'] : $this->dashboard_key;
-			$is_ajax = ( isset( $args['is_ajax'] )  ) ? $args['is_ajax'] : true;
-
-			if( !empty( $dashboard_key ) || !empty( $this->req_params['table_model']['posts']['where']['post_type'] ) ) {
-				$dashboards = ( !empty( $this->req_params['table_model']['posts']['where']['post_type'] ) && empty( $args['dashboard_key'] ) ) ? $this->req_params['table_model']['posts']['where']['post_type'] : $dashboard_key;
-				$dashboards = ( is_array( $dashboards ) ) ? $dashboards : array( $dashboards );
-				$search_term = ( ! empty( $this->req_params['search_term'] ) ) ? $this->req_params['search_term'] : ( ( ! empty( $args['search_term'] ) ) ? $args['search_term'] : '' );
-				if ( ( ! empty( $this->req_params['load_variations'] ) ) && ( 'true' === $this->req_params['load_variations'] ) ) {
-					array_push( $dashboards, "product_variation" );
-				}
-
-				$select = apply_filters( 'sm_batch_update_copy_from_ids_select', "SELECT ID AS id, post_title AS title", $args );
-
-				$search_cond = ( ! empty( $search_term ) ) ? " AND ( id LIKE '%".$search_term."%' OR post_title LIKE '%".$search_term."%' OR post_excerpt LIKE '%".$search_term."%' ) " : '';
-
-				$search_cond_ids = ( !empty( $args['search_ids'] ) ) ? " AND id IN ( ". implode(",", $args['search_ids']) ." ) " : '';
-
-				$results = $wpdb->get_results( $select . " FROM {$wpdb->prefix}posts WHERE post_status " . ( ( ! empty( $this->req_params['load_published_only'] ) ) && ( 'true' === $this->req_params['load_published_only'] ) ? "= 'publish'" : "!= 'trash'" ) . $search_cond . " " . $search_cond_ids . " AND post_type IN ('" . implode( "','", array_map( 'esc_sql', $dashboards ) ) . "')", 'ARRAY_A' );
-
-				if( count( $results ) > 0 ) {
-					foreach( $results as $result ) {
-						if ( empty( $result ) || ! is_array( $result ) || empty( $result['id'] ) || empty( $result['title'] ) ) {
-							continue;
-						}
-						if ( ( ( ! empty( $this->req_params['load_variations'] ) ) && ( 'true' === $this->req_params['load_variations'] ) ) && ( ( ! empty( $this->req_params['skip_variation_parent'] ) ) && ( 'true' === $this->req_params['skip_variation_parent'] ) ) ) {
-							$product_object = wc_get_product( absint( $result['id'] ) );
-							if ( ( ! is_object( $product_object ) ) || ( ! is_a( $product_object, 'WC_Product' ) ) || ( is_callable( array( $product_object, 'get_type' ) ) && 'variable' === $product_object->get_type() ) ) {
-								continue;
-							}
-							$formatted_name = is_callable( array( $product_object, 'get_formatted_name' ) ) ? $product_object->get_formatted_name() : '';
-							if ( is_callable( array( $product_object, 'managing_stock' ) ) && ( ! empty( $product_object->managing_stock() ) ) ) {
-								$stock_amount = is_callable( array( $product_object, 'get_stock_quantity' ) ) ? $product_object->get_stock_quantity() : 0;
-								$formatted_name .= ' - ' . sprintf( __( 'Stock: %d', 'woocommerce' ), wc_format_stock_quantity_for_display( $stock_amount, $product_object ) );
-							}
-							if ( ( empty( $formatted_name ) ) ) {
-								continue;
-							}
-							$result['title'] = rawurldecode( wp_strip_all_tags( $formatted_name ) );
-						}
-						$data[ $result['id'] ] = trim($result['title']);
-					}
-				}
-				$data = apply_filters( 'sm_batch_update_copy_from_ids', $data );
-			}
-
-			if( $is_ajax ){
-				wp_send_json( $data );
-			} else {
-				return $data;
-			}
-		}
-
-
 		public function save_state() {
 			$slug = ( ! empty( $this->req_params['active_module'] ) ) ? $this->req_params['active_module'] : '';
 			$is_view = ( isset( $this->req_params['is_view'] ) ) ? $this->req_params['is_view'] : '';
-			if( ! empty( $slug ) && ! empty( $this->req_params['dashboard_states'] ) ) {		
+			if( ! empty( $slug ) && ! empty( $this->req_params['dashboard_states'] ) ) {
 				// Code to update the dashboards column state
 				foreach ($this->req_params['dashboard_states'] as $dashboard => $value) {
-					$value = json_decode( stripslashes( $value ), true );			
+					$value = json_decode( stripslashes( $value ), true );
 					$column_model_transient = sa_sm_generate_column_state( $value );
 					if ( ( 1 !== intval( $is_view ) ) && ( ! empty( $this->store_col_model_transient_option_nm ) ) ) {
 						update_user_meta( get_current_user_id(), $this->store_col_model_transient_option_nm, $column_model_transient );
@@ -2344,7 +1715,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 
 				// State saving for view should not be done.
 				if( 1 === intval( $is_view ) ) {
-					global $wpdb;	
+					global $wpdb;
 					$result = $wpdb->query( // phpcs:ignore
 											$wpdb->prepare( // phpcs:ignore
 												"UPDATE {$wpdb->prefix}sm_views
@@ -2361,7 +1732,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				$this->req_params['state_option_name'] = $this->store_col_model_transient_option_nm;
 				Smart_Manager_Pro_Base::update_column_titles( $this->req_params );
 			}
-			
+
 			wp_send_json( array( 'ACK'=> 'Success' ) );
 		}
 
@@ -2383,10 +1754,10 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 						$store_model_transient = get_transient( 'sa_sm_'.$this->req_params['dashboard_key'] );
 						if( ! empty( $store_model_transient ) && !is_array( $store_model_transient ) ) {
 							$column_model_transient = sa_sm_generate_column_state( json_decode( $store_model_transient, true ) );
-						}	
+						}
 					}
 				}
-			
+
 			 	if( ! empty( $column_model_transient ) ) {
 					$result = $wpdb->query( // phpcs:ignore
 											$wpdb->prepare( // phpcs:ignore
@@ -2397,9 +1768,9 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 												$slug
 											)
 										);
-				}	
-				
-			}		
+				}
+
+			}
 			wp_send_json( array( 'ACK'=> 'Success' ) );
 		}
 
@@ -2414,7 +1785,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			$col_model = ( ! empty( $store_model_transient['columns'] ) ) ? $store_model_transient['columns'] : array();
 			if ( empty( $edited_data ) || empty( $table_model ) || empty( $col_model ) ) return;
 			if ( is_callable( array( 'Smart_Manager_Task', 'task_update' ) ) && ( is_array( $updated_edited_data ) && ( ! empty( $updated_edited_data ) ) ) && ( ! empty( $this->req_params['title'] ) ) && ( ! empty( $this->dashboard_key ) ) ) {
-				$this->task_id = Smart_Manager_Task::task_update( 
+				$this->task_id = Smart_Manager_Task::task_update(
 					array(
 						'title' => $this->req_params['title'],
 						'created_date' => date( 'Y-m-d H:i:s' ),
@@ -2424,7 +1795,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 						'status' => 'in-progress',
 						'actions' => array_values( $updated_edited_data ),
 						'record_count' => count( $updated_edited_data )
-					) 
+					)
 				);
 			}
 			$edited_data['task_id'] = intval( $this->task_id );
@@ -2453,7 +1824,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				$col_exploded = (!empty($col['src'])) ? explode("/", $col['src']) : array();
 
 				if (empty($col_exploded)) continue;
-				
+
 				if ( sizeof($col_exploded) > 2) {
 					$col_meta = explode("=",$col_exploded[1]);
 					$col_nm = $col_meta[1];
@@ -2540,7 +1911,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 
 				foreach ($edited_data as $id => $edited_row) {
 
-					
+
 					$update_params_custom = array(); // for custom tables
 					$where_cond = array();
 					$insert_post = 0;
@@ -2553,7 +1924,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 						$insert_params_posts = array();
 						foreach ($edited_row as $key => $value) {
 							$edited_value_exploded = explode("/", $key);
-							
+
 							if (empty($edited_value_exploded)) continue;
 
 							$update_table = $edited_value_exploded[0];
@@ -2573,9 +1944,9 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 							if ( !is_wp_error( $inserted_id ) && !empty($inserted_id) ) {
 								if( ! empty( $edited_data[$temp_id] ) ){
 									unset( $edited_data[$temp_id] );
-								} 
+								}
 								$id = $inserted_id;
-								$insert_post = 1; //Flag for determining whether post has been inserted	
+								$insert_post = 1; //Flag for determining whether post has been inserted
 								$edited_data[$id] =  $edited_row;
 							} else {
 								continue;
@@ -2619,7 +1990,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 						}
 						$update_column_name = ( 'postmeta' === $update_table ) ? $meta_key_name : $update_column;
 						$this->field_names[ $id ][ $update_column_name ] = $key;
-						// For fetching previous value	
+						// For fetching previous value
 						if ( ( ! empty( $id ) ) && ( ! empty( $update_table ) ) && ( ! empty( $update_column_name ) ) && ( is_callable( array( 'Smart_Manager_Task', 'get_previous_data' ) ) ) ){
 							$prev_val = Smart_Manager_Task::get_previous_data( $id, $update_table, $update_column_name );
 							$prev_val = ( ! empty( $data_col_params ) ) ? sa_sm_format_prev_val( array(
@@ -2681,7 +2052,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 									$offset = get_option( 'gmt_offset' ) * HOUR_IN_SECONDS;
 									$updated_val = ( ! empty( $value ) ) ? $value + $offset : '';
 								} else if( in_array( $meta_key, $date_cols_utc_timezone ) ){
-									$updated_val = ( ! empty( $value ) ) ? sa_sm_get_utc_timestamp_from_site_date( $value ) : '';
+									$updated_val = ( ! empty( $value ) ) ? sa_get_utc_timestamp_from_site_date( $value ) : '';
 								} else {
 									$updated_val = $value;
 								}
@@ -2726,18 +2097,18 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 								$meta_keys_edited = ( ! empty( $args['meta_keys_edited'] ) ) ? $args['meta_keys_edited'] : $meta_keys_edited;
 								$taxonomies = ( ! empty( $args['taxonomies'] ) ) ? $args['taxonomies'] : $taxonomies;
 								if ( ! empty( $taxonomy_data_to_update[ $id ][ $update_column ] ) ) {
-									$posts_updated_data[ $id ]['tax_input'][ $update_column ][] = array( 
+									$posts_updated_data[ $id ]['tax_input'][ $update_column ][] = array(
 										'operator'         => 'set_to',
-										'value'            => ( ! empty( $taxonomy_data_to_update[ $id ][ $update_column ]['term_ids_set'] ) ) 
-																? $taxonomy_data_to_update[ $id ][ $update_column ]['term_ids_set'] 
+										'value'            => ( ! empty( $taxonomy_data_to_update[ $id ][ $update_column ]['term_ids_set'] ) )
+																? $taxonomy_data_to_update[ $id ][ $update_column ]['term_ids_set']
 																: array(),
-										'remove_all_terms' => ( ! empty( $taxonomy_data_to_update[ $id ][ $update_column ]['remove_all_terms'] ) ) 
-																? $taxonomy_data_to_update[ $id ][ $update_column ]['remove_all_terms'] 
+										'remove_all_terms' => ( ! empty( $taxonomy_data_to_update[ $id ][ $update_column ]['remove_all_terms'] ) )
+																? $taxonomy_data_to_update[ $id ][ $update_column ]['remove_all_terms']
 																: false,
 									);
 								}
-								
-								
+
+
 							} else { //update terms data.
 								$this->update_terms_table_data( array(
 									'update_column' => $update_column,//taxonomy.
@@ -2772,19 +2143,19 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				}
 
 				do_action( 'sm_inline_update_post_data',
-					array( 
+					array(
 						'posts_data' => $posts_updated_data,
 						'taxonomies' => $taxonomies,
 						'task_id' => ( ! empty( $this->task_id ) ) ? $this->task_id : 0,
 						'prev_postmeta_values' => $this->prev_postmeta_values
-					) 
+					)
 				);
 
 				//update post data.
 				if ( ( ! empty( $data_col_params['posts_fields'] ) ) && ( defined('SMPRO') && empty( SMPRO ) ) ) {
 					foreach ( $data_col_params['posts_fields'] as $id => $post_params ) {
 						if ( empty( $id ) || empty( $post_params ) ) {
-							continue;	
+							continue;
 						}
 						wp_update_post( $post_params );
 					}
@@ -2818,8 +2189,8 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 									'smart-manager-for-wp-e-commerce'
 								),
 								__(
-									( ( ! empty( $time_saved_details['time_saved'] ) ) ? $time_saved_details['time_saved'] : '' ) . 
-									' ' . 
+									( ( ! empty( $time_saved_details['time_saved'] ) ) ? $time_saved_details['time_saved'] : '' ) .
+									' ' .
 									( ( ! empty( $time_saved_details['unit'] ) ) ? $time_saved_details['unit'] : '' )
 								), // Time saved in mins/hrs.
 								sprintf(
@@ -2828,21 +2199,21 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 									esc_html__( 'Pro', 'smart-manager-for-wp-e-commerce' )
 								),
 								__(
-									( ( ! empty( $time_saved_details['additional_savings'] ) ) ? $time_saved_details['additional_savings'] : '' ) . 
-									' ' . 
+									( ( ! empty( $time_saved_details['additional_savings'] ) ) ? $time_saved_details['additional_savings'] : '' ) .
+									' ' .
 									( ( ! empty( $time_saved_details['unit'] ) ) ? $time_saved_details['unit'] : '' )
 								) // Additional savings in mins/hrs.
 							);
 				}
-				$resp = array( 
+				$resp = array(
 							'sm_inline_update_count' => $sm_inline_update_count,
 							'modal_message' => $modal_message,
 							'msg' => sprintf(
-									/* translators: %1$d: number of updated record %2$s: record update message */ 
-									esc_html__( '%1$d record%2$s updated successfully!', 'smart-manager-for-wp-e-commerce'), sizeof( $edited_data ), $msg_str 
+									/* translators: %1$d: number of updated record %2$s: record update message */
+									esc_html__( '%1$d record%2$s updated successfully!', 'smart-manager-for-wp-e-commerce'), sizeof( $edited_data ), $msg_str
 								),
 						);
-								
+
 				$msg = json_encode($resp);
 			} else {
 				$msg = sprintf(
@@ -2853,7 +2224,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			echo $msg;
 			exit;
 		}
-				
+
 		// Function to handle the delete data functionality
 		public function delete() {
 
@@ -2890,9 +2261,9 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 					( $is_callable ) ? call_user_func_array( $deleter['callback'], array( intval( $delete_id ) ) ) : wp_trash_post( intval( $delete_id ) );
 				}
 			}
-			
+
 			$delete_ids_count = apply_filters( 'sm_default_process_delete_records_result', sizeof( $delete_ids ), array( 'ids' => $delete_ids, 'this' => $this ) );
-			echo sprintf( 
+			echo sprintf(
 				/* translators: %1$d: number of updated record %2$s: record update message */
 				esc_html__( '%1$d record%2$s deleted successfully!', 'smart-manager-for-wp-e-commerce' ), $delete_ids_count, ( ( $delete_ids_count > 1 ) ? 's' : '' ) );
 			exit;
@@ -2924,7 +2295,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			if( empty( $table_nm ) || empty( $search_params ) ){
 				return array();
 			}
-			
+
 			$search_col = apply_filters('sm_search_format_query_'. $table_nm .'_col_name', $search_params['search_col'], $search_params);
 			$search_value = apply_filters('sm_search_format_query_'. $table_nm .'_col_value', $search_params['search_value'], $search_params);
 			if ( empty( $params['search_query']['cond_'.$table_nm.'_col_vals'] ) ) {
@@ -2994,14 +2365,14 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			}
 			if( in_array( $search_params['search_data_type'], array( "number", "numeric" ) ) ) {
 				$val = ( empty( $search_params['search_value'] ) && '0' != $search_params['search_value'] ) ? "''" : $search_params['search_value'];
-				
+
 				//Condition for exact matching of '0' numeric values
 				if( '0' == $search_params['search_value'] && ( '=' === $search_params['search_operator'] || '!=' === $search_params['search_operator'] ) ) {
 					$val = "'". $val . "'";
 				}
-				
+
 				$meta_cond = "( ". $params['rule']['table_name'].".meta_key LIKE '". $search_params['search_col'] . "' AND ". $params['rule']['table_name'] .".meta_value ". $search_params['search_operator']. " " . ( empty( $params['skip_placeholders'] ) ? "%f" : $search_params['search_value'] )." )";
-				
+
 				$params['search_query']['cond_'.$meta_table.'_operator'] .= $search_params['search_operator'];
 			} else if( $search_params['search_data_type'] == "date" || $search_params['search_data_type'] == "sm.datetime" ) {
 				$meta_cond = "( ". $params['rule']['table_name'].".meta_key LIKE '". $search_params['search_col'] . "' AND ". $params['rule']['table_name'] .".meta_value ". $search_params['search_operator'] ." %s AND ". $params['rule']['table_name'] .".meta_value NOT IN ('0', '1970-01-01 00:00:00', '1970-01-01', '', 0) )";
@@ -3017,7 +2388,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				} else {
 					$params['search_query']['cond_'.$meta_table.'_operator'] .= $search_params['search_operator'];
 					$meta_cond = "( ". $params['rule']['table_name'].".meta_key LIKE '". $search_params['search_col'] . "' AND ". $params['rule']['table_name'] .".meta_value ". $search_params['search_operator']. ( empty( $params['skip_placeholders'] ) ? " %s" : " '".$search_params['search_value']."'" )." )";
-				}	
+				}
 			}
 
 			$meta_cond = apply_filters( 'sm_search_'.$meta_table.'_cond', $meta_cond, array_merge( $search_params, array( 'table_nm' => $params['rule']['table_name'], 'rule_val' => $params['rule']['value'] ) ) );
@@ -3080,10 +2451,10 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				if( $params['rule']['value'] == "''" ) { //for handling empty search strings
 					$terms_cond = "( ". $wpdb->prefix ."term_taxonomy.taxonomy NOT LIKE '". $search_params['search_col'] . "' AND ". $wpdb->prefix ."term_taxonomy.taxonomy NOT LIKE 'product_type' )";
 					$params['search_query']['cond_terms_operator'] .= 'NOT LIKE';
-				} else {                                        
+				} else {
 					$terms_cond = "( ". $wpdb->prefix ."term_taxonomy.taxonomy LIKE '". $search_params['search_col'] . "' AND ". $wpdb->prefix ."terms.slug LIKE %s" . " )";
 					$params['search_query']['cond_terms_operator'] .= 'LIKE';
-						
+
 				}
 			} else if( 'is not' === $search_params['search_operator'] ) {
 				if( $params['rule']['value'] == "''" ) { //for handling empty search strings
@@ -3155,12 +2526,12 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 														WHERE ".$cond_terms, $exp_search_val );
 				$result_advanced_search_taxonomy_id = $wpdb->get_col ( $query_advanced_search_taxonomy_id );
 
-				//Query to get the child taxonomy ids 
+				//Query to get the child taxonomy ids
 				$query_advanced_search_parent_id = $wpdb->prepare( "SELECT {$wpdb->prefix}term_taxonomy.term_taxonomy_id
 													FROM {$wpdb->prefix}term_taxonomy
 														JOIN {$wpdb->prefix}terms 
 														ON ( {$wpdb->prefix}term_taxonomy.parent = {$wpdb->prefix}terms.term_id )    
-													WHERE {$wpdb->prefix}terms.slug  = %s", $exp_search_val ); 
+													WHERE {$wpdb->prefix}terms.slug  = %s", $exp_search_val );
 
 				$result_advanced_search_parent_id = $wpdb->get_col( $query_advanced_search_parent_id);
 
@@ -3195,13 +2566,13 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 								$tt_ids_to_exclude = get_terms( array(
 															'taxonomy' => $taxonomy,
 															'fields' => 'tt_ids',
-													));	
+													));
 							} else {
 								$tt_ids_to_exclude = get_terms( $taxonomy, array(
 															'fields' => 'tt_ids',
-													));	
+													));
 							}
-							
+
 						} else {
 							$term_meta = get_term_by( 'slug', $search_params['cond_terms_col_value'], $taxonomy );
 							if ( ! is_wp_error( $term_meta ) && ! empty( $term_meta->term_taxonomy_id ) ) {
@@ -3230,7 +2601,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 					$count_temp_previous_cond = $wpdb->query("UPDATE {$wpdb->base_prefix}sm_advanced_search_temp 
 																SET flag = 0
 																WHERE flag = ". $params['search_query_index']);
-					if ( ! empty( $this->previous_cond_has_results ) ) {	
+					if ( ! empty( $this->previous_cond_has_results ) ) {
 					//Code to handle condition if the ids of previous cond are present in temp table
 						if ( ( 0 === $index && $count_temp_previous_cond > 0 ) || ( ! empty( $result_terms_search ) ) || $index > 0 ) {
 							$terms_advanced_search_from .= " JOIN ".$wpdb->base_prefix."sm_advanced_search_temp ON (".$wpdb->base_prefix."sm_advanced_search_temp.product_id = ".$wpdb->prefix."posts.id)";
@@ -3329,7 +2700,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 							'selected_search_operator' => $params['selected_search_operators'][ $index ],
 						) );
 						$query_postmeta_search = $wpdb->prepare(
-							"REPLACE INTO {$wpdb->base_prefix}sm_advanced_search_temp ( {$select} {$from} {$where} )", 
+							"REPLACE INTO {$wpdb->base_prefix}sm_advanced_search_temp ( {$select} {$from} {$where} )",
 							$exp_search_val
 						); // Prepare a SQL query using $wpdb->prepare for safe execution.
 						$results = $wpdb->query ( $query_postmeta_search );
@@ -3410,7 +2781,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 					$results = array();
 
 					if ( ( ! empty( $select ) ) && ( ! empty( $from ) ) && ( ! empty( $where ) ) ) {
-						$select = esc_sql( $select ); 
+						$select = esc_sql( $select );
 						$from = esc_sql( $from );
 						$exp_search_val = ( is_array( $params['search_vals'] ) && ( ! empty( $params['search_vals'][ $index ] ) ) ) ? $params['search_vals'][ $index ] : '';
 						$exp_search_val = $this->format_advanced_search_value( array(
@@ -3418,7 +2789,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 							'selected_search_operator' => $params['selected_search_operators'][ $index ],
 						) );
 						$query_posts_search = $wpdb->prepare(
-							"REPLACE INTO {$wpdb->base_prefix}sm_advanced_search_temp ( {$select} {$from} {$where} )", 
+							"REPLACE INTO {$wpdb->base_prefix}sm_advanced_search_temp ( {$select} {$from} {$where} )",
 							$exp_search_val
 						); // Prepare a SQL query using $wpdb->prepare for safe execution.
 						$results = $wpdb->query ( $query_posts_search );
@@ -3447,14 +2818,14 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				return '';
 			}
 			global $wpdb;
-			return $cond . ( 
-				! empty( $params['post_type'] ) 
-				? " AND " . $wpdb->prefix . "posts.post_type IN ('" . 
-					( is_array( $params['post_type'] ) ? implode( "','", $params['post_type'] ) : $params['post_type'] ) . 
-				  "')" 
-				: '' 
+			return $cond . (
+				! empty( $params['post_type'] )
+				? " AND " . $wpdb->prefix . "posts.post_type IN ('" .
+					( is_array( $params['post_type'] ) ? implode( "','", $params['post_type'] ) : $params['post_type'] ) .
+				  "')"
+				: ''
 			);
-			
+
 		}
 
 		/**
@@ -3477,7 +2848,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 		 * @return void.
 		 */
 		public function get_matching_children_advanced_search( $params = array() ){
-			
+
 			global $wpdb;
 
 			$child_where_cond = '';
@@ -3552,11 +2923,11 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			if( ! empty( $store_model_transient ) && !is_array( $store_model_transient ) ) {
 				$store_model_transient = json_decode( $store_model_transient, true );
 			}
-			
+
 			return ( ! empty( $store_model_transient['columns'] ) ) ? $store_model_transient['columns'] : array();
 		}
 
-		
+
 		public function create_search_condition( $search_params = array() ){
 
 			global $wpdb;
@@ -3583,7 +2954,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				$search_value = ( empty( $search_value ) && '0' != $search_value ) ? "''" : $search_value;
 				if( $is_meta_table && '0' == $search_value && ( '=' === $search_params['search_operator'] || '!=' === $search_params['search_operator'] ) ) {
 					$search_value = "'". $search_value . "'";
-				}	 
+				}
 			} else if ( $search_params['search_data_type'] == "date" || $search_params['search_data_type'] == "sm.datetime" || ! empty( $db_operator_map[$search_params['search_operator']] ) ) {
 				$search_value = " '" . $search_value ."' ";
 
@@ -3592,11 +2963,11 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				} else {
 					$additional_cond .= " AND ". $db_table_name .".". $search_col ." NOT IN ('0', '1970-01-01 00:00:00', '1970-01-01', '', 0)";
 				}
-				
+
 			} else {
 				$search_value = " '%" . $search_value ."%' ";
 			}
-			
+
 			$cond = "( ". $db_table_name .".". ( ( ! empty( $is_meta_table ) ) ? 'meta_value' : $search_col ) ." ". $search_params['search_operator'] ." ". $search_value ." ". $additional_cond .")";
 
 			return apply_filters('sm_search_'. $table_name .'_cond', $cond, $search_params) ." && ";
@@ -3608,11 +2979,11 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			* @return array $col_model Updated column model.
 		*/
 		public function get_flat_table_columns( $args = array() ) {
-			
+
 			if ( empty( $args ) || ( ! empty( $args ) && empty( $args['table_nm'] ) ) ){
 				return array();
 			}
-			
+
 			global $wpdb;
 			$results = $wpdb->get_results( "SHOW COLUMNS FROM {$wpdb->prefix}". $args['table_nm'], 'ARRAY_A' );
 			$num_rows = $wpdb->num_rows;
@@ -3646,7 +3017,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 						continue;
 					}
 					$col_model[] = $this->get_default_column_model( $col_args );
-				} 
+				}
 			}
 			return $col_model;
 		}
@@ -3683,7 +3054,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 					$results[ $col['meta_key'] ] = $col;
 				}
 				//not in 0 added for handling empty date columns
-				if ( ! empty( $meta_keys ) ) { 
+				if ( ! empty( $meta_keys ) ) {
 					$results_meta_value = $wpdb->get_results ( "SELECT " . $meta_table_nm . ".meta_key,
 																	" . $meta_table_nm . ".meta_value
 																FROM " . $meta_table_nm."
@@ -3753,14 +3124,14 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
         	foreach ( $args['items'] as $key => $item ) {
         		foreach ( array_keys( $args['terms_visible_cols'] ) as $col ) {
         			$terms_key = 'terms_' . strtolower( str_replace( ' ', '_', $col ) );
-        			$args['items'][ $key ][ $terms_key ] = '';	
+        			$args['items'][ $key ][ $terms_key ] = '';
         		}
         	}
 
 	        if ( empty( $terms_objects ) || ( ! is_array( $terms_objects ) ) ) {
 	        	return $args['items'];
 	        }
-	        $terms_data = array();	
+	        $terms_data = array();
 	        //Code for creating the terms data array
 			foreach ( $terms_objects as $term_obj ) {
 				if ( empty( $term_obj->object_id ) || empty( $term_obj->taxonomy ) ) {
@@ -3825,7 +3196,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 
 					$args['items'][ $key ][ $terms_key ] = ( ! empty( $terms_data[ $id ][ $visible_taxonomy ] ) ) ? $terms_data[ $id ][ $visible_taxonomy ] : '';
 
-				}	        			
+				}
 	        }
 	        return $args['items'];
 		}
@@ -3871,7 +3242,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 					if ( ! empty( $term_id ) ) {
 						$term_ids[] = $term_id;
 					}
-				}	
+				}
 				if ( empty( $term_ids ) ) {
 					return;
 				}
@@ -3914,7 +3285,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 															ON ( {$wpdb->prefix}terms.term_id = {$wpdb->prefix}term_taxonomy.term_id ) 
 															". $join_condition ." ) as taxonomy_sort 
 										ON (taxonomy_sort.object_id = " . $args['id'] . ")";
-							
+
 			$this->terms_sort_join = true;
 			return $args['join'];
 		}
@@ -3938,7 +3309,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			}
 
 			$params['table_model'] = ( ! is_array( $params['table_model'] ) ) ? json_decode( stripslashes( $params['table_model'] ), true ) : $params['table_model'];
-			
+
 			$is_scheduled_export = false;
 			$scheduled_export_params = array();
 			if( ( defined('SMPRO') && true === SMPRO ) && ( ! empty( $params['is_scheduled_export'] ) ) && ( ! empty( $params['scheduled_export_params'] ) ) && ( is_array( $params['scheduled_export_params'] ) ) ) {
@@ -3958,16 +3329,16 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 					}
 					//setup scheduled exports recurring action.
 					as_schedule_recurring_action( $timestamp, (int) $scheduled_export_params['schedule_export_interval'] * DAY_IN_SECONDS, 'storeapps_smart_manager_scheduled_export_actions', array( Smart_Manager_Pro_Base::get_scheduled_export_action_params( $params ) ) );
-					wp_send_json( 
-						array( 
-							'ACK' => 'success', 
+					wp_send_json(
+						array(
+							'ACK' => 'success',
 							'data' => array(
 								'msg' => sprintf(
-								/* translators: %1$s: exports schedule success message */ 
+								/* translators: %1$s: exports schedule success message */
 								_x( "Export scheduled successfully. Check all your scheduled export actions <a target='_blank' href='%s'>here</a>.", 'success notification', 'smart-manager-for-wp-e-commerce' ), ! empty( $scheduled_export_params['scheduledExportActionAdminUrl'] ) ? $scheduled_export_params['scheduledExportActionAdminUrl'] : ''
 								)
-							) 
-						) 
+							)
+						)
 					);
 				}
 			}
@@ -4013,8 +3384,8 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			$col_model = apply_filters( 'sm_col_model_for_export', $col_model, $this->req_params );
 
 			$data = $this->get_data_model( $col_model );
-			if ( empty( $data ) && is_callable( array( 'Smart_Manager', 'log' ) ) ) {
-				Smart_Manager::log( 'error', _x( 'Export CSV: no data found ', 'export data model', 'smart-manager-for-wp-e-commerce' ) );
+			if ( empty( $data ) && is_callable( 'sa_manager_log' ) ) {
+				sa_manager_log( 'error', _x( 'Export CSV: no data found ', 'export data model', 'smart-manager-for-wp-e-commerce' ) );
 			}
 			$columns_header = $select_cols = $numeric_cols = array();
 
@@ -4054,7 +3425,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				for($i = 0; $i < count ( $columns_header ); $i++){
 
 					if( $i == 0 ){
-						$fields .= "\n";	
+						$fields .= "\n";
 					}
 
 					if( !empty( $select_cols[ $each_field[$i] ] ) && !empty( $row[$each_field[$i]] ) ) {
@@ -4072,8 +3443,8 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 						$str = ( $array && is_array( $array ) ) ? implode( ', ', $array ) : '';
 					}
 					$fields .= ( ! empty( $each_field[ $i ] ) && ! empty( $escaped_html_columns ) && is_array( $escaped_html_columns ) && in_array( $each_field[ $i ], $escaped_html_columns ) ) ? '"'. esc_html( $str ) . '",' : '"'. $str . '",';
-				}	
-				$fields = substr_replace($fields, '', -1); 
+				}
+				$fields = substr_replace($fields, '', -1);
 			}
 			// Prepare file data.
 			$upload_dir = wp_upload_dir();
@@ -4083,8 +3454,8 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				'file_content'  => $fields
 			);
 			// Log error if no file data is present.
-			if ( empty( $file_data ) && is_callable( array( 'Smart_Manager', 'log' ) ) ) {
-				Smart_Manager::log( 'error', _x( 'Export CSV: no file data found', 'export file data', 'smart-manager-for-wp-e-commerce' ) );
+			if ( empty( $file_data ) && is_callable( 'sa_manager_log' ) ) {
+				sa_manager_log( 'error', _x( 'Export CSV: no file data found', 'export file data', 'smart-manager-for-wp-e-commerce' ) );
 			}
 			//if scheduled export then send the csv to email.
 			if( $is_scheduled_export && ( defined('SMPRO') && true === SMPRO ) && is_callable( 'Smart_Manager_Pro_Base', 'process_scheduled_csv_email_export' ) ){
@@ -4111,7 +3482,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 
 		/**
 	     * Function to get parent term values for taxonomies.
-		 * 
+		 *
 		 * @param array $args array of taxonomy related data.
 		 * @return array terms data.
 		 */
@@ -4151,7 +3522,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 
 		/**
 	     * Function to format advanced search value.
-		 * 
+		 *
 		 * @param array $params array contains search value, selected search operator.
 		 * @return string $params['search_val'] formatted search value.
 		 */
@@ -4207,7 +3578,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 							continue;
 						}
 						$src_exploded = explode( "/", $col['src'] );
-						if ( ! empty( $src_exploded[0] ) && ( 'posts' === $src_exploded[0] ) && ( ! in_array( $src_exploded[1], $simple_search_ignored_cols ) ) ) {
+						if ( ! empty( $src_exploded[0] ) && ( 'posts' === $src_exploded[0] ) && ( ! in_array( $src_exploded[1], (array) $simple_search_ignored_cols ) ) ) {
 							if ( ! empty( $col['selectOptions'] ) ) {
 								$matchedResults = preg_grep( '/' . ucfirst( $search_text ) . '.*/', $col['selectOptions'] );
 							}
@@ -4251,15 +3622,15 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			global $wpdb;
 			$sort_params = array();
 			if ( ! empty( $params['wp_query_obj'] ) ) {
-				$sort_params = ( ! empty( $params['wp_query_obj']->query_vars['sm_sort_params'] ) ) ? $params['wp_query_obj']->query_vars['sm_sort_params'] : array();		
+				$sort_params = ( ! empty( $params['wp_query_obj']->query_vars['sm_sort_params'] ) ) ? $params['wp_query_obj']->query_vars['sm_sort_params'] : array();
 			} elseif ( ! empty( $params['sort_params'] ) ) {
-				$sort_params = $params['sort_params']; 
+				$sort_params = $params['sort_params'];
 			}
 			// Code for sorting of the terms columns
 			if ( ! empty( $sort_params ) ) {
 				if ( ! empty( $sort_params['column_nm'] ) && ! empty( $sort_params['sortOrder'] ) ) {
 					if ( ! empty( $sort_params['table'] ) && ( 'terms' === $sort_params['table'] ) ) {
-						$params['join'] = $this->terms_table_column_sort_query( 
+						$params['join'] = $this->terms_table_column_sort_query(
 							array(
 								'col_name'     => $sort_params['column_nm'],
 								'id'           => $wpdb->prefix . 'posts.ID',
@@ -4310,9 +3681,9 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			global $wpdb;
 			$sort_params = array();
 			if (  ! empty( $params['wp_query_obj'] ) ) {
-				$sort_params = ( ! empty( $params['wp_query_obj']->query_vars['sm_sort_params'] ) ) ? $params['wp_query_obj']->query_vars['sm_sort_params'] : array();		
+				$sort_params = ( ! empty( $params['wp_query_obj']->query_vars['sm_sort_params'] ) ) ? $params['wp_query_obj']->query_vars['sm_sort_params'] : array();
 			} elseif( ! empty( $params['sort_params'] ) ) {
-				$sort_params = $params['sort_params']; 
+				$sort_params = $params['sort_params'];
 			}
 			if ( ! empty( $sort_params ) && ( ! empty( $sort_params['column_nm'] ) ) ) {
 				$sort_order = ( ! empty( $sort_params['sortOrder'] ) ) ? $sort_params['sortOrder'] : 'ASC';
@@ -4321,7 +3692,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 						$params['order_by'] = $sort_params['column_nm'] .' '. $sort_order;
 					} else if ( ( 'terms' === $sort_params['table'] ) && ( true === $this->terms_sort_join ) ) {
 						$params['order_by'] = ' taxonomy_sort.term_name '.$sort_order ;
-					}	
+					}
 				}
 			}
 			// Condition for sorting of postmeta_cols.

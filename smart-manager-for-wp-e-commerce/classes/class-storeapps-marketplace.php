@@ -6,7 +6,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class StoreApps_Marketplace {
-
 	public static function init() {
 		?>
 		<style type="text/css">
