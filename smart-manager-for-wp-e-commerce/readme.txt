@@ -7,7 +7,7 @@ Tags: woocommerce advanced bulk edit, wordpress bulk edit, woocommerce inventory
 Requires at least: 5.0
 Tested up to: 6.8.1
 Requires PHP: 5.6
-Stable tag: 8.64.0
+Stable tag: 8.65.0
 License: GPLv2
 
 WooCommerce Advanced Bulk Edit products, orders, & posts in an Excel-like sheet editor. Get advanced WooCommerce stock, pricing, & order management.
@@ -247,7 +247,7 @@ The plugin is also GDPR-ready – it doesn’t collect personal data.
 
 * [Smart Manager Detailed Documentation](https://www.storeapps.org/knowledgebase_category/smart-manager/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme)
 * Compatible with latest versions of both [WooCommerce](https://wordpress.org/plugins/woocommerce/) and [WP e-Commerce](https://wordpress.org/plugins/wp-e-commerce/)
-* Available Translations: Brazilian Portuguese, Chinese, Dutch, French, German, Italian, Japanese, Polish, Romanian and Spanish.
+* Available Translations: Portuguese (Brazilian), Chinese, Dutch, French, German, Italian, Japanese, Polish, Portuguese (Portugal), Russian, Romanian, Spanish and Turkish.
 * Want to add a new language to Smart Manager? Contribute via [translate.wordpress.org](https://translate.wordpress.org/projects/wp-plugins/smart-manager-for-wp-e-commerce/).
 * Questions? [Contact us](https://www.storeapps.org/support/contact-us/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme)
 
@@ -309,6 +309,15 @@ Open Smart Manager Products dashboard, select required products, click on Bulk E
 
 == Changelog ==
 
+= 8.65.0 (20.06.2025) =
+* New: WooCommerce 9.9.4 compatible
+* New: Portuguese (Portugal), Russian and Turkish translations (AI-generated)
+* New: 'Product SKU' and 'Product title' advanced search fields for WooCommerce Subscriptions dashboard (Pro)
+* Fix: Inline edit functionality not working for 'Sale Price Dates From' and 'Sale Price Dates To' columns on WooCommerce Products dashboard
+* Update: Improved UI/UX of the inline edit modal for WooCommerce Product Attributes
+* Update: Pricing page related changes
+* Update: POT file
+
 = 8.64.0 (16.06.2025) =
 * New: WooCommerce 9.9.3 compatible
 * New: Advanced Search for 'Plan' column in WooCommerce Memberships 'Members' dashboard (Pro)
@@ -316,8 +325,8 @@ Open Smart Manager Products dashboard, select required products, click on Bulk E
 * Fix: Scheduled Bulk Edits not processing successfully for large number of records (Pro)
 * Fix: Undo shows both warning modal and background processing message during active background tasks (Pro)
 * Update: Display warning when applying Bulk Edit to all store items or filtered search results (Pro)
-* Developer: 'sm_dashboard_model' filter renamed to 'sa_dashboard_model'
 * Update: POT file
+* Developer: 'sm_dashboard_model' filter renamed to 'sa_dashboard_model'
 
 = 8.63.0 (28.05.2025) =
 * New: German, Japanese and Polish translations (AI-generated)
@@ -617,6 +626,9 @@ Open Smart Manager Products dashboard, select required products, click on Bulk E
 [See changelog for all versions](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 8.65.0 =
+WooCommerce 9.9.4 compatible, Portuguese (Portugal), Russian and Turkish translations (AI-generated), 'Product SKU' and 'Product title' advanced search fields for WooCommerce Subscriptions dashboard (Pro), Fixes related to Inline edit functionality not working for 'Sale Price Dates From' and 'Sale Price Dates To' columns on WooCommerce Products dashboard, Updates related to Improved UI/UX of the inline edit modal for WooCommerce Product Attributes, Pricing page related changes. Recommended upgrade.
 
 = 8.64.0 =
 WooCommerce 9.9.3 compatible, Advanced Search for 'Plan' column in WooCommerce Memberships 'Members' dashboard (Pro), Auto-adjust batch sizes in Bulk Edit functionality based on server capacity (Pro), Fixes related to Scheduled Bulk Edits not processing successfully for large number of records (Pro), Undo shows both warning modal and background processing message during active background tasks (Pro), Updates related to Display warning when applying Bulk Edit to all store items or filtered search results (Pro), Developer changes related to 'sm_dashboard_model' filter renamed to 'sa_dashboard_model' along with other important fixes and updates. Recommended upgrade.

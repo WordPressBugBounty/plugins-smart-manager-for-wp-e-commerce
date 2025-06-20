@@ -166,10 +166,6 @@ th {
 	border-color: #F0F0F0 !important;
 }
 
-.multiselect {
-	width: 100%!important;
-}
-
 ul.children{list-style:none outside;margin:0px 0 0 24px}
 
 #edit_product_attributes input[type="text"] {
@@ -1652,6 +1648,7 @@ div[aria-describedby="sm_inline_dialog"] {
 
 #edit_product_attributes .chosen-container{
 	padding: 0!important;
+	margin-bottom: .25rem;
 }
 
 #sa_manager_main .modal-body input[type="checkbox"]{
@@ -1665,6 +1662,7 @@ div[aria-describedby="sm_inline_dialog"] {
 
 #edit_attributes_toolbar{
 	margin-top: 2em;
+	margin-bottom: 2.5rem;
 	padding-top: 2em;
 	border-top: 1px solid #d2d6dc;
 }
@@ -1904,4 +1902,48 @@ input.sm-title-input {
 }
 .sm-custom-notification-width {
 	max-width: 25rem !important;
+}
+/* Edit Arributes modal Css*/
+#sa_manager_main td.sm-attribute-modal-select-td {
+    width: 15rem;
+}
+#sa_manager_main .sm-attribute-modal-select2-container{
+	width: 100% !important;
+}
+#sa_manager_main .sm-attribute-modal-select2-container{
+  padding: 0 0.5rem;
+}
+#sa_manager_main .sm-attribute-modal-select2-container .select2-search__field{
+  border: none !important;
+}
+.sm-attribute-modal-select2-container ul li.select2-search--inline{
+  margin-bottom: 0;
+}
+.sm-attribute-modal-select2-dropdown{
+  z-index: 9990 !important;
+}
+#sa_manager_main #table_edit_attributes .button.select_all_attributes, #table_edit_attributes .button.select_no_attributes{
+	margin-top: 0.25rem !important;
+}
+#sa_manager_main #table_edit_attributes input[type="text"]{
+	width: 15rem !important;
+}
+#sa_manager_main #table_edit_attributes input[type="number"], #sa_manager_main #table_edit_attributes input[type="text"], #sa_manager_main #table_edit_attributes #edit_attributes_toolbar #edit_attributes_taxonomy_list, #sa_manager_main #table_edit_attributes #edit_attributes_toolbar #edit_attributes_add{
+	height: 2rem;
+}
+#sa_manager_main #table_edit_attributes input[name^="attribute_names"], #sa_manager_main .sm-attribute-modal-attribute-name{
+	margin-bottom: 0.5rem;
+}
+#sa_manager_main #table_edit_attributes input[name^="attribute_visibility"], #sa_manager_main #table_edit_attributes input[name^="attribute_variation"]{
+	margin-right: 0.25rem !important;
+}
+#sa_manager_main input[name^="attribute_position"]{
+	margin-bottom: 1rem;
+}
+#sa_manager_main .sm-attribute-modal-select2-container .select2-search.select2-search--inline{
+	height: 2.05rem;
+    overflow: hidden;
+}
+#sa_manager_main .sm-attribute-modal-select2-container .select2-selection__rendered{
+	margin-top: 0.25rem;
 }

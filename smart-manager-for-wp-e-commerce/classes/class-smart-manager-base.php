@@ -967,14 +967,14 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 													'SM_IS_WOO30' => (!empty($params['SM_IS_WOO30'])) ? $params['SM_IS_WOO30'] : '',
 													'post_type' => (!empty($params['post_type'])) ? $params['post_type'] : array());
                             if ( ! empty( $this->advanced_search_table_types['flat'] ) && in_array( $table_name, array_keys( $this->advanced_search_table_types['flat'] ) ) ) {
-								$advanced_search_query[$i] = $this->create_flat_table_search_query( array(
+								$advanced_search_query[$i] = self::create_flat_table_search_query( array(
 									'table_nm'	=> $table_name,
 									'search_query' => $advanced_search_query[$i],
 									'search_params' => $search_params,
 									'rule'			=> $rule
 								) );
                             } else if ( ! empty( $this->advanced_search_table_types['meta'] ) && in_array( $table_name, array_keys( $this->advanced_search_table_types['meta'] ) ) ) {
-								$advanced_search_query[$i] = $this->create_meta_table_search_query( array(
+								$advanced_search_query[$i] = self::create_meta_table_search_query( array(
 									'table_nm'	=> $table_name,
 									'search_query' => $advanced_search_query[$i],
 									'search_params' => array_merge( $search_params, array( 'is_meta_table' => true, 'pkey' => ( ! empty( $params['pkey'] ) ) ? $params['pkey'] : 'post_id',
@@ -983,7 +983,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 									'rule'			=> $rule,
 								) );
                             } else if ( !in_array( $table_name, array_keys( $this->advanced_search_table_types['flat'] ) ) && 'terms' === $table_name ) {
-                                $advanced_search_query[$i] = $this->create_terms_table_search_query( array(
+                                $advanced_search_query[$i] = self::create_terms_table_search_query( array(
 									'search_query' => $advanced_search_query[$i],
 									'search_params' => $search_params,
 									'rule'			=> $rule
@@ -2288,7 +2288,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 		 * @param array $params The search condition params.
 		 * @return array updated search query.
 		 */
-		public function create_flat_table_search_query( $params = array() ){
+		public static function create_flat_table_search_query( $params = array() ){
 			$table_nm = ( ! empty( $params['table_nm'] ) ) ? $params['table_nm'] : '';
 			$search_params = ( ! empty( $params['search_params'] ) ) ? $params['search_params'] : '';
 
@@ -2341,7 +2341,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 		 * @param array $params The search condition params.
 		 * @return array updated search query.
 		 */
-		public function create_meta_table_search_query( $params = array() ){
+		public static function create_meta_table_search_query( $params = array() ){
 
 			global $wpdb;
 
@@ -2426,7 +2426,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 		 * @param array $params The search condition params.
 		 * @return array updated search query.
 		 */
-		public function create_terms_table_search_query( $params = array() ){
+		public static function create_terms_table_search_query( $params = array() ){
 
 			global $wpdb;
 

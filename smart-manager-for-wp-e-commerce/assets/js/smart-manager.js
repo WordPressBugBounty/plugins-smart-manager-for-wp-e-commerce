@@ -1607,6 +1607,10 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 					}
 
 					if (window.smart_manager.modifiedRows.indexOf(row) == -1) {
+						// To prevent updating more than 3 records by dragging the columns.
+						if((parseInt(window.smart_manager.sm_beta_pro) !== 1) && (parseInt(window.smart_manager.modifiedRows.length) >= parseInt(window.smart_manager.sm_updated_successful))) {
+							return;
+						}
 						window.smart_manager.modifiedRows.push(row);
 					}
 
@@ -3619,13 +3623,13 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 			});
 	};
 
-	SmartManager.prototype.dateEditor = function(currObj, arguments, format = 'Y-m-d H:i:s', placeholder = 'YYYY-MM-DD HH:MM:SS', cssClass = 'htDateTimeEditor') {
+	SmartManager.prototype.dateEditor = function(currObj, arguments, format = 'Y-m-d H:i:s', placeholder = 'YYYY-MM-DD HH:MM:SS', cssClass = 'htDateTimeEditor', showDatetimeField = true) {
       // Call the original createElements method
       Handsontable.editors.TextEditor.prototype.createElements.apply(currObj, arguments);
 
       // Create datepicker input and update relevant properties
       currObj.TEXTAREA = document.createElement('input');
-      currObj.TEXTAREA.setAttribute('type', 'datetime-local');
+      currObj.TEXTAREA.setAttribute('type', (showDatetimeField === false) ? 'date' : 'datetime-local');
       currObj.TEXTAREA.className = cssClass;
       currObj.textareaStyle = currObj.TEXTAREA.style;
       currObj.textareaStyle.width = 0;
@@ -3690,7 +3694,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 
 
         dateTimeEditor.prototype.createElements = function() { window.smart_manager.dateEditor( this, arguments ) };
-        dateEditor.prototype.createElements = function() { window.smart_manager.dateEditor( this, arguments, 'Y-m-d', 'YYYY-MM-DD', 'htDateEditor' ) };
+        dateEditor.prototype.createElements = function() { window.smart_manager.dateEditor( this, arguments, 'Y-m-d', 'YYYY-MM-DD', 'htDateEditor', false ) };
         timeEditor.prototype.createElements = function() { window.smart_manager.dateEditor( this, arguments, 'H:i', 'HH:MM', 'htTimeEditor' ) };
 
         function numericRenderer(hotInstance, td, row, col, prop, value, cellProperties) {

@@ -370,11 +370,11 @@ jQuery(document).on('sm_dashboard_change', '#sm_editor_grid', function() {
 			attrChkboxList += '<input type="hidden" name="attribute_taxonomy['+window.smart_manager.prodAttrDisplayIndex+']" value='+isTaxonomy+'> </td> </tr>';
 
 			if (isTaxonomy == 1) {
-				attrSelectedList += '<tr> <td> <label style="font-weight: bold;"> '+attrLabel+': </label> </td>';
+				attrSelectedList += '<tr> <td class="sm-attribute-modal-attribute-name"> <label style="font-weight: bold;"> '+attrLabel+': </label> </td>';
 				if( "text" === attrType ) {
 					attrSelectedList += '<td rowspan="4"> <input type="text" id="'+attrLabel+'" name="attribute_values['+window.smart_manager.prodAttrDisplayIndex+']" value="'+attrValue+'" placeholder="'+_x('Pipe (|) separate terms', 'placeholder', 'smart-manager-for-wp-e-commerce')+'" /> </ td>';
 				} else {
-					attrSelectedList += '<td rowspan="4"> <select id="'+key+'" multiple="multiple" data-placeholder="'+_x('Select terms', 'placeholder', 'smart-manager-for-wp-e-commerce')+'" name="attribute_values['+window.smart_manager.prodAttrDisplayIndex+'][]" class="multiselect">';
+					attrSelectedList += '<td rowspan="4" class="sm-attribute-modal-select-td"> <select id="'+key+'" multiple="multiple" data-placeholder="'+_x('Select terms', 'placeholder', 'smart-manager-for-wp-e-commerce')+'" name="attribute_values['+window.smart_manager.prodAttrDisplayIndex+'][]" class="multiselect">';
 
 					if( attrValue != '' ) {
 						Object.entries(attrValue).forEach(([key, value]) => {
@@ -413,21 +413,25 @@ jQuery(document).on('sm_dashboard_change', '#sm_editor_grid', function() {
 						'</div>'+
 					'</div>';
 
-		let initializeChosen = function() {
-			jQuery("select.multiselect").chosen();
-			jQuery(".chosen-container-multi").css({'width': '250px !important', 'margin-bottom': '7px'});
+		let initializeAttributesSelect2 = function() {
+			jQuery("select.multiselect").select2({
+				tags: true,
+				containerCssClass: 'sm-attribute-modal-select2-container',
+				dropdownCssClass: 'sm-attribute-modal-select2-dropdown',
+				width: '15rem',
+			});
 
 			//Code for select all and none attributes
 			jQuery(document)
 			.off('click', 'button.select_all_attributes').on('click', 'button.select_all_attributes', function(){
 				jQuery(this).closest('td').find('select option').attr("selected","selected");
-				jQuery(this).closest('td').find('select').trigger("chosen:updated");
+				jQuery(this).closest('td').find('select').trigger('change.select2');
 				return false;
 			})
 
 			.off('click', 'button.select_no_attributes').on('click', 'button.select_no_attributes', function(){
 				jQuery(this).closest('td').find('select option').removeAttr("selected");
-				jQuery(this).closest('td').find('select').trigger("chosen:updated");
+				jQuery(this).closest('td').find('select').trigger('change.select2');
 				return false;
 			});
 		}
@@ -445,8 +449,8 @@ jQuery(document).on('sm_dashboard_change', '#sm_editor_grid', function() {
 					}
 				}
 			},
-			onCreate: initializeChosen,
-			onUpdate: initializeChosen
+			onCreate: initializeAttributesSelect2,
+			onUpdate: initializeAttributesSelect2
 		}
 		window.smart_manager.showModal()
 })
@@ -477,11 +481,11 @@ jQuery(document).on('sm_dashboard_change', '#sm_editor_grid', function() {
 	attrChkboxList += '<input type="hidden" name="attribute_taxonomy['+window.smart_manager.prodAttrDisplayIndex+']" value="'+isTaxonomy+'"> </td> </tr>';
 
 	if (isTaxonomy == 1) {
-		newAttribute += '<tr> <td> <label style="font-weight: bold;">'+window.smart_manager.prodAttributeActualValues[taxonomySelected].lbl+':</label> </td>';
+		newAttribute += '<tr> <td class="sm-attribute-modal-attribute-name"> <label style="font-weight: bold;">'+window.smart_manager.prodAttributeActualValues[taxonomySelected].lbl+':</label> </td>';
 		if( "text" === attrType ) {
 			newAttribute += '<td rowspan="4"> <input type="text" id="'+attrLabel+'" name="attribute_values['+window.smart_manager.prodAttrDisplayIndex+']" value="'+attrValue+'" placeholder="'+_x('Pipe (|) separate terms', 'placeholder', 'smart-manager-for-wp-e-commerce')+'" /> </ td>';
 		} else {
-			newAttribute += '<td rowspan="4"> <select multiple="multiple" data-placeholder="'+_x('Select terms', 'placeholder', 'smart-manager-for-wp-e-commerce')+'" name="attribute_values['+window.smart_manager.prodAttrDisplayIndex+'][]" class="multiselect" style="width:100% !important">';
+			newAttribute += '<td rowspan="4" class="sm-attribute-modal-select-td"> <select multiple="multiple" data-placeholder="'+_x('Select terms', 'placeholder', 'smart-manager-for-wp-e-commerce')+'" name="attribute_values['+window.smart_manager.prodAttrDisplayIndex+'][]" class="multiselect" style="">';
 
 			if( attrVal != '' ) {
 				Object.entries(attrVal).forEach(([key, value]) => {
@@ -502,7 +506,12 @@ jQuery(document).on('sm_dashboard_change', '#sm_editor_grid', function() {
 	newAttribute += attrChkboxList;
 
 	jQuery('#table_edit_attributes').append(newAttribute);
-	jQuery("select.multiselect").chosen();
+	jQuery("select.multiselect").select2({
+		tags: true,
+		containerCssClass: 'sm-attribute-modal-select2-container',
+		dropdownCssClass: 'sm-attribute-modal-select2-dropdown',
+		width: '15rem'
+	});
 
 	window.smart_manager.prodAttrDisplayIndex++;
 })
