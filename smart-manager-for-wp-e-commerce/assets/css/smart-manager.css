@@ -1947,3 +1947,13 @@ input.sm-title-input {
 #sa_manager_main .sm-attribute-modal-select2-container .select2-selection__rendered{
 	margin-top: 0.25rem;
 }
+/* CSS of notification to save inline edit changes */
+#sa_manager_main #sm_floating_save_bar button{
+	padding: 0rem 0.5em 0rem 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+	line-height: 0;
+}
+#sa_manager_main .sm-save-changes-notification{
+	max-width: 29rem !important;
+}

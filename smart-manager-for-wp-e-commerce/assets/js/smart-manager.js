@@ -187,6 +187,10 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 			this.colEditDisableMessage = (sm_beta_params.colEditDisableMessage) ? sm_beta_params.colEditDisableMessage : []
 			this.orderStatuses = sm_beta_params?.orderStatuses || []
 			this.scheduledExportActionAdminUrl = sm_beta_params?.scheduled_export_actions_admin_url || ''
+			this.isSubscriptionPluginActive = sm_beta_params?.isSubscriptionPluginActive || false
+			this.subscriptionsExist = sm_beta_params?.subscriptionsExist || false
+			this.subscriptionsAcceptManualRenewals = sm_beta_params?.subscriptionsAcceptManualRenewals || false
+			this.isStripeGatewayActive = sm_beta_params?.isStripeGatewayActive || false
 		}
 		window.smart_manager.setDashboardDisplayName();
 		this.loadMoreBtnHtml = "<button id='sm_editor_grid_load_items' style='height:2em;border: 1px solid #5850ec;background-color: white;border-radius: 3px;cursor: pointer;line-height: 17px;color: #5850ec;padding: 0 0.5em;'>"+ sprintf(
@@ -1537,7 +1541,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 					}
 
 					window.smart_manager.page = 1;
-					if (((window.smart_manager.userSwitchingDashboard === false) && (window.smart_manager.firstLoad === false)) || ((window.smart_manager.hasOwnProperty("columnSort")) && (window.smart_manager.columnSort === true) && (window.smart_manager.firstLoad === true))) {
+					if (((window.smart_manager.userSwitchingDashboard === false) && (window.smart_manager.firstLoad === false) && (window.smart_manager.columnSort === true)) || ((window.smart_manager.hasOwnProperty("columnSort")) && (window.smart_manager.columnSort === true) && (window.smart_manager.firstLoad === true))) {
 						window.smart_manager.getData();
 					}
 				}
@@ -1632,6 +1636,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 						if (window.smart_manager.dirtyRowColIds[row].indexOf(colIndex) == -1) {
 							window.smart_manager.dirtyRowColIds[row].push(colIndex);
 						}
+						window.smart_manager.showSavePrompt();
 
 						if (jQuery('.sm_top_bar_action_btns #save_sm_editor_grid_btn svg').hasClass('sm-ui-state-disabled')) {
 							jQuery('.sm_top_bar_action_btns #save_sm_editor_grid_btn svg').removeClass('sm-ui-state-disabled');
@@ -2125,6 +2130,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 			}
 			window.smart_manager.saved_bulk_edits = false;
 			window.smart_manager.selectedSavedBulkEdit = "";
+			jQuery('.sm-save-changes-notification .sm-notification-close').trigger('click');
 		})
 
 			.off('click', '#sm_advanced_search').on('click', '#sm_advanced_search', function (e) {
@@ -2242,6 +2248,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 
 			//Code to handle the inline save functionality
 			.off('click', '.sm_top_bar_action_btns #save_sm_editor_grid_btn').on('click', '.sm_top_bar_action_btns #save_sm_editor_grid_btn', function () {
+				jQuery('.sm-notification-close').trigger('click');
 				if (Object.keys(window.smart_manager.editedData).length == 0) {
 					window.smart_manager.notification = { message: _x('Please edit a record', 'notification', 'smart-manager-for-wp-e-commerce') }
 					window.smart_manager.showNotification()
@@ -2756,6 +2763,15 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 					window.smart_manager.showPannelDialog(window.smart_manager.settingsRoute)
 				}
 			})
+			jQuery(document).on('click', '#sm_floating_save_bar .save-btn', function () {
+				jQuery('#save_sm_editor_grid_btn').trigger('click');
+				jQuery('.sm-notification-close').trigger('click');
+			})
+			jQuery(document).on('click', '#sm_floating_save_bar .close-btn', function () {
+				jQuery('.sm-notification-close').trigger('click');
+				window.smart_manager.dirtyRowColIds = {};
+				window.smart_manager.getData();
+			})
 
 		jQuery(document).trigger('sm_event_handler');
 	}
@@ -3215,6 +3231,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 			content: (params.hasOwnProperty('content') !== false && params.content != '') ? params.content : _x('Are you sure?', 'modal content', 'smart-manager-for-wp-e-commerce'),
 			autoHide: false,
 			showCloseIcon: (params.hasOwnProperty('showCloseIcon')) ? params.showCloseIcon : true,
+			modalClass: params?.modalClass || '',
 			cta: {
 				title: ((params.btnParams.hasOwnProperty('yesText')) ? params.btnParams.yesText : _x('Yes', 'button', 'smart-manager-for-wp-e-commerce')),
 				closeModalOnClick: (params.btnParams.hasOwnProperty('hideOnYes')) ? params.btnParams.hideOnYes : true,
@@ -3508,6 +3525,22 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 		}
 		window.smart_manager.notification = { status: 'error', message: disableErrorMessage, hideDelay: window.smart_manager.notificationHideDelayInMs }
 		window.smart_manager.showNotification()
+	}
+	SmartManager.prototype.showSavePrompt = function () {
+		let recordsCount = parseInt(Object.keys(window.smart_manager.dirtyRowColIds).length);
+		window.smart_manager.notification = {
+			message: `
+			<div id='sm_floating_save_bar' class="flex-align-center">
+				<span class="mr-3">${_x(`You've edited ${recordsCount} ${(recordsCount===1)?"record":"records"}`,'save changes text','smart-manager-for-wp-e-commerce')}.</span>
+				<button class='button button-large close-btn hover:text-gray-700 bg-gray-300' type='button'>${_x('Discard Changes', 'undo all button', 'smart-manager-for-wp-e-commerce')}</button>
+				<button class='ml-4 button button-large bg-indigo-600 text-white hover:bg-indigo-500 focus:outline-none focus:shadow-outline-indigo save-btn' type='button'>${_x('Save Changes', 'save changes button', 'smart-manager-for-wp-e-commerce')}</button>
+			</div>`,
+			status: 'warning_light',
+			autoHide: false,
+			hideIcon: true,
+			customClass: 'sm-save-changes-notification',
+		}
+		window.smart_manager.showNotification();
 	}
 	let instance = new SmartManager();
 	// Attach to window using dynamic pluginKey

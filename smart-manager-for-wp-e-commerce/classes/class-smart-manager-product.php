@@ -155,7 +155,6 @@ if ( ! class_exists( 'Smart_Manager_Product' ) ) {
 		}
 
 		public function sm_beta_required_cols( $cols ) {
-
 			$required_cols = array('posts_post_title', 'posts_post_parent', 'postmeta_meta_key__product_attributes_meta_value__product_attributes');
 			return array_merge($cols, $required_cols);
 		}

@@ -19,6 +19,36 @@
 			window.smart_manager.dashboardStates[window.smart_manager.dashboardKey] = JSON.stringify( window.smart_manager.dashboardStates[window.smart_manager.dashboardKey] );
 		}
 	}
+
+	SmartManagerProduct.prototype.setProductTypeValuesFromColModel = function() {
+		if (!window.smart_manager.currentColModel){
+			return;
+		} 
+		window.smart_manager.currentColModel.forEach(function(value) {
+			if ( value.hasOwnProperty('data') && value.hasOwnProperty('selectOptions') && value.data === 'terms_product_type') {
+				window.smart_manager.productTypeValues = value.selectOptions;
+			}
+		});
+	}
+
+	SmartManagerProduct.prototype.getSelectedSubscriptionProductIds = function() {
+		window.smart_manager.setProductTypeValuesFromColModel();
+		if ( !window.smart_manager.selectedRows || !window.smart_manager.currentDashboardData || !window.smart_manager.productTypeValues ) {
+			return [];
+		}
+		const subscriptionTypes = ['Subscription', 'Variable Subscription'];
+		const subscriptionIds = [];
+		window.smart_manager.selectedRows.forEach(function(rowIndex) {
+			const rowData = window.smart_manager.currentDashboardData[rowIndex];
+			if (!rowData) return;
+			const prodTypeId = rowData.terms_product_type;
+			const typeName = window.smart_manager.productTypeValues[prodTypeId] || prodTypeId;
+			if (subscriptionTypes.includes(typeName)) {
+				subscriptionIds.push(rowData.posts_id);
+			}
+		});
+		return subscriptionIds;
+	}
 	//Function to handle Product Attribute Inline Edit
 	SmartManager.prototype.prodAttributeInlineEdit = function (params) {
 		if ('undefined' === typeof (window.smart_manager.editedAttribueSlugs)) {

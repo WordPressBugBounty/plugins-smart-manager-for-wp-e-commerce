@@ -7,7 +7,7 @@ Tags: woocommerce advanced bulk edit, wordpress bulk edit, woocommerce inventory
 Requires at least: 5.0
 Tested up to: 6.8.1
 Requires PHP: 5.6
-Stable tag: 8.65.0
+Stable tag: 8.66.0
 License: GPLv2
 
 WooCommerce Advanced Bulk Edit products, orders, & posts in an Excel-like sheet editor. Get advanced WooCommerce stock, pricing, & order management.
@@ -247,7 +247,7 @@ The plugin is also GDPR-ready – it doesn’t collect personal data.
 
 * [Smart Manager Detailed Documentation](https://www.storeapps.org/knowledgebase_category/smart-manager/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme)
 * Compatible with latest versions of both [WooCommerce](https://wordpress.org/plugins/woocommerce/) and [WP e-Commerce](https://wordpress.org/plugins/wp-e-commerce/)
-* Available Translations: Portuguese (Brazilian), Chinese, Dutch, French, German, Italian, Japanese, Polish, Portuguese (Portugal), Russian, Romanian, Spanish and Turkish.
+* Available Translations: Chinese, Dutch, French, German, Italian, Japanese, Polish, Portuguese (Brazilian), Portuguese (Portugal), Russian, Romanian, Spanish and Turkish.
 * Want to add a new language to Smart Manager? Contribute via [translate.wordpress.org](https://translate.wordpress.org/projects/wp-plugins/smart-manager-for-wp-e-commerce/).
 * Questions? [Contact us](https://www.storeapps.org/support/contact-us/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme)
 
@@ -308,6 +308,17 @@ Open Smart Manager Products dashboard, select required products, click on Bulk E
 2. Bulk edit / Batch update (only in Pro version)
 
 == Changelog ==
+
+= 8.66.0 (07.07.2025) =
+* New: WooCommerce 9.9.5 compatible
+* New: Display save prompt after edits done via Inline Edit
+* New: Automatically update existing WooCommerce Subscriptions when editing subscription product prices via Bulk Edit (Pro)
+* Fix: FacetWP reindexing not triggered for updates made via Inline Edit
+* Fix: 'post_id' was incorrectly passed as a string instead of an integer in the 'save_post' hook
+* Fix: Fetching hidden meta fields in the grid impacting dashboard load speed
+* Fix: FacetWP reindexing not triggered for updates made via Bulk Edit (Pro)
+* Fix: 'Products' and 'Exclude Products' columns not displaying associated product lists in the WooCommerce Coupons dashboard (Pro)
+* Update: POT file
 
 = 8.65.0 (20.06.2025) =
 * New: WooCommerce 9.9.4 compatible
@@ -626,6 +637,9 @@ Open Smart Manager Products dashboard, select required products, click on Bulk E
 [See changelog for all versions](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 8.66.0 =
+WooCommerce 9.9.5 compatible, Display save prompt after edits done via Inline Edit, Automatically update existing WooCommerce Subscriptions when editing subscription product prices via Bulk Edit (Pro), Fixes related to FacetWP reindexing not triggered for updates made via Inline Edit, 'post_id' was incorrectly passed as a string instead of an integer in the 'save_post' hook, Fetching hidden meta fields in the grid impacting dashboard load speed, FacetWP reindexing not triggered for updates made via Bulk Edit (Pro), 'Products' and 'Exclude Products' columns not displaying associated product lists in the WooCommerce Coupons dashboard (Pro). Recommended upgrade.
 
 = 8.65.0 =
 WooCommerce 9.9.4 compatible, Portuguese (Portugal), Russian and Turkish translations (AI-generated), 'Product SKU' and 'Product title' advanced search fields for WooCommerce Subscriptions dashboard (Pro), Fixes related to Inline edit functionality not working for 'Sale Price Dates From' and 'Sale Price Dates To' columns on WooCommerce Products dashboard, Updates related to Improved UI/UX of the inline edit modal for WooCommerce Product Attributes, Pricing page related changes. Recommended upgrade.

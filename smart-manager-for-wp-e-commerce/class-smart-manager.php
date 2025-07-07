@@ -1392,7 +1392,11 @@ class Smart_Manager {
 							'is_admin' => ( 'administrator' === self::get_current_user_role() ) ? true : false,
 							'manHoursData' => self::sm_get_man_hours_data(),
 							'userName' => self::sm_get_current_user_display_name(),
-							'orderStatuses' => ( function_exists( 'wc_get_order_statuses' ) ) ? wc_get_order_statuses() : array()
+							'orderStatuses' => ( function_exists( 'wc_get_order_statuses' ) ) ? wc_get_order_statuses() : array(),
+							'isSubscriptionPluginActive' => ( class_exists( 'WC_Subscriptions' ) ) ? true : false,
+							'subscriptionsAcceptManualRenewals' => ( get_option( 'woocommerce_subscriptions_accept_manual_renewals', 'no' ) === 'yes' ) ? true : false,
+							'subscriptionsExist' => ( class_exists( 'WC_Subscriptions' ) && function_exists( 'wcs_do_subscriptions_exist' ) ) ? wcs_do_subscriptions_exist() : false,
+							'isStripeGatewayActive' => self::is_stripe_gateway_active()
 						);
 
 		$active_plugins = (array) get_option( 'active_plugins', array() );
@@ -2296,6 +2300,22 @@ class Smart_Manager {
 		// Check nonce.
 		check_ajax_referer( 'sa-dismiss-generate-sku-feature-notice', 'security' );
 		return update_option( 'sa_sm_hide_generate_sku_feature_notice', true );
+	}
+
+	/**
+	 * Checks if the Stripe payment gateway is active.
+	 *
+	 * @return bool True if the Stripe gateway is active, false otherwise.
+	 */
+	public static function is_stripe_gateway_active() {
+		if ( ! function_exists( 'WC' ) || ! is_callable( 'WC' ) ) {
+			return false;
+		}
+		$gateways = WC()->payment_gateways->get_available_payment_gateways();
+		if ( empty( $gateways ) || ! is_array( $gateways ) ) {
+			return false;
+		}
+		return ( ! empty( $gateways['stripe'] ) ) ? true : false;
 	}
 }
 

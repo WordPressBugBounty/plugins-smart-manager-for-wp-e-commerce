@@ -727,6 +727,11 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				$store_model_transient = false;
 				update_option( '_sm_update_8640_' . $this->dashboard_key, 1, 'no' );
 			}
+			if ( 'product' === $this->dashboard_key && false === get_option( '_sm_update_8660_' . $this->dashboard_key ) ) {
+				delete_transient( 'sa_sm_' . $this->dashboard_key );
+				$store_model_transient = false;
+				update_option( '_sm_update_8660_' . $this->dashboard_key, 1, 'no' );
+			}
 			$store_model_and_old_model_transient['store_model_transient'] = $store_model_transient;
 			$store_model_and_old_model_transient['old_col_model'] = $old_col_model;
 			return $store_model_and_old_model_transient;
@@ -3295,7 +3300,6 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 		 * @return void
 		 */
 		public function get_export_csv( $params = array() ) {
-
 			global $current_user;
 
 			ini_set('memory_limit','-1');

@@ -422,10 +422,11 @@ if ( ! class_exists( 'SA_Manager_Base' ) ) {
 											WHERE {$wpdb->prefix}postmeta.meta_key != '' 
 												AND {$wpdb->prefix}postmeta.meta_key NOT LIKE %s
 												AND {$wpdb->prefix}postmeta.meta_key NOT LIKE %s
+												AND {$wpdb->prefix}postmeta.meta_key NOT LIKE %s
 												AND {$wpdb->prefix}posts.post_type IN (" . implode( ',', array_fill( 0, count( $this->post_type ), '%s' ) ) . ")
 											GROUP BY {$wpdb->prefix}postmeta.meta_key",
 						array_merge(
-							array( 'free-%', '_oembed%' ),
+							array( 'free-%', '_oembed%', 'xts-blocks%' ),
 							$this->post_type
 						)
 					),
@@ -441,10 +442,12 @@ if ( ! class_exists( 'SA_Manager_Base' ) ) {
 											WHERE {$wpdb->prefix}postmeta.meta_key != '' 
 												AND {$wpdb->prefix}postmeta.meta_key NOT LIKE %s
 												AND {$wpdb->prefix}postmeta.meta_key NOT LIKE %s
+												AND {$wpdb->prefix}postmeta.meta_key NOT LIKE %s
 												AND {$wpdb->prefix}posts.post_type = %s
 											GROUP BY {$wpdb->prefix}postmeta.meta_key",
 						'free-%',
 						'_oembed%',
+						'xts-blocks%',
 						$this->post_type
 					),
 					'ARRAY_A'
