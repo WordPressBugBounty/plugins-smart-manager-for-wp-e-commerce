@@ -3,9 +3,7 @@
     SaCommonManager.prototype.init = function () {
         try{
             this.saCommonNonce = '';
-            this.commonManagerAjaxUrl = (ajaxurl.indexOf('?') !== -1)
-                ? ajaxurl + '&action=sa_manager_include_file'
-                : ajaxurl + '?action=sa_manager_include_file';
+            this.commonManagerAjaxUrl = '';
             this.dateParams = {}; //params for date filter
             this.defaultRoute = "dashboard";
             this.notification = {} // object for handling all notification messages
@@ -13,9 +11,11 @@
             this.modal = {} // object for handling all modal dialogs
             this.selectAll = false;
             this.selectedIds = [];
+            this.selectedRows = [];
             this.saManagerStoreModel = new Array()
             this.currentColModel = '';
             this.hideDialog = '';
+            this.bulkEditRoute = "bulkEdit";
             // defining operators for diff datatype for advanced search
             let intOperators = {
                 'eq': '==',
@@ -45,6 +45,26 @@
             this.dashboardKey = ''
             this.columnNamesBatchUpdate= new Array()
             this.pluginSlug = '';
+            this.savedBulkEditConditions = [];
+            this.date_params = {}; //params for date filter
+            let additionalDateOperators = { increase_date_by: _x('increase by', "bulk edit action - 'date' fields", 'smart-manager-for-wp-e-commerce'), decrease_date_by: _x('decrease by', "bulk edit action - 'date' fields", 'smart-manager-for-wp-e-commerce') };
+            this.batchUpdateActions = {
+                'numeric': { increase_by_per: _x('increase by %', "bulk edit action - 'number' fields", 'smart-manager-for-wp-e-commerce'), decrease_by_per: _x('decrease by %', "bulk edit action - 'number' fields", 'smart-manager-for-wp-e-commerce'), increase_by_num: _x('increase by number', "bulk edit action - 'number' fields", 'smart-manager-for-wp-e-commerce'), decrease_by_num: _x('decrease by number', "bulk edit action - 'number' fields", 'smart-manager-for-wp-e-commerce') },
+                'image': {},
+                'multipleImage': {},
+                'datetime': Object.assign({ set_datetime_to: _x('set datetime to', "bulk edit action - 'datetime' fields", 'smart-manager-for-wp-e-commerce'), set_date_to: _x('set date to', "bulk edit action - 'datetime' fields", 'smart-manager-for-wp-e-commerce'), set_time_to: _x('set time to', "bulk edit action - 'datetime' fields", 'smart-manager-for-wp-e-commerce') }, additionalDateOperators),
+                'date': Object.assign({ set_date_to: _x('set date to', "bulk edit action - 'date' fields", 'smart-manager-for-wp-e-commerce') }, additionalDateOperators),
+                'time': Object.assign({ set_time_to: _x('set time to', "bulk edit action - 'time' fields", 'smart-manager-for-wp-e-commerce') }, additionalDateOperators),
+                'dropdown': {},
+                'multilist': { add_to: _x('add to', "bulk edit action - 'multiselect list' fields", 'smart-manager-for-wp-e-commerce'), remove_from: _x('remove from', "bulk edit action - 'multiselect list' fields", 'smart-manager-for-wp-e-commerce') },
+                'serialized': {},
+                'text': { prepend: _x('prepend', "bulk edit action - 'text' fields", 'smart-manager-for-wp-e-commerce'), append: _x('append', "bulk edit action - 'text' fields", 'smart-manager-for-wp-e-commerce'), search_and_replace: _x('search & replace', "bulk edit action - 'text' fields", 'smart-manager-for-wp-e-commerce') }
+            }
+            let types_exclude_set_to = ['datetime', 'date', 'time']
+            Object.keys(this.batchUpdateActions).forEach(key => {
+                let setToObj = (types_exclude_set_to.includes(key)) ? {} : { set_to: _x('set to', 'bulk edit action', 'smart-manager-for-wp-e-commerce') }
+                this.batchUpdateActions[key] = Object.assign(setToObj, this.batchUpdateActions[key], { copy_from: _x('copy from', 'bulk edit action', 'smart-manager-for-wp-e-commerce') }, { copy_from_field: _x('copy from field', 'bulk edit action', 'smart-manager-for-wp-e-commerce') });
+            });
         } catch (e){
             SaErrorHandler.log('Error initializing SaCommonManager:: ', e)
         }
@@ -178,20 +198,11 @@
                 }
                 this.currentColModel[i].name = this.currentColModel[i].index;
             }
-        } catch (e){
-            SaErrorHandler.log('Error in formatDashboardColumnModel:: ', e)
-        }
-    }
-
-    SaCommonManager.prototype.showLoader = function( is_show = true ) {
-        try{
-            if (is_show) {
-                jQuery('.sa-loader-container').hide().show();
-            } else {
-                jQuery('.sa-loader-container').hide();
+            if (typeof this.childFormatDashboardColumnModel === 'function') {
+                this.childFormatDashboardColumnModel(this.currentColModel);
             }
         } catch (e){
-            SaErrorHandler.log('Error in showLoader:: ', e)
+            SaErrorHandler.log('Error in formatDashboardColumnModel:: ', e)
         }
     }
 
@@ -219,6 +230,51 @@
             SaErrorHandler.log('In sending AJAX request:: ', e)
         }
 
+    }
+
+    SaCommonManager.prototype.showLoader = function (is_show = true) {
+        try {
+            if (is_show) {
+                jQuery('.sa-loader-container').hide().show();
+            } else {
+                jQuery('.sa-loader-container').hide();
+            }
+        } catch (e) {
+            SaErrorHandler.log('Error in showLoader:: ', e)
+        }
+    }
+
+    //Function to show confirm dialog
+    SaCommonManager.prototype.showConfirmDialog = function (params) {
+        this.modal = {
+            title: (params.hasOwnProperty('title') !== false && params.title != '') ? params.title : _x('Warning', 'modal title', 'smart-manager-for-wp-e-commerce'),
+            content: (params.hasOwnProperty('content') !== false && params.content != '') ? params.content : _x('Are you sure?', 'modal content', 'smart-manager-for-wp-e-commerce'),
+            autoHide: false,
+            showCloseIcon: (params.hasOwnProperty('showCloseIcon')) ? params.showCloseIcon : true,
+            cta: {
+                title: ((params.btnParams.hasOwnProperty('yesText')) ? params.btnParams.yesText : _x('Yes', 'button', 'smart-manager-for-wp-e-commerce')),
+                closeModalOnClick: (params.btnParams.hasOwnProperty('hideOnYes')) ? params.btnParams.hideOnYes : true,
+                callback: function () {
+                    if (params.btnParams.hasOwnProperty('yesCallback') && typeof params.btnParams.yesCallback === "function") {
+                        if (params.btnParams.hasOwnProperty('yesCallbackParams')) {
+                            params.btnParams.yesCallback(params.btnParams.yesCallbackParams);
+                        } else {
+                            params.btnParams.yesCallback();
+                        }
+                    }
+                }
+            },
+            closeCTA: {
+                title: ((params.btnParams.hasOwnProperty('noText')) ? params.btnParams.noText : _x('No', 'button', 'smart-manager-for-wp-e-commerce')),
+                callback: function () {
+                    if (params.btnParams.hasOwnProperty('noCallback') && typeof params.btnParams.noCallback === "function") {
+                        params.btnParams.noCallback();
+                    }
+                }
+            },
+            route: params?.route || false
+        }
+        this.showModal()
     }
 
     // Function to handle all modal dialog
@@ -295,17 +351,17 @@
     }
 
     //Function to show progress dialog
-    SaCommonManager.prototype.showProgressDialog = function( title = '' ) {
-        try{
+    SaCommonManager.prototype.showProgressDialog = function (title = '') {
+        try {
             this.modal = {
-                title: ( title != '' ) ? title : _x('Please Wait', 'progressbar modal title', 'smart-manager-for-wp-e-commerce'),
-                content: '<div class="sa_background_update_progressbar"> <span class="sa_background_update_progressbar_text" style="" >'+_x('Initializing...', 'progressbar modal content', 'smart-manager-for-wp-e-commerce')+'</span></div><div class="sa_batch_update_background_link" >'+_x('Continue in background', 'progressbar modal content', 'smart-manager-for-wp-e-commerce')+'</div>',
+                title: (title != '') ? title : _x('Please Wait', 'progressbar modal title', 'smart-manager-for-wp-e-commerce'),
+                content: '<div class="sa_background_update_progressbar"> <span class="sa_background_update_progressbar_text" style="" >' + _x('Initializing...', 'progressbar modal content', 'smart-manager-for-wp-e-commerce') + '</span></div><div class="sa_' + this.pluginSlug + '_batch_update_background_link" >' + _x('Continue in background', 'progressbar modal content', 'smart-manager-for-wp-e-commerce') + '</div>',
                 autoHide: false,
                 showCloseIcon: false,
                 cta: {}
             }
             this.showModal()
-        } catch (e){
+        } catch (e) {
             SaErrorHandler.log('Exception occurred in showProgressDialog:: ', e)
         }
     }

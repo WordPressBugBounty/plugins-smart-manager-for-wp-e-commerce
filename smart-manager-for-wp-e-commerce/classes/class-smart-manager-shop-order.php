@@ -51,11 +51,11 @@ if ( ! class_exists( 'Smart_Manager_Shop_Order' ) ) {
 				add_filter( 'sm_default_inline_update', function() { return false; } );
 
 			} else {
-				add_filter( 'sa_dashboard_model', array( &$this,'orders_dashboard_model' ), 10, 2 );
-				add_filter( 'posts_where', array( &$this,'sm_query_orders_where_cond' ),100,2);
-				add_filter( 'posts_join_paged', array( &$this,'sm_order_query_join' ), 100, 2 );
-				add_filter( 'posts_orderby', array( &$this,'sm_query_order_by' ), 100, 2 );
-				add_filter( 'found_posts', array( 'Smart_Manager_Shop_Order' ,'kpi_data_query' ), 100, 2 );
+				add_filter( 'sa_sm_dashboard_model', array( &$this,'orders_dashboard_model' ), 10, 2 );
+				add_filter( 'sm_posts_where', array( &$this,'sm_query_orders_where_cond' ),100,2);
+				add_filter( 'sm_posts_join_paged', array( &$this,'sm_order_query_join' ), 100, 2 );
+				add_filter( 'sm_posts_orderby', array( &$this,'sm_query_order_by' ), 100, 2 );
+				add_filter( 'sm_found_posts', array( 'Smart_Manager_Shop_Order' ,'kpi_data_query' ), 100, 2 );
 				add_filter( 'sm_inline_update_pre', array( &$this, 'pre_inline_update' ), 10, 1 );
 				add_filter( 'sm_batch_update_copy_from_ids_select',array( &$this,'sm_batch_update_copy_from_ids_select' ), 10, 2 );
 			}

@@ -4,7 +4,7 @@
  *
  * @package common-core/
  * @since       8.64.0
- * @version     8.64.0
+ * @version     8.67.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -72,8 +72,24 @@ if ( ! class_exists( 'SA_Manager_Product' ) ) {
 			$this->dashboard_key = ( ! empty( $plugin_data['dashboard_key'] ) ) ? $plugin_data['dashboard_key'] : '';
 			$this->plugin_sku    = ( ! empty( $plugin_data['plugin_sku'] ) ) ? $plugin_data['plugin_sku'] : '';
 			$this->post_type     = array( 'product', 'product_variation' );
-			$this->req_params                          = ( ! empty( $_REQUEST ) ) ? wc_clean( wp_unslash( $_REQUEST ) ) : array();// phpcs:ignore
-			add_filter( 'sa_dashboard_model', array( $this, 'products_dashboard_model' ), 10, 2 );
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$this->req_params = ( ! empty( $_REQUEST ) )
+				? ( function_exists( 'wc_clean' )
+					// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+					? wc_clean( wp_unslash( $_REQUEST ) )
+					: array_map(
+						function( $value ) {
+							if ( is_array( $value ) ) {
+								return array_map( 'sanitize_text_field', $value );
+							}
+							return is_scalar( $value ) ? sanitize_text_field( $value ) : $value;
+						},
+						// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+						wp_unslash( $_REQUEST )
+					)
+				)
+				: array();
+			add_filter( 'sa_' . $this->plugin_sku . '_dashboard_model', array( $this, 'products_dashboard_model' ), 10, 2 );
 		}
 
 		/**
@@ -143,7 +159,7 @@ if ( ! class_exists( 'SA_Manager_Product' ) ) {
 			$attributes_search_val = array();
 			$attribute_meta_cols   = array();
 			// Load from cache.
-			if ( empty( $attr_col_index ) || ( ! empty( $attr_col_index ) && empty( $column_model [ $attr_col_index ]['values'] ) ) ) {
+			if ( is_null( $attr_col_index ) || ( ! isset( $column_model[ $attr_col_index ]['values'] ) ) || empty( $column_model[ $attr_col_index ]['values'] ) ) {
 				// Query to get the attribute name.
 				$results_attribute_label = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 					"SELECT attribute_name, attribute_label, attribute_type
@@ -176,8 +192,9 @@ if ( ! class_exists( 'SA_Manager_Product' ) ) {
 				if ( empty( $column['src'] ) ) {
 					continue;
 				}
+				$src          = $column['src'];
 				$src_exploded = explode( '/', $column['src'] );
-				if ( empty( $src_exploded ) ) {
+				if ( count( $src_exploded ) < 2 ) {
 					$src = $column['src'];
 				}
 				if ( count( $src_exploded ) > 2 ) {
@@ -420,6 +437,7 @@ if ( ! class_exists( 'SA_Manager_Product' ) ) {
 					}
 				}
 			}
+			$index = 0;
 			if ( empty( $attr_col_index ) ) {
 				$index = count( $column_model );
 				// Code for including custom columns for product dashboard.
@@ -448,7 +466,7 @@ if ( ! class_exists( 'SA_Manager_Product' ) ) {
 				}
 				$column_model[ $index ]['allow_showhide'] = true;
 				$column_model[ $index ]['exportable']     = true;
-			} elseif ( ! empty( $attr_col_index ) && empty( $column_model [ $attr_col_index ]['values'] ) ) {
+			} elseif ( empty( $column_model [ $attr_col_index ]['values'] ) ) {
 				$column_model [ $attr_col_index ]['values'] = $attributes_val; // Code for assigning attr. values.
 			}
 			// code for creating search columns for attributes.

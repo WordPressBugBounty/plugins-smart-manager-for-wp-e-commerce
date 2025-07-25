@@ -4,7 +4,7 @@
  *
  * @package common-core/
  * @since       8.64.0
- * @version     8.64.0
+ * @version     8.67.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -53,9 +53,9 @@ if ( ! class_exists( 'SA_Manager_Controller' ) ) {
 		/**
 		 * Indicates whether the plugin has pro folder.
 		 *
-		 * @var bool $pro_flag
+		 * @var bool $folder_flag
 		 */
-		public $pro_flag = false;
+		public $folder_flag = false;
 
 		/**
 		 * Stores the plugin directory path.
@@ -107,6 +107,13 @@ if ( ! class_exists( 'SA_Manager_Controller' ) ) {
 		public static $common_params = array();
 
 		/**
+		 * Stores the plugin directory.
+		 *
+		 * @var string $plugin_dir
+		 */
+		public $plugin_dir = '';
+
+		/**
 		 * Constructor is called when the class is instantiated
 		 *
 		 * @param Array $plugin_data Array of plugin data.
@@ -114,19 +121,13 @@ if ( ! class_exists( 'SA_Manager_Controller' ) ) {
 		 * @return void
 		 */
 		public function __construct( $plugin_data = array() ) {
-			$this->plugin_file                    = ( ! empty( $plugin_data['plugin_file'] ) ) ? $plugin_data['plugin_file'] : '';
 			$this->plugin_short_name              = ( ! empty( $plugin_data['plugin_name'] ) ) ? $plugin_data['plugin_name'] : '';
-			$this->plugin_sku                     = ( ! empty( $plugin_data['plugin_sku'] ) ) ? $plugin_data['plugin_sku'] : '';
-			$this->prefix                         = ( ! empty( $plugin_data['plugin_prefix'] ) ) ? $plugin_data['plugin_prefix'] : '';
-			$this->pro_flag                       = ( ! empty( $plugin_data['plugin_pro_flag'] ) ) ? $plugin_data['plugin_pro_flag'] : '';
 			$this->plugin_main_class_nm           = ( ! empty( $plugin_data['plugin_main_class_nm'] ) ) ? $plugin_data['plugin_main_class_nm'] : '';
-			$this->is_common_pro_module_available = ( ( ! empty( $plugin_data['common_pro_available'] ) ) || ( ! empty( $this->pro_flag ) ) ) ? true : false;
+			$this->is_common_pro_module_available = ( ! empty( $this->folder_flag ) ) ? true : false;
 			$this->plugin_dir_path                = dirname( $this->plugin_file );
-			$this->sa_manager_common_params       = ( ! empty( $plugin_data ) ) ? $plugin_data : array();
 			if ( is_admin() ) {
-				add_action( 'wp_ajax_sa_manager_include_file', array( $this, 'request_handler' ) );
+				add_action( 'wp_ajax_sa_' . $this->plugin_sku . '_manager_include_file', array( $this, 'request_handler' ) );
 			}
-			add_action( 'admin_init', array( $this, 'call_custom_actions' ), 11 );
 		}
 
 		/**
@@ -135,20 +136,25 @@ if ( ! class_exists( 'SA_Manager_Controller' ) ) {
 		 * @return void
 		 */
 		public function request_handler() {
-			if ( ( ! is_user_logged_in() ) || ( ! is_admin() ) || empty( $_REQUEST ) || empty( $_REQUEST['active_module'] ) || empty( $_REQUEST['cmd'] ) ) {
+			$is_valid_page = apply_filters( 'sa_' . $this->plugin_sku . '_validate_current_page', true, $_REQUEST ); // phpcs:ignore
+			if ( ( ! is_user_logged_in() ) || ( ! is_admin() ) || empty( $_REQUEST ) || empty( $_REQUEST['active_module'] ) || empty( $_REQUEST['cmd'] ) || ( ! $is_valid_page ) ) {
 				return;
 			}
-			check_ajax_referer( 'sa-manager-security', 'security' );
+			check_ajax_referer( 'sa-' . $this->plugin_sku . '-manager-security', 'security' );
 			$this->dashboard_key            = ( ! empty( $_REQUEST['active_module'] ) ) ? sanitize_text_field( wp_unslash( $_REQUEST['active_module'] ) ) : '';
 			$is_common_module_available     = ( ! empty( $_REQUEST['cmd'] ) && ( 'get_background_progress' !== $_REQUEST['cmd'] ) ) ? apply_filters( 'sa_common_module_available', false, $this->dashboard_key ) : false;
 			$this->sa_manager_common_params = ( ! empty( $this->dashboard_key ) ) ? array_merge( $this->sa_manager_common_params, array( 'dashboard_key' => $this->dashboard_key ) ) : $this->sa_manager_common_params;
-			$this->pro_flag                 = ( ! empty( $this->pro_flag ) ) ? '/pro' : '';
+			$this->folder_flag              = ( ! empty( $this->folder_flag ) ) ? $this->folder_flag : '';
 			$func_nm                        = ( ! empty( $_REQUEST['cmd'] ) ) ? sanitize_text_field( wp_unslash( $_REQUEST['cmd'] ) ) : '';
 			if ( empty( $this->plugin_dir_path ) ) {
 				return;
 			}
-			$common_core_path = $this->plugin_dir_path . '/common-core/classes/';
-			$common_pro_path  = $this->plugin_dir_path . $this->pro_flag . '/common-pro/classes/';
+			$common_core_path = apply_filters(
+				'sa_' . $this->plugin_sku . '_manager_common_core_path',
+				$this->plugin_dir_path . '/common-core/classes/',
+				$this->plugin_dir_path
+			);
+			$common_pro_path  = $this->plugin_dir_path . $this->folder_flag . '/common-pro/classes/';
 			$class_name       = 'SA_Manager_Base';
 			$pro_class_nm     = 'class-sa-manager-pro-base.php';
 			if ( ! empty( $this->is_common_pro_module_available ) ) {
@@ -173,11 +179,28 @@ if ( ! class_exists( 'SA_Manager_Controller' ) ) {
 					)
 				);
 			}
+			$allowed_dirs = apply_filters( 'sa_' . $this->plugin_sku . '_manager_request_handler_allowed_dir_path', array() );
 			foreach ( $files_to_include as $file_to_include ) {
-				if ( file_exists( $file_to_include ) ) {
-					include_once $file_to_include;
+				$real_path = realpath( $file_to_include );
+				$basename  = basename( $file_to_include );
+				if (
+					$real_path &&
+					preg_match( '/^class-sa-manager(-pro)?(-[a-z0-9_]+)?\.php$/i', $basename ) &&
+					file_exists( $real_path )
+				) {
+					$is_in_allowed_dir = false;
+					foreach ( $allowed_dirs as $allowed_dir ) {
+						if ( 0 === strpos( $real_path, $allowed_dir ) ) {
+							$is_in_allowed_dir = true;
+							break;
+						}
+					}
+					if ( $is_in_allowed_dir && ( is_file( $real_path ) ) ) {
+						include_once $real_path; // nosemgrep: audit.php.lang.security.file.inclusion-arg, scanner.php.lang.security.file.inclusion .
+					}
 				}
 			}
+
 			if ( ! empty( $_REQUEST['cmd'] ) && ( 'get_background_progress' === $_REQUEST['cmd'] ) ) {
 				$class_name   = 'class-sa-manager-pro-background-updater.php';
 				$pro_class_nm = 'SA_Manager_Pro_Background_Updater';
@@ -188,7 +211,7 @@ if ( ! class_exists( 'SA_Manager_Controller' ) ) {
 			$_REQUEST['class_path'] = $pro_class_nm;
 			$req_params             = $_REQUEST;
 			$sa_manager_handler     = apply_filters(
-				'sa_manager_handler',
+				'sa_' . $this->plugin_sku . '_manager_handler',
 				array(
 					'handler_obj' => $handler_obj,
 					'req_params'  => $req_params,
@@ -207,14 +230,14 @@ if ( ! class_exists( 'SA_Manager_Controller' ) ) {
 					)
 				);
 			} elseif ( class_exists( $class_name ) ) {
-				$handler_obj = new $class_name( $this->sa_manager_common_params );
+				$handler_obj = is_callable( array( $class_name, 'instance' ) ) ? $class_name::instance( $this->sa_manager_common_params ) : new $class_name( $this->sa_manager_common_params );
 			}
 			do_action(
-				'sa_manager_func_handler',
+				'sa_' . $this->plugin_sku . '_manager_func_handler',
 				array(
-					'handler_obj'      => $sa_manager_handler['handler_obj'],
-					'func_nm'          => $func_nm,
-					'common_dashboard' => array( 'product' ),
+					'handler_obj' => $sa_manager_handler['handler_obj'],
+					'func_nm'     => $func_nm,
+					'req_params'  => $req_params,
 				)
 			);
 			if ( class_exists( $class_name ) && is_callable( array( $handler_obj, $func_nm ) ) ) {
@@ -253,10 +276,10 @@ if ( ! class_exists( 'SA_Manager_Controller' ) ) {
 			add_action( 'woocommerce_attribute_deleted', array( $this, 'woocommerce_attributes_updated' ) );
 			add_action( 'added_post_meta', array( $this, 'added_post_meta' ), 10, 4 );
 			// for background updater.
-			$this->pro_flag = ( ! empty( $this->pro_flag ) ) ? '/pro' : '';
-			if ( is_file( realpath( $this->plugin_dir_path . $this->pro_flag . '/common-pro/classes/class-sa-manager-pro-background-updater.php' ) ) ) {
-				include_once $this->plugin_dir_path . $this->pro_flag . '/common-pro/classes/class-sa-manager-pro-background-updater.php';
-				$this->background_updater = SA_Manager_Pro_Background_Updater::instance();
+			$this->folder_flag = ( ! empty( $this->folder_flag ) ) ? $this->folder_flag : '';
+			if ( is_file( realpath( $this->plugin_dir_path . $this->folder_flag . '/common-pro/classes/class-sa-manager-pro-background-updater.php' ) ) ) {
+				include_once $this->plugin_dir_path . $this->folder_flag . '/common-pro/classes/class-sa-manager-pro-background-updater.php';
+				$this->background_updater = SA_Manager_Pro_Background_Updater::instance( $this->sa_manager_common_params );
 			}
 		}
 
@@ -340,6 +363,7 @@ if ( ! class_exists( 'SA_Manager_Controller' ) ) {
 					delete_transient( 'sa_' . $this->plugin_sku . '_' . $post_type );
 				}
 			}
+			return true;
 		}
 	}
 }

@@ -286,5 +286,23 @@ function get_sa_manager_common_params() {
 		'plugin_pro_flag'      => (defined('SMPRO') && (true === SMPRO)) ? true : false,
 		'plugin_main_class_nm' => 'Smart_Manager',
 		'plugin_dir'           => defined('SM_PLUGIN_DIR_PATH') ? SM_PLUGIN_DIR_PATH : '',
+		'plugin_obj_key'       => 'smart_manager',
+		'folder_flag'          => '/pro'
 	);
+}
+
+/**
+ * Checks if the Stripe payment gateway is active.
+ *
+ * @return bool True if the Stripe gateway is active, false otherwise.
+ */
+function sm_is_stripe_gateway_active() {
+	if ( ! function_exists( 'WC' ) || ! is_callable( 'WC' ) ) {
+		return false;
+	}
+	$gateways = WC()->payment_gateways->get_available_payment_gateways();
+	if ( empty( $gateways ) || ! is_array( $gateways ) ) {
+		return false;
+	}
+	return ( ! empty( $gateways['stripe'] ) ) ? true : false;
 }

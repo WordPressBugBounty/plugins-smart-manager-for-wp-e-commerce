@@ -17,8 +17,13 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
     SmartManager.prototype.constructor = SmartManager;
 	window.smart_manager = new SmartManager();
     SmartManager.prototype.init = function () {
-        SaCommonManager.prototype.init.call(this); // Reuse base init
+		SaCommonManager.prototype.init.call(this); // Reuse base init
+		this.commonManagerAjaxUrl = (ajaxurl.indexOf('?') !== -1)
+			? ajaxurl + '&action=sa_sm_manager_include_file'
+			: ajaxurl + '?action=sa_sm_manager_include_file';
 		this.ajaxParams = {}
+		this.pluginKey = 'smart_manager';
+		this.pluginSlug = 'sm';
 		this.firstLoad = true
 		this.currentDashboardModel='';
 		this.dashboardKey = '';

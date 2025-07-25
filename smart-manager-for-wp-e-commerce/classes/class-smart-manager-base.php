@@ -72,21 +72,21 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			$this->dashboard_title = ( !empty( $this->req_params['active_module_title'] ) ) ? $this->req_params['active_module_title'] : 'Post';
 			$this->advanced_search_table_types = apply_filters( 'sm_search_table_types', $this->advanced_search_table_types ); //filter to add custom tables to table types
 			$this->store_col_model_transient_option_nm = 'sa_sm_' . $this->dashboard_key;
-			add_filter( 'posts_join_paged', array( &$this, 'sm_query_join' ), 99, 2 );
-			add_filter( 'posts_where', array( &$this, 'sm_query_post_where_cond' ), 99, 2 );
-			add_filter( 'posts_groupby', array( &$this, 'sm_query_group_by' ), 99, 2 );
-			add_filter( 'posts_orderby', array( &$this, 'sm_query_order_by' ), 99, 2 );
+			add_filter( 'sm_posts_join_paged', array( &$this, 'sm_query_join' ), 99, 2 );
+			add_filter( 'sm_posts_where', array( &$this, 'sm_query_post_where_cond' ), 99, 2 );
+			add_filter( 'sm_posts_groupby', array( &$this, 'sm_query_group_by' ), 99, 2 );
+			add_filter( 'sm_posts_orderby', array( &$this, 'sm_query_order_by' ), 99, 2 );
 			add_action( 'sm_search_posts_conditions_array_complete', array( &$this, 'get_matching_children_advanced_search' ) );
 			add_action( 'sm_search_posts_condition_start', array( &$this, 'modify_posts_advanced_search_condition' ), 10, 2 );
 			add_action( 'sm_search_query_postmeta_from', array( &$this, 'modify_postmeta_advanced_search_from' ), 10, 2 );
-			add_filter( 'get_col_model_transient_data', array( $this, 'get_views_col_model_transient' ) );
-			add_filter( 'get_col_and_store_model_transient_data', array( $this, 'get_col_and_store_model_transient' ) );
-			add_filter( 'port_store_model_old_structure', array( $this, 'port_store_model_old_structure' ) );
-			add_filter( 'port_store_model_new_mapping', array( $this, 'port_store_model_new_mapping' ), 10, 2 );
-			add_filter( 'get_store_model_data', array( $this, 'get_store_model_data' ) );
-			add_filter( 'map_column_for_stored_transient', array( $this, 'map_column_for_stored_transient' ) );
-			add_filter( 'modify_store_model_for_trash_status', array( $this, 'modify_store_model_for_trash_status' ) );
-			add_filter( 'modify_store_model_search_params', array( $this, 'modify_store_model_search_params' ), 10, 2 );
+			add_filter( 'sm_get_col_model_transient_data', array( &$this, 'get_views_col_model_transient' ), 10, 2 );
+			add_filter( 'sm_get_col_and_store_model_transient_data', array( $this, 'get_col_and_store_model_transient' ) );
+			add_filter( 'sm_port_store_model_old_structure', array( $this, 'port_store_model_old_structure' ) );
+			add_filter( 'sm_port_store_model_new_mapping', array( $this, 'port_store_model_new_mapping' ), 10, 2 );
+			add_filter( 'sm_get_store_model_data', array( $this, 'get_store_model_data' ) );
+			add_filter( 'sm_map_column_for_stored_transient', array( $this, 'map_column_for_stored_transient' ) );
+			add_filter( 'sm_modify_store_model_for_trash_status', array( $this, 'modify_store_model_for_trash_status' ) );
+			add_filter( 'sm_modify_store_model_search_params', array( $this, 'modify_store_model_search_params' ), 10, 2 );
 		}
 
 		/**
@@ -212,7 +212,6 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				return $params;
 			}
 			global $wpdb;
-			$search_params = $params['search_params'];
 			$view_obj = ( class_exists( 'Smart_Manager_Pro_Views' ) ) ? Smart_Manager_Pro_Views::get_instance() : null;
 			$view_slug = $this->req_params['active_view'];
 			$view_data = ( is_callable( array( $view_obj, 'get' ) ) ) ? $view_obj->get( $view_slug ) : array();
@@ -222,9 +221,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			$this->dashboard_key = $view_data['post_type'];
 			$column_model_transient = json_decode( $view_data['params'], true );
 			if ( empty( $column_model_transient['search_params'] ) ) {
-				return $params;
-			}
-			if ( empty( $column_model_transient['search_params'] ) ) {
+				$params['column_model_transient'] = $column_model_transient;
 				return $params;
 			}
 			if ( ( ! empty( $column_model_transient['search_params']['isAdvanceSearch'] ) ) && ( ! empty( $column_model_transient['search_params']['params'] ) ) && is_array( $column_model_transient['search_params']['params'] ) ) {  // For advanced search
@@ -1824,6 +1821,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			$taxonomies		           = array();
 			$taxonomy_data_to_update   = array();
 			$posts_updated_data   = array();
+			$update_result   = array();
 			//Code for storing the serialized cols
 			foreach ($col_model as $col) {
 				$col_exploded = (!empty($col['src'])) ? explode("/", $col['src']) : array();
@@ -2147,13 +2145,14 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 					}
 				}
 
-				do_action( 'sm_inline_update_post_data',
+				$update_result = apply_filters( 'sm_inline_update_post_data',
 					array(
 						'posts_data' => $posts_updated_data,
 						'taxonomies' => $taxonomies,
 						'task_id' => ( ! empty( $this->task_id ) ) ? $this->task_id : 0,
 						'prev_postmeta_values' => $this->prev_postmeta_values
-					)
+					),
+					$update_result
 				);
 
 				//update post data.
@@ -2170,6 +2169,9 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			// For updating task details table.
 			if ( ( ! empty( self::$update_task_details_params ) ) && is_callable( array( 'Smart_Manager_Task', 'task_details_update' ) ) ) {
 				Smart_Manager_Task::task_details_update();
+			}
+			if ( ( ! empty( $update_result ) ) && ( is_array( $update_result ) ) && ( ! empty( $update_result['after_update_actions_params'] ) ) ) {
+				do_action( 'sm_update_posts_after_update_actions', $update_result['after_update_actions_params'] );
 			}
 			delete_transient('sm_beta_skip_delete_dashboard_transients', 1, DAY_IN_SECONDS); // for preventing delete dashboard transients
 			$msg_str = '';

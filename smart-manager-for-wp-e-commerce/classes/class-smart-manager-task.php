@@ -102,7 +102,7 @@ if ( ! class_exists( 'Smart_Manager_Task' ) ) {
 				}
 			);
 			add_filter(
-				'sa_can_apply_dashboard_model_filter',
+				'sa_sm_can_apply_dashboard_model_filter',
 				function() {
 					return false;
 				}

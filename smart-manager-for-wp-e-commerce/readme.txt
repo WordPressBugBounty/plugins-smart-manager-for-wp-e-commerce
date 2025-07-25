@@ -5,9 +5,9 @@ Author URI: https://www.storeapps.org/woocommerce-plugins/
 Plugin URI: https://www.storeapps.org/product/smart-manager/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme
 Tags: woocommerce advanced bulk edit, wordpress bulk edit, woocommerce inventory management, woocommerce stock manager, woocommerce product manager
 Requires at least: 5.0
-Tested up to: 6.8.1
+Tested up to: 6.8.2
 Requires PHP: 5.6
-Stable tag: 8.66.0
+Stable tag: 8.67.0
 License: GPLv2
 
 WooCommerce Advanced Bulk Edit products, orders, & posts in an Excel-like sheet editor. Get advanced WooCommerce stock, pricing, & order management.
@@ -308,6 +308,18 @@ Open Smart Manager Products dashboard, select required products, click on Bulk E
 2. Bulk edit / Batch update (only in Pro version)
 
 == Changelog ==
+
+= 8.67.0 (25.07.2025) =
+* New: WordPress 6.8.2 compatible
+* New: WooCommerce 10.0.4 compatible
+* Fix: Smart Manager Dashboard not loading if WooCommerce plugin is inactive
+* Fix: FacetWP reindexing not triggered when the WooCommerce Products 'Sale Price' field was updated using Inline Edit
+* Fix: 'save_post' hook triggered prematurely when updating the WooCommerce Products 'Sale Price' field via Inline Edit
+* Fix: Bulk Edit not working when using the 'All Items in Search Results' option after the latest update (Pro)
+* Fix: FacetWP reindexing not triggered when the WooCommerce Products 'Sale Price' field was updated using Bulk Edit (Pro)
+* Fix: 'save_post' hook triggered prematurely when updating the WooCommerce Products 'Sale Price' field via Bulk Edit (Pro)
+* Update: UI/UX improvements for Bulk Edit panel (Pro)
+* Update: POT file
 
 = 8.66.0 (07.07.2025) =
 * New: WooCommerce 9.9.5 compatible
@@ -637,6 +649,9 @@ Open Smart Manager Products dashboard, select required products, click on Bulk E
 [See changelog for all versions](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 8.67.0 =
+WordPress 6.8.2 compatible, WooCommerce 10.0.4 compatible, Fixes related to Smart Manager Dashboard not loading if WooCommerce plugin is inactive, FacetWP reindexing not triggered when the WooCommerce Products 'Sale Price' field was updated using Inline Edit, 'save_post' hook triggered prematurely when updating the WooCommerce Products 'Sale Price' field via Inline Edit, Bulk Edit not working when using the 'All Items in Search Results' option after the latest update (Pro), FacetWP reindexing not triggered when the WooCommerce Products 'Sale Price' field was updated using Bulk Edit (Pro), 'save_post' hook triggered prematurely when updating the WooCommerce Products 'Sale Price' field via Bulk Edit (Pro), Updates related to UI/UX improvements for Bulk Edit panel. Recommended upgrade.
 
 = 8.66.0 =
 WooCommerce 9.9.5 compatible, Display save prompt after edits done via Inline Edit, Automatically update existing WooCommerce Subscriptions when editing subscription product prices via Bulk Edit (Pro), Fixes related to FacetWP reindexing not triggered for updates made via Inline Edit, 'post_id' was incorrectly passed as a string instead of an integer in the 'save_post' hook, Fetching hidden meta fields in the grid impacting dashboard load speed, FacetWP reindexing not triggered for updates made via Bulk Edit (Pro), 'Products' and 'Exclude Products' columns not displaying associated product lists in the WooCommerce Coupons dashboard (Pro). Recommended upgrade.

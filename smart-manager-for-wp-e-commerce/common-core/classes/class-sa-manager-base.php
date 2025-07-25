@@ -4,7 +4,7 @@
  *
  * @package common-core/
  * @since       8.64.0
- * @version     8.64.0
+ * @version     8.67.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -85,11 +85,28 @@ if ( ! class_exists( 'SA_Manager_Base' ) ) {
 		 * @return void
 		 */
 		public function __construct( $plugin_data = array() ) {
-			$this->dashboard_key                       = ( ! empty( $plugin_data['dashboard_key'] ) ) ? $plugin_data['dashboard_key'] : '';
-			$this->plugin_sku                          = ( ! empty( $plugin_data['plugin_sku'] ) ) ? $plugin_data['plugin_sku'] : '';
-			$this->post_type                           = ( ! empty( $this->dashboard_key ) ) ? $this->dashboard_key : '';
-			$this->plugin_path                         = untrailingslashit( plugin_dir_path( __FILE__ ) );
-			$this->req_params                          = ( ! empty( $_REQUEST ) ) ? wc_clean( wp_unslash( $_REQUEST ) ) : array(); // phpcs:ignore
+			$this->dashboard_key = ( ! empty( $plugin_data['dashboard_key'] ) ) ? $plugin_data['dashboard_key'] : '';
+			$this->plugin_sku    = ( ! empty( $plugin_data['plugin_sku'] ) ) ? $plugin_data['plugin_sku'] : '';
+			$this->post_type     = ( ! empty( $this->dashboard_key ) ) ? $this->dashboard_key : '';
+			$this->plugin_path   = untrailingslashit( plugin_dir_path( __FILE__ ) );
+			// Sanitize $_REQUEST recursively using sanitize_text_field, similar to wc_clean.
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$this->req_params = ( ! empty( $_REQUEST ) )
+				? ( function_exists( 'wc_clean' )
+					// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+					? wc_clean( wp_unslash( $_REQUEST ) )
+					: array_map(
+						function( $value ) {
+							if ( is_array( $value ) ) {
+								return array_map( 'sanitize_text_field', $value );
+							}
+							return is_scalar( $value ) ? sanitize_text_field( $value ) : $value;
+						},
+						// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+						wp_unslash( $_REQUEST )
+					)
+				)
+				: array();
 			$this->dashboard_title                     = ( ! empty( $this->req_params['active_module_title'] ) ) ? $this->req_params['active_module_title'] : '';
 			$this->store_col_model_transient_option_nm = 'sa_' . $this->plugin_sku . '_' . $this->dashboard_key;
 		}
@@ -110,7 +127,7 @@ if ( ! class_exists( 'SA_Manager_Base' ) ) {
 				$type = substr( $data_type, 0, $type_strpos );
 			} else {
 				$types = explode( ' ', $data_type ); // for handling types with attributes (biginit unsigned).
-				$type  = ( ! empty( $types ) ) ? $types[0] : $data_type;
+				$type  = $types[0];
 			}
 			switch ( $type ) {
 				case ( 'int' === substr( $type, -3 ) ):
@@ -352,6 +369,7 @@ if ( ! class_exists( 'SA_Manager_Base' ) ) {
 			);
 			$posts_num_rows        = $wpdb->num_rows;
 			$last_position         = 0;
+			$field_nm              = '';
 			if ( $posts_num_rows > 0 && ( ! empty( $results_posts_col ) ) && is_array( $results_posts_col ) ) {
 				foreach ( $results_posts_col as $posts_col ) {
 					$field_nm = ( ! empty( $posts_col['Field'] ) ) ? $posts_col['Field'] : '';
@@ -681,7 +699,7 @@ if ( ! class_exists( 'SA_Manager_Base' ) ) {
 			$old_col_model               = array();
 			$column_model_transient      = ( ! empty( $this->store_col_model_transient_option_nm ) ) ? get_user_meta( get_current_user_id(), $this->store_col_model_transient_option_nm, true ) : array();
 			$column_model_transient_data = apply_filters(
-				'get_col_model_transient_data',
+				$this->plugin_sku . '_get_col_model_transient_data',
 				array(
 					'search_params'          => $search_params,
 					'column_model_transient' => $column_model_transient,
@@ -710,7 +728,7 @@ if ( ! class_exists( 'SA_Manager_Base' ) ) {
 				}
 			}
 			$column_and_store_model_transient_data = apply_filters(
-				'get_col_and_store_model_transient_data',
+				$this->plugin_sku . '_get_col_and_store_model_transient_data',
 				array(
 					'column_model_transient' => $column_model_transient,
 					'store_model_transient'  => $store_model_transient,
@@ -722,7 +740,7 @@ if ( ! class_exists( 'SA_Manager_Base' ) ) {
 			$store_model_transient = ( ! empty( $column_and_store_model_transient_data ) ) ? $column_and_store_model_transient_data['store_model_transient'] : $store_model_transient;
 
 			$port_store_model_old_structure_data = apply_filters(
-				'port_store_model_old_structure',
+				$this->plugin_sku . '_port_store_model_old_structure',
 				array(
 					'store_model_transient' => $store_model_transient,
 					'old_col_model'         => $old_col_model,
@@ -743,16 +761,16 @@ if ( ! class_exists( 'SA_Manager_Base' ) ) {
 				// Filter to modify the default dashboard model.
 				$this->default_store_model = apply_filters( $this->plugin_sku . '_default_dashboard_model', $this->default_store_model );
 				$store_model               = ( ! empty( $this->default_store_model ) ) ? $this->default_store_model : array();
-				$store_model               = apply_filters( 'get_store_model_data', $store_model );
+				$store_model               = apply_filters( $this->plugin_sku . '_get_store_model_data', $store_model );
 			}
 			// Filter to modify the dashboard model.
-			$can_apply_dashboard_model_filter = apply_filters( 'sa_can_apply_dashboard_model_filter', true );
-			$store_model                      = ( ! empty( $can_apply_dashboard_model_filter ) ) ? apply_filters( 'sa_dashboard_model', $store_model, $store_model_transient ) : $store_model;
+			$can_apply_dashboard_model_filter = apply_filters( 'sa_' . $this->plugin_sku . '_can_apply_dashboard_model_filter', true );
+			$store_model                      = ( ! empty( $can_apply_dashboard_model_filter ) ) ? apply_filters( 'sa_' . $this->plugin_sku . '_dashboard_model', $store_model, $store_model_transient ) : $store_model;
 
-			$store_model = apply_filters( 'port_store_model_new_mapping', $store_model, $old_col_model );
+			$store_model = apply_filters( $this->plugin_sku . '_port_store_model_new_mapping', $store_model, $old_col_model );
 
 			$column_and_store_model_data_post_mapping = apply_filters(
-				'map_column_for_stored_transient',
+				$this->plugin_sku . '_map_column_for_stored_transient',
 				array(
 					'column_model_transient' => $column_model_transient,
 					'store_model'            => $store_model,
@@ -784,7 +802,7 @@ if ( ! class_exists( 'SA_Manager_Base' ) ) {
 					unset( $final_column_model[ $key ] );
 				}
 				if ( ! empty( $priority_columns ) || ! empty( $final_column_model ) ) {
-					usort( $priority_columns, $this->plugin_sku . '_position_compare' ); // code for sorting as per the position.
+					usort( $priority_columns, 'sa_position_compare' ); // code for sorting as per the position.
 					$final_column_model = array_values( $final_column_model );
 					foreach ( $final_column_model as $col_model ) {
 						$priority_columns[] = $col_model;
@@ -800,9 +818,9 @@ if ( ! class_exists( 'SA_Manager_Base' ) ) {
 			if ( ( ! empty( $this->store_col_model_transient_option_nm ) ) && empty( get_user_meta( get_current_user_id(), $this->store_col_model_transient_option_nm, true ) ) ) {
 				update_user_meta( get_current_user_id(), $this->store_col_model_transient_option_nm, $column_model_transient );
 			}
-			$store_model = apply_filters( 'modify_store_model_for_trash_status', $store_model );
+			$store_model = apply_filters( $this->plugin_sku . '_modify_store_model_for_trash_status', $store_model );
 			do_action( $this->plugin_sku . '_dashboard_model_saved' );
-			$store_model = apply_filters( 'modify_store_model_search_params', $store_model, $search_params );
+			$store_model = apply_filters( $this->plugin_sku . '_modify_store_model_search_params', $store_model, $search_params );
 			if ( ! $return_store_model ) {
 				wp_send_json( $store_model );
 			} else {

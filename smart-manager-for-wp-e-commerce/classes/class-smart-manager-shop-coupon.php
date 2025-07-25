@@ -15,7 +15,7 @@ if ( ! class_exists( 'Smart_Manager_Shop_Coupon' ) ) {
 			$this->post_type = $dashboard_key;
 			$this->req_params  	= (!empty($_REQUEST)) ? $_REQUEST : array();
 			
-			add_filter( 'sa_dashboard_model',array( &$this,'coupons_dashboard_model' ), 10, 2 );
+			add_filter( 'sa_sm_dashboard_model',array( &$this,'coupons_dashboard_model' ), 10, 2 );
 			add_filter( 'sm_data_model', array( &$this, 'coupons_data_model' ), 10, 2 );
 
 		}

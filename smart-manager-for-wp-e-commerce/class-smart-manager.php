@@ -478,6 +478,7 @@ class Smart_Manager {
 			}
 		});
 		add_action( 'wp_ajax_dismiss_generate_sku_feature_notice', array( $this, 'dismiss_generate_sku_feature_notice' ) );
+		add_filter( 'sa_sm_manager_request_handler_allowed_dir_path', array( $this, 'request_handler_allowed_dir_path' ), 10 );
 	}
 
 	// Find latest StoreApps Upgrade file
@@ -849,7 +850,7 @@ class Smart_Manager {
 		$current_user_role = '';
 		$current_user_caps = '';
 
-		$roles = ( ! empty( $current_user->roles[0] ) ) ? array_values( $current_user->roles ) : $current_user->roles;
+		$roles = ( is_object( $current_user ) && ( ! empty( $current_user->roles ) ) && ( is_array( $current_user->roles ) ) && ( ! empty( $current_user->roles[0] ) ) ) ? array_values( $current_user->roles ) : $current_user->roles;
 		if( ! empty( $roles ) && sizeof( $roles ) > 0 ) {
 			$user_role = array_search( 'administrator', $roles );
 			$current_user_role = ( false !== $user_role ) ? $roles[ $user_role ] : $roles[0];
@@ -1072,7 +1073,7 @@ class Smart_Manager {
 		wp_register_script ( 'sm_select2', plugins_url ( '/assets/js/select2/select2.full.min.js', SM_PLUGIN_FILE ), $deps, '4.0.5' );
 		wp_enqueue_script( 'sm_select2' );
 		wp_register_script ( 'sm_mithril', plugins_url ( '/common-core/assets/js/mithril/mithril.min.js', SM_PLUGIN_FILE ), $deps, $this->version );
-		wp_register_script ( 'sm_search_styles', plugins_url ( '/common-core/assets/js/core-styles.js', SM_PLUGIN_FILE ), array( 'sm_mithril' ), $this->version );
+		wp_register_script ( 'sm_search_styles', plugins_url ( '/common-core/assets/js/styles.js', SM_PLUGIN_FILE ), array( 'sm_mithril' ), $this->version );
 		wp_register_script ( 'sm_dashboard_js', plugins_url ( '/assets/js/admin.js', SM_PLUGIN_FILE ), array( 'sm_search_styles', 'wp-i18n'), $this->version );
 		$last_reg_script = 'sm_mithril';
 		//Code for loading custom js automatically
@@ -1314,7 +1315,7 @@ class Smart_Manager {
 		//Updating The Files Recieved in SM Beta
 		$deleted_successful = ( ($this->dupdater * $this->dupgrade)/$this->dupdater ) * 2;
 
-		self::$sm_dashboards_final ['sm_nonce'] = wp_create_nonce( 'sa-manager-security' );
+		self::$sm_dashboards_final ['sm_nonce'] = wp_create_nonce( 'sa-sm-manager-security' );
 		$batch_background_process = false;
 		$background_process_name = '';
 
@@ -1396,7 +1397,7 @@ class Smart_Manager {
 							'isSubscriptionPluginActive' => ( class_exists( 'WC_Subscriptions' ) ) ? true : false,
 							'subscriptionsAcceptManualRenewals' => ( get_option( 'woocommerce_subscriptions_accept_manual_renewals', 'no' ) === 'yes' ) ? true : false,
 							'subscriptionsExist' => ( class_exists( 'WC_Subscriptions' ) && function_exists( 'wcs_do_subscriptions_exist' ) ) ? wcs_do_subscriptions_exist() : false,
-							'isStripeGatewayActive' => self::is_stripe_gateway_active()
+							'isStripeGatewayActive' => sm_is_stripe_gateway_active()
 						);
 
 		$active_plugins = (array) get_option( 'active_plugins', array() );
@@ -2303,19 +2304,20 @@ class Smart_Manager {
 	}
 
 	/**
-	 * Checks if the Stripe payment gateway is active.
+	 * Handles the allowed directory paths for request processing.
 	 *
-	 * @return bool True if the Stripe gateway is active, false otherwise.
+	 * This function can be used to filter or modify the list of allowed directory paths
+	 * for requests handled.
+	 *
+	 * @param array $allowed_dir_path An array of allowed directory paths.
+	 * @return array The filtered or modified array of allowed directory paths.
 	 */
-	public static function is_stripe_gateway_active() {
-		if ( ! function_exists( 'WC' ) || ! is_callable( 'WC' ) ) {
-			return false;
-		}
-		$gateways = WC()->payment_gateways->get_available_payment_gateways();
-		if ( empty( $gateways ) || ! is_array( $gateways ) ) {
-			return false;
-		}
-		return ( ! empty( $gateways['stripe'] ) ) ? true : false;
+	public function request_handler_allowed_dir_path( $allowed_dir_path = array() ) {
+		$plugin_base_path = plugin_dir_path( __FILE__ );
+		return array_filter( array(
+			realpath( $plugin_base_path . 'common-core/classes' ),
+			realpath( $plugin_base_path . 'pro/common-pro/classes' )
+		) );
 	}
 }
 

@@ -794,7 +794,7 @@ td[aria-describedby*="postmeta_meta_key__thumbnail_id_meta_value__thumbnail_id"]
 	font-weight: bold;
 }
 
-.sa_batch_update_background_link {
+.sa_sm_batch_update_background_link {
 	text-align: right;
 	cursor: pointer;
 	text-decoration: underline;

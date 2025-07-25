@@ -7,10 +7,56 @@ if ( ! class_exists( 'Smart_Manager_Controller' ) ) {
 		public $dashboard_key = '',
 				$plugin_path = '',
 				$sm_beta_pro_background_updater = null;
+		/**
+		 *  Plugin prefix
+		 *
+		 * @var string
+		 */
+		public $plugin_prefix = '';
 
+		/**
+		 *  Plugin name
+		 *
+		 * @var string
+		 */
+		public $plugin_name = '';
+
+		/**
+		 * Stores plugin folder flag.
+		 *
+		 * @var string
+		 */
+		public $folder_flag = '';
+
+		/**
+		 * Stores the plugin directory path.
+		 *
+		 * @var string $plugin_dir_path
+		 */
+		public $plugin_dir_path = '';
 		function __construct() {
-			add_filter( 'sa_manager_handler', array( $this, 'req_handler' ), 10, 2 );
-			add_action( 'sa_manager_func_handler', array( $this, 'func_handler' ) );
+			$this->plugin_path              = untrailingslashit( plugin_dir_path( __FILE__ ) );
+			$this->plugin_file              = defined( 'SM_PLUGIN_FILE' ) ? SM_PLUGIN_FILE : '';
+			$this->plugin_sku               = defined( 'SM_SKU' ) ? SM_SKU : '';
+			$this->plugin_prefix            = defined( 'SM_PREFIX' ) ? SM_PREFIX : '';
+			$this->plugin_name              = defined( 'SM_PLUGIN_NAME' ) ? SM_PLUGIN_NAME : '';
+			$this->folder_flag              = '/pro';
+			$this->plugin_main_class_nm     = 'Smart_Manager';
+			$this->plugin_dir               = defined( 'SM_PLUGIN_DIR_PATH' ) ? SM_PLUGIN_DIR_PATH : '';
+			$this->sa_manager_common_params = array(
+				'plugin_file'          => $this->plugin_file,
+				'plugin_sku'           => $this->plugin_sku,
+				'plugin_prefix'        => $this->plugin_prefix,
+				'plugin_name'          => $this->plugin_name,
+				'folder_flag'          => $this->folder_flag,
+				'plugin_main_class_nm' => $this->plugin_main_class_nm,
+				'plugin_dir'           => $this->plugin_dir,
+				'plugin_obj_key'       => 'smart_manager',
+			);
+			parent::__construct( $this->sa_manager_common_params );
+
+			add_filter( 'sa_sm_manager_handler', array( $this, 'req_handler' ), 10, 2 );
+			add_action( 'sa_sm_manager_func_handler', array( $this, 'func_handler' ) );
 			$this->plugin_path  = untrailingslashit( plugin_dir_path( __FILE__ ) );
 			add_action('admin_init',array(&$this,'call_custom_actions'),11);
 			add_action('admin_footer',array(&$this,'sm_footer'));
