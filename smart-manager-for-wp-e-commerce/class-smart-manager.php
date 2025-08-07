@@ -2127,7 +2127,7 @@ class Smart_Manager {
 		}
 		return array(
 			'man_hours_saved'    => floatval( $man_hours_data['inline'] ),
-			'display_man_hours'  => ( floatval( $man_hours_data['inline'] ) >= 0.25 ) ? true : false,
+			'display_man_hours'  => ( ( floatval( $man_hours_data['inline'] ) >= 0.25 ) && ( ( defined('SMPRO') && false === SMPRO ) || ( ! defined('SMPRO') ) ) ) ? true : false,
 			'additional_savings' => round( self::sm_calculate_additional_man_hrs_savings( floatval( $man_hours_data['inline'] ) ), 2 )
 		);
 	}

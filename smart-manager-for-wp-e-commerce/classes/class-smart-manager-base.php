@@ -72,10 +72,10 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			$this->dashboard_title = ( !empty( $this->req_params['active_module_title'] ) ) ? $this->req_params['active_module_title'] : 'Post';
 			$this->advanced_search_table_types = apply_filters( 'sm_search_table_types', $this->advanced_search_table_types ); //filter to add custom tables to table types
 			$this->store_col_model_transient_option_nm = 'sa_sm_' . $this->dashboard_key;
-			add_filter( 'sm_posts_join_paged', array( &$this, 'sm_query_join' ), 99, 2 );
-			add_filter( 'sm_posts_where', array( &$this, 'sm_query_post_where_cond' ), 99, 2 );
-			add_filter( 'sm_posts_groupby', array( &$this, 'sm_query_group_by' ), 99, 2 );
-			add_filter( 'sm_posts_orderby', array( &$this, 'sm_query_order_by' ), 99, 2 );
+			add_filter( 'posts_join_paged', array( &$this, 'sm_query_join' ), 99, 2 );
+			add_filter( 'posts_where', array( &$this, 'sm_query_post_where_cond' ), 99, 2 );
+			add_filter( 'posts_groupby', array( &$this, 'sm_query_group_by' ), 99, 2 );
+			add_filter( 'posts_orderby', array( &$this, 'sm_query_order_by' ), 99, 2 );
 			add_action( 'sm_search_posts_conditions_array_complete', array( &$this, 'get_matching_children_advanced_search' ) );
 			add_action( 'sm_search_posts_condition_start', array( &$this, 'modify_posts_advanced_search_condition' ), 10, 2 );
 			add_action( 'sm_search_query_postmeta_from', array( &$this, 'modify_postmeta_advanced_search_from' ), 10, 2 );
@@ -728,6 +728,11 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				delete_transient( 'sa_sm_' . $this->dashboard_key );
 				$store_model_transient = false;
 				update_option( '_sm_update_8660_' . $this->dashboard_key, 1, 'no' );
+			}
+			if ( 'user' === $this->dashboard_key && false === get_option( '_sm_update_8680_' . $this->dashboard_key ) ) {
+				delete_transient( 'sa_sm_' . $this->dashboard_key );
+				$store_model_transient = false;
+				update_option( '_sm_update_8680_' . $this->dashboard_key, 1, 'no' );
 			}
 			$store_model_and_old_model_transient['store_model_transient'] = $store_model_transient;
 			$store_model_and_old_model_transient['old_col_model'] = $old_col_model;
@@ -3537,7 +3542,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				return;
 			}
 			global $wpdb;
-			$params['search_val'] = trim( $params['search_val'] );
+			$params['search_val'] = ( is_string( $params['search_val'] ) ) ? trim( $params['search_val'] ) : $params['search_val'];
 			$params['search_val'] = ( ! empty( $params['selected_search_operator'] ) && ( in_array( $params['selected_search_operator'], array( 'like', 'not like') ) ) ) ? '%'.$wpdb->esc_like( $params['search_val'] ) . '%' : $params['search_val']; // To handle operators like startsWith, endsWith, notStartsWith, notEndswith.
 			if ( in_array( $params['selected_search_operator'], array( 'anyOf', 'notAnyOf' ) ) ) { // to handle search values for anyOf, notAnyOf operators.
 				$params['search_val'] = array_map( function( $value ) use ( $wpdb ) {

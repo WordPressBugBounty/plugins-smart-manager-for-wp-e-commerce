@@ -7,7 +7,7 @@ Tags: woocommerce advanced bulk edit, wordpress bulk edit, woocommerce inventory
 Requires at least: 5.0
 Tested up to: 6.8.2
 Requires PHP: 5.6
-Stable tag: 8.67.0
+Stable tag: 8.68.0
 License: GPLv2
 
 WooCommerce Advanced Bulk Edit products, orders, & posts in an Excel-like sheet editor. Get advanced WooCommerce stock, pricing, & order management.
@@ -308,6 +308,15 @@ Open Smart Manager Products dashboard, select required products, click on Bulk E
 2. Bulk edit / Batch update (only in Pro version)
 
 == Changelog ==
+
+= 8.68.0 (07.08.2025) =
+* New: Advanced Search for 'Orders Count' column in the Users dashboard (Pro)
+* Fix: Advanced Search not working for post type dashboards after the last update
+* Fix: 'Set to Regular Price and decrease by %' action sets negative values when updating empty Sale Price fields for WooCommerce Products (Pro)
+* Fix: Success message not displayed after scheduling a Bulk Edit (Pro)
+* Update: Display 'Orders Count' and 'Orders Total' columns for all user roles in the Users dashboard (Pro)
+* Update: UI/UX improvements for Bulk Edit panel (Pro)
+* Update: POT file
 
 = 8.67.0 (25.07.2025) =
 * New: WordPress 6.8.2 compatible
@@ -649,6 +658,9 @@ Open Smart Manager Products dashboard, select required products, click on Bulk E
 [See changelog for all versions](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 8.68.0 =
+Advanced Search for 'Orders Count' column in the Users dashboard (Pro), Fixes related to Advanced Search not working for post type dashboards after the last update, 'Set to Regular Price and decrease by %' action sets negative values when updating empty Sale Price fields for WooCommerce Products (Pro), Success message not displayed after scheduling a Bulk Edit (Pro), Updates related to Display 'Orders Count' and 'Orders Total' columns for all user roles in the Users dashboard (Pro), UI/UX improvements for Bulk Edit panel (Pro). Recommended upgrade.
 
 = 8.67.0 =
 WordPress 6.8.2 compatible, WooCommerce 10.0.4 compatible, Fixes related to Smart Manager Dashboard not loading if WooCommerce plugin is inactive, FacetWP reindexing not triggered when the WooCommerce Products 'Sale Price' field was updated using Inline Edit, 'save_post' hook triggered prematurely when updating the WooCommerce Products 'Sale Price' field via Inline Edit, Bulk Edit not working when using the 'All Items in Search Results' option after the latest update (Pro), FacetWP reindexing not triggered when the WooCommerce Products 'Sale Price' field was updated using Bulk Edit (Pro), 'save_post' hook triggered prematurely when updating the WooCommerce Products 'Sale Price' field via Bulk Edit (Pro), Updates related to UI/UX improvements for Bulk Edit panel. Recommended upgrade.

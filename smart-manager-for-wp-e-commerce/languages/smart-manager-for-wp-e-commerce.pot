@@ -2,14 +2,14 @@
 # This file is distributed under the GNU General Public License v2.0.
 msgid ""
 msgstr ""
-"Project-Id-Version: Smart Manager - Advanced WooCommerce Bulk Edit & Inventory Management 8.67.0\n"
+"Project-Id-Version: Smart Manager - Advanced WooCommerce Bulk Edit & Inventory Management 8.68.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/smart-manager-for-wp-e-commerce\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-07-25T08:41:04+00:00\n"
+"POT-Creation-Date: 2025-08-07T09:21:37+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.10.0\n"
 "X-Domain: smart-manager-for-wp-e-commerce\n"
@@ -328,7 +328,7 @@ msgstr ""
 
 #: classes/class-smart-manager-admin-welcome.php:350
 #: classes/class-smart-manager-admin-welcome.php:372
-#: classes/class-smart-manager-base.php:2206
+#: classes/class-smart-manager-base.php:2211
 msgid "Pro"
 msgstr ""
 
@@ -451,45 +451,45 @@ msgstr ""
 msgid "Slug"
 msgstr ""
 
-#: classes/class-smart-manager-base.php:819
-#: classes/class-smart-manager-base.php:820
-#: classes/class-smart-manager-base.php:821
+#: classes/class-smart-manager-base.php:824
+#: classes/class-smart-manager-base.php:825
+#: classes/class-smart-manager-base.php:826
 #: classes/class-smart-manager-shop-order.php:1781
 msgid "Trash"
 msgstr ""
 
 #. translators: %1$s: time saved in minutes/hours, %2$s: Pro upgrade link, %3$s: additional savings possible
-#: classes/class-smart-manager-base.php:2194
+#: classes/class-smart-manager-base.php:2199
 msgid "You saved <strong>%1$s</strong>! Upgrade to %2$s to save more <strong>%3$s</strong> and unlock undo."
 msgstr ""
 
 #. translators: %1$d: number of updated record %2$s: record update message
-#: classes/class-smart-manager-base.php:2220
+#: classes/class-smart-manager-base.php:2225
 msgid "%1$d record%2$s updated successfully!"
 msgstr ""
 
 #. translators: %1$d: number of updated record %2$s: record update message
-#: classes/class-smart-manager-base.php:2228
+#: classes/class-smart-manager-base.php:2233
 msgid "%1$d record%2$s updated successfully! %3$s"
 msgstr ""
 
 #. translators: %1$d: number of updated record %2$s: record update message
-#: classes/class-smart-manager-base.php:2275
+#: classes/class-smart-manager-base.php:2280
 msgid "%1$d record%2$s deleted successfully!"
 msgstr ""
 
 #. translators: %1$s: exports schedule success message
-#: classes/class-smart-manager-base.php:3344
+#: classes/class-smart-manager-base.php:3349
 msgctxt "success notification"
 msgid "Export scheduled successfully. Check all your scheduled export actions <a target='_blank' href='%s'>here</a>."
 msgstr ""
 
-#: classes/class-smart-manager-base.php:3394
+#: classes/class-smart-manager-base.php:3399
 msgctxt "export data model"
 msgid "Export CSV: no data found "
 msgstr ""
 
-#: classes/class-smart-manager-base.php:3464
+#: classes/class-smart-manager-base.php:3469
 msgctxt "export file data"
 msgid "Export CSV: no file data found"
 msgstr ""
@@ -1016,20 +1016,20 @@ msgstr ""
 
 #. translators: %s: process name
 #: pro/classes/class-smart-manager-pro-background-updater.php:101
-#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:973
+#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:974
 msgctxt "batch handler time exceed status"
 msgid "Time is exceeded for %s"
 msgstr ""
 
 #. translators: %s: process name
 #: pro/classes/class-smart-manager-pro-background-updater.php:105
-#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:977
+#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:978
 msgctxt "batch handler memory exceed status"
 msgid "Memory is exceeded for %s"
 msgstr ""
 
 #: pro/classes/class-smart-manager-pro-background-updater.php:198
-#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:706
+#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:708
 msgctxt "background process task params"
 msgid "Background process task params "
 msgstr ""
@@ -1825,65 +1825,65 @@ msgctxt "delete task details"
 msgid "No task detail ids found for deleting task details"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:99
+#: pro/classes/class-smart-manager-pro-user.php:103
 msgctxt "AFWC Affiliate Tags field name"
 msgid "AFWC Affiliate Tags"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:216
+#: pro/classes/class-smart-manager-pro-user.php:220
 msgid "Nickname"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:395
+#: pro/classes/class-smart-manager-pro-user.php:399
 msgctxt "AFWC Is Affiliate field name"
 msgid "AFWC Is Affiliate"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:396
+#: pro/classes/class-smart-manager-pro-user.php:400
 msgctxt "AFWC Referral URL ID field name"
 msgid "AFWC Referral URL ID"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:397
+#: pro/classes/class-smart-manager-pro-user.php:401
 msgctxt "AFWC PayPal Email field name"
 msgid "AFWC PayPal Email"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:398
+#: pro/classes/class-smart-manager-pro-user.php:402
 msgctxt "AFWC Parent Chain field name"
 msgid "AFWC Parent Chain"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:399
+#: pro/classes/class-smart-manager-pro-user.php:403
 msgctxt "AFWC Lifetime Customers field name"
 msgid "AFWC Lifetime Customers"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:400
+#: pro/classes/class-smart-manager-pro-user.php:404
 msgctxt "AFWC Affiliate Form Description field name"
 msgid "AFWC Affiliate Form Description"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:401
+#: pro/classes/class-smart-manager-pro-user.php:405
 msgctxt "AFWC Affiliate Form Contact field name"
 msgid "AFWC Affiliate Form Contact"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:402
+#: pro/classes/class-smart-manager-pro-user.php:406
 msgctxt "AFWC Affiliate Skype Handle field name"
 msgid "AFWC Affiliate Skype Handle"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:404
+#: pro/classes/class-smart-manager-pro-user.php:408
 msgctxt "AFWC Additional Form Fields field name"
 msgid "AFWC Additional Form Fields"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:1435
+#: pro/classes/class-smart-manager-pro-user.php:1439
 msgid "Email cannot be empty"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:1441
+#: pro/classes/class-smart-manager-pro-user.php:1445
 msgid "Email already exists. Please enter another email."
 msgstr ""
 
@@ -1936,87 +1936,87 @@ msgctxt "background process notice"
 msgid "Every 5 Seconds"
 msgstr ""
 
-#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:430
+#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:432
 msgctxt "batch handler params"
 msgid "Batch handler params "
 msgstr ""
 
-#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:431
+#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:433
 msgctxt "batch handler update ids"
 msgid "Batch handler update ids "
 msgstr ""
 
-#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:540
+#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:542
 msgctxt "entire store"
 msgid "All"
 msgstr ""
 
 #. translators: 1. Error title 2. The bulk process
-#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:552
+#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:554
 msgid "%1$s: The %2$s process has stopped. Please review the dashboard to check the status."
 msgstr ""
 
 #. translators: 1. Error title 2. The bulk process
-#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:552
+#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:554
 msgid "Error"
 msgstr ""
 
-#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:560
+#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:562
 msgid "Important"
 msgstr ""
 
-#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:561
+#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:563
 msgid "request is running"
 msgstr ""
 
-#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:562
+#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:564
 msgid "in the background. You will be notified on"
 msgstr ""
 
-#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:562
+#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:564
 msgid "when it is completed."
 msgstr ""
 
-#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:568
+#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:570
 msgid "Progress"
 msgstr ""
 
-#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:569
+#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:571
 msgid "--:--:--"
 msgstr ""
 
-#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:570
+#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:572
 msgid "Stop"
 msgstr ""
 
-#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:575
+#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:577
 msgid "NOTE"
 msgstr ""
 
-#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:583
+#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:585
 msgid "for"
 msgstr ""
 
-#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:583
+#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:585
 msgid "completed successfully"
 msgstr ""
 
 #. translators: %s: process name
-#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:595
+#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:597
 msgid "Are you sure you want to stop the %s process? Click OK to stop."
 msgstr ""
 
-#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:763
+#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:765
 msgctxt "fatal error for callback"
 msgid "Transactional email triggered fatal error for callback "
 msgstr ""
 
-#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:850
+#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:851
 msgctxt "percentage progress"
 msgid "% completed"
 msgstr ""
 
-#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:873
+#: pro/common-pro/classes/class-sa-manager-pro-background-updater.php:874
 msgid "% Completed"
 msgstr ""
 
@@ -2032,38 +2032,38 @@ msgid "Bulk Edit"
 msgstr ""
 
 #. translators: %s process name
-#: pro/common-pro/classes/class-sa-manager-pro-base.php:763
+#: pro/common-pro/classes/class-sa-manager-pro-base.php:767
 msgctxt "update status"
 msgid "%s failed"
 msgstr ""
 
-#: pro/common-pro/classes/class-sa-manager-pro-base.php:826
+#: pro/common-pro/classes/class-sa-manager-pro-base.php:830
 msgctxt "batch process"
 msgid "No batch process params found"
 msgstr ""
 
-#: pro/common-pro/classes/class-sa-manager-pro-base.php:839
+#: pro/common-pro/classes/class-sa-manager-pro-base.php:843
 msgctxt "background process notification"
 msgid "records"
 msgstr ""
 
-#: pro/common-pro/classes/class-sa-manager-pro-base.php:839
+#: pro/common-pro/classes/class-sa-manager-pro-base.php:843
 msgctxt "background process notification"
 msgid "record"
 msgstr ""
 
-#: pro/common-pro/classes/class-sa-manager-pro-base.php:840
+#: pro/common-pro/classes/class-sa-manager-pro-base.php:844
 msgctxt "background process notification"
 msgid "entire store"
 msgstr ""
 
 #. translators: %1$1s: site title %2$2s: background process parameter name
-#: pro/common-pro/classes/class-sa-manager-pro-base.php:843
+#: pro/common-pro/classes/class-sa-manager-pro-base.php:847
 msgctxt "background process title"
 msgid "[%1$1s] %2$2s process completed!"
 msgstr ""
 
-#: pro/common-pro/classes/class-sa-manager-pro-base.php:1583
+#: pro/common-pro/classes/class-sa-manager-pro-base.php:1587
 msgctxt "bulk update process"
 msgid "Bulk update posts batch failed"
 msgstr ""
@@ -2541,13 +2541,13 @@ msgstr ""
 #: assets/js/smart-manager.js:2575
 #: assets/js/smart-manager.js:4363
 #: pro/assets/js/smart-manager.js:1230
-#: pro/assets/js/smart-manager.js:1863
+#: pro/assets/js/smart-manager.js:1866
 msgctxt "modal title"
 msgid "Attention!"
 msgstr ""
 
 #: assets/js/admin.js:1
-#: pro/assets/js/smart-manager.js:1864
+#: pro/assets/js/smart-manager.js:1867
 msgctxt "modal content"
 msgid "Do you really want to"
 msgstr ""
@@ -2555,7 +2555,7 @@ msgstr ""
 #: assets/js/admin.js:1
 #: assets/js/smart-manager.js:2541
 #: pro/assets/js/smart-manager.js:1239
-#: pro/assets/js/smart-manager.js:1864
+#: pro/assets/js/smart-manager.js:1867
 msgctxt "modal content"
 msgid "delete"
 msgstr ""
@@ -2587,7 +2587,7 @@ msgstr ""
 
 #: assets/js/admin.js:1
 msgctxt "subscription status condition"
-msgid "Are in <strong>Active</strong>, <strong>On hold</strong> or <strong>Pending</strong> status"
+msgid "Are in <strong>Active</strong>, <strong>On hold</strong>, <strong>Pending</strong> or <strong>Pending Cancellation</strong> status"
 msgstr ""
 
 #: assets/js/admin.js:1
@@ -3457,7 +3457,7 @@ msgstr ""
 #: assets/js/admin.js:1
 #: assets/js/smart-manager.js:2492
 #: pro/assets/js/smart-manager.js:1150
-#: pro/assets/js/smart-manager.js:1944
+#: pro/assets/js/smart-manager.js:1947
 #: pro/common-pro/assets/js/base.js:82
 msgctxt "button"
 msgid "Cancel"
@@ -4114,7 +4114,7 @@ msgid "Enter how many new %s(s) to create!"
 msgstr ""
 
 #: assets/js/smart-manager.js:2483
-#: pro/assets/js/smart-manager.js:1917
+#: pro/assets/js/smart-manager.js:1920
 msgctxt "button"
 msgid "Create"
 msgstr ""
@@ -4377,99 +4377,99 @@ msgid "not contains"
 msgstr ""
 
 #: common-core/assets/js/core-base.js:50
-#: pro/assets/js/smart-manager.js:1622
+#: pro/assets/js/smart-manager.js:1625
 #: pro/common-pro/assets/js/base.js:5
 msgctxt "bulk edit action - 'date' fields"
 msgid "increase by"
 msgstr ""
 
 #: common-core/assets/js/core-base.js:50
-#: pro/assets/js/smart-manager.js:1622
+#: pro/assets/js/smart-manager.js:1625
 #: pro/common-pro/assets/js/base.js:5
 msgctxt "bulk edit action - 'date' fields"
 msgid "decrease by"
 msgstr ""
 
 #: common-core/assets/js/core-base.js:52
-#: pro/assets/js/smart-manager.js:1625
+#: pro/assets/js/smart-manager.js:1628
 msgctxt "bulk edit action - 'number' fields"
 msgid "increase by %"
 msgstr ""
 
 #: common-core/assets/js/core-base.js:52
-#: pro/assets/js/smart-manager.js:1625
+#: pro/assets/js/smart-manager.js:1628
 msgctxt "bulk edit action - 'number' fields"
 msgid "decrease by %"
 msgstr ""
 
 #: common-core/assets/js/core-base.js:52
-#: pro/assets/js/smart-manager.js:1625
+#: pro/assets/js/smart-manager.js:1628
 msgctxt "bulk edit action - 'number' fields"
 msgid "increase by number"
 msgstr ""
 
 #: common-core/assets/js/core-base.js:52
-#: pro/assets/js/smart-manager.js:1625
+#: pro/assets/js/smart-manager.js:1628
 msgctxt "bulk edit action - 'number' fields"
 msgid "decrease by number"
 msgstr ""
 
 #: common-core/assets/js/core-base.js:55
-#: pro/assets/js/smart-manager.js:1628
+#: pro/assets/js/smart-manager.js:1631
 msgctxt "bulk edit action - 'datetime' fields"
 msgid "set datetime to"
 msgstr ""
 
 #: common-core/assets/js/core-base.js:55
-#: pro/assets/js/smart-manager.js:1628
+#: pro/assets/js/smart-manager.js:1631
 msgctxt "bulk edit action - 'datetime' fields"
 msgid "set date to"
 msgstr ""
 
 #: common-core/assets/js/core-base.js:55
-#: pro/assets/js/smart-manager.js:1628
+#: pro/assets/js/smart-manager.js:1631
 msgctxt "bulk edit action - 'datetime' fields"
 msgid "set time to"
 msgstr ""
 
 #: common-core/assets/js/core-base.js:56
-#: pro/assets/js/smart-manager.js:1629
+#: pro/assets/js/smart-manager.js:1632
 msgctxt "bulk edit action - 'date' fields"
 msgid "set date to"
 msgstr ""
 
 #: common-core/assets/js/core-base.js:57
-#: pro/assets/js/smart-manager.js:1630
+#: pro/assets/js/smart-manager.js:1633
 msgctxt "bulk edit action - 'time' fields"
 msgid "set time to"
 msgstr ""
 
 #: common-core/assets/js/core-base.js:59
-#: pro/assets/js/smart-manager.js:1632
+#: pro/assets/js/smart-manager.js:1635
 msgctxt "bulk edit action - 'multiselect list' fields"
 msgid "add to"
 msgstr ""
 
 #: common-core/assets/js/core-base.js:59
-#: pro/assets/js/smart-manager.js:1632
+#: pro/assets/js/smart-manager.js:1635
 msgctxt "bulk edit action - 'multiselect list' fields"
 msgid "remove from"
 msgstr ""
 
 #: common-core/assets/js/core-base.js:61
-#: pro/assets/js/smart-manager.js:1634
+#: pro/assets/js/smart-manager.js:1637
 msgctxt "bulk edit action - 'text' fields"
 msgid "prepend"
 msgstr ""
 
 #: common-core/assets/js/core-base.js:61
-#: pro/assets/js/smart-manager.js:1634
+#: pro/assets/js/smart-manager.js:1637
 msgctxt "bulk edit action - 'text' fields"
 msgid "append"
 msgstr ""
 
 #: common-core/assets/js/core-base.js:61
-#: pro/assets/js/smart-manager.js:1634
+#: pro/assets/js/smart-manager.js:1637
 msgctxt "bulk edit action - 'text' fields"
 msgid "search & replace"
 msgstr ""
@@ -4477,19 +4477,19 @@ msgstr ""
 #: common-core/assets/js/core-base.js:65
 #: pro/assets/js/smart-manager.js:654
 #: pro/assets/js/smart-manager.js:790
-#: pro/assets/js/smart-manager.js:1640
+#: pro/assets/js/smart-manager.js:1643
 msgctxt "bulk edit action"
 msgid "set to"
 msgstr ""
 
 #: common-core/assets/js/core-base.js:66
-#: pro/assets/js/smart-manager.js:1641
+#: pro/assets/js/smart-manager.js:1644
 msgctxt "bulk edit action"
 msgid "copy from"
 msgstr ""
 
 #: common-core/assets/js/core-base.js:66
-#: pro/assets/js/smart-manager.js:1641
+#: pro/assets/js/smart-manager.js:1644
 msgctxt "bulk edit action"
 msgid "copy from field"
 msgstr ""
@@ -4874,7 +4874,7 @@ msgctxt "error message"
 msgid "Error in scheduling export, please try again later"
 msgstr ""
 
-#: pro/assets/js/smart-manager.js:1887
+#: pro/assets/js/smart-manager.js:1890
 msgctxt "saved bulk edit error msg"
 msgid "Name cannot be empty."
 msgstr ""

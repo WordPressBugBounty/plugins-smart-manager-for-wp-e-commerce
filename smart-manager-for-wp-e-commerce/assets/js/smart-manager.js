@@ -3540,7 +3540,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 				<button class='button button-large close-btn hover:text-gray-700 bg-gray-300' type='button'>${_x('Discard Changes', 'undo all button', 'smart-manager-for-wp-e-commerce')}</button>
 				<button class='ml-4 button button-large bg-indigo-600 text-white hover:bg-indigo-500 focus:outline-none focus:shadow-outline-indigo save-btn' type='button'>${_x('Save Changes', 'save changes button', 'smart-manager-for-wp-e-commerce')}</button>
 			</div>`,
-			status: 'warning_light',
+			status: 'warning400',
 			autoHide: false,
 			hideIcon: true,
 			customClass: 'sm-save-changes-notification',
