@@ -479,6 +479,9 @@ class Smart_Manager {
 		});
 		add_action( 'wp_ajax_dismiss_generate_sku_feature_notice', array( $this, 'dismiss_generate_sku_feature_notice' ) );
 		add_filter( 'sa_sm_manager_request_handler_allowed_dir_path', array( $this, 'request_handler_allowed_dir_path' ), 10 );
+		if ( ( defined('SMPRO') ) && ( SMPRO === true ) && ! class_exists( 'Smart_Manager_Pro_Product_Changes_Tracker' ) && file_exists( ( dirname( SM_PLUGIN_FILE ) ) . '/pro/classes/class-smart-manager-pro-product-changes-tracker.php' ) ) {
+			require_once 'pro/classes/class-smart-manager-pro-product-changes-tracker.php';
+		}
 	}
 
 	// Find latest StoreApps Upgrade file

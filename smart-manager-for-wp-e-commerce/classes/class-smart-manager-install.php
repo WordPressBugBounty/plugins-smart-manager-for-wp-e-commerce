@@ -48,6 +48,9 @@ class Smart_Manager_Install {
 		'8.63.0' => array(
 			'create_predefined_custom_views',
 			'rename_attachment_columns'
+		),
+		'8.69.0' => array(
+			'update_869_alter_table'
 		)
 	);
 
@@ -593,6 +596,19 @@ class Smart_Manager_Install {
 		}
 		$columns[ 'postmeta_meta_key__wp_attached_file_meta_value__wp_attached_file' ] = 'File';
 		update_option( 'sa_sm_attachment_columns', $columns );
+	}
+
+	/**
+	 * Update the 'sm_tasks' table to add 'external' enum option to type column if it exists.
+	 * 
+	 * @return bool Void.
+	*/
+	public static function update_869_alter_table() {
+		global $wpdb;
+		// Check if the 'type' column already exists.
+		if ( true === ( self::check_table_column_exists( $wpdb->prefix . 'sm_tasks', 'type' ) ) ) {
+			$wpdb->query( $wpdb->prepare( "ALTER TABLE {$wpdb->prefix}sm_tasks MODIFY `type` ENUM(%s,%s,%s) NOT NULL COMMENT 'edit functionality type'", 'inline', 'bulk_edit', 'external' ) );
+		}
 	}
 }
 

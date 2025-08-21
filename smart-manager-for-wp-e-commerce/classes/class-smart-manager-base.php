@@ -1791,8 +1791,8 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			$table_model = ( ! empty( $store_model_transient['tables'] ) ) ? $store_model_transient['tables'] : array();
 			$col_model = ( ! empty( $store_model_transient['columns'] ) ) ? $store_model_transient['columns'] : array();
 			if ( empty( $edited_data ) || empty( $table_model ) || empty( $col_model ) ) return;
-			if ( is_callable( array( 'Smart_Manager_Task', 'task_update' ) ) && ( is_array( $updated_edited_data ) && ( ! empty( $updated_edited_data ) ) ) && ( ! empty( $this->req_params['title'] ) ) && ( ! empty( $this->dashboard_key ) ) ) {
-				$this->task_id = Smart_Manager_Task::task_update(
+			if ( function_exists( 'sm_task_update' ) && ( is_array( $updated_edited_data ) && ( ! empty( $updated_edited_data ) ) ) && ( ! empty( $this->req_params['title'] ) ) && ( ! empty( $this->dashboard_key ) ) ) {
+				$this->task_id = sm_task_update(
 					array(
 						'title' => $this->req_params['title'],
 						'created_date' => date( 'Y-m-d H:i:s' ),
@@ -2473,7 +2473,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 					$terms_cond = "( ". $wpdb->prefix ."term_taxonomy.taxonomy LIKE '". $search_params['search_col'] . "' )";
 					$params['search_query']['cond_terms_operator'] .= 'LIKE';
 				} else {
-					$terms_cond = "( ". $wpdb->prefix ."term_taxonomy.taxonomy NOT LIKE '". $search_params['search_col'] . "' AND ". $wpdb->prefix ."terms.slug NOT LIKE %s" . " )";
+					$terms_cond = "( ". $wpdb->prefix ."term_taxonomy.taxonomy LIKE '". $search_params['search_col'] . "' AND ". $wpdb->prefix ."terms.slug NOT LIKE %s" . " )";
 					$params['search_query']['cond_terms_operator'] .= 'NOT LIKE';
 				}
 			} else {

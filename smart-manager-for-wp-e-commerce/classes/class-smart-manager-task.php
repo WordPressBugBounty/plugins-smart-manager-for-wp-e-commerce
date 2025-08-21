@@ -336,56 +336,6 @@ if ( ! class_exists( 'Smart_Manager_Task' ) ) {
 		}
 
 		/**
-		 * Task updation
-		 *
-		 * @param array $params contains status, completed date, title, date, post type, author, type, status, actions, record_count.
-		 * @return int inserted task id in case of insertion or number of affected rows in case of updation
-		 */
-		public static function task_update( $params = array() ) {
-			global $wpdb;
-			if ( empty( $params ) && ( ! is_array( $params ) ) ) {
-				if ( is_callable( 'sa_manager_log' ) ) {
-					sa_manager_log( 'error', _x( 'No params found for updating task ', 'task update params', 'smart-manager-for-wp-e-commerce' ) );
-				}
-				return;
-			}
-			if ( ( ! empty( $params['task_id'] ) ) && ( ( ! empty( $params['status'] ) ) || ( ! empty( $params['completed_date'] ) ) ) ) {
-				$set_query = '';
-				switch ( $params ) {
-					case ( ! empty( $params['status'] ) && ( ! isset( $params['completed_date'] ) ) ):
-						$set_query = "status = '{$params['status']}'";
-						break;
-					case ( ! isset( $params['status'] ) && ( ! empty( $params['completed_date'] ) ) ):
-						$set_query = "completed_date = '{$params['completed_date']}'";
-						break;
-					default:
-						$set_query = "status = '{$params['status']}', completed_date = '{$params['completed_date']}'";
-					}
-				if ( empty( $set_query ) ) {
-					return;
-				}
-				return $wpdb->query( "UPDATE {$wpdb->prefix}sm_tasks SET " . $set_query . " WHERE id = " . $params['task_id'] . "" );
-			} elseif ( ! empty( $params['title'] ) && ! empty( $params['post_type'] ) && ! empty( $params['type'] ) && ! empty( $params['actions'] ) && ! empty( $params['record_count'] ) ) {
-				$wpdb->query(
-					$wpdb->prepare(
-						"INSERT INTO {$wpdb->prefix}sm_tasks( title, date, completed_date, post_type, author, type, status, actions, record_count)
-						VALUES( %s, %s, %s, %s, %d, %s, %s, %s, %d )",
-						$params['title'],
-						( ! empty( $params['created_date'] ) ) ? $params['created_date'] : '0000-00-00 00:00:00',
-						'0000-00-00 00:00:00',
-						$params['post_type'],
-						get_current_user_id(),
-						$params['type'],
-						( ! empty( $params['status'] ) ) ? $params['status'] : 'in-progress',
-						json_encode( $params['actions'] ),
-						$params['record_count']
-					)
-				);
-			}
-			return ( ! is_wp_error( $wpdb->insert_id ) ) ? $wpdb->insert_id : 0;
-		}
-
-		/**
 		 * Insert task details into sm_task_details table
 		 *
 		 * @param array $params contains task_id, action, status, record_id, field, prev_val, updated_val.
@@ -394,40 +344,7 @@ if ( ! class_exists( 'Smart_Manager_Task' ) ) {
 		public static function task_details_update() {
 			global $wpdb;
 			$params = ( ! empty( property_exists( 'Smart_Manager_Base', 'update_task_details_params' ) ) ) ? Smart_Manager_Base::$update_task_details_params : array();
-			if ( empty( $params ) && ( ! is_array( $params ) ) ) {
-				return;
-			}
-			$task_id         = array();
-			$task_details_id = array();
-			foreach ( $params as $param ) {
-				if ( empty( $param['task_id'] ) || empty( $param['action'] ) || empty( $param['status'] ) || empty( $param['record_id'] ) || empty( $param['field'] ) ) {
-					continue;
-				}
-				$task_id = array( $param['task_id'] );
-				$wpdb->query(
-					$wpdb->prepare(
-						"INSERT INTO {$wpdb->prefix}sm_task_details( task_id, action, status, record_id, field, prev_val, updated_val )
-						VALUES( %d, %s, %s, %d, %s, %s, %s )",
-						$param['task_id'],
-						$param['action'],
-						$param['status'],
-						$param['record_id'],
-						$param['field'],
-						( isset( $param['prev_val'] ) ) ? $param['prev_val'] : '',
-						( isset( $param['updated_val'] ) ) ? maybe_serialize( $param['updated_val'] ) : ''
-					)
-				);
-				$task_details_id[] = ( ! is_wp_error( $wpdb->insert_id ) ) ? $wpdb->insert_id : array();
-			}
-			if ( ( ! empty( $task_details_id ) ) && ( count( $params ) === count( $task_details_id ) ) ) {
-				self::task_update(
-					array(
-						'task_id' => implode( '', $task_id ),
-						'status' => 'completed',
-						'completed_date' => date( 'Y-m-d H:i:s' )
-					)
-				);
-			}
+			sm_task_details_update( $params );
 		}
 
 		/**

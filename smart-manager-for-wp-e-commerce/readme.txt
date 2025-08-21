@@ -7,7 +7,7 @@ Tags: woocommerce advanced bulk edit, wordpress bulk edit, woocommerce inventory
 Requires at least: 5.0
 Tested up to: 6.8.2
 Requires PHP: 5.6
-Stable tag: 8.68.0
+Stable tag: 8.69.0
 License: GPLv2
 
 WooCommerce Advanced Bulk Edit products, orders, & posts in an Excel-like sheet editor. Get advanced WooCommerce stock, pricing, & order management.
@@ -247,7 +247,7 @@ The plugin is also GDPR-ready – it doesn’t collect personal data.
 
 * [Smart Manager Detailed Documentation](https://www.storeapps.org/knowledgebase_category/smart-manager/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme)
 * Compatible with latest versions of both [WooCommerce](https://wordpress.org/plugins/woocommerce/) and [WP e-Commerce](https://wordpress.org/plugins/wp-e-commerce/)
-* Available Translations: Chinese, Dutch, French, German, Italian, Japanese, Polish, Portuguese (Brazilian), Portuguese (Portugal), Russian, Romanian, Spanish and Turkish.
+* Available Translations: Chinese, Dutch, French, German, Italian, Japanese, Korean, Polish, Portuguese (Brazilian), Portuguese (Portugal), Russian, Romanian, Spanish and Turkish.
 * Want to add a new language to Smart Manager? Contribute via [translate.wordpress.org](https://translate.wordpress.org/projects/wp-plugins/smart-manager-for-wp-e-commerce/).
 * Questions? [Contact us](https://www.storeapps.org/support/contact-us/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme)
 
@@ -308,6 +308,17 @@ Open Smart Manager Products dashboard, select required products, click on Bulk E
 2. Bulk edit / Batch update (only in Pro version)
 
 == Changelog ==
+
+= 8.69.0 (21.08.2025) =
+* New: WooCommerce 10.1.1 compatible
+* New: Korean translation (AI-generated)
+* New: Log WooCommerce product changes (inventory, price and other product fields) across edits from the admin screen, third‑party plugins, or REST API (Pro)
+* New: Undo WooCommerce product changes (inventory, price and other product fields) across edits from the admin screen, third‑party plugins, or REST API (Pro)
+* Fix: Newly created taxonomy terms (e.g., WooCommerce product categories) not appearing in the Smart Manager dashboard
+* Fix: Advanced Search not working when using the 'is not' operator in taxonomy conditions
+* Fix: Scheduled Bulk Edits failing to process when handling a large number of records (Pro)
+* Update: Pricing page related changes
+* Update: POT file
 
 = 8.68.0 (07.08.2025) =
 * New: Advanced Search for 'Orders Count' column in the Users dashboard (Pro)
@@ -658,6 +669,9 @@ Open Smart Manager Products dashboard, select required products, click on Bulk E
 [See changelog for all versions](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 8.69.0 =
+WooCommerce 10.1.1 compatible, Korean translation (AI-generated), Log WooCommerce product changes (inventory, price and other product fields) across edits from the admin screen, third‑party plugins, or REST API (Pro), Undo WooCommerce product changes (inventory, price and other product fields) across edits from the admin screen, third‑party plugins, or REST API (Pro), Fixes related to Newly created taxonomy terms (e.g., WooCommerce product categories) not appearing in the Smart Manager dashboard, Advanced Search not working when using the 'is not' operator in taxonomy conditions, Scheduled Bulk Edits failing to process when handling a large number of records (Pro), Updates related to Pricing page related changes. Recommended upgrade.
 
 = 8.68.0 =
 Advanced Search for 'Orders Count' column in the Users dashboard (Pro), Fixes related to Advanced Search not working for post type dashboards after the last update, 'Set to Regular Price and decrease by %' action sets negative values when updating empty Sale Price fields for WooCommerce Products (Pro), Success message not displayed after scheduling a Bulk Edit (Pro), Updates related to Display 'Orders Count' and 'Orders Total' columns for all user roles in the Users dashboard (Pro), UI/UX improvements for Bulk Edit panel (Pro). Recommended upgrade.

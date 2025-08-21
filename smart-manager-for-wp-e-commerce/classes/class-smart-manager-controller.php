@@ -119,6 +119,9 @@ if ( ! class_exists( 'Smart_Manager_Controller' ) ) {
 
 		//Function to call custom actions on admin_init
 		public function call_custom_actions() {
+			if ( is_callable( array( 'SA_Manager_Controller', 'call_custom_actions' ) ) ) {
+				SA_Manager_Controller::call_custom_actions();
+			}
 			//for background updater
 			if( defined('SMPRO') && SMPRO === true && file_exists(SM_PRO_URL . 'classes/class-smart-manager-pro-background-updater.php') ) {
 				include_once SM_PRO_URL . 'classes/class-smart-manager-pro-background-updater.php';
