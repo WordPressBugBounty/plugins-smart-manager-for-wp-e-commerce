@@ -109,6 +109,9 @@
             if (typeof this.childSetDashboardModel === 'function') {
                 this.childSetDashboardModel(response);
             }
+            if(typeof this.setSearchableCols === 'function'){
+                this.setSearchableCols();
+            }
         } catch (e){
             SaErrorHandler.log('Error in setDashboardModel:: ', e)
         }

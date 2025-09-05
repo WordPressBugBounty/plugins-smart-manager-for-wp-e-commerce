@@ -618,31 +618,32 @@ if ( ! class_exists( 'Smart_Manager_Product' ) ) {
 	        // Code to get all the variable parent ids whose type is set to 'simple'
 
 	        //Code to get the taxonomy id for 'simple' product_type
-	        $query_taxonomy_ids = "SELECT taxonomy.term_taxonomy_id as term_taxonomy_id
-	                                    FROM {$wpdb->prefix}terms as terms
-	                                        JOIN {$wpdb->prefix}term_taxonomy as taxonomy ON (taxonomy.term_id = terms.term_id)
-	                                    WHERE taxonomy.taxonomy = 'product_type'
-	                                    	AND terms.slug IN ('variable', 'variable-subscription')";
-	        $variable_taxonomy_ids = $wpdb->get_col( $query_taxonomy_ids );
+	        // $query_taxonomy_ids = "SELECT taxonomy.term_taxonomy_id as term_taxonomy_id
+	        //                             FROM {$wpdb->prefix}terms as terms
+	        //                                 JOIN {$wpdb->prefix}term_taxonomy as taxonomy ON (taxonomy.term_id = terms.term_id)
+	        //                             WHERE taxonomy.taxonomy = 'product_type'
+	        //                             	AND terms.slug IN ('variable', 'variable-subscription')";
+	        // $variable_taxonomy_ids = $wpdb->get_col( $query_taxonomy_ids );
 
-	        if ( !empty($variable_taxonomy_ids) ) {
-	        	$query_post_parent_not_variable = "SELECT distinct products.post_parent 
-				                            FROM {$wpdb->prefix}posts as products 
-				                            WHERE NOT EXISTS (SELECT * 
-				                            					FROM {$wpdb->prefix}term_relationships 
-				                            					WHERE object_id = products.post_parent
-				                            						AND term_taxonomy_id IN (". implode(",",$variable_taxonomy_ids) ."))
-				                              AND products.post_parent > 0 
-				                              AND products.post_type = 'product_variation'";
-		        $results_post_parent_not_variable = $wpdb->get_col( $query_post_parent_not_variable );
-		        $rows_post_parent_not_variable = $wpdb->num_rows;
+	        // if ( !empty($variable_taxonomy_ids) ) {
+	        // 	$query_post_parent_not_variable = "SELECT distinct products.post_parent 
+			// 	                            FROM {$wpdb->prefix}posts as products 
+			// 	                            WHERE NOT EXISTS (SELECT * 
+			// 	                            					FROM {$wpdb->prefix}term_relationships 
+			// 	                            					WHERE object_id = products.post_parent
+			// 	                            						AND term_taxonomy_id IN (". implode(",",$variable_taxonomy_ids) ."))
+			// 	                              AND products.post_parent > 0 
+			// 	                              AND products.post_type = 'product_variation'";
+		    //     $results_post_parent_not_variable = $wpdb->get_col( $query_post_parent_not_variable );
+		    //     $rows_post_parent_not_variable = $wpdb->num_rows;
 
-		        for ($i=sizeof($results_trash),$j=0;$j<sizeof($results_post_parent_not_variable);$i++,$j++ ) {
-		            $results_trash[$i] = $results_post_parent_not_variable[$j];
-		        }
-	        }
+		    //     for ($i=sizeof($results_trash),$j=0;$j<sizeof($results_post_parent_not_variable);$i++,$j++ ) {
+		    //         $results_trash[$i] = $results_post_parent_not_variable[$j];
+		    //     }
+	        // }
 
-	        if ($rows_trash > 0 || $rows_post_parent_not_variable > 0) {
+	        // if ($rows_trash > 0 || $rows_post_parent_not_variable > 0) {
+	        if ($rows_trash > 0 ) {
 	            $where .= " AND {$wpdb->prefix}posts.post_parent NOT IN (" .implode(",",$results_trash). ")";
 	        }
 			return array( 'sql' => $where, 'value' => ( ! empty( $where_params['where_cond'] ) && ( is_array( $where_params['where_cond'] ) ) && ( ! empty( $where_params['search_text'] ) ) ) ? array_fill( 0, sizeof( $where_params['where_cond'] ) + 1, '%' . $wpdb->esc_like( $where_params['search_text'] ) . '%' ) : ''  );
@@ -1496,7 +1497,7 @@ if ( ! class_exists( 'Smart_Manager_Product' ) ) {
 
 						foreach ($attr_editd_val as $attr_editd) {
 
-							$term_id = array_search($attr_editd, $attr_val);
+							$term_id = array_search( htmlspecialchars( $attr_editd ), $attr_val );
 
 							if ($term_id === false && $attr_type == 'text') {
 								$new_term = wp_insert_term($attr_editd, $taxonomy_nm);

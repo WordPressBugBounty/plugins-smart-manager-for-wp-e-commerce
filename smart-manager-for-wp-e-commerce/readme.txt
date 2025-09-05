@@ -7,7 +7,7 @@ Tags: woocommerce advanced bulk edit, wordpress bulk edit, woocommerce inventory
 Requires at least: 5.0
 Tested up to: 6.8.2
 Requires PHP: 5.6
-Stable tag: 8.69.0
+Stable tag: 8.70.0
 License: GPLv2
 
 WooCommerce Advanced Bulk Edit products, orders, & posts in an Excel-like sheet editor. Get advanced WooCommerce stock, pricing, & order management.
@@ -308,6 +308,14 @@ Open Smart Manager Products dashboard, select required products, click on Bulk E
 2. Bulk edit / Batch update (only in Pro version)
 
 == Changelog ==
+
+= 8.70.0 (05.09.2025) =
+* New: WooCommerce 10.1.2 compatible
+* Fix: Advanced Search panel gets stuck when loading a long list of fields
+* Fix: WooCommerce Product attributes list not visible in Inline Edit attributes modal when trying to add attributes
+* Fix: Add/Remove WooCommerce Product attributes containing special characters not working
+* Update: 2x boost in loading speed for the WooCommerce Products dashboard
+* Update: POT file
 
 = 8.69.0 (21.08.2025) =
 * New: WooCommerce 10.1.1 compatible
@@ -669,6 +677,9 @@ Open Smart Manager Products dashboard, select required products, click on Bulk E
 [See changelog for all versions](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 8.70.0 =
+WooCommerce 10.1.2 compatible, Fixes related to Advanced Search panel gets stuck when loading a long list of fields, WooCommerce Product attributes list not visible in Inline Edit attributes modal when trying to add attributes, Add/Remove WooCommerce Product attributes containing special characters not working, Updates related to 2x boost in loading speed for the WooCommerce Products dashboard. Recommended upgrade.
 
 = 8.69.0 =
 WooCommerce 10.1.1 compatible, Korean translation (AI-generated), Log WooCommerce product changes (inventory, price and other product fields) across edits from the admin screen, third‑party plugins, or REST API (Pro), Undo WooCommerce product changes (inventory, price and other product fields) across edits from the admin screen, third‑party plugins, or REST API (Pro), Fixes related to Newly created taxonomy terms (e.g., WooCommerce product categories) not appearing in the Smart Manager dashboard, Advanced Search not working when using the 'is not' operator in taxonomy conditions, Scheduled Bulk Edits failing to process when handling a large number of records (Pro), Updates related to Pricing page related changes. Recommended upgrade.

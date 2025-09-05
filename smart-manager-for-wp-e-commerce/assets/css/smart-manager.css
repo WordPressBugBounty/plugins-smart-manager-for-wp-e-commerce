@@ -1829,7 +1829,7 @@ input#sm_add_title{
 }
 
 .sm-eligible-dashboards-select2-dropdown{
-	z-index: 9999 !important;
+	z-index: 999999 !important;
 }
 #select2-eligible_dashboards_select-container{
     font-weight: 500;
@@ -1920,7 +1920,7 @@ input.sm-title-input {
   margin-bottom: 0;
 }
 .sm-attribute-modal-select2-dropdown{
-  z-index: 9990 !important;
+  z-index: 999999 !important;
 }
 #sa_manager_main #table_edit_attributes .button.select_all_attributes, #table_edit_attributes .button.select_no_attributes{
 	margin-top: 0.25rem !important;

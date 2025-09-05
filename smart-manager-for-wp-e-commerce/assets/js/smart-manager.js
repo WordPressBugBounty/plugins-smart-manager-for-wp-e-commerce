@@ -849,9 +849,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 		jQuery('#sm_top_bar').trigger('sm_top_bar_loaded');
 		window.smart_manager.toggleTopBar();
 	}
-
-	SmartManager.prototype.initialize_advanced_search = function () {
-
+	SmartManager.prototype.setSearchableCols = function () {
 		if (typeof (window.smart_manager.currentColModel) == 'undefined') {
 			return;
 		}
@@ -860,7 +858,6 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 		window.smart_manager.colModelSearch = {}
 
 		Object.entries(colModel).map(([key, obj]) => {
-
 			if (obj.hasOwnProperty('searchable') && obj.searchable == 1) {
 
 				if (obj.type == 'checkbox') {
@@ -888,9 +885,28 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 					'title': obj.name_display,
 					'type': (obj.hasOwnProperty('search_type')) ? obj.search_type : obj.type,
 					'values': (obj.search_values) ? obj.search_values : {}
-				};
+				}
+
 			}
 		});
+		if (window.smart_manager.hasOwnProperty('colModelSearch') && Object.entries(window.smart_manager.colModelSearch).length > 0) {
+			window[pluginKey].advancedSearchFields = Object.entries(smart_manager.colModelSearch).map(([key, value]) => ({
+				id: key,
+				text: value.title || key
+			}))
+		}
+		if (window.smart_manager.hasOwnProperty('columnNamesBatchUpdate') && Object.entries(window.smart_manager.columnNamesBatchUpdate).length > 0) {
+			window[pluginKey].bulkEditFields = Object.entries(smart_manager.columnNamesBatchUpdate).map(([key, value]) => ({
+				id: key,
+				text: value.title || key
+			}))
+		}
+	}
+	
+	SmartManager.prototype.initialize_advanced_search = function () {
+		if (typeof (window.smart_manager.currentColModel) == 'undefined') {
+			return;
+		}
 		jQuery('#sm_advanced_search_content').html(sprintf(
 			/* translators: %1$d: Advanced search rule count %2$s: search conditions */
 			_x('%1$d condition%2$s', 'search conditions', 'smart-manager-for-wp-e-commerce'), window.smart_manager.advancedSearchRuleCount, ((window.smart_manager.advancedSearchRuleCount > 1) ? _x('s', 'search conditions', 'smart-manager-for-wp-e-commerce') : '')))
