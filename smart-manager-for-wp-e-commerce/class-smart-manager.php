@@ -1413,7 +1413,10 @@ class Smart_Manager {
 			$sm_beta_params['woo_price_decimal_places'] = wc_get_price_decimals();
 			$sm_beta_params['woo_price_decimal_separator'] = wc_get_price_decimal_separator();
 		}
-
+		//WPML language params.
+		if ( ( ! empty( $_GET['lang'] ) ) && ( class_exists( 'SitePress' ) ) ) {
+			$sm_beta_params['lang'] = sanitize_text_field( wp_unslash( $_GET['lang'] ) );
+		}
 
 		wp_localize_script( 'sm_custom_smart_manager_js', 'sm_beta_params', $sm_beta_params );
 

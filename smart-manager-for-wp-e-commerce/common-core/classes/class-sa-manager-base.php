@@ -693,6 +693,9 @@ if ( ! class_exists( 'SA_Manager_Base' ) ) {
 		 * @return array $store_model Updated store model
 		 */
 		public function get_dashboard_model( $return_store_model = false ) {
+			if ( ( ! empty( $this->req_params['lang'] ) ) && ( class_exists( 'SitePress' ) ) && ( defined('SMPRO') && true === SMPRO ) ) {
+				delete_transient( 'sa_sm_' . $this->dashboard_key );
+			}
 			global $wpdb, $current_user;
 			$col_model                   = array();
 			$search_params               = array();

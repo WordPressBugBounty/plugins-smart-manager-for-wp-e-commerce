@@ -196,7 +196,7 @@ ul.children{list-style:none outside;margin:0px 0 0 24px}
 }
 
 #sm_top_bar_left > * {
-	width: 25%;
+	width: 28%;
 	margin: 0em 1em 0em 1em;
 	display: inherit;
 }
@@ -1360,7 +1360,7 @@ input[type=checkbox]:checked{
 /*CSS For advanced search switch*/
 #sm_top_bar_advanced_search {
 	display: flex;
-	padding-top: 0.8em;
+	align-items: center;
 	padding-left: 0.5rem;
 }
 
@@ -1956,4 +1956,14 @@ input.sm-title-input {
 }
 #sa_manager_main .sm-save-changes-notification{
 	max-width: 29rem !important;
+}
+
+#sm_nav_bar_search #search_content{
+	gap: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#sa_manager_main .overflow-auto{
+	overflow: auto !important;
 }

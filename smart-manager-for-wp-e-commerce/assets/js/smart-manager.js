@@ -21,6 +21,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 		this.commonManagerAjaxUrl = (ajaxurl.indexOf('?') !== -1)
 			? ajaxurl + '&action=sa_sm_manager_include_file'
 			: ajaxurl + '?action=sa_sm_manager_include_file';
+		this.lang = sm_beta_params?.lang;
 		this.ajaxParams = {}
 		this.pluginKey = 'smart_manager';
 		this.pluginSlug = 'sm';
@@ -154,6 +155,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 		this.WCProductImportURL = (sm_beta_params.hasOwnProperty('WCProductImportURL')) ? sm_beta_params.WCProductImportURL : ''
 		this.allSettings = (sm_beta_params.hasOwnProperty('allSettings')) ? sm_beta_params.allSettings : {}
 		this.useDatePickerForDateTimeOrDateCols = (sm_beta_params.hasOwnProperty('useDatePickerForDateTimeOrDateCols')) ? parseInt(sm_beta_params.useDatePickerForDateTimeOrDateCols) : 0
+		this.select2RulesDropdownParent = '#sa_manager_main aside';
 		//Code for setting the default dashboard
 		if( typeof this.sm_dashboards != 'undefined' && this.sm_dashboards != '' ) {
 			this.sm_dashboards_combo = this.sm_dashboards = JSON.parse(this.sm_dashboards);
@@ -725,7 +727,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 						</div>
 					</div>
 				</div>`);
-		let sm_top_bar = '<div id="sm_top_bar" style="font-weight:400 !important;width:100%;">' +
+		let sm_top_bar = '<div id="sm_top_bar" style="font-weight:400 !important;width:max-content;">' +
 			'<div id="sm_top_bar_left" class="sm_beta_left" style="width:' + window.smart_manager.grid_width + 'px;background-color: white;padding: 0.5em 0em 1em 0em;">' +
 			'<div class="sm_top_bar_action_btns">' +
 			'<div id="batch_update_sm_editor_grid" title="' + _x('Bulk Edit', 'tooltip', 'smart-manager-for-wp-e-commerce') + '" class="sm_beta_dropdown">' +
@@ -848,59 +850,6 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 
 		jQuery('#sm_top_bar').trigger('sm_top_bar_loaded');
 		window.smart_manager.toggleTopBar();
-	}
-	SmartManager.prototype.setSearchableCols = function () {
-		if (typeof (window.smart_manager.currentColModel) == 'undefined') {
-			return;
-		}
-
-		let colModel = JSON.parse(JSON.stringify(window.smart_manager.currentColModel));
-		window.smart_manager.colModelSearch = {}
-
-		Object.entries(colModel).map(([key, obj]) => {
-			if (obj.hasOwnProperty('searchable') && obj.searchable == 1) {
-
-				if (obj.type == 'checkbox') {
-					obj.type = 'dropdown';
-					obj.search_values = window.smart_manager.getCheckboxValues(obj);
-				}
-
-				if (obj.type == 'sm.multilist') {
-					obj.type = 'dropdown';
-				}
-
-				if (obj.type == 'text') {
-					if (obj.hasOwnProperty('validator')) {
-						if (obj.validator == 'customNumericTextEditor') {
-							obj.type = 'numeric';
-						}
-					}
-				}
-
-				if (obj.type == "number") {
-					obj.type = 'numeric'
-				}
-
-				window.smart_manager.colModelSearch[obj.table_name + '.' + obj.col_name] = {
-					'title': obj.name_display,
-					'type': (obj.hasOwnProperty('search_type')) ? obj.search_type : obj.type,
-					'values': (obj.search_values) ? obj.search_values : {}
-				}
-
-			}
-		});
-		if (window.smart_manager.hasOwnProperty('colModelSearch') && Object.entries(window.smart_manager.colModelSearch).length > 0) {
-			window[pluginKey].advancedSearchFields = Object.entries(smart_manager.colModelSearch).map(([key, value]) => ({
-				id: key,
-				text: value.title || key
-			}))
-		}
-		if (window.smart_manager.hasOwnProperty('columnNamesBatchUpdate') && Object.entries(window.smart_manager.columnNamesBatchUpdate).length > 0) {
-			window[pluginKey].bulkEditFields = Object.entries(smart_manager.columnNamesBatchUpdate).map(([key, value]) => ({
-				id: key,
-				text: value.title || key
-			}))
-		}
 	}
 	
 	SmartManager.prototype.initialize_advanced_search = function () {
@@ -2491,7 +2440,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 					title: sprintf(
 						/* translators: %s: dashboard display name */
 						_x('Add %s(s)', 'modal title', 'smart-manager-for-wp-e-commerce'), window.smart_manager.dashboardDisplayName),
-					content: '<div style="font-size:1.2em;margin:1em;"> <div style="margin-bottom:1em;">' + sprintf(
+					content: '<div style="font-size:1.2em;"> <div style="margin-bottom:1em;">' + sprintf(
 						/* translators: %s: dashboard display name */
 						_x('Enter how many new %s(s) to create!', 'modal content', 'smart-manager-for-wp-e-commerce'), window.smart_manager.dashboardDisplayName) + '</div> <input type="number" id="sm_beta_add_record_count" min="1" value="1" style="width:5em;"></div>',
 					autoHide: false,
@@ -3553,7 +3502,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 			message: `
 			<div id='sm_floating_save_bar' class="flex-align-center">
 				<span class="mr-3">${_x(`You've edited ${recordsCount} ${(recordsCount===1)?"record":"records"}`,'save changes text','smart-manager-for-wp-e-commerce')}.</span>
-				<button class='button button-large close-btn hover:text-gray-700 bg-gray-300' type='button'>${_x('Discard Changes', 'undo all button', 'smart-manager-for-wp-e-commerce')}</button>
+				<button class='button button-large close-btn hover:text-gray-700 bg-gray-300' style="background-color:#d2d6dc;" type='button'>${_x('Discard Changes', 'undo all button', 'smart-manager-for-wp-e-commerce')}</button>
 				<button class='ml-4 button button-large bg-indigo-600 text-white hover:bg-indigo-500 focus:outline-none focus:shadow-outline-indigo save-btn' type='button'>${_x('Save Changes', 'save changes button', 'smart-manager-for-wp-e-commerce')}</button>
 			</div>`,
 			status: 'warning400',
@@ -4313,7 +4262,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 	    if(!args || !((Object.keys(args)).every(arg => args.hasOwnProperty(arg)))){
 	        return;
 	    }
-	    args.params.content = _x('Are you sure you want to export the ','modal content','smart-manager-for-wp-e-commerce') + args.btnText + '?';
+	    args.params.content = _x('Are you sure you want to export the ','modal content','smart-manager-for-wp-e-commerce') + '<strong>' + args.btnText + '</strong>' + '?';
 	    if("undefined" !== typeof(window.smart_manager.generateCsvExport) && "function" === typeof(window.smart_manager.generateCsvExport)){
 	        args.params.btnParams.yesCallback = window.smart_manager.generateCsvExport;
 	    }

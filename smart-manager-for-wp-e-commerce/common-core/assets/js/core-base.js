@@ -79,7 +79,8 @@
                 data: {
                     cmd: 'get_dashboard_model',
                     security: this.saCommonNonce,
-                    active_module: this.dashboardKey
+                    active_module: this.dashboardKey,
+                    lang: this?.lang || ''
                 }
             }
             if(sendRequest){
@@ -117,6 +118,59 @@
         }
     }
 
+    SaCommonManager.prototype.setSearchableCols = function () {
+        if (typeof (window[pluginKey].currentColModel) == 'undefined') {
+            return;
+        }
+
+        let colModel = JSON.parse(JSON.stringify(window[pluginKey].currentColModel));
+        window[pluginKey].colModelSearch = {}
+
+        Object.entries(colModel).map(([key, obj]) => {
+            if (obj.hasOwnProperty('searchable') && obj.searchable == 1) {
+
+                if (obj.type == 'checkbox') {
+                    obj.type = 'dropdown';
+                    obj.search_values = window[pluginKey].getCheckboxValues(obj);
+                }
+
+                if (obj.type == 'sm.multilist') {
+                    obj.type = 'dropdown';
+                }
+
+                if (obj.type == 'text') {
+                    if (obj.hasOwnProperty('validator')) {
+                        if (obj.validator == 'customNumericTextEditor') {
+                            obj.type = 'numeric';
+                        }
+                    }
+                }
+
+                if (obj.type == "number") {
+                    obj.type = 'numeric'
+                }
+
+                window[pluginKey].colModelSearch[obj.table_name + '.' + obj.col_name] = {
+                    'title': obj.name_display,
+                    'type': (obj.hasOwnProperty('search_type')) ? obj.search_type : obj.type,
+                    'values': (obj.search_values) ? obj.search_values : {}
+                }
+
+            }
+        });
+        if (window[pluginKey].hasOwnProperty('colModelSearch') && Object.entries(window[pluginKey].colModelSearch).length > 0) {
+            window[pluginKey].advancedSearchFields = Object.entries(window[pluginKey].colModelSearch).map(([key, value]) => ({
+                id: key,
+                text: value.title || key
+            }))
+        }
+        if (window[pluginKey].hasOwnProperty('columnNamesBatchUpdate') && Object.entries(window[pluginKey].columnNamesBatchUpdate).length > 0) {
+            window[pluginKey].bulkEditFields = Object.entries(window[pluginKey].columnNamesBatchUpdate).map(([key, value]) => ({
+                id: key,
+                text: value.title || key
+            }))
+        }
+    }
     //function to format the column model
     SaCommonManager.prototype.formatDashboardColumnModel = function (column_model) {
         try{

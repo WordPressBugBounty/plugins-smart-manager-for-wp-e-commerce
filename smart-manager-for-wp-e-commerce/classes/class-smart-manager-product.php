@@ -608,6 +608,18 @@ if ( ! class_exists( 'Smart_Manager_Product' ) ) {
 				)
 			);
 			$where = ( ! empty( $where_params['where'] ) ) ? $where_params['where'] : $where;
+			$lang = apply_filters( 'wpml_current_language', NULL );
+			// WPML Workaround to show current active lang products.
+			if ( ( ! empty( $lang ) ) && ( class_exists( 'SitePress' ) ) && ( defined( 'ICL_SITEPRESS_VERSION' ) ) ) {//add class exist check
+				$where.=$wpdb->prepare( "
+					AND {$wpdb->posts}.ID IN (
+						SELECT element_id
+						FROM {$wpdb->prefix}icl_translations
+						WHERE language_code = %s
+						AND element_type LIKE 'post_product%%'
+					)
+				", $lang );
+			}
 			//Code to get the ids of all the products whose post_status is thrash
 	        $query_trash = "SELECT ID FROM {$wpdb->prefix}posts 
 	                        WHERE post_status = 'trash'

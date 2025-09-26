@@ -3222,7 +3222,6 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			if ( empty( $args ) || ( ! is_array( $args ) ) || empty( $args['id'] ) || empty( $args['update_column'] ) ) {
 				return;
 			}
-
 	    	if ( ( ! empty( $args['data_cols_multiselect'] ) ) && ( false !== array_search( $args['update_column'], $args['data_cols_multiselect'] ) ) ) {
 
 	    		$actual_val = ( ! empty( $args['data_cols_multiselect_val'][ $args['update_column'] ] ) ) ? $args['data_cols_multiselect_val'][ $args['update_column'] ] : array();
@@ -3260,6 +3259,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				}
 				$result = wp_set_object_terms( $args['id'], $term_ids, $args['update_column'] );
 	    	}
+			do_action('sm_after_update_post_term', $args );
 			return $result;
 	    }
 

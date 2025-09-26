@@ -434,7 +434,7 @@ jQuery(document).on('sm_dashboard_change', '#sm_editor_grid', function() {
 
 	dlgContent += '<div id="edit_product_attributes">'+
 						'<input type="hidden" name="isVariation" value="'+ ( ( isVariation ) ? 1 : 0 ) +'">'+
-						'<table id= "table_edit_attributes" width="102%">'+
+						'<table id= "table_edit_attributes" width="100%">'+
 							attrSelectedList +
 						'</table>'+
 						'<div id="edit_attributes_toolbar">'+

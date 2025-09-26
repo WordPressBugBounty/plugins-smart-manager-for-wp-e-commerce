@@ -7,7 +7,7 @@ Tags: woocommerce advanced bulk edit, wordpress bulk edit, woocommerce inventory
 Requires at least: 5.0
 Tested up to: 6.8.2
 Requires PHP: 5.6
-Stable tag: 8.70.0
+Stable tag: 8.71.0
 License: GPLv2
 
 WooCommerce Advanced Bulk Edit products, orders, & posts in an Excel-like sheet editor. Get advanced WooCommerce stock, pricing, & order management.
@@ -308,6 +308,14 @@ Open Smart Manager Products dashboard, select required products, click on Bulk E
 2. Bulk edit / Batch update (only in Pro version)
 
 == Changelog ==
+
+= 8.71.0 (26.09.2025) =
+* New: WooCommerce 10.2.1 compatible
+* Fix: Switching WPML active language not displaying taxonomy terms for the selected language in the grid (Pro)
+* Fix: Updates to taxonomy terms via Inline and Bulk Edit not syncing with WPML translated post types (Pro)
+* Update: Display WooCommerce Products in the grid based on WPML active language (Pro)
+* Update: UI/UX improvements across the Smart Manager dashboard
+* Update: POT file
 
 = 8.70.0 (05.09.2025) =
 * New: WooCommerce 10.1.2 compatible
@@ -677,6 +685,9 @@ Open Smart Manager Products dashboard, select required products, click on Bulk E
 [See changelog for all versions](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 8.71.0 =
+WooCommerce 10.2.1 compatible, Fixes related to Switching WPML active language not displaying taxonomy terms for the selected language in the grid (Pro), Updates to taxonomy terms via Inline and Bulk Edit not syncing with WPML translated post types (Pro), Updates related to Display WooCommerce Products in the grid based on WPML active language (Pro), UI/UX improvements across the Smart Manager dashboard. Recommended upgrade.
 
 = 8.70.0 =
 WooCommerce 10.1.2 compatible, Fixes related to Advanced Search panel gets stuck when loading a long list of fields, WooCommerce Product attributes list not visible in Inline Edit attributes modal when trying to add attributes, Add/Remove WooCommerce Product attributes containing special characters not working, Updates related to 2x boost in loading speed for the WooCommerce Products dashboard. Recommended upgrade.
