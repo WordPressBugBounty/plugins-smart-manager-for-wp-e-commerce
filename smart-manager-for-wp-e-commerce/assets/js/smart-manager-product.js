@@ -141,16 +141,8 @@
 
 	//Function to handle 'import CSV' button
 	SmartManager.prototype.showImportButtonHtml = function () {
-		if (jQuery(".sm_top_bar_action_btns:nth-last-child(3)").find('#import_csv_sm_editor_grid').length == 0) {
-			jQuery(".sm_top_bar_action_btns:nth-last-child(3)").append('<div id="import_csv_sm_editor_grid" title="' + _x('Import CSV', 'tooltip', 'smart-manager-for-wp-e-commerce') + '">' +
-				'<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
-				'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m6.75 12l-3-3m0 0l-3 3m3-3v6m-1.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />' +
-				'</svg>' +
-				'<span>' + _x('Import CSV', 'button', 'smart-manager-for-wp-e-commerce') + '</span>' +
-				'</div>');
-		}
-
-		jQuery('.sm_top_bar_action_btns:nth-last-child(3) #import_csv_sm_editor_grid').off('click').on('click', function () {
+		// Add click handler to navbar import button
+		jQuery('#sm_navbar_import_btn').off('click').on('click', function () {
 			if ((typeof window.smart_manager.dirtyRowColIds !== 'undefined') && Object.getOwnPropertyNames(window.smart_manager.dirtyRowColIds).length > 0) {
 				window.smart_manager.confirmUnsavedChanges({ 'yesCallback': window.smart_manager.handleProductImportCSV })
 			} else if ("undefined" !== typeof (window.smart_manager.handleProductImportCSV) && "function" === typeof (window.smart_manager.handleProductImportCSV)) {
@@ -159,48 +151,37 @@
 		})
 	}
 
-	//Function to handle 'show variations' checkbox
+	//Function to handle 'show variations' checkbox - renders toggle HTML in header
 	SmartManager.prototype.showVariationsHtml = function () {
-		let show_variations_checked = '';
-
-		if (window.smart_manager.currentDashboardModel.hasOwnProperty('treegrid') && window.smart_manager.currentDashboardModel.treegrid == 'true') {
-			show_variations_checked = 'checked';
+		if (window.smart_manager.dashboardKey !== 'product') {
+			jQuery('#sm-header-center-extras').empty();
+			return;
 		}
+		
+		const showVariationsChecked = (window.smart_manager.currentDashboardModel && window.smart_manager.currentDashboardModel.treegrid === 'true') ? 'checked' : '';
+		const toggleHtml = `
+			<label class="gap-2 text-[0.8125rem] leading-4 text-sm-base-foreground md:inline-flex items-center select-none cursor-pointer shrink-0" for="sm-toggle-variations">
+				<span>${_x('Show variations', 'toggle', 'smart-manager-for-wp-e-commerce')}</span>
+				<span class="w-8.5 h-4.5 relative inline-flex items-center">
+					<input id="sm-toggle-variations" type="checkbox" class="peer sr-only" ${showVariationsChecked} />
+					<span class="sm-toggle-track absolute inset-0 rounded-[0.625rem] bg-[#d4d4d8] peer-checked:bg-sm-base-primary transition-colors duration-200"></span>
+					<span class="sm-toggle-thumb absolute left-0.5 w-3 h-3 rounded-lg bg-white shadow-[0_1px_2px_rgba(0,0,0,0.1)] peer-checked:translate-x-4 transition-transform duration-200"></span>
+				</span>
+			</label>
+		`;
+		jQuery('#sm-header-center-extras').html(toggleHtml);
+	}
 
-		if (jQuery(".sm_top_bar_action_btns:nth-last-child(2)").find('#sm_products_show_variations_span').length == 0) {
-			jQuery(".sm_top_bar_action_btns:nth-last-child(2)").append("<label id='sm_products_show_variations_span' style='font-weight:400 !important;float: right;padding: 0.5em;'> <input type='checkbox' name='sm_products_show_variations' id='sm_products_show_variations' value='sm_products_show_variations' " + show_variations_checked + ">" + _x('Show Variations', 'checkbox for displaying WooCommerce product variations', 'smart-manager-for-wp-e-commerce') + "</label>");
-		}
-
-		jQuery('.sm_top_bar_action_btns:nth-last-child(2) #sm_products_show_variations').off('change').on('change', function () {
-
-			if (jQuery('#sm_products_show_variations').is(":checked")) {
-				window.smart_manager.currentDashboardModel.tables.posts.where.post_type = ['product', 'product_variation'];
-				window.smart_manager.currentDashboardModel.treegrid = 'true';
-			} else {
-				window.smart_manager.currentDashboardModel.tables.posts.where.post_type = 'product';
-				window.smart_manager.currentDashboardModel.treegrid = 'false';
-			}
-
-			if ((typeof window.smart_manager.dirtyRowColIds !== 'undefined') && Object.getOwnPropertyNames(window.smart_manager.dirtyRowColIds).length > 0) {
-				window.smart_manager.confirmUnsavedChanges({ 'yesCallback': window.smart_manager.updateState })
-			} else if (typeof (window.smart_manager.updateState) !== "undefined" && typeof (window.smart_manager.updateState) === "function") {
-				window.smart_manager.updateState(); //refreshing the dashboard states
-			}
-			if ((typeof window.smart_manager.dirtyRowColIds !== 'undefined') && Object.getOwnPropertyNames(window.smart_manager.dirtyRowColIds).length > 0) {
-				window.smart_manager.confirmUnsavedChanges({ 'yesCallback': window.smart_manager.refresh, 'noCallback': window.smart_manager.handleShowVariations })
-			} else if (typeof (window.smart_manager.refresh) !== "undefined" && typeof (window.smart_manager.refresh) === "function") {
-				window.smart_manager.refresh(); //refreshing the dashboard states
-			}
-		});
+	// Function to get show variations state for getData params
+	SmartManager.prototype.getShowVariationsState = function () {
+		return jQuery('#sm-toggle-variations').is(':checked');
 	}
 
 	//Function to change 'export csv' button HTML
 	SmartManager.prototype.changeExportButtonHtml = function () {
 		if (document.getElementById('sm_export_csv') !== null) {
-			document.getElementById('sm_export_csv').innerHTML = '<a id="sm_export_selected_stock_cols" href="#">' + _x('Selected Records - Stock Columns', 'export button', 'smart-manager-for-wp-e-commerce') + '</a>' +
-				'<a id="sm_export_selected_visible_cols" href="#">' + _x('Selected Records - Visible Columns', 'export button', 'smart-manager-for-wp-e-commerce') + '</a>' +
-				'<a id="sm_export_entire_store_stock_cols" class="sm_entire_store" href="#">' + _x('Entire Store - Stock Columns', 'export button', 'smart-manager-for-wp-e-commerce') + '</a>' +
-				'<a id="sm_export_entire_store_visible_cols" class="sm_entire_store" href="#">' + _x('Entire Store - Visible Columns', 'export button', 'smart-manager-for-wp-e-commerce') + '</a>';
+			document.getElementById('sm_export_csv').innerHTML = '<a id="sm_export_entire_store_stock_cols" class="sm_entire_store" href="#">' + _x('Entire Store - Stock Columns', 'export button', 'smart-manager-for-wp-e-commerce') + '</a>' +
+			'<a id="sm_export_entire_store_visible_cols" class="sm_entire_store" href="#">' + _x('Entire Store - Visible Columns', 'export button', 'smart-manager-for-wp-e-commerce') + '</a>';
 		}
 	}
 	SmartManager.prototype.setExportButtonHTML = function () {
@@ -215,7 +196,7 @@
 	}
 	// Function for handling the 'Show Variations' when click on it during unsaved changes.
 	SmartManager.prototype.handleShowVariations = function () {
-		jQuery('#sm_products_show_variations').prop('checked', !jQuery('#sm_products_show_variations').prop('checked'));
+		jQuery('#sm-toggle-variations').prop('checked', !jQuery('#sm-toggle-variations').prop('checked'));
 	}
 	//Function for redirecting to WC product import
 	SmartManager.prototype.handleProductImportCSV = function(){
@@ -242,15 +223,41 @@
 })(window);
 
 jQuery(document).on('sm_dashboard_change', '#sm_editor_grid', function() {
-	if( window.smart_manager.dashboardKey != 'product' ) {
-		//Code to hide the 'show variations' checkbox
-		if( jQuery(".sm_top_bar_action_btns:nth-last-child(2)").find('#sm_products_show_variations_span').length > 0 ) {
-			jQuery(".sm_top_bar_action_btns:nth-last-child(2) #sm_products_show_variations_span").remove();
+	// Clear variations toggle if not on product dashboard
+	if (window.smart_manager.dashboardKey !== 'product') {
+		jQuery('#sm-header-center-extras').empty();
+	}
+})
+
+// Show variations toggle change handler
+.on('change', '#sm-toggle-variations', function () {
+	const isChecked = jQuery(this).is(':checked');
+	// Update dashboard model for variations
+	if (window.smart_manager.currentDashboardModel && window.smart_manager.currentDashboardModel.tables && window.smart_manager.currentDashboardModel.tables.posts) {
+		if (isChecked) {
+			window.smart_manager.currentDashboardModel.tables.posts.where.post_type = ['product', 'product_variation'];
+			window.smart_manager.currentDashboardModel.treegrid = 'true';
+		} else {
+			window.smart_manager.currentDashboardModel.tables.posts.where.post_type = 'product';
+			window.smart_manager.currentDashboardModel.treegrid = 'false';
 		}
-		if( jQuery(".sm_top_bar_action_btns:nth-last-child(3)").find('#import_csv_sm_editor_grid').length > 0 ) {
-			jQuery(".sm_top_bar_action_btns:nth-last-child(3) #import_csv_sm_editor_grid").remove();
+	}
+	// Refresh grid to show/hide variations
+	if ((typeof window.smart_manager.dirtyRowColIds !== 'undefined') && Object.getOwnPropertyNames(window.smart_manager.dirtyRowColIds).length > 0) {
+		window.smart_manager.confirmUnsavedChanges({ 'yesCallback': function() {
+			window.smart_manager.updateState();
+			window.smart_manager.refresh();
+		}, 'noCallback': function() {
+			// Revert checkbox state
+			jQuery('#sm-toggle-variations').prop('checked', !isChecked);
+		}})
+	} else {
+		if (typeof window.smart_manager.updateState === 'function') {
+			window.smart_manager.updateState();
 		}
-		return;
+		if (typeof window.smart_manager.refresh === 'function') {
+			window.smart_manager.refresh();
+		}
 	}
 })
 
@@ -547,7 +554,7 @@ jQuery(document).on('sm_dashboard_change', '#sm_editor_grid', function() {
 	window.smart_manager.prodAttrDisplayIndex++;
 })
 // Code for handling the export records functionality
-.off( 'click', ".sm_top_bar_action_btns .sm_beta_dropdown_content a").on( 'click', ".sm_top_bar_action_btns .sm_beta_dropdown_content a", function(e){
+.off( 'click', "#sm_navbar_export_btn .sm_beta_dropdown_content a").on( 'click', "#sm_navbar_export_btn .sm_beta_dropdown_content a", function(e){
 	if(window.smart_manager.dashboardKey === 'product'){
 		window.smart_manager.stockCols = ['sm_export_selected_stock_cols', 'sm_export_entire_store_stock_cols'];
 		window.smart_manager.visibleCols = ['sm_export_selected_visible_cols', 'sm_export_entire_store_visible_cols'];

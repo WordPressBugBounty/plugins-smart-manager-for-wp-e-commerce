@@ -890,6 +890,13 @@ class Smart_Manager {
 
 	public function on_admin_init() {
 		global $wp_version,$wpdb;
+		
+		// Remove WordPress core update nag on Smart Manager dashboard.
+		if ( ! empty( $_GET['page'] ) && 'smart-manager' === sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) {
+			remove_action( 'admin_notices', 'update_nag', 3 );
+			remove_action( 'admin_notices', 'maintenance_nag', 10 );
+		}
+		
 		if( is_callable( array( 'Smart_Manager', 'get_version' ) ) ) {
 			$this->version = self::get_version();
 		}
@@ -1787,19 +1794,7 @@ class Smart_Manager {
 				</style>
 				<?php if ( SMPRO === true && function_exists( 'smart_support_ticket_content' ) ) smart_support_ticket_content();  ?>
 
-				<div id="sm_nav_bar" style="margin-bottom:1em;">
-					<div class='sm_beta_left'>
-						<span class="sm-h2">
-						<?php
-								echo 'Smart Manager';
-								echo ' <sup style="vertical-align: super;background-color: #EC8F1C;background-color:#508991;font-size: 0.7em !important;padding: 2px 3px;border-radius: 2px;font-weight: 600;letter-spacing:0.1em;"><span>'.((SMPRO === true) ? __('PRO', 'smart-manager-for-wp-e-commerce') : __('LITE', 'smart-manager-for-wp-e-commerce')).'</span></sup>';
-								$plug_page = '';
-
-						?>
-						</span>
-					</div>
-					<span id="sm_nav_bar_right" style="float: right;"></span>
-				</div>
+				<div id="sm_nav_bar"></div>
 		<?php
 			}
 			if (! $is_pro_updated) {
@@ -1821,7 +1816,7 @@ class Smart_Manager {
 			}
 			if( ! $is_pricing_page ) {
 		?>
-				<div id="sm_editor_grid" ></div>
+				<div id="sm_editor_grid" class="sm-custom-scrollbar" ></div>
 				<div id="sm_pagging_bar"></div>
 				<div id="sm_inline_dialog"></div>
 				<div class="sa-loader-container">
@@ -1887,29 +1882,11 @@ class Smart_Manager {
 			$plugin_data = get_plugin_data( SM_PLUGIN_FILE );
 			ob_start();
 			?>
-			<span class="sm-footer-left">
-				<span class="sm-footer-left-top">
-					<?php
-					printf(
-						/* translators: 1: heart symbol 2: plugin author */
-						esc_html_x( 'Smart Manager, made with %1$s by %2$s', 'plugin and brand text in footer', 'smart-manager-for-wp-e-commerce' ),
-						'<span class="sm-heart">&hearts;</span>',
-						'<span class="sm-brand">' . esc_html_x( 'StoreApps', 'brand name in footer', 'smart-manager-for-wp-e-commerce' ) . '</span>'
-					);
-					?>
+			<div class="flex flex-wrap gap-[0.25rem] items-start shrink-0">
+				<span class="text-xs font-normal leading-4 text-sm-base-ring whitespace-nowrap overflow-hidden text-ellipsis">
+					v<?php echo esc_html( $plugin_data['Version'] ); ?>
 				</span>
-				<br />
-				<span class="sm-footer-left-bottom">
-					<?php
-					printf(
-						/* translators: 1: pipe as text separator 2: plugin version */
-						esc_html_x( 'Proudly built for WordPress & WooCommerce %1$s Version %2$s', 'text for showing plugin is for WordPress and WooCommerce in footer', 'smart-manager-for-wp-e-commerce' ),
-						'<span class="sm-separator">|</span>',
-						esc_html( $plugin_data['Version'] )
-					)
-					?>
-				</span>
-			</span>
+			</div>
 			<?php
 			return ob_get_clean();
 		}
@@ -1924,30 +1901,35 @@ class Smart_Manager {
 		if ( is_admin() && ! empty( $_GET['page'] ) && ( 'smart-manager-woo' === $_GET['page'] || 'smart-manager-wpsc' === $_GET['page'] || ( !empty( $_GET['sm_old'] ) && ( 'woo' === $_GET['sm_old'] || 'wpsc' === $_GET['sm_old'] ) && 'smart-manager' === $_GET['page'] ) || 'smart-manager' === $_GET['page'] || 'smart-manager-settings' === $_GET['page'] || 'smart-manager-pricing' === $_GET['page'] || 'sm-storeapps-plugins' === $_GET['page'] ) ) {
 			ob_start();
 			?>
-			<span class="sm-footer-right">
-				<span class="sm-footer-right-top">
-					<?php
-					printf(
-						/* translators: 1: open the anchor tag for plugin review link 2: five star symbol 3: close the anchor tag for plugin review link */
-						esc_html_x( 'If you like it, please give us %1$s %2$s rating%3$s.', 'text for plugin review in footer', 'smart-manager-for-wp-e-commerce' ),
-						'<a target="_blank" href="'.SM_REVIEW_URL.'">',
-						'<span class="sm-star">&starf;&starf;&starf;&starf;&starf;</span>',
-						'</a>'
-					);
-					?>
-				</span>
-				<br />
-				<span class="sm-footer-right-bottom">
-					<?php
-					printf(
-						/* translators: 1: open the anchor tag for plugin feature request link 2: close the anchor tag for plugin feature request link */
-						esc_html_x( 'Do you have a feature request? Tell us %1$shere%2$s.', 'text for plugin feature request in footer', 'smart-manager-for-wp-e-commerce' ),
-						'<a target="_blank" href="'.SM_CONTACT_SUPPORT_URL.'?utm_source=sm&utm_medium=in_app_footer&utm_campaign=feature_request">',
-						'</a>'
-					);
-					?>
-				</span>
-			</span>
+			<div class="flex gap-[0.5rem] items-center justify-end shrink-0">
+				<!-- Visit StoreApps Button -->
+				<a href="https://www.storeapps.org/?utm_source=sm&utm_medium=in_app_footer&utm_campaign=sa_website" target="_blank" class="text-sm-base-muted-foreground flex gap-[0.375rem] cursor-default h-[2rem] items-center px-[0.75rem] py-[0.5rem] rounded-lg shrink-0 no-underline transition-colors duration-200 hover:underline decoration-current">
+					<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M8.66504 0.665009H12.665M12.665 0.665009V4.66501M12.665 0.665009L5.33171 7.99834M10.665 7.33168V11.3317C10.665 11.6853 10.5246 12.0244 10.2745 12.2745C10.0245 12.5245 9.68533 12.665 9.33171 12.665H1.99837C1.64475 12.665 1.30561 12.5245 1.05556 12.2745C0.805515 12.0244 0.665039 11.6853 0.665039 11.3317V3.99834C0.665039 3.64472 0.805515 3.30558 1.05556 3.05553C1.30561 2.80548 1.64475 2.66501 1.99837 2.66501H5.99837" stroke="#737373" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/>
+					</svg>
+					<span class="text-xs font-medium leading-4 whitespace-nowrap">
+						<?php echo esc_html_x( 'Visit StoreApps', 'footer button', 'smart-manager-for-wp-e-commerce' ); ?>
+					</span>
+				</a>
+				<!-- Request a Feature Button -->
+				<a href="<?php echo esc_url( SM_CONTACT_SUPPORT_URL . '?utm_source=sm&utm_medium=in_app_footer&utm_campaign=feature_request' ); ?>" target="_blank" class=" text-sm-base-muted-foreground cursor-default flex gap-[0.375rem] h-[2rem] items-center px-[0.75rem] py-[0.5rem] rounded-lg shrink-0 no-underline transition-colors duration-200 hover:underline decoration-current">
+					<svg width="10" height="15" viewBox="0 0 10 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M6.66504 8.66501C6.79837 7.99834 7.13171 7.53167 7.66504 6.99834C8.33171 6.39834 8.66504 5.53167 8.66504 4.66501C8.66504 3.60414 8.24361 2.58673 7.49347 1.83658C6.74332 1.08644 5.72591 0.665009 4.66504 0.665009C3.60417 0.665009 2.58676 1.08644 1.83661 1.83658C1.08647 2.58673 0.665039 3.60414 0.665039 4.66501C0.665039 5.33167 0.798372 6.13167 1.66504 6.99834C2.13171 7.46501 2.53171 7.99834 2.66504 8.66501M2.66504 11.3317H6.66504M3.33171 13.9983H5.99837" stroke="#737373" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/>
+					</svg>
+					<span class="text-xs font-medium leading-4 whitespace-nowrap">
+						<?php echo esc_html_x( 'Request a Feature', 'footer button', 'smart-manager-for-wp-e-commerce' ); ?>
+					</span>
+				</a>
+				<!-- Rate Us Button -->
+				<a href="<?php echo esc_url( SM_REVIEW_URL ); ?>" target="_blank" class="text-sm-base-muted-foreground cursor-default flex gap-[0.375rem] h-[2rem] items-center px-[0.75rem] py-[0.5rem] rounded-lg shrink-0 transition-colors duration-200 no-underline hover:underline decoration-current">
+					<svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M7.33171 0.665009L9.39171 4.83834L13.9984 5.51168L10.665 8.75834L11.4517 13.345L7.33171 11.1783L3.21171 13.345L3.99837 8.75834L0.665039 5.51168L5.27171 4.83834L7.33171 0.665009Z" stroke="#737373" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/>
+					</svg>
+					<span class="text-xs font-medium leading-4 whitespace-nowrap">
+						<?php echo esc_html_x( 'Rate Us', 'footer button', 'smart-manager-for-wp-e-commerce' ); ?>
+					</span>
+				</a>
+			</div>
 			<?php
 			return ob_get_clean();
 		}

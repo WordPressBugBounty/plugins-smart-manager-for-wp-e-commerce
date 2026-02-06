@@ -1497,10 +1497,8 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 	        			//Code for generating the view & edit links for the post
 	        			if ( is_array( $data_cols ) && !empty( $data_cols ) ) {
 	        				foreach( $view_edit_cols as $col ) {
-	        					if ( array_search( $col, $data_cols ) ) {
-        							$link = ( 'custom_view_link' === $col ) ? get_permalink( $id_val ) : get_edit_post_link( $id_val, '' );
-	        						$items [$index]['custom_'. ( ( 'custom_view_link' === $col ) ? 'view' : 'edit' ) .'_link'] = ( !empty( $this->req_params['cmd'] ) && $this->req_params['cmd'] != 'get_export_csv' && $this->req_params['cmd'] != 'get_print_invoice' ) ? '<a href="'.$link.'" target="_blank" style="text-decoration:none !important; color:#5850ecc2 !important;"><span class="dashicons dashicons-external"></span></a>' : $link;
-	        					}
+								$link = ( 'custom_view_link' === $col ) ? get_permalink( $id_val ) : get_edit_post_link( $id_val, '' );
+								$items [$index]['custom_'. ( ( 'custom_view_link' === $col ) ? 'view' : 'edit' ) .'_link'] = ( !empty( $this->req_params['cmd'] ) && $this->req_params['cmd'] != 'get_export_csv' && $this->req_params['cmd'] != 'get_print_invoice' ) ? '<a href="'.$link.'" target="_blank" style="text-decoration:none !important; color:#5850ecc2 !important;"><span class="dashicons dashicons-external"></span></a>' : $link;
 	        				}
         				}
 

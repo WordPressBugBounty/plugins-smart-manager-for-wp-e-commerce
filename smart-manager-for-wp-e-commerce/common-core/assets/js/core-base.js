@@ -99,7 +99,7 @@
             }
             jQuery('.sm_grid_notice').remove();
             if (response?.dashboard_notice_message?.length > 0) {
-                jQuery('<div class="sm_grid_notice notice notice-warning is-dismissible" style="display:block !important;"><p>' + response.dashboard_notice_message + '</p></div>').insertBefore('#sm_top_bar');
+                jQuery('<div class="ml-5 sm_grid_notice notice notice-warning is-dismissible" style="display:block !important;"><p>' + response.dashboard_notice_message + '</p></div>').insertBefore('#sm-header');
             }
             this.currentColModel = response.columns;
             //call to function for formatting the column model
