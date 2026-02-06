@@ -4,7 +4,7 @@
  *
  * @package common-core/
  * @since       8.64.0
- * @version     8.67.0
+ * @version     8.76.0
  */
 
 if ( ! function_exists( 'sa_variable_parent_sync_price' ) ) {
@@ -154,8 +154,9 @@ if ( ! function_exists( 'sa_woo_get_price' ) ) {
 	function sa_woo_get_price( $regular_price = 0, $sale_price = 0, $sale_price_dates_from = '0000-00-00 00:00:00', $sale_price_dates_to = '0000-00-00 00:00:00' ) {
 		// Get price if on sale.
 		$price     = ( $sale_price && empty( $sale_price_dates_to ) && empty( $sale_price_dates_from ) ) ? $sale_price : $regular_price;
-		$from_date = ( is_numeric( $sale_price_dates_from ) && (int) $sale_price_dates_from === $sale_price_dates_from ) ? (int) $sale_price_dates_from : strtotime( $sale_price_dates_from );
-		$to_date   = ( is_numeric( $sale_price_dates_to ) && (int) $sale_price_dates_to === $sale_price_dates_to ) ? (int) $sale_price_dates_to : strtotime( $sale_price_dates_to );
+		//Always convert dates to timestamp.
+		$from_date = sa_parse_date_or_timestamp( $sale_price_dates_from );
+		$to_date = sa_parse_date_or_timestamp( $sale_price_dates_to );
 		if ( ! empty( $from_date ) && $from_date < strtotime( 'NOW' ) ) {
 			$price = $sale_price;
 		}
@@ -413,7 +414,6 @@ if ( ! function_exists( 'sa_update_attribute_lookup_data' ) ) {
 	}
 }
 
-
 if ( ! function_exists( 'sa_update_post' ) ) {
 	/**
 	 * Custom function to update post - Compat for WooCommerce Product Stock Alert plugins
@@ -518,5 +518,49 @@ if ( ! function_exists( 'sa_position_compare' ) ) {
 			return -1;
 		}
 		return 1;
+	}
+}
+
+if ( ! function_exists( 'sa_parse_date_or_timestamp' ) ) {
+	/**
+	 * Parse a value into a Unix timestamp.
+	 *
+	 * @param string $value Optional. Date string or timestamp-like numeric string. Default empty.
+	 * @return int|false|null Returns timestamp on success, false for invalid date, or null for empty input.
+	 */
+	function sa_parse_date_or_timestamp( $value = '' ) {
+		if ( empty( $value ) ) {
+			return;
+		}
+		// Check if value is an integer-like numeric string within valid Unix timestamp range
+		if ( ctype_digit( $value ) && $value <= PHP_INT_MAX && $value >= 0 ) {
+			// It's a valid timestamp string
+			return (int) $value;
+		}
+		// Try parsing it as a date string using DateTime
+		try {
+			$dt = new DateTime($value);
+			return $dt->getTimestamp();
+		} catch (Exception $e) {
+			// Not a valid date string
+			return false;
+		}
+	}
+}
+
+if ( ! function_exists( 'sa_get_offset_timestamp' ) ) {
+	/**
+	 * Get offset timestamp
+	 *
+	 * @param  int $timestamp The timestamp.
+	 *
+	 * @return int Return the timestamp offset.
+	 */
+	function sa_get_offset_timestamp( $timestamp = 0 ) {
+		if ( empty( $timestamp ) ) {
+			$timestamp = time();
+		}
+		$gmt_offset = floatval( get_option( 'gmt_offset', 0 ) ) * HOUR_IN_SECONDS;
+		return $timestamp + ( $gmt_offset ? intval( $gmt_offset ) : 0 );
 	}
 }

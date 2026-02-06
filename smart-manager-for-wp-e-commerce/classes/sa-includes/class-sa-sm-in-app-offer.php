@@ -183,7 +183,10 @@ class SA_SM_In_App_Offer {
 	 * The offer content
 	 */
 	public function in_app_offer() {
-
+		//Prevent display it above the smart manager dashboard.
+		if ( ( empty( $_GET['page'] ) ) || ( ! ( empty( $_GET['page'] ) ) && ( 'smart-manager' === sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) && ( ( empty( $_GET['tab'] ) ) ) && ( ( empty( $_GET['landing-page'] ) ) ) ) ) {
+			return;
+		}
 		if ( $this->is_show() ) {
 			?>
 			<div class="sa_offer_container"><?php $this->show_offer_content(); ?></div>
@@ -222,7 +225,7 @@ class SA_SM_In_App_Offer {
 		<div class="sa_offer">
 			<div class="sa_offer_content">
 				<a href="https://www.storeapps.org/woocommerce-plugins/?utm_source=in_app&utm_medium=<?php echo esc_attr( $this->prefix ); ?>_banner&utm_campaign=<?php echo esc_attr( $this->campaign ); ?>" target="_blank">
-					<img src="<?php echo esc_url( plugins_url( 'sa-includes/images/bfcm-2024.jpg', $this->plugin_file ) ); ?>" />
+					<img src="<?php echo esc_url( plugins_url( 'sa-includes/images/bfcm-2025.png', $this->plugin_file ) ); ?>" />
 				</a>
 				<div class="sa_dismiss"> <!-- Do not change this class -->
 					<a href="javascript:void(0)" style="color: black; text-decoration: none;" title="<?php echo esc_attr__( 'Dismiss', 'smart-manager-for-wp-e-commerce' ); ?>"><?php echo esc_html__( 'Hide this', 'smart-manager-for-wp-e-commerce' ); ?></a>

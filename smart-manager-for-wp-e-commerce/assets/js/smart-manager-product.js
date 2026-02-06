@@ -20,7 +20,7 @@
 		}
 	}
 
-	SmartManagerProduct.prototype.setProductTypeValuesFromColModel = function() {
+	SmartManager.prototype.setProductTypeValuesFromColModel = function() {
 		if (!window.smart_manager.currentColModel){
 			return;
 		} 
@@ -31,7 +31,7 @@
 		});
 	}
 
-	SmartManagerProduct.prototype.getSelectedSubscriptionProductIds = function() {
+	SmartManager.prototype.getSelectedSubscriptionProductIds = function() {
 		window.smart_manager.setProductTypeValuesFromColModel();
 		if ( !window.smart_manager.selectedRows || !window.smart_manager.currentDashboardData || !window.smart_manager.productTypeValues ) {
 			return [];
@@ -412,8 +412,8 @@ jQuery(document).on('sm_dashboard_change', '#sm_editor_grid', function() {
 						});
 					}
 					attrSelectedList += '</select> <br />';
-					attrSelectedList += '<button class="button select_all_attributes" style="margin-right: 1em;">'+_x('Select all', 'button for selecting WooCommerce product attribute', 'smart-manager-for-wp-e-commerce')+'</button> ';
-					attrSelectedList += '<button class="button select_no_attributes">'+_x('Select none', 'button for selecting WooCommerce product attribute', 'smart-manager-for-wp-e-commerce')+'</button> </td>';
+					attrSelectedList += '<button class="bg-sm-base-primary button hover:bg-[#5850d6] select_all_attributes text-sm-base-primary-foreground" style="margin-right: 1em;">'+_x('Select all', 'button for selecting WooCommerce product attribute', 'smart-manager-for-wp-e-commerce')+'</button> ';
+					attrSelectedList += '<button class="bg-sm-base-muted button select_no_attributes text-sm-base-foreground">'+_x('Select none', 'button for selecting WooCommerce product attribute', 'smart-manager-for-wp-e-commerce')+'</button> </td>';
 				}
 				attrSelectedList += '<td> <input type="hidden" name="attribute_names['+window.smart_manager.prodAttrDisplayIndex+']" index="'+window.smart_manager.prodAttrDisplayIndex+'" value="'+key+'" /></td>';
 			} else if (isTaxonomy == 0) {
@@ -438,7 +438,7 @@ jQuery(document).on('sm_dashboard_change', '#sm_editor_grid', function() {
 							attrSelectedList +
 						'</table>'+
 						'<div id="edit_attributes_toolbar">'+
-							'<button type="button" class= "button button-primary" id="edit_attributes_add" style="float:right;">'+_x('Add', 'add attribute button for WooCommerce products', 'smart-manager-for-wp-e-commerce')+'</button>'+
+							'<button type="button" class= "button bg-sm-base-primary text-sm-base-primary-foreground" id="edit_attributes_add" style="float:right;">'+_x('Add', 'add attribute button for WooCommerce products', 'smart-manager-for-wp-e-commerce')+'</button>'+
 							'<select id="edit_attributes_taxonomy_list" style="float: right; margin-right: 1em;">'+attributeList+'</select>'+
 						'</div>'+
 					'</div>';
@@ -470,7 +470,8 @@ jQuery(document).on('sm_dashboard_change', '#sm_editor_grid', function() {
 			title: _x('Attribute', 'modal title', 'smart-manager-for-wp-e-commerce'),
 			content: dlgContent,
 			autoHide: false,
-			width: 'w-2/6',
+			width: 'max-w-lg',
+			// modalClass: 'max-w-lg',
 			cta: {
 				title: _x('Ok', 'button', 'smart-manager-for-wp-e-commerce'),
 				callback: function() {
@@ -523,8 +524,8 @@ jQuery(document).on('sm_dashboard_change', '#sm_editor_grid', function() {
 				});
 			}
 			newAttribute += '</select> <br />';
-			newAttribute += '<button class="button select_all_attributes" style="margin-right: 1em;">'+_x('Select all', 'button for selecting WooCommerce product attribute', 'smart-manager-for-wp-e-commerce')+'</button> ';
-			newAttribute += '<button class="button select_no_attributes">'+_x('Select none', 'button for selecting WooCommerce product attribute', 'smart-manager-for-wp-e-commerce')+'</button> </td>';
+			newAttribute += '<button class="bg-sm-base-primary button hover:bg-[#5850d6] select_all_attributes text-sm-base-primary-foreground" style="margin-right: 1em;">'+_x('Select all', 'button for selecting WooCommerce product attribute', 'smart-manager-for-wp-e-commerce')+'</button> ';
+			newAttribute += '<button class="bg-sm-base-muted button select_no_attributes text-sm-base-foreground">'+_x('Select none', 'button for selecting WooCommerce product attribute', 'smart-manager-for-wp-e-commerce')+'</button> </td>';
 		}
 		newAttribute += '<td> <input type="hidden" name="attribute_names['+window.smart_manager.prodAttrDisplayIndex+']" index="'+window.smart_manager.prodAttrDisplayIndex+'" value="'+ taxonomySelected +'"/></td>';
 	} else if (isTaxonomy == 0) {

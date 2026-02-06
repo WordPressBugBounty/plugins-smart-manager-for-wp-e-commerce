@@ -197,13 +197,16 @@ if ( ! class_exists( 'SA_Manager_Controller' ) ) {
 					}
 					if ( $is_in_allowed_dir && ( is_file( $real_path ) ) ) {
 						include_once $real_path; // nosemgrep: audit.php.lang.security.file.inclusion-arg, scanner.php.lang.security.file.inclusion .
+						if ( ( 'class-sa-manager-product.php' === $basename ) && ( class_exists( 'SA_Manager_Product' ) ) && ( is_callable( array( 'SA_Manager_Product', 'instance' ) ) ) ) {
+							SA_Manager_Product::instance( $this->sa_manager_common_params );
+						}
 					}
 				}
 			}
 
 			if ( ! empty( $_REQUEST['cmd'] ) && ( 'get_background_progress' === $_REQUEST['cmd'] ) ) {
-				$class_name   = 'class-sa-manager-pro-background-updater.php';
-				$pro_class_nm = 'SA_Manager_Pro_Background_Updater';
+				$class_name   = 'class-sa-manager-background-updater.php';
+				$pro_class_nm = 'SA_Manager_Background_Updater';
 			}
 			$handler_obj = null;
 			// Include the class name and path for background processing.
@@ -276,6 +279,10 @@ if ( ! class_exists( 'SA_Manager_Controller' ) ) {
 			add_action( 'woocommerce_attribute_deleted', array( $this, 'woocommerce_attributes_updated' ) );
 			add_action( 'added_post_meta', array( $this, 'added_post_meta' ), 10, 4 );
 			// for background updater.
+			if ( is_file( realpath( $this->plugin_dir_path . '/common-core/classes/class-sa-manager-background-updater.php' ) ) ) {
+				include_once $this->plugin_dir_path . '/common-core/classes/class-sa-manager-background-updater.php';
+				$this->background_updater = SA_Manager_Background_Updater::instance( $this->sa_manager_common_params );
+			}
 			$this->folder_flag = ( ! empty( $this->folder_flag ) ) ? $this->folder_flag : '';
 			if ( is_file( realpath( $this->plugin_dir_path . $this->folder_flag . '/common-pro/classes/class-sa-manager-pro-background-updater.php' ) ) ) {
 				include_once $this->plugin_dir_path . $this->folder_flag . '/common-pro/classes/class-sa-manager-pro-background-updater.php';

@@ -181,6 +181,15 @@ if ( ! class_exists( 'Smart_Manager_Controller' ) ) {
 			// Code to handle saving of settings
 			if( 'smart_manager_settings' === $req_params['active_module'] && is_callable( 'Smart_Manager_Settings', 'update' ) ){
 				$settings = ( ! empty( $req_params['settings'] ) ) ? json_decode( stripslashes( $req_params['settings'] ), true ) : array();
+				//Validate API key settings.
+				$ai_integration_settings = ( ( ! empty( $settings ) ) && ( is_array( $settings ) ) && ( ! empty( $settings['general']['select']['ai_integration_settings'] ) ) ) ? $settings['general']['select']['ai_integration_settings'] : array();
+				if ( ( ! empty( $ai_integration_settings ) ) && ( is_array( $ai_integration_settings ) ) && ( ! empty( $ai_integration_settings['selectedModal'] ) ) && ( defined('SMPRO') && SMPRO === true ) && ( file_exists( $plugin_path . '/class-smart-manager-'.$pro_flag_class_path.'ai-connector.php' ) ) ) {
+					//Include required files.
+					include_once $plugin_path . '/class-smart-manager-'.$pro_flag_class_path.'ai-connector.php';
+					if ( ( class_exists( 'Smart_Manager_Pro_AI_Connector' ) ) && ( is_callable( array( 'Smart_Manager_Pro_AI_Connector', 'verify_cohere_key' ) ) ) ) {
+						Smart_Manager_Pro_AI_Connector::verify_AI_integration_settings( $ai_integration_settings );
+					}
+				}
 				$result = Smart_Manager_Settings::update( $settings );
 				wp_send_json( array( 'ACK'=> ( ( ! empty( $result ) ) ? 'Success' : 'Failure' ) ) );
 			}

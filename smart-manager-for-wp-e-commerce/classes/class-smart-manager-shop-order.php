@@ -1198,13 +1198,18 @@ if ( ! class_exists( 'Smart_Manager_Shop_Order' ) ) {
 			}
 
 			foreach( $edited_data as $id => $edited_row ) {
-				$id = intval( $id );
-
+				$id = ( strpos($id, 'sm_temp_') !== false ) ? 0 : absint( $id );
+				$order = null;
+				//Code for creating the order for HPOS setup.
+				if ( empty( $id ) ) {
+					$order = wc_create_order();
+					$id = ( ! empty( $order ) && is_object( $order ) && is_callable( array( $order, 'get_id' ) ) ) ? absint( $order->get_id() ) : 0;
+				}
 				if ( empty( $id ) || empty( $edited_row ) ) {
 					continue;
 				}
 
-				$order = wc_get_order( $id );
+				$order = ( empty( $order ) && ! empty( $id ) ) ? wc_get_order( $id ) : $order;
 
 				if( empty( $order ) || ! $order instanceof WC_Order ){
 					continue;

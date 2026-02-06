@@ -381,7 +381,7 @@ function sm_task_details_update( $params = array() ) {
                 $param['status'],
                 $param['record_id'],
                 $param['field'],
-                ( isset( $param['prev_val'] ) ) ? $param['prev_val'] : '',
+                ( isset( $param['prev_val'] ) ) ? maybe_serialize( $param['prev_val'] ) : '',
                 ( isset( $param['updated_val'] ) ) ? maybe_serialize( $param['updated_val'] ) : ''
             )
         );
@@ -396,4 +396,21 @@ function sm_task_details_update( $params = array() ) {
             )
         );
     }
+}
+
+/**
+ * Get singular label of a post type.
+ *
+ * @param string $post_type Post type slug.
+ * @return string Singular label or empty string if not found.
+ */
+function sm_get_post_type_singular_name( $post_type = '' ) {
+	if ( empty( $post_type ) ) {
+		return;
+	}
+	$post_type_obj = get_post_type_object( $post_type );
+	if ( empty( $post_type_obj ) || ! is_object( $post_type_obj ) || empty( $post_type_obj->labels->singular_name ) ) {
+		return;
+	}
+	return $post_type_obj->labels->singular_name;
 }

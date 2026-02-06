@@ -904,6 +904,7 @@ if ( ! class_exists( 'Smart_Manager_Product' ) ) {
 							$parent_title = (!empty($data_model['items'][$parent_key]['posts_post_title'])) ? $data_model['items'][$parent_key]['posts_post_title'] : get_the_title($data['posts_post_parent']);
 							$parent_title .= ( !empty($parent_title) ) ? ' - ' : '';
 						// }
+						$parent_attributes = ( ! empty( $data_model['items'][$parent_key]['postmeta_meta_key__product_attributes_meta_value__product_attributes'] ) ) ? json_decode( $data_model['items'][$parent_key]['postmeta_meta_key__product_attributes_meta_value__product_attributes'], true ) : get_post_meta( $data['posts_post_parent'], '_product_attributes', true );
 
 						$data_model['items'][$key]['parent'] = $data['posts_post_parent'];
 						$data_model['items'][$key]['isLeaf'] = true;
@@ -924,18 +925,28 @@ if ( ! class_exists( 'Smart_Manager_Product' ) ) {
 
 								$attr_nm = substr($key1, $start_pos+22);
 
+								//Do not append the attr to variation name if the attr is removed from parent.
+								if ( ( empty( $attr_nm ) ) || ( empty( $parent_attributes ) ) || ( ! is_array( $parent_attributes ) ) || ( is_array( $parent_attributes ) && ( empty( $parent_attributes[ $attr_nm ] ) ) || ( ! is_array( $parent_attributes[ $attr_nm ] ) ) || ( 1 !== (int) $parent_attributes[ $attr_nm ][ 'is_variation' ] ) ) ) {
+									continue;
+								}
+
 								$data_model['items'][$key][$key1] = (empty($data_model['items'][$key][$key1])) ? 'any' : $data_model['items'][$key][$key1];
 
 								if ( !empty($attr_values[$attr_nm]) ) {
 
 									$attr_lbl = (!empty($attr_values[$attr_nm]['lbl'])) ? $attr_values[$attr_nm]['lbl'] : $attr_nm;
 									$attr_val = ( !empty($attr_val_by_slug[$attr_nm][$data_model['items'][$key][$key1]]) ) ? $attr_val_by_slug[$attr_nm][$data_model['items'][$key][$key1]] : $data_model['items'][$key][$key1];
-									$variation_title .= $attr_lbl . ': ' . $attr_val;
+									$variation_title .= $attr_lbl . ': ' . $attr_val . ' | ';
 
-								} else {
-									$variation_title .= $attr_nm . ': ' . $data_model['items'][$key][$key1];
+								} else { // check if variation attr term exists in the parent attributes terms list.
+									$custom_attr_vals = array_map(
+										function( $item ) {
+											return trim( $item );
+										},
+										explode( ' | ', $parent_attributes[ $attr_nm ][ 'value' ] )
+									);
+									$variation_title .= ( is_array( $custom_attr_vals ) && in_array( $data_model['items'][$key][$key1], $custom_attr_vals, true ) ) ? $attr_nm . ': ' . $data_model['items'][$key][$key1] . ' | ' : '';
 								}
-								$variation_title .= ' | ';
 							}
 						}
 
@@ -1429,7 +1440,7 @@ if ( ! class_exists( 'Smart_Manager_Product' ) ) {
 							) ) : $prev_val;
 					}
 					if ( ! empty( $visibility ) ) {
-						$product_visibility_update = $this->set_product_visibility( $id, $visibility );
+						$product_visibility_update = ( class_exists( 'SA_Manager_Product' ) && is_callable( array( 'SA_Manager_Product', 'set_product_visibility' ) ) ) ? SA_Manager_Product::set_product_visibility( $id, $visibility ) : false;
 						if ( ( defined('SMPRO') && ( ! empty( SMPRO ) ) ) && ( ! empty( $this->task_id ) ) && ( ! empty( $id ) ) && ( ! empty( $product_visibility_update ) ) && ( ! empty( property_exists( 'Smart_Manager_Base', 'update_task_details_params' ) ) ) ) {
 			            	Smart_Manager_Base::$update_task_details_params[] = array(
 			            		'task_id' => $this->task_id,

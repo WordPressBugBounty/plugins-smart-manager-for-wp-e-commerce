@@ -271,16 +271,11 @@ if ( ! class_exists( 'Smart_Manager_Task' ) ) {
 			}
 			$query_limit_str  = ( ! empty( $this->req_params['cmd'] ) && ( 'get_export_csv' === $this->req_params['cmd'] ) ) ? '' : 'LIMIT ' . $start_offset . ', ' . $limit;
 			$user_id_constraint = ( ! empty( $current_user_role ) && 'administrator' === $current_user_role ) ? '' : $current_user_id;
-			$args = ( ( ! empty( $this->req_params['search_text'] ) ) ?
-				array_merge(
-					array(
-						1,
-						$this->dashboard_key,
-						$user_id_constraint
-					),
-					array_fill( 0, sizeof( $simple_search_where_cond ), '%' . $wpdb->esc_like( $search_text ) . '%' )
-				) : array( 1, $this->dashboard_key, $user_id_constraint )
-				);
+			$base_args = array( 1, $this->dashboard_key );
+			if ( ! empty( $user_id_constraint ) ) {
+				$base_args[] = $user_id_constraint;
+			}
+			$args = ( ! empty( $this->req_params['search_text'] ) ) ? array_merge( $base_args, array_fill( 0, sizeof( $simple_search_where_cond ), '%' . $wpdb->esc_like( $search_text ) . '%' ) ) : $base_args;
 			$ids              = $wpdb->get_col(
 				$wpdb->prepare(
 					"SELECT DISTINCT {$wpdb->prefix}sm_tasks.id" . $from . $join . "
@@ -321,7 +316,7 @@ if ( ! class_exists( 'Smart_Manager_Task' ) ) {
 						$items[ $index ][ $key_mod ] = $value;
 						if ( 'author' === $key ) {
 							$user_info   = get_user_by( 'id', intval( $value ) );
-							$items[ $index ][ $key_mod ] = ( $user_info instanceof WP_User ) ? ( ( ! empty( $user_info->display_name ) ? $user_info->display_name : '' ) . ( ! empty( $user_info->user_email ) ? ' (' . $user_info->user_email . ')' : '' ) ) : '';
+							$items[ $index ][ $key_mod ] = ( $user_info instanceof WP_User ) ? ( ( ! empty( $user_info->display_name ) ? $user_info->display_name : '' ) . ( ! empty( $user_info->user_email ) ? ' (' . $user_info->user_email . ')' : '' ) ) : '-';
 						}
 					}
 					$index++;
@@ -365,6 +360,11 @@ if ( ! class_exists( 'Smart_Manager_Task' ) ) {
 				case 'postmeta':
 					return get_post_meta( $post_id, $column, true );
 				case 'terms':
+					// Get product catalog visibility.
+					if( ( 'product_visibility' === $column ) && ( function_exists( 'wc_get_product' ) ) ){
+						$product = wc_get_product( $post_id );
+						return ( ( ! empty( $product ) ) && ( is_callable( array( $product, 'get_catalog_visibility' ) ) ) ) ? $product->get_catalog_visibility() : '';
+					}
 					return wp_get_object_terms( $post_id, $column, 'orderby=none&fields=ids' );
 			}
 		}

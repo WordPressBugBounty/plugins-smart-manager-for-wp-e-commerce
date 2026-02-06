@@ -87,6 +87,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			add_filter( 'sm_map_column_for_stored_transient', array( $this, 'map_column_for_stored_transient' ) );
 			add_filter( 'sm_modify_store_model_for_trash_status', array( $this, 'modify_store_model_for_trash_status' ) );
 			add_filter( 'sm_modify_store_model_search_params', array( $this, 'modify_store_model_search_params' ), 10, 2 );
+			add_filter( 'sm_data_model', array( $this, 'on_data_model_load' ), 10, 2 );
 		}
 
 		/**
@@ -733,6 +734,16 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				delete_transient( 'sa_sm_' . $this->dashboard_key );
 				$store_model_transient = false;
 				update_option( '_sm_update_8680_' . $this->dashboard_key, 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_8730_' . $this->dashboard_key ) ) {
+				delete_transient( 'sa_sm_' . $this->dashboard_key . '_tasks' );
+				$store_model_transient = false;
+				update_option( '_sm_update_8730_' . $this->dashboard_key, 1, 'no' );
+			}
+			if ( 'product' === $this->dashboard_key && false === get_option( '_sm_update_8780_' . $this->dashboard_key ) ) {
+				delete_transient( 'sa_sm_' . $this->dashboard_key );
+				$store_model_transient = false;
+				update_option( '_sm_update_8780_' . $this->dashboard_key, 1, 'no' );
 			}
 			$store_model_and_old_model_transient['store_model_transient'] = $store_model_transient;
 			$store_model_and_old_model_transient['old_col_model'] = $old_col_model;
@@ -1622,7 +1633,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 							//Code for handling image fields
         					if( in_array( $meta_key, $image_postmeta_cols ) ) {
 								if( ! empty( $meta_value ) ){
-									$attachment = wp_get_attachment_image_url( $meta_value, 'full' );
+									$attachment = wp_get_attachment_image_url( $meta_value, 'thumbnail' );
 									$meta_value = ( ! empty( $attachment ) ) ? $attachment : '';
 								}
 							}
@@ -1635,7 +1646,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 										$meta_value = array();
 										$img_url = '';
 										foreach( $image_ids as $image_id ) {
-											$img_url = wp_get_attachment_image_url( $image_id, 'full' );
+											$img_url = wp_get_attachment_image_url( $image_id, 'thumbnail' );
 											$meta_value[] = ( !empty( $this->req_params['cmd'] ) && $this->req_params['cmd'] == 'get_export_csv' ) ? $img_url : array( 'id' => $image_id, 'val' => $img_url );
 										}
 									}
@@ -2079,7 +2090,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 							$posts_updated_data[ $id ][ 'meta_input' ][ $update_cond[ 'meta_key' ] ] = $updated_val;
 							$meta_keys_edited [$update_cond['meta_key']] = '';
 
-						} else if($update_table == 'terms') {
+						} else if ( ( 'terms' === $update_table ) && ( 'product_visibility' !== $update_column_name ) ) {
 							if ( ( defined('SMPRO') ) && ( true === SMPRO ) ) {
 								$args = apply_filters( 'sm_process_inline_terms_update', array(
 									'update_column' => $update_column,
@@ -2186,6 +2197,11 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			}
 			//Update man-hrs data in DB
 			Smart_Manager::sm_update_man_hours_data( $is_advanced_search ? 'advanced_search_inline' : 'inline', sizeof( $edited_data ) );
+			$resp = array();
+			if ( ( defined( 'SM_SKU' ) ) && ( class_exists( 'SA_Manager_Feedback' ) ) && ( is_callable( array( 'SA_Manager_Feedback', 'handle_feedback_tracking' ) ) ) ) {
+				SA_Manager_Feedback::handle_feedback_tracking( SM_SKU, 'inline_edit' );
+				$resp['show_feedback'] = ( is_callable( array( 'SA_Manager_Feedback', 'show_feedback' ) ) ) ? SA_Manager_Feedback::show_feedback( SM_SKU ) : false;
+			}
 			if( isset( $this->req_params['pro'] ) && empty( $this->req_params['pro'] ) ) {
 				$sm_inline_update_count = get_option( 'sm_inline_update_count', 0 );
 				$sm_inline_update_count += sizeof($edited_data);
@@ -2217,22 +2233,18 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 								) // Additional savings in mins/hrs.
 							);
 				}
-				$resp = array(
-							'sm_inline_update_count' => $sm_inline_update_count,
-							'modal_message' => $modal_message,
-							'msg' => sprintf(
-									/* translators: %1$d: number of updated record %2$s: record update message */
-									esc_html__( '%1$d record%2$s updated successfully!', 'smart-manager-for-wp-e-commerce'), sizeof( $edited_data ), $msg_str
-								),
-						);
-
-				$msg = json_encode($resp);
+				$resp['msg'] = sprintf(
+					/* translators: %1$d: number of updated record %2$s: record update message */
+					esc_html__( '%1$d record%2$s updated successfully!', 'smart-manager-for-wp-e-commerce'), sizeof( $edited_data ), $msg_str
+				);
+				$resp['sm_inline_update_count'] = $sm_inline_update_count;
+				$resp['modal_message'] = $modal_message;
 			} else {
-				$msg = sprintf(
+				$resp['msg'] = sprintf(
 					/* translators: %1$d: number of updated record %2$s: record update message */
 					esc_html__( '%1$d record%2$s updated successfully! %3$s', 'smart-manager-for-wp-e-commerce' ), sizeof( $edited_data ), $msg_str, '<a href="#" id="undo_action" data-task-id="'.$this->task_id.'">Undo last update.</a>');
 			}
-
+			$msg = json_encode($resp);
 			echo $msg;
 			exit;
 		}
@@ -3174,7 +3186,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 
 					if ( ! empty( $args['terms_visible_cols'][ $taxonomy_nm ] ) ) {
 						if ( ! empty( $args['terms_visible_cols'][ $taxonomy_nm ][ $term_obj->term_id ] ) ) {
-							$multilist_value = ( ! empty( $args['terms_visible_cols'][ $taxonomy_nm ][ $term_obj->term_id ]['title'] ) ) ? $args['terms_visible_cols'][ $taxonomy_nm ][ $term_obj->term_id ]['title'] : $multilist_value;
+							$multilist_value = ( ! empty( $args['terms_visible_cols'][ $taxonomy_nm ][ $term_obj->term_id ]['term'] ) ) ? $args['terms_visible_cols'][ $taxonomy_nm ][ $term_obj->term_id ]['term'] : $multilist_value;
 						}
 					}
 					if ( empty( $terms_data[ $term_obj->object_id ][ $taxonomy_nm ] ) ) {
@@ -3728,5 +3740,65 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 
 			return $params['order_by'];
 		}
+
+		/**
+		 * Handle data model load event and trigger feedback tracking based on request parameters.
+		 *
+		 * @param array $data_model      Data model array.
+		 * @param array $data_col_params Data column parameters.
+		 * @return array Modified data model.
+		 */
+		public function on_data_model_load( $data_model = array(), $data_col_params = array() ) {
+			if ( ! empty( $data_model ) && is_array( $data_model ) && ! empty( $this->req_params ) && is_array( $this->req_params ) && defined( 'SM_SKU' ) && class_exists( 'SA_Manager_Feedback' ) && is_callable( array( 'SA_Manager_Feedback', 'handle_feedback_tracking' ) ) ) {
+				$action = ( ! empty( $this->req_params['advanced_search_query'] ) && is_array( $this->req_params['advanced_search_query'] ) ) ? 'advanced_search' : ( ( ! empty( $this->req_params['show_variations'] ) && 'true' === $this->req_params['show_variations'] ) ? 'show_variations' : '' );
+				if ( ! empty( $action ) ) { 
+					SA_Manager_Feedback::handle_feedback_tracking( SM_SKU, $action );
+					if ( ( 'advanced_search' === $action ) && ( is_callable( array( 'SA_Manager_Feedback', 'show_feedback' ) ) ) ) {
+						$data_model['meta']['show_feedback'] = SA_Manager_Feedback::show_feedback( SM_SKU );
+					}
+					
+				}
+			}
+			return $data_model;
+		}
+
+		/**
+		 * Initiates the Stock Log import process.
+		 *
+		 * This function handles the initialization and execution of the stock log import functionality within the Smart Manager for WP e-Commerce plugin.
+		 *
+		 * @return void
+		*/
+		public function initiate_wsm_stock_log_import_process() {
+			if ( ( ! class_exists( 'SA_Manager_Background_Updater' ) ) || ( ! class_exists( 'Smart_Manager_Product_Stock_Log' ) ) || ( ! is_callable( array( 'SA_Manager_Background_Updater', 'instance' ) ) ) || ( ! is_callable( array( 'SA_Manager_Background_Updater', 'get_identifier' ) ) ) || ( ! is_callable( array( 'Smart_Manager_Product_Stock_Log', 'alter_wsm_stock_log_table' ) ) ) || ( ! is_callable( array( 'Smart_Manager_Product_Stock_Log', 'get_wsm_stock_log_ids' ) ) ) ) {
+				return;
+			}
+			Smart_Manager_Product_Stock_Log::alter_wsm_stock_log_table();
+			$identifier = SA_Manager_Background_Updater::get_identifier();
+			$selected_ids = Smart_Manager_Product_Stock_Log::get_wsm_stock_log_ids();
+			if ( ( empty( $identifier ) ) || ( empty( $selected_ids ) ) || ( ! is_array( $selected_ids ) ) ) {
+				return;
+			}
+			$params = array();
+			$params['process_key']                        = 'import_wsm_stock_log';
+			$params['plugin_data']                        = $this->sa_manager_common_params;
+			$params['backgroundProcessRunningMessage']    = ( ! empty( $this->req_params['background_process_running_message'] ) ) ? $this->req_params['background_process_running_message'] : '';  
+			$params['process_name']                       = _x( 'Stock Log Synchronization' , 'background update process name', 'smart-manager-for-wp-e-commerce' );
+			$params['selected_ids']                       = $selected_ids;
+			$params['id_count']                           = count( $selected_ids );
+			$params['dashboard_key']                      = 'product-stock-log';
+			$params['class_path']                         = 'class-smart-manager-product-stock-log.php';
+			$params['class_nm']                           = 'Smart_Manager_Product_Stock_Log';
+			$params['callback']['func']                   = array( $params['class_nm'], 'import_wsm_stock_log' );
+			$params['callback']['class_path']             = $params['class_path'];
+			update_option( $identifier . '_params', $params, 'no' );
+			update_option( $identifier . '_ids', $selected_ids, 'no' );
+			update_option( $identifier . '_initial_process', 1, 'no' );
+			// Calling the initiate_batch_process function to initiaite the batch process.
+			if ( is_callable( array( SA_Manager_Background_Updater::instance(), 'initiate_batch_process' ) ) ) {
+				SA_Manager_Background_Updater::instance()->initiate_batch_process( $selected_ids );
+			}
+		}
+
 	}
 }

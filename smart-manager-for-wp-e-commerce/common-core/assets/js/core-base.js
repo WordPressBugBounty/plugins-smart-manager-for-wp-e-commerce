@@ -97,6 +97,10 @@
             if (typeof response == 'undefined' || response == '') {
                 return;
             }
+            jQuery('.sm_grid_notice').remove();
+            if (response?.dashboard_notice_message?.length > 0) {
+                jQuery('<div class="sm_grid_notice notice notice-warning is-dismissible" style="display:block !important;"><p>' + response.dashboard_notice_message + '</p></div>').insertBefore('#sm_top_bar');
+            }
             this.currentColModel = response.columns;
             //call to function for formatting the column model
             if (typeof (this.formatDashboardColumnModel) !== "undefined" && typeof (this.formatDashboardColumnModel) === "function") {
@@ -112,6 +116,27 @@
             }
             if(typeof this.setSearchableCols === 'function'){
                 this.setSearchableCols();
+            }
+            if(1===parseInt(window.smart_manager.sm_beta_pro)){
+                let showEditHistory = window.location.search.includes('show_edit_history');
+                //Show tasks list based on url params.
+                if(showEditHistory){
+                    jQuery("#sm_show_tasks").prop('checked', true);
+                    jQuery('#sm_editor_grid').trigger('sm_show_tasks_change');
+                }
+                //Apply advanced search to dashboards based on url params.
+                if( typeof window[pluginKey].buildSearchParamsFromUrl === 'function'){
+                    let advancedSearchParamsFromUrl = window[pluginKey].buildSearchParamsFromUrl( window.location.href, showEditHistory );
+                    if(advancedSearchParamsFromUrl && typeof (window[pluginKey].applyAdvancedSearch) === "function"){
+                        window[pluginKey].applyAdvancedSearch(advancedSearchParamsFromUrl)
+                    }else if(showEditHistory){
+                        window.smart_manager.refresh();
+                    }
+                    //Remove url params except page.
+                    if(typeof (window.smart_manager.removeURLParams)==='function' ){
+                        window.smart_manager.removeURLParams?.([...new URLSearchParams(location.search).keys()].filter(k => k !== 'page'));
+                    }
+                }
             }
         } catch (e){
             SaErrorHandler.log('Error in setDashboardModel:: ', e)

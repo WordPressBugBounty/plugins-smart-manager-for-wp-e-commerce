@@ -51,6 +51,12 @@ class Smart_Manager_Install {
 		),
 		'8.69.0' => array(
 			'update_869_alter_table'
+		),
+		'8.74.0' => array(
+			'update_874_add_options'
+		),
+		'8.77.0' => array(
+			'update_877_alter_table'
 		)
 	);
 
@@ -330,7 +336,7 @@ class Smart_Manager_Install {
 					'per_page_record_limit' => get_option( '_sm_beta_set_record_limit', 50 )
 				),
 				'text'  => array(
-					'grid_row_height' => get_option( 'sm_grid_row_height', '50px' )
+					'grid_row_height' => get_option( 'sm_grid_row_height', '50' )
 				)
 			)
 		);
@@ -608,6 +614,35 @@ class Smart_Manager_Install {
 		// Check if the 'type' column already exists.
 		if ( true === ( self::check_table_column_exists( $wpdb->prefix . 'sm_tasks', 'type' ) ) ) {
 			$wpdb->query( $wpdb->prepare( "ALTER TABLE {$wpdb->prefix}sm_tasks MODIFY `type` ENUM(%s,%s,%s) NOT NULL COMMENT 'edit functionality type'", 'inline', 'bulk_edit', 'external' ) );
+		}
+	}
+
+	/**
+	 * Add new feedback-related options during plugin update (version 8.7.4).
+	 * 
+	 * @return void
+	*/
+	public static function update_874_add_options() {
+		//Check if fresh install.
+		if ( empty( get_option( 'sa_sm_db_version', null ) ) ) {
+			return;
+		}
+		// For existing installs, add feedback start date option if not exists.
+		if ( empty( get_option( 'sa_sm_feedback_start_date', false ) ) ) {
+			update_option( 'sa_sm_feedback_start_date', gmdate( 'Y-m-d', sa_get_offset_timestamp() ), 'no' );
+		}
+	}
+
+	/**
+	 * Update the 'sm_tasks' table to add 'external' enum option to type column if it exists.
+	 * 
+	 * @return bool Void.
+	*/
+	public static function update_877_alter_table() {
+		global $wpdb;
+		// Check if the 'type' column already exists.
+		if ( true === ( self::check_table_column_exists( $wpdb->prefix . 'sm_tasks', 'type' ) ) ) {
+			$wpdb->query( $wpdb->prepare( "ALTER TABLE {$wpdb->prefix}sm_tasks MODIFY `type` ENUM(%s,%s,%s,%s) NOT NULL COMMENT 'edit functionality type'", 'inline', 'bulk_edit', 'external', 'imported') );
 		}
 	}
 }

@@ -476,16 +476,26 @@ if ( ! class_exists( 'SA_Manager_Product' ) ) {
 					// Code for including custom columns for product dashboard.
 					$column_model [ $index ]                   = array();
 					$column_model [ $index ]['src']            = 'terms/attribute_' . $key;
-					$column_model [ $index ]['data']           = sanitize_title( str_replace( '/', '_', $column_model [ $index ]['src'] ) ); // generate slug using the WordPress function if not given.
-					$column_model [ $index ]['name']           = _x( 'Attributes', 'attributes column name', 'smart-manager-for-wp-e-commerce' ) . ': ' . substr( $key, 3 );
+					$column_model [ $index ]['data']           = sanitize_title( str_replace( '/', '_', $column_model [ $index ]['src'] ) ); // generate slug using the WordPress function if not given
+					$column_model [ $index ]['name']           = __( 'Attributes', 'smart-manager-for-wp-e-commerce' ) . ': ' . substr( $key, 3 );
 					$column_model [ $index ]['key']            = $column_model [ $index ]['name'];
 					$column_model [ $index ]['type']           = 'dropdown';
+					$column_model [ $index ]['hidden']         = true;
 					$column_model [ $index ]['editable']       = false;
 					$column_model [ $index ]['batch_editable'] = false;
+					$column_model [ $index ]['sortable']       = false;
+					$column_model [ $index ]['resizable']      = false;
+					$column_model [ $index ]['allow_showhide'] = false;
+					$column_model [ $index ]['exportable']     = false;
+					$column_model [ $index ]['searchable']     = true;
+					$column_model [ $index ]['wordWrap']       = false; // For disabling word-wrap
 					$column_model [ $index ]['table_name']     = $wpdb->prefix . 'terms';
 					$column_model [ $index ]['col_name']       = 'attribute_' . $key;
-					// Code for assigning attr. values.
-					$column_model [ $index ]['values'] = array();
+					$column_model [ $index ]['width']          = 0;
+					$column_model [ $index ]['save_state']     = true;
+					// Code for assigning attr. values
+					$column_model [ $index ]['values']        = array();
+					$column_model [ $index ]['search_values'] = $value;
 				}
 				++$index;
 				// Code for including custom attribute column for product dashboard.
@@ -526,9 +536,23 @@ if ( ! class_exists( 'SA_Manager_Product' ) ) {
 					$column_model [ $index ]['col_name']       = 'product_visibility';
 					// Code for assigning attr. values.
 					$column_model [ $index ]['values']         = $product_visibility_options;
+					$column_model [ $index ]['search_values']  = array();
+					if ( ! empty( $column_model [ $index ]['values'] ) ) {
+						foreach ( $column_model [ $index ]['values'] as $key => $value ) {
+							$column_model [ $index ]['search_values'][] = array(
+								'key'   => $key,
+								'value' => $value,
+							);
+						}
+					}
 					$column_model [ $index ] ['selectOptions'] = $column_model [ $index ]['values'];
 					$column_model [ $index ] ['editor']        = 'select';
 					$column_model [ $index ] ['renderer']      = 'selectValueRenderer';
+					//Code to add allow enable/disable for this column in grid plus support for Advanced Search too.
+					$column_model [ $index ]['allow_showhide'] = true;
+					$column_model [ $index ]['searchable'] = true;
+					$column_model [ $index ]['hidden'] = true;
+					$column_model [ $index ]['save_state'] = true;
 				}
 				$featured_index = sa_multidimesional_array_search( 'terms/product_visibility_featured', 'src', $column_model );
 				if ( empty( $featured_index ) ) {
@@ -547,6 +571,11 @@ if ( ! class_exists( 'SA_Manager_Product' ) ) {
 					$column_model [ $index ]['uncheckedTemplate'] = 'no';
 					// Code for assigning attr. values.
 					$column_model [ $index ]['values'] = array();
+					//Code to add allow enable/disable for this column in grid plus support for Advanced Search too.
+					$column_model [ $index ]['allow_showhide'] = true;
+					$column_model [ $index ]['searchable'] = true;
+					$column_model [ $index ]['hidden'] = true;
+					$column_model [ $index ]['save_state'] = true;
 				}
 			}
 			if ( ! empty( $attribute_meta_cols ) ) {
@@ -583,7 +612,7 @@ if ( ! class_exists( 'SA_Manager_Product' ) ) {
 		 * @param string $visibility selected visibility name.
 		 * @return boolean true if updated successfully else false
 		 */
-		public function set_product_visibility( $id = 0, $visibility = '' ) {
+		public static function set_product_visibility( $id = 0, $visibility = '' ) {
 			if ( empty( $id ) || empty( $visibility ) ) {
 				return;
 			}

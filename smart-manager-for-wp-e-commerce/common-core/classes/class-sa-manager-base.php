@@ -109,6 +109,12 @@ if ( ! class_exists( 'SA_Manager_Base' ) ) {
 				: array();
 			$this->dashboard_title                     = ( ! empty( $this->req_params['active_module_title'] ) ) ? $this->req_params['active_module_title'] : '';
 			$this->store_col_model_transient_option_nm = 'sa_' . $this->plugin_sku . '_' . $this->dashboard_key;
+			$plugin_dir_path                           = ( ! empty( $plugin_data['plugin_dir'] ) ) ? $plugin_data['plugin_dir'] : '';
+			$folder_flag                               = ( ! empty( $plugin_data['folder_flag'] ) && '/lib' === $plugin_data['folder_flag'] ) ? $plugin_data['folder_flag'] : '';
+			( ( class_exists( 'SA_Manager_Pro_Background_Updater' ) ) && ( is_callable( array( 'SA_Manager_Pro_Background_Updater', 'sa_manager_file_safe_include' ) ) ) ) ? SA_Manager_Pro_Background_Updater::sa_manager_file_safe_include( $plugin_dir_path . $folder_flag . '/common-core/classes/', 'class-sa-manager-feedback.php' ) : '';
+			if ( class_exists( 'SA_Manager_Feedback' ) && is_callable( array( 'SA_Manager_Feedback', 'instance' ) ) ) {
+				SA_Manager_Feedback::instance( $plugin_data );
+			}
 		}
 
 		/**
@@ -869,6 +875,104 @@ if ( ! class_exists( 'SA_Manager_Base' ) ) {
 				'terms_val'        => $terms_val,
 				'terms_val_search' => $terms_val_search,
 			);
+		}
+		
+		/**
+		 * Method to update feedback-related options based on user action.
+		 * 
+		 * @return void
+		 */
+		public function update_feedback( ) {
+			if ( ( empty( $_POST['update_action'] ) ) ) {
+				wp_send_json_error( _x( 'Parameter is missing.', 'error message for missing update action', 'smart-manager-for-wp-e-commerce' ) );
+			}
+			if ( ( ! class_exists( 'SA_Manager_Feedback' ) ) || ( ! is_callable( array( 'SA_Manager_Feedback', 'update_feedback' ) ) ) ) {
+				return;
+			}
+			SA_Manager_Feedback::update_feedback(
+				array( 'update_action' => sanitize_text_field( $_POST['update_action'] ), 'plugin_sku' => $this->plugin_sku )
+			);
+			wp_send_json(
+				array(
+					'ACK' => 'Success',
+					'msg' => _x( 'Feedback option updated', 'success message on feedback option update', 'smart-manager-for-wp-e-commerce' ),
+				)
+			);
+		}
+
+		/**
+		 * Handle batch update process completion
+		 *
+		 * @return void
+		 */
+		public static function batch_process_complete() {
+			$identifier = '';
+			if ( is_callable( array( 'SA_Manager_Background_Updater', 'get_identifier' ) ) ) {
+				$identifier = SA_Manager_Background_Updater::get_identifier();
+			}
+			if ( empty( $identifier ) ) {
+				return;
+			}
+			$background_process_params = get_option( $identifier . '_params', false );
+			if ( ( empty( $background_process_params ) ) || ( ! is_array( $background_process_params ) ) ) {
+				if ( is_callable( 'sa_manager_log' ) ) {
+					sa_manager_log( 'error', _x( 'No batch process params found', 'batch process', 'smart-manager-for-wp-e-commerce' ) );
+				}
+				return;
+			}
+			$plugin_prefix = ( ! empty( $background_process_params['plugin_data']['plugin_sku'] ) ) ? $background_process_params['plugin_data']['plugin_sku'] : '';
+			delete_option( $identifier . '_params' );
+			// Preparing email content.
+			$email                         = get_option( 'admin_email' );
+			$site_title                    = get_option( 'blogname' );
+			$email_heading_color           = get_option( 'woocommerce_email_base_color' );
+			$email_heading_color           = ( empty( $email_heading_color ) ) ? '#96588a' : $email_heading_color;
+			$email_text_color              = get_option( 'woocommerce_email_text_color' );
+			$email_text_color              = ( empty( $email_text_color ) ) ? '#3c3c3c' : $email_text_color;
+			$actions                 = ( ! empty( $background_process_params['actions'] ) ) ? $background_process_params['actions'] : array();
+			$records_str                   = $background_process_params['id_count'] . ' ' . ( ( $background_process_params['id_count'] > 1 ) ? _x( 'records', 'background process notification', 'smart-manager-for-wp-e-commerce' ) : _x( 'record', 'background process notification', 'smart-manager-for-wp-e-commerce' ) );
+			$records_str                  .= ( ! empty( $background_process_params['entire_store'] ) ) ? ' (' . _x( 'entire store', 'background process notification', 'smart-manager-for-wp-e-commerce' ) . ')' : '';
+			$background_process_param_name = $background_process_params['process_name'];
+			/* translators: %1$1s: site title %2$2s: background process parameter name */
+			$title = sprintf( _x( '[%1$1s] %2$2s process completed!', 'background process title', 'smart-manager-for-wp-e-commerce' ), $site_title, $background_process_param_name );
+			ob_start();
+			$background_process_actions = $actions;
+			if ( 'import_wsm_stock_log' === $background_process_params['process_key'] ) {	
+				include apply_filters( $plugin_prefix . '_batch_email_template', constant( strtoupper( $plugin_prefix ) . '_PLUGIN_DIR_PATH' ) . '/templates/emails/sync-wsm-stock-log-data.php' );
+			} else{
+				include apply_filters( $plugin_prefix . '_batch_email_template', constant( strtoupper( $plugin_prefix ) . '_EMAIL_TEMPLATE_PATH' ) . '/bulk-edit.php' );
+			}
+			$message = ob_get_clean();
+			$subject = $title;
+			self::send_email(
+				array(
+					'subject' => $subject,
+					'message' => $message,
+					'email'   => $email,
+				)
+			);
+		}
+
+		/**
+		 * Sends an email using WooCommerce's `wc_mail` if available,
+		 * otherwise falls back to WordPress's `wp_mail`.
+		 *
+		 * @param array $args {.
+		 *     @type string $subject Email subject.
+		 *     @type string $email   Recipient's email address.
+		 *     @type string $message Email body content.
+		 * }.
+		 * @return void
+		 */
+		public static function send_email( $args = array() ) {
+			if ( ( empty( $args ) ) || ( ! is_array( $args ) ) || ( empty( $args['subject'] ) ) || ( empty( $args['email'] ) ) || ( empty( $args['message'] ) ) ) {
+				return;
+			}
+			if ( function_exists( 'wc_mail' ) ) {
+				wc_mail( sanitize_email( $args['email'] ), $args['subject'], $args['message'] );
+			} elseif ( function_exists( 'wp_mail' ) ) {
+				wp_mail( sanitize_email( $args['email'] ), $args['subject'], $args['message'] );
+			}
 		}
 	}
 }

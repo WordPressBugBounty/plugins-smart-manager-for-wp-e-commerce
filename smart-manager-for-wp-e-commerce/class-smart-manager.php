@@ -35,6 +35,8 @@ class Smart_Manager {
 		'advanced_search_inline'  => ( 3 / 60 ),
 		'bulk'                    => ( 4.5 / 60 ),
 	);
+	//In app offer class instance
+	public static $sa_offer_instance = null;
 	public static function instance() {
 		if ( is_null( self::$_instance ) ) {
 			self::$_instance = new self();
@@ -191,6 +193,14 @@ class Smart_Manager {
 			define( 'STORE_APPS_URL', 'https://www.storeapps.org/' );
 		}
 
+		// Set plugin review link.
+		if ( ! defined( 'SM_REVIEW_URL' ) ) {
+			define( 'SM_REVIEW_URL', 'https://wordpress.org/support/plugin/smart-manager-for-wp-e-commerce/reviews/?filter=5#new-post' );
+		}
+		// Set contact human support link.
+		if ( ! defined( 'SM_CONTACT_SUPPORT_URL' ) ) {
+			define( 'SM_CONTACT_SUPPORT_URL', 'https://www.storeapps.org/support/contact-us/' );
+		}
 		if ( ! defined( 'SMPRO' ) ) {
 			if (file_exists ( (dirname ( SM_PLUGIN_FILE )) . '/pro/assets/js/smart-manager.js' )) {
 				define ( 'SMPRO', true );
@@ -344,6 +354,9 @@ class Smart_Manager {
 		if( file_exists( $this->plugin_path . '/classes/class-smart-manager-install.php' ) ) {
 			include_once $this->plugin_path . '/classes/class-smart-manager-install.php';
 		}
+		if( file_exists( $this->plugin_path . '/classes/class-smart-manager-install.php' ) ) {
+			include_once $this->plugin_path . '/classes/class-smart-manager-uninstall.php';
+		}
 		if( file_exists( $this->plugin_path . '/classes/class-smart-manager-utils.php' ) ) {
 			include_once $this->plugin_path . '/classes/class-smart-manager-utils.php';
 		}
@@ -362,6 +375,12 @@ class Smart_Manager {
 			$GLOBALS['smart_manager_controller'] = new Smart_Manager_Controller();
 		}
 
+		if ( file_exists( ( dirname( SM_PLUGIN_FILE ) ) . '/common-core/classes/class-sa-manager-background-updater.php') ) {
+			include_once 'common-core/classes/class-sa-manager-background-updater.php';
+		}
+		if ( file_exists( ( dirname( SM_PLUGIN_FILE ) ) . '/classes/class-smart-manager-background-updater.php') ) {
+			include_once 'classes/class-smart-manager-background-updater.php';
+		}
 		//for including background updater & other libraries
 		if ( defined('SMPRO') && SMPRO === true ) {
 
@@ -477,11 +496,13 @@ class Smart_Manager {
 				require_once 'pro/classes/class-smart-manager-pro-product-import-csv.php';
 			}
 		});
-		add_action( 'wp_ajax_dismiss_generate_sku_feature_notice', array( $this, 'dismiss_generate_sku_feature_notice' ) );
+		add_action( 'wp_ajax_dismiss_feature_notice', array( $this, 'dismiss_feature_notice' ) );
 		add_filter( 'sa_sm_manager_request_handler_allowed_dir_path', array( $this, 'request_handler_allowed_dir_path' ), 10 );
 		if ( ( defined('SMPRO') ) && ( SMPRO === true ) && ! class_exists( 'Smart_Manager_Pro_Product_Changes_Tracker' ) && file_exists( ( dirname( SM_PLUGIN_FILE ) ) . '/pro/classes/class-smart-manager-pro-product-changes-tracker.php' ) ) {
 			require_once 'pro/classes/class-smart-manager-pro-product-changes-tracker.php';
 		}
+		//Add custom body class to Smart Manager dashboard page.
+		add_filter( 'admin_body_class', array( $this, 'add_dashboard_body_class' ) );
 	}
 
 	// Find latest StoreApps Upgrade file
@@ -540,13 +561,13 @@ class Smart_Manager {
 			$args = array(
 				'file'           => (dirname( SM_PLUGIN_FILE )) . '/classes/sa-includes/',
 				'prefix'         => 'sm',				// prefix/slug of your plugin
-				'option_name'    => 'sa_sm_offer_bfcm_2024',
-				'campaign'       => 'sa_bfcm_2024',
-				'start'          => '2024-11-26 07:00:00',
-				'end'            => '2024-12-06 06:30:00',
+				'option_name'    => 'sa_sm_offer_bfcm_2025',
+				'campaign'       => 'sa_bfcm_2025',
+				'start'          => '2025-11-14 07:00:00',
+				'end'            => '2025-12-05 06:30:00',
 				'is_plugin_page' => ( !empty($_GET['page']) && in_array( $_GET['page'], array( 'smart-manager', 'sm-storeapps-plugins' ) ) ) ? true : false,	// page where you want to show offer, do not send this if no plugin page is there and want to show offer on Products page
 			);
-			$sa_offer = SA_SM_In_App_Offer::get_instance( $args );
+			self::$sa_offer_instance = SA_SM_In_App_Offer::get_instance( $args );
 			if ( ! defined( 'SA_OFFER_VISIBLE' ) ) {
 
 				$show = false;
@@ -856,9 +877,8 @@ class Smart_Manager {
 		$roles = ( is_object( $current_user ) && ( ! empty( $current_user->roles ) ) && ( is_array( $current_user->roles ) ) && ( ! empty( $current_user->roles[0] ) ) ) ? array_values( $current_user->roles ) : $current_user->roles;
 		if( ! empty( $roles ) && sizeof( $roles ) > 0 ) {
 			$user_role = array_search( 'administrator', $roles );
-			$current_user_role = ( false !== $user_role ) ? $roles[ $user_role ] : $roles[0];
+			$current_user_role = ( false !== $user_role && isset( $roles[ $user_role ] ) ) ? $roles[ $user_role ] : ( ! empty( $roles[0] ) ? $roles[0] : '' );
 		}
-
 		$caps = ( ! empty( $current_user->caps ) ) ? array_keys( $current_user->caps ) : array();
 		if( ! empty( $caps ) && sizeof( $caps ) > 0 ) {
 			$user_caps = array_search( 'administrator', $roles );
@@ -914,8 +934,10 @@ class Smart_Manager {
 
 	// Function to handle SM admin notices
 	function add_admin_notices() {
-		if ( ( ! empty( $_GET['page'] ) ) && ( defined('SMPRO') ) && ( SMPRO === true ) && ( 'sm-storeapps-plugins' === $_GET['page'] || ( ( 'smart-manager' === $_GET['page'] ) && ( ! empty( $_GET['landing-page'] ) && ( 'sm-about' ===  $_GET['landing-page'] ) ) ) ) ) {
-			$this->add_sku_generation_feature_notice();
+		if ( ( ! empty( $_GET['page'] ) ) && ( ( ( 'smart-manager' === $_GET['page'] ) && ( ! empty( $_GET['landing-page'] ) && ( 'sm-about' === $_GET['landing-page'] ) ) ) ) ) {
+			if( is_callable( array( $this, 'display_wsm_stock_log_import_notice' ) ) ) {
+				self::display_wsm_stock_log_import_notice();
+			}
 		}
 		if( !( !empty( $_GET['page'] ) && ( 'smart-manager' === $_GET['page'] ) ) ) {
 			return;
@@ -954,8 +976,10 @@ class Smart_Manager {
 
 			$is_pro_available = $this->is_pro_available();
 
-			if ( 'smart-manager' === $_GET['page'] && $is_pro_available === false && ( ! defined('SA_OFFER_VISIBLE') || ( defined('SA_OFFER_VISIBLE') && SA_OFFER_VISIBLE === false ) ) ) {
-
+			if ( 'smart-manager' === $_GET['page'] && $is_pro_available === false ) { 
+				if( ( defined('SA_OFFER_VISIBLE') && SA_OFFER_VISIBLE === true ) && ( 'yes' === get_option( 'sa_sm_offer_bfcm_2025', 'yes' ) ) ){
+					return;
+				}
 				$sm_inline_update_count = get_option( 'sm_inline_update_count', 0 );
 				$sm_current_user_display_name = self::sm_get_current_user_display_name();
 				if( ( empty( $sm_current_user_display_name ) ) ) return;
@@ -985,6 +1009,7 @@ class Smart_Manager {
 						font-size: 1.7em;
 						color: rgb(55 65 81);
 						opacity: 0.9;
+						line-height: 1.75rem !important;
 					}
 					.sm_main_headline .dashicons.dashicons-awards {
 						font-size: 3em;
@@ -1001,8 +1026,9 @@ class Smart_Manager {
 					}
 				</style>';
 				$man_hours_data = self::sm_get_man_hours_data();
+				$discount = ( defined('SA_OFFER_VISIBLE') && SA_OFFER_VISIBLE === true ) ? '60%' : '25%';
 				if( ( ! empty( $man_hours_data ) ) && ( is_array( $man_hours_data ) ) && ( ! empty( $man_hours_data['display_man_hours'] ) )  ){
-					echo self::sm_get_man_hours_html( $man_hours_data, $sm_current_user_display_name );
+					echo self::sm_get_man_hours_html( $man_hours_data, $sm_current_user_display_name, $discount );
 				}else{
 					echo '<div class="sm_design_notice">
 						<div class="sm_container">
@@ -1012,8 +1038,8 @@ class Smart_Manager {
 								$sm_current_user_display_name,
 								'<span style="font-weight: bold;font-size: 2rem;color: rgb(20 184 166);color: #508991;color: rgb(55 65 81);">'. __( "25% off", "smart-manager-for-wp-e-commerce" ) .'</span>' ) : sprintf(
 								/* translators: %1$s: current user display name %2$s: HTML of Pro price discount */
-									__( 'Hey %1$s, you just unlocked %2$s on Smart Manager Pro!', 'smart-manager-for-wp-e-commerce' ), $sm_current_user_display_name,
-									'<span style="font-weight: bold;font-size: 2rem;color: rgb(20 184 166);color: #508991;color: rgb(55 65 81);">'. __( "25% off", "smart-manager-for-wp-e-commerce" ) .'</span>' ) ) .'</span></div>
+									__( 'Hey %1$s, you just unlocked %2$s off on Smart Manager Pro!', 'smart-manager-for-wp-e-commerce' ), $sm_current_user_display_name,
+									'<span style="font-weight: bold;font-size: 2rem;color: rgb(20 184 166);color: #508991;color: rgb(55 65 81);">'. __( $discount, "smart-manager-for-wp-e-commerce" ) .'</span>' ) ) .'</span></div>
 							<div class="sm_sub_headline" style="margin: 0.75rem 0 0 .5em !important;">' . sprintf(
 								/* translators: %s: pricing page link */
 								__( '%s to check Smart Manager Pro features/benefits and claim your discount.', 'smart-manager-for-wp-e-commerce' ), '<a style="color: rgb(55 65 81);" href="'. admin_url( 'admin.php?page=smart-manager-pricing' ) .'" target="_blank">' . __( 'Click here', 'smart-manager-for-wp-e-commerce' ) . '</a>' ) .'</div>
@@ -1152,6 +1178,11 @@ class Smart_Manager {
 		if( SMPRO === true ) {
 			wp_register_script ( 'sm_pro_custom_smart_manager_js', plugins_url ( '/pro/assets/js/smart-manager.js', SM_PLUGIN_FILE ), array ($last_reg_script), $this->version );
 			$last_reg_script = 'sm_pro_custom_smart_manager_js';
+			//NLP JS.
+			wp_register_script ( 'sm_pro_nl_converter', plugins_url ( '/pro/assets/js/smart-manager-nl-converter.js', SM_PLUGIN_FILE ), array ($last_reg_script), $this->version );
+			$last_reg_script = 'sm_pro_nl_converter';
+			wp_register_script ( 'sm_pro_url_parser', plugins_url ( '/pro/assets/js/smart-manager-url-parser.js', SM_PLUGIN_FILE ), array( $last_reg_script, $sm_common_core_base ), $this->version );
+			$last_reg_script = 'sm_pro_url_parser';
 		}
 
 		// Code for loading custom js automatically
@@ -1390,7 +1421,7 @@ class Smart_Manager {
 							'useDatePickerForDateTimeOrDateCols' => ( 'no' === apply_filters( 'sm_use_date_picker_for_date_or_datetime_cols', Smart_Manager_Settings::get( 'use_date_picker_for_date_or_datetime_cols' ) ) ) ? 0 : 1,
 							'SM_IS_WOO79' => ( ! empty( self::$sm_is_woo79 ) ) ? 'true' : 'false',
 							'isSAOfferVisible' => SA_OFFER_VISIBLE,
-							'isSAOfferBannerVisible' => ( 'yes' === get_option( 'sa_sm_offer_bfcm_2024', 'yes' ) ) ? true : false,
+							'isSAOfferBannerVisible' => ( 'yes' === get_option( 'sa_sm_offer_bfcm_2025', 'yes' ) ) ? true : false,
 							'scheduled_action_admin_url' => self::get_scheduled_actions_search_url('storeapps_sm_scheduled_actions'),
 							'scheduled_export_actions_admin_url' => self::get_scheduled_actions_search_url('storeapps_smart_manager_scheduled_export_actions'),
 							'is_admin' => ( 'administrator' === self::get_current_user_role() ) ? true : false,
@@ -1400,7 +1431,10 @@ class Smart_Manager {
 							'isSubscriptionPluginActive' => ( class_exists( 'WC_Subscriptions' ) ) ? true : false,
 							'subscriptionsAcceptManualRenewals' => ( get_option( 'woocommerce_subscriptions_accept_manual_renewals', 'no' ) === 'yes' ) ? true : false,
 							'subscriptionsExist' => ( class_exists( 'WC_Subscriptions' ) && function_exists( 'wcs_do_subscriptions_exist' ) ) ? wcs_do_subscriptions_exist() : false,
-							'isStripeGatewayActive' => sm_is_stripe_gateway_active()
+							'isStripeGatewayActive' => sm_is_stripe_gateway_active(),
+							'is_ai_integration_enabled' => self::is_ai_integration_enabled(),
+							'review_link'  => SM_REVIEW_URL,
+							'support_link' => SM_CONTACT_SUPPORT_URL
 						);
 
 		$active_plugins = (array) get_option( 'active_plugins', array() );
@@ -1434,7 +1468,7 @@ class Smart_Manager {
 	}
 
 	function enqueue_admin_styles() {
-
+		$this->enqueue_admin_footer_style();
 		if( !empty( $_GET['landing-page'] ) || !( !empty( $_GET['page'] ) && 'smart-manager' === $_GET['page'] ) ) {
 			return;
 		}
@@ -1538,10 +1572,21 @@ class Smart_Manager {
 			// hiding admin notices except SM admin notices.
 			?>
 				<style type="text/css">
+					/* Hide common notice/alert patterns */
+					#wpbody-content > div[class*="-notice"],
+					#wpbody-content > div[class*="-alert"],
+					#wpbody-content > div[class*="-message"],
+					#wpbody-content > div[class*="notice-"],
+					#wpbody-content > div[class*="alert-"],
+					#wpbody-content > div[id*="-notice"],
+					#wpbody-content > div[id*="-alert"] {
+						display: none !important;
+					}
+
 					.notice {
 						display: none !important;
 					}
-					.<?php echo esc_html( self::$sku . '-notice' ); ?> {
+					#wpbody-content > div.<?php echo esc_html( self::$sku . '-notice' ); ?> {
 						display: block !important;
 					}
 				</style>
@@ -1768,8 +1813,11 @@ class Smart_Manager {
 			if( is_callable( array( $this, 'show_upgrade_notifications' ) ) ) {
 				$this->show_upgrade_notifications();
 			}
-			if( is_callable( array( $this, 'add_sku_generation_feature_notice' ) ) ) {
-				$this->add_sku_generation_feature_notice();
+			if( is_callable( array( $this, 'display_wsm_stock_log_import_notice' ) ) ) {
+				self::display_wsm_stock_log_import_notice();
+			}
+			if ( ( ! empty( self::$sa_offer_instance ) ) && ( is_callable( array( self::$sa_offer_instance, 'is_show' ) ) ) && ( ! empty( self::$sa_offer_instance->is_show() ) ) && ( is_callable( array( self::$sa_offer_instance, 'show_offer_content' ) ) ) && ( ! $is_pricing_page ) ) {
+				?> <div class="sa_offer_container"><?php self::$sa_offer_instance->show_offer_content(); ?></div> <?php
 			}
 			if( ! $is_pricing_page ) {
 		?>
@@ -1836,8 +1884,34 @@ class Smart_Manager {
 
 	public function footer_text( $sm_footer_text ) {
 		if ( is_admin() && !empty( $_GET['page'] ) && ( 'smart-manager-woo' === $_GET['page'] || 'smart-manager-wpsc' === $_GET['page'] || ( !empty( $_GET['sm_old'] ) && ( 'woo' === $_GET['sm_old'] || 'wpsc' === $_GET['sm_old'] ) && 'smart-manager' === $_GET['page'] ) || 'smart-manager' === $_GET['page'] || 'smart-manager-settings' === $_GET['page'] || 'smart-manager-pricing' === $_GET['page'] || 'sm-storeapps-plugins' === $_GET['page'] ) ) {
-			// $sm_footer_text = __( '<span style="color:#555d66;">Thank you for using <span style="color: #5850EC;">Smart Manager</span>. A huge thank you from <span style="color: #5850EC;">StoreApps</span></span>!', 'smart-manager-for-wp-e-commerce' );
-			$sm_footer_text = '';
+			$plugin_data = get_plugin_data( SM_PLUGIN_FILE );
+			ob_start();
+			?>
+			<span class="sm-footer-left">
+				<span class="sm-footer-left-top">
+					<?php
+					printf(
+						/* translators: 1: heart symbol 2: plugin author */
+						esc_html_x( 'Smart Manager, made with %1$s by %2$s', 'plugin and brand text in footer', 'smart-manager-for-wp-e-commerce' ),
+						'<span class="sm-heart">&hearts;</span>',
+						'<span class="sm-brand">' . esc_html_x( 'StoreApps', 'brand name in footer', 'smart-manager-for-wp-e-commerce' ) . '</span>'
+					);
+					?>
+				</span>
+				<br />
+				<span class="sm-footer-left-bottom">
+					<?php
+					printf(
+						/* translators: 1: pipe as text separator 2: plugin version */
+						esc_html_x( 'Proudly built for WordPress & WooCommerce %1$s Version %2$s', 'text for showing plugin is for WordPress and WooCommerce in footer', 'smart-manager-for-wp-e-commerce' ),
+						'<span class="sm-separator">|</span>',
+						esc_html( $plugin_data['Version'] )
+					)
+					?>
+				</span>
+			</span>
+			<?php
+			return ob_get_clean();
 		}
 
 		return $sm_footer_text;
@@ -1847,14 +1921,36 @@ class Smart_Manager {
 		if ( ! function_exists( 'get_plugin_data' ) ) {
 			include_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
-		$sm_plugin_data = get_plugin_data( SM_PLUGIN_FILE );
-		$sm_current_version = $sm_plugin_data['Version'];
-
 		if ( is_admin() && ! empty( $_GET['page'] ) && ( 'smart-manager-woo' === $_GET['page'] || 'smart-manager-wpsc' === $_GET['page'] || ( !empty( $_GET['sm_old'] ) && ( 'woo' === $_GET['sm_old'] || 'wpsc' === $_GET['sm_old'] ) && 'smart-manager' === $_GET['page'] ) || 'smart-manager' === $_GET['page'] || 'smart-manager-settings' === $_GET['page'] || 'smart-manager-pricing' === $_GET['page'] || 'sm-storeapps-plugins' === $_GET['page'] ) ) {
-			// $sm_version_text = sprintf( __( 'Smart Manager version: <span style="color: #5850EC;">%s</span>', 'smart-manager-for-wp-e-commerce' ), $sm_current_version );
-			$sm_version_text = '';
+			ob_start();
+			?>
+			<span class="sm-footer-right">
+				<span class="sm-footer-right-top">
+					<?php
+					printf(
+						/* translators: 1: open the anchor tag for plugin review link 2: five star symbol 3: close the anchor tag for plugin review link */
+						esc_html_x( 'If you like it, please give us %1$s %2$s rating%3$s.', 'text for plugin review in footer', 'smart-manager-for-wp-e-commerce' ),
+						'<a target="_blank" href="'.SM_REVIEW_URL.'">',
+						'<span class="sm-star">&starf;&starf;&starf;&starf;&starf;</span>',
+						'</a>'
+					);
+					?>
+				</span>
+				<br />
+				<span class="sm-footer-right-bottom">
+					<?php
+					printf(
+						/* translators: 1: open the anchor tag for plugin feature request link 2: close the anchor tag for plugin feature request link */
+						esc_html_x( 'Do you have a feature request? Tell us %1$shere%2$s.', 'text for plugin feature request in footer', 'smart-manager-for-wp-e-commerce' ),
+						'<a target="_blank" href="'.SM_CONTACT_SUPPORT_URL.'?utm_source=sm&utm_medium=in_app_footer&utm_campaign=feature_request">',
+						'</a>'
+					);
+					?>
+				</span>
+			</span>
+			<?php
+			return ob_get_clean();
 		}
-
 		return $sm_version_text;
 	}
 
@@ -2156,10 +2252,12 @@ class Smart_Manager {
 	 *
 	 * @param string $user_name The name of the current user.
 	 * @param array  $man_hours_data The data about the saved man-hours and additional savings.
+	 * @param string $discount discount %.
+	 * 
 	 * @return string html containing man hours data or empty string if data is not valid.
 	*/
-	public static function sm_get_man_hours_html( $man_hours_data = array(), $user_name = '' ) {
-		if( ( empty( $man_hours_data ) ) || ( ! is_array( $man_hours_data ) ) || ( empty( $user_name ) ) || ( empty( $man_hours_data['additional_savings'] ) ) || ( empty( $man_hours_data['man_hours_saved'] ) ) ) {
+	public static function sm_get_man_hours_html( $man_hours_data = array(), $user_name = '', $discount = '' ) {
+		if( ( empty( $man_hours_data ) ) || ( ! is_array( $man_hours_data ) ) || ( empty( $user_name ) ) || ( empty( $man_hours_data['additional_savings'] ) ) || ( empty( $man_hours_data['man_hours_saved'] ) ) || ( empty( $discount ) ) ) {
 			return '';
 		}
 		return '<style>
@@ -2207,7 +2305,7 @@ class Smart_Manager {
 						/* translators: %1$s: discount percentage, %2$s: additional man-hours */
 						__( 'Upgrade to Smart Manager Pro to save <strong>additional %1$s hours</strong> (minimum) and unlock all features. %2$s', 'smart-manager-for-wp-e-commerce' ),
 						$man_hours_data['additional_savings'],
-						'<a class="pricing-link" href="' . admin_url( 'admin.php?page=smart-manager-pricing' ) . '" target="_blank">' . __( 'Get it at', 'smart-manager-for-wp-e-commerce' ) . ' <strong>'. __( '25% off!', 'smart-manager-for-wp-e-commerce' ) . '</strong> </a>'
+						'<a class="pricing-link" href="' . admin_url( 'admin.php?page=smart-manager-pricing' ) . '" target="_blank">' . __( 'Get it at', 'smart-manager-for-wp-e-commerce' ) . ' <strong>'. __( $discount . ' off!', 'smart-manager-for-wp-e-commerce' ) . '</strong> </a>'
 					) . '
 					</div>
 				</div>
@@ -2257,7 +2355,7 @@ class Smart_Manager {
 		if (! is_admin() || empty($_GET['page']) || (! empty($_GET['page']) && ('smart-manager' !== $_GET['page'])) || empty($wp_styles->queue) || (! is_array($wp_styles->queue))) {
 			return;
 		}
-		$dequeue_handles = array('adl-lp-bootstrap');
+		$dequeue_handles = array( 'adl-lp-bootstrap', 'AG_fraud_css' );
 		foreach ($wp_styles->queue as $handle) {
 			if (empty($handle) || empty($dequeue_handles) || (! is_array($dequeue_handles)) || (! in_array($handle, $dequeue_handles)) || (! wp_style_is($handle))) {
 				continue;
@@ -2268,45 +2366,76 @@ class Smart_Manager {
 	}
 
 	/**
-	 * Function to Show admin notice about the new auto-SKU generation feature on Smart Manager pages.
+	 * Generic function to show admin notice about new features on Smart Manager pages.
 	 *
+	 * @param string $notice_key Unique identifier for the feature (e.g., 'sku_generation', 'bulk_edit').
 	 * @return void
 	 */
-	public function add_sku_generation_feature_notice(){
-		if ( ( ! defined('SMPRO') ) || ( SMPRO !== true ) || ( empty( $_GET['page'] ) ) || ( ! in_array( sanitize_text_field( wp_unslash( $_GET['page'] ) ), array( 'smart-manager', 'sm-storeapps-plugins' ), true ) ) || get_option( 'sa_sm_hide_generate_sku_feature_notice' ) ) {
+	public static function add_dismissible_notice( $notice_key = '', $description = '', $pro_only = false ) {
+		if ( ( empty( $notice_key ) ) || ( empty( $description ) ) ) {
+			return;
+		}
+		//Remove previous feature notice DB options.
+		self::clear_previous_feature_notices( array( 'link_to_view_product_edit_history' ) );
+		
+		$notice_key = sanitize_key( $notice_key );
+		if ( ( ! defined('SMPRO') ) || ( ( ! empty( $pro_only ) ) && ( SMPRO !== true ) ) || ( empty( $_GET['page'] ) ) || ( ! in_array( sanitize_text_field( wp_unslash( $_GET['page'] ) ), array( 'smart-manager', 'sm-storeapps-plugins', 'sm-about' ), true ) ) || get_option( "sa_sm_hide_{$notice_key}_notice" ) ) {
 			return;
 		}
 		?>
 		<script>
-			jQuery(document).on('click', '#sm_generate_sku_feature_notice .notice-dismiss', function(){
+			jQuery(document).on('click', '#sm_<?php echo esc_attr( $notice_key ); ?>_notice .notice-dismiss', function(){
 				jQuery.ajax({
 					url: '<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>',
 					type: 'post',
 					dataType: 'json',
 					data: {
-						action: 'dismiss_generate_sku_feature_notice',
-						security: '<?php echo esc_html( wp_create_nonce( 'sa-dismiss-generate-sku-feature-notice' ) ); ?>'
+						action: 'dismiss_feature_notice',
+						feature_key: '<?php echo $notice_key; ?>',
+						security: '<?php echo wp_create_nonce( "sa-dismiss-{$notice_key}-notice" ); ?>'
 					}
 				});
-			})
+			});
 		</script>
 		<?php
-		echo sprintf(
-			'<div class="notice notice-success is-dismissible" id="sm_generate_sku_feature_notice" style="display:block !important;"><p>🎉 <strong>%s</strong> %s %s</p></div>',
-			_x( 'New Feature Alert:', 'admin notice title for sku generation feature', 'smart-manager-for-wp-e-commerce' ),
-			_x( 'Automatically generate SKUs for WooCommerce products with blank SKUs during CSV import.', 'admin notice description for sku generation feature', 'smart-manager-for-wp-e-commerce' ),
-			_x( 'Enable this by turning on the <strong>“Automatically generate SKUs for WooCommerce products with blank values during CSV import”</strong> setting in <strong>Settings > General Settings.</strong>', 'admin notice instructions for sku generation feature', 'smart-manager-for-wp-e-commerce' )
+		
+		printf(
+			'<div class="sm_feature_notice notice notice-%s is-dismissible" id="sm_%s_notice" style="display:block !important;"><p> %s </p></div>',
+			'success',
+			esc_attr( $notice_key ),
+			$description
 		);
 	}
 
 	/**
-	 * AJAX handler to dismiss the Generate SKU feature notice.
+	 * AJAX handler to dismiss feature notices.
 	 *
+	 * @return void
 	 */
-	public function dismiss_generate_sku_feature_notice() {
-		// Check nonce.
-		check_ajax_referer( 'sa-dismiss-generate-sku-feature-notice', 'security' );
-		return update_option( 'sa_sm_hide_generate_sku_feature_notice', true );
+	public function dismiss_feature_notice() {
+		if ( empty( $_POST['feature_key'] ) ) {
+			wp_send_json_error();
+		}
+		$notice_key = sanitize_key( $_POST['feature_key'] );
+		check_ajax_referer( "sa-dismiss-{$notice_key}-notice", 'security' );
+		return update_option( "sa_sm_hide_{$notice_key}_notice", true );
+	}
+
+	/**
+	 * Remove/clear previous feature notices DB options when a new feature is announced.
+	 *
+	 * @param array $previous_feature_keys. Array of previous feature keys to dismiss.
+	 * @return void
+	 */
+	public static function clear_previous_feature_notices( $previous_feature_keys = array() ) {
+		// If no previous keys specified, find all feature notice options.
+		if ( empty( $previous_feature_keys ) || ( ! is_array( $previous_feature_keys ) ) ) {
+			return;
+		}
+		// Dismiss previous notices.
+		foreach ( $previous_feature_keys as $old_key ) {
+			delete_option( "sa_sm_hide_" . sanitize_key( $old_key ) . "_notice" );
+		}
 	}
 
 	/**
@@ -2324,6 +2453,97 @@ class Smart_Manager {
 			realpath( $plugin_base_path . 'common-core/classes' ),
 			realpath( $plugin_base_path . 'pro/common-pro/classes' )
 		) );
+	}
+
+	/**
+	 * Method to enqueue footer css file
+	 * 
+	 * @return void
+	 */
+	public function enqueue_admin_footer_style() {
+		$get_page = ( ! empty( $_GET['page'] ) ) ? ( ( function_exists( 'wc_clean' ) ) ? wc_clean( wp_unslash( $_GET['page'] ) ) : wp_unslash( sanitize_text_field( $_GET['page'] ) ) ) : ''; // phpcs:ignore
+		if ( empty( boolval( in_array( $get_page, array( 'smart-manager', 'sm-about', 'smart-manager-pricing', 'sm-storeapps-plugins' ), true ) ) ) ) {
+			return;
+		}
+		$plugin_data = ( function_exists( 'get_plugin_data' ) ) ? get_plugin_data( self::$plugin_file ) : array();
+		wp_enqueue_style( 'smart-manager-footer-css', plugins_url ( '/assets/css/smart-manager-footer.css', SM_PLUGIN_FILE ), array(), ( ! empty( $plugin_data['Version'] ) ) ? $plugin_data['Version'] : false );
+	}
+	/**
+	 * Check if AI integration is enabled and a model is selected.
+	 *
+	 * @return bool True if AI integration is enabled and a model is selected, false otherwise.
+	 */
+	public function is_ai_integration_enabled() {
+		$ai_integration_settings = Smart_Manager_Settings::get('ai_integration_settings');
+		return ( is_array( $ai_integration_settings ) && ! empty( $ai_integration_settings['selectedModel'] ) );
+	}
+
+	/**
+	 * Check if stock log import from WSM is required
+	 * 
+	 * This function checks:
+	 * 1. If the stock_log table exists
+	 * 2. If the table has data
+	 * 3. If the import flag is already set
+	 * 
+	 * @return bool True if import is required, false otherwise
+	 */
+	public static function is_wsm_stock_log_import_required() {
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'stock_log';
+		
+		// Check if table exists.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$table_exists = $wpdb->get_var(
+			$wpdb->prepare(
+				'SHOW TABLES LIKE %s',
+				$table_name
+			)
+		);
+		
+		if ( empty( $table_exists ) ) {
+			return false;
+		}
+		
+		// Check if table has any data.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$row_count = $wpdb->get_var(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			"SELECT COUNT(*) FROM {$table_name}"
+		);
+		if ( empty( $row_count ) || 0 === (int) $row_count ) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Display the notice prompting users to import stock logs from the old plugin.
+	 *
+	 * @return void
+	 */
+	public static function display_wsm_stock_log_import_notice() {
+		if ( ( empty( self::is_wsm_stock_log_import_required() ) ) || ( ! empty( get_option( 'sa_sm_wsm_stock_log_imported', false ) ) ) ) {
+			return;
+		}
+		self::add_dismissible_notice(
+			'import_wsm_stock_log',
+			sprintf(
+				/* translators: %s: clickable link text */
+				__( 'Smart Manager has detected stock logs from an earlier installation of <a href="https://wordpress.org/plugins/woocommerce-stock-manager/" target="_blank">Stock Manager for WooCommerce</a> plugin. %s to sync and import them into Smart Manager.', 'smart-manager-for-wp-e-commerce' ),
+				'<a href="javascript:void(0)" class="sa-sm-import-wsm-stock-log">' . esc_html__( 'Click here', 'smart-manager-for-wp-e-commerce' ) . '</a>'
+        	)
+		);
+	}
+
+	/**
+	 * Adds custom CSS classes to the dashboard body element.
+	 *
+	 * @param string $classes Existing CSS classes for the dashboard body.
+	 * @return string Modified CSS classes including custom additions.
+	 */
+	public function add_dashboard_body_class( $classes = '' ) {
+		return ( ( ! empty( $_GET['page'] ) ) && ( 'smart-manager' === sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) ) ? $classes . ' smart-manager-dashboard' : $classes;
 	}
 }
 
