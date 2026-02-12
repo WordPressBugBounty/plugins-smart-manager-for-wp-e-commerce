@@ -2180,12 +2180,10 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				}
 			}
 			do_action( 'sm_inline_update_post', $edited_data, $data_col_params );
-			// For updating task details table.
-			if ( ( ! empty( self::$update_task_details_params ) ) && is_callable( array( 'Smart_Manager_Task', 'task_details_update' ) ) ) {
-				Smart_Manager_Task::task_details_update();
-			}
 			if ( ( ! empty( $update_result ) ) && ( is_array( $update_result ) ) && ( ! empty( $update_result['after_update_actions_params'] ) ) ) {
 				do_action( 'sm_update_posts_after_update_actions', $update_result['after_update_actions_params'] );
+				// For updating task details table.
+				apply_filters( 'sm_handle_post_processing_inline_update', true );
 			}
 			delete_transient('sm_beta_skip_delete_dashboard_transients', 1, DAY_IN_SECONDS); // for preventing delete dashboard transients
 			$msg_str = '';

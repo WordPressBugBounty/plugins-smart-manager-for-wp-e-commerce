@@ -617,36 +617,6 @@ if ( ! class_exists( 'SA_Manager_Base' ) ) {
 					}
 				}
 			}
-			$col_model[] = $this->get_default_column_model(
-				array(
-					'table_nm'       => 'custom',
-					'col'            => 'edit_link',
-					'renderer'       => 'html',
-					'name'           => _x( 'Edit', 'edit link', 'smart-manager-for-wp-e-commerce' ),
-					'sortable'       => false,
-					'editor'         => false,
-					'searchable'     => false,
-					'editable'       => false,
-					'batch_editable' => false,
-					'position'       => ++$last_position,
-					'width'          => 30,
-				)
-			);
-			$col_model[] = $this->get_default_column_model(
-				array(
-					'table_nm'       => 'custom',
-					'col'            => 'view_link',
-					'renderer'       => 'html',
-					'name'           => _x( 'View', 'view link', 'smart-manager-for-wp-e-commerce' ),
-					'sortable'       => false,
-					'editor'         => false,
-					'searchable'     => false,
-					'editable'       => false,
-					'batch_editable' => false,
-					'position'       => ++$last_position,
-					'width'          => 30,
-				)
-			);
 			// defining the default col model.
 			$this->default_store_model = array(
 				'display_name'   => _x( 'Product', 'dashboard display name', 'smart-manager-for-wp-e-commerce' ),

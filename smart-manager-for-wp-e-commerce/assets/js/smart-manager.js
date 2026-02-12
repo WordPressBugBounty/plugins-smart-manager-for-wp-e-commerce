@@ -248,7 +248,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 		if ( !jQuery(document.body).hasClass('folded') && window.smart_manager.sm_beta_pro == 1 && window.smart_manager.forceCollapseAdminMenu == 1) {
 			jQuery(document.body).addClass('folded');
 		}
-		let contentwidth = jQuery('#wpbody-content').width() - 20,
+		let contentwidth = jQuery('#wpbody-content').width() - 5,
 			contentheight = 910;
 		let grid_height = contentheight - ( contentheight * 0.20 );
 		window.smart_manager.grid_width = contentwidth;
@@ -1119,11 +1119,9 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 		window.smart_manager.initNavbarDropdown();
 
 		// Build the new header component
-		let sm_header = window.smart_manager.buildHeaderHtml();
-
 		let sm_bottom_bar = "<div id='sm_bottom_bar' style='font-weight:500 !important;color:#5850ec;width:" + window.smart_manager.grid_width + "px;'>" +
 			"<div id='sm_bottom_bar_left' class='sm_beta_left'></div>" +
-			"<div id='sm_bottom_bar_right' class='sm_beta_right'>" +
+			"<div id='sm_bottom_bar_right' class='sm_beta_right mr-2'>" +
 			"<div id='sm_beta_load_more_records' class='sm_beta_right' style='cursor: pointer;' title='" + _x('Load more records', 'tooltip', 'smart-manager-for-wp-e-commerce') + "'>" + window.smart_manager.loadMoreBtnHtml + "</div>" +
 			"<div id='sm_beta_display_records' class='sm_beta_select_blue sm_beta_right'></div>" +
 			"</div>" +
@@ -1136,7 +1134,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 		}
 
 		setTimeout(() => {
-			jQuery(sm_header).insertBefore("#sm_editor_grid");
+			jQuery(window.smart_manager.buildHeaderHtml()).insertBefore("#sm_editor_grid");
 		}, 500);
 		jQuery(sm_bottom_bar).insertAfter("#sm_editor_grid");
 		
@@ -1275,7 +1273,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 		return (window.smart_manager.isTasksViewActive === true || (window.location.search.includes('show_edit_history'))) ? 1 : 0;
 	}
 	SmartManager.prototype.displayShowHideColumnSettings = function (isShow = true) {
-		// Columns button removed from header - function kept for compatibility
+		jQuery('#sm-edit-custom-view-btn, #sm-delete-custom-view-btn').removeClass((!isShow) ? 'inline-flex' : '!hidden').addClass((!isShow)?'!hidden':'inline-flex');
 	}
 
 	SmartManager.prototype.set_data = function (response) {
@@ -1829,6 +1827,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 			},
 			persistentState: true,
 			customBorders: true,
+			// fixedColumnsLeft: 1,
 			//   disableVisualSelection: true,
 			columns: window.smart_manager.currentVisibleColumns,
 			colHeaders: window.smart_manager.column_names,
@@ -4864,7 +4863,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 				<div id="sm-header-center-extras"></div>
 
 				<!-- Panel: Custom Views (only used when NOT on custom view) -->
-				<div id="sm-custom-views-panel" class="absolute left-0 top-8 z-999 w-56 rounded-lg border border-sm-base-border bg-sm-base-background shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)] overflow-hidden hidden">
+				<div id="sm-custom-views-panel" class="sm-custom-scrollbar absolute left-0 top-8 z-999 w-56 rounded-lg border border-sm-base-border bg-sm-base-background shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)] overflow-hidden hidden">
 					<!-- Header -->
 					<div class="bg-sm-base-background sticky top-0 z-10 pt-1 px-1">
 						<div class="flex items-center justify-between px-2 py-1.5">
@@ -5128,22 +5127,37 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 	    }
 	    
 	    let hasSelectedRecords = window.smart_manager.selectedRows?.length > 0;
-	    let isProductDashboard = window.smart_manager.dashboardKey === 'product';
 	    let allRecordsText = window.smart_manager.isFilteredData() ? _x('All (Search Results)', 'option', 'smart-manager-for-wp-e-commerce') : _x('All (Entire Store)', 'option', 'smart-manager-for-wp-e-commerce');
-	    args.params.modalWidth = 'max-w-xl'
+	    // Check if entire store option was clicked from dropdown
+	    args.params.modalWidth = 'max-w-xl w-100'
+	    // Build records selection - text for entire store, select for other cases
+	    let recordsSelectionHtml = (args.id && args.id.includes('entire_store')) 
+	        ? `<span class="font-medium">${allRecordsText}</span>
+	           <input type="hidden" id="sm_export_records_select" value="all" />`
+	        : `<select id="sm_export_records_select" class="inline-flex h-[1.75rem] border border-sm-base-input rounded-[0.375rem] bg-sm-base-background text-[0.875rem] text-sm-base-foreground font-medium cursor-pointer">
+	                <option value="selected" ${!hasSelectedRecords ? 'disabled' : ''} ${hasSelectedRecords ? 'selected' : ''}>${_x('Selected', 'option', 'smart-manager-for-wp-e-commerce')}</option>
+	                <option value="all" ${!hasSelectedRecords ? 'selected' : ''}>${allRecordsText}</option>
+	            </select>`;
+	    
+	    // Build columns selection - dropdown for product dashboard (has stock option), text for others
+	    // Check if stock option was clicked from dropdown
+	    let isStockColumn = args.id && args.id.includes('stock');
+	    let columnsSelectionHtml = (window.smart_manager.dashboardKey === 'product')
+	        ? `<select id="sm_export_columns_select" class="inline-flex h-[1.75rem] border border-sm-base-input rounded-[0.375rem] bg-sm-base-background text-[0.875rem] text-sm-base-foreground font-medium cursor-pointer">
+	                <option value="visible" ${!isStockColumn ? 'selected' : ''}>${_x('Visible', 'option', 'smart-manager-for-wp-e-commerce')}</option>
+	                <option value="stock" ${isStockColumn ? 'selected' : ''}>${_x('Stock', 'option', 'smart-manager-for-wp-e-commerce')}</option>
+	            </select>`
+	        : `<span class="font-medium">${_x('Visible', 'option', 'smart-manager-for-wp-e-commerce')}</span>
+	           <input type="hidden" id="sm_export_columns_select" value="visible" />`;
+	    
 	    // Build inline content with select dropdowns
 	    args.params.content = `
 	        <div class="flex flex-wrap items-center gap-[0.375rem] text-[0.875rem] leading-[1.5rem] text-sm-base-foreground">
 	            <span>${_x('Do you want to export', 'modal content', 'smart-manager-for-wp-e-commerce')}</span>
-	            <select id="sm_export_records_select" class="inline-flex h-[1.75rem] border border-sm-base-input rounded-[0.375rem] bg-sm-base-background text-[0.875rem] text-sm-base-foreground font-medium cursor-pointer">
-	                <option value="selected" ${!hasSelectedRecords ? 'disabled' : ''} ${hasSelectedRecords ? 'selected' : ''}>${_x('Selected', 'option', 'smart-manager-for-wp-e-commerce')}</option>
-	                <option value="all" ${!hasSelectedRecords ? 'selected' : ''}>${allRecordsText}</option>
-	            </select>
-	            <span>${_x('records with', 'modal content', 'smart-manager-for-wp-e-commerce')}</span>
-	            <select id="sm_export_columns_select" class="inline-flex h-[1.75rem] border border-sm-base-input rounded-[0.375rem] bg-sm-base-background text-[0.875rem] text-sm-base-foreground font-medium cursor-pointer">
-	                <option value="visible" selected>${_x('Visible', 'option', 'smart-manager-for-wp-e-commerce')}</option>
-	                ${isProductDashboard ? `<option value="stock">${_x('Stock', 'option', 'smart-manager-for-wp-e-commerce')}</option>` : ''}
-	            </select>
+	            ${recordsSelectionHtml}
+	            <span>${_x(' records ', 'modal content', 'smart-manager-for-wp-e-commerce')}</span>
+	            <span>${_x('with ', 'modal content', 'smart-manager-for-wp-e-commerce')}</span>
+	            ${columnsSelectionHtml}
 	            <span>${_x('columns?', 'modal content', 'smart-manager-for-wp-e-commerce')}</span>
 	        </div>
 	    `;
@@ -5522,7 +5536,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 					${_x('Manage columns', 'quick column manager title', 'smart-manager-for-wp-e-commerce')}
 				</div>
 			</div>
-			<ul id="sm-quick-column-list" class="px-1 overflow-y-auto max-h-[20rem] flex flex-col"></ul>
+			<ul id="sm-quick-column-list" class="px-1 overflow-y-auto max-h-[20rem] md:max-h-[18rem] flex flex-col"></ul>
 			<div class="bg-white border-t border-[#e5e5e5] p-2 z-[1]">
 				<button id="sm-open-full-column-manager" class="w-full flex items-center justify-center gap-1.5 h-8 px-3 py-2 text-xs font-medium text-[#0a0a0a] bg-white hover:bg-[#f5f5f5] border border-[#e5e5e5] rounded-lg shadow-sm transition-colors cursor-pointer">
 					<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13.335 6.66667V2C13.335 1.26362 12.7381 0.666667 12.0017 0.666667H2.00171C1.26533 0.666667 0.668375 1.26362 0.668375 2V12C0.668375 12.7364 1.26533 13.3333 2.00171 13.3333H7.00171M4.66838 0.666667V13.3333M9.33504 0.666667V7.33333M9.30804 11.3333H14.0221M11.6651 14.0223V9.30825" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -5576,7 +5590,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 					<button type="button" class="sm-quick-col-toggle shrink-0 w-4 h-4 rounded border bg-[#6b63f1] border-[#6b63f1] shadow-sm flex items-center justify-center cursor-pointer" data-col-index="${index}" data-checked="true">
 						<svg class="w-3.5 h-3.5 text-white" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.6667 3.5L5.25 9.91667L2.33333 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 					</button>
-					<span class="sm-col-name flex-1 text-sm text-[#0a0a0a] truncate leading-5">${colName}</span>
+					<span class="sm-col-name flex-1 text-sm text-[#0a0a0a] truncate leading-5" title="${colName}">${colName}</span>
 					<button type="button" class="sm-quick-col-edit shrink-0 w-5 h-5 rounded flex items-center justify-center text-[#9ca3af] hover:text-[#6b63f1] hover:bg-[#e5e5e5] opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" data-col-index="${index}" title="${_x('Edit column name', 'tooltip', 'smart-manager-for-wp-e-commerce')}">
 						<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6.41667 2.33333H2.33333C1.97971 2.33333 1.64057 2.47381 1.39052 2.72386C1.14048 2.97391 1 3.31304 1 3.66667V11.6667C1 12.0203 1.14048 12.3594 1.39052 12.6095C1.64057 12.8595 1.97971 13 2.33333 13H10.3333C10.687 13 11.0261 12.8595 11.2761 12.6095C11.5262 12.3594 11.6667 12.0203 11.6667 11.6667V7.58333M10.7917 1.45833C11.0571 1.19291 11.4156 1.04398 11.7896 1.04398C12.1635 1.04398 12.522 1.19291 12.7875 1.45833C13.0529 1.72375 13.2018 2.08228 13.2018 2.45625C13.2018 2.83022 13.0529 3.18875 12.7875 3.45417L6.99167 9.25L4.66667 9.83333L5.25 7.50833L10.7917 1.45833Z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 					</button>
@@ -5908,8 +5922,8 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 		if (isTasksView) {
 			// History/Tasks view - show Undo and Delete buttons
 			td.innerHTML = `
-				<div style="display:flex;align-items:center;justify-content:center;gap:4px;">
-					<button type="button" class="sm-history-undo-btn inline-flex items-center gap-1 px-2.5 py-2 rounded-lg border border-[#E5E5E5] bg-white text-xs font-medium text-sm-base-foreground cursor-pointer hover:bg-[#F5F5F5] transition-colors" data-row="${row}" onmousedown="event.stopPropagation();" onclick="event.preventDefault();event.stopPropagation();window.smart_manager.undoHistoryRow(${row});return false;">
+				<div class="inline-flex items-center justify-center gap-1 ml-4 mb-3">
+					<button type="button" class="sm-history-undo-btn inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#E5E5E5] bg-white text-xs font-medium text-sm-base-foreground cursor-pointer hover:bg-[#F5F5F5] transition-colors" data-row="${row}" onmousedown="event.stopPropagation();" onclick="event.preventDefault();event.stopPropagation();window.smart_manager.undoHistoryRow(${row});return false;">
 						${window.smart_manager.getIcons('undo','#0A0A0A')}
 						<span>Undo</span>
 					</button>

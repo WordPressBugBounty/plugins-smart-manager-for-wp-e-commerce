@@ -18,12 +18,12 @@
             this.bulkEditRoute = "bulkEdit";
             // defining operators for diff datatype for advanced search
             let intOperators = {
-                'eq': '==',
-                'neq': '!=',
-                'lt': '<',
-                'gt': '>',
-                'lte': '<=',
-                'gte': '>='
+                'eq': _x('Equal to ==', "select options - operator for 'numeric' data type fields", 'smart-manager-for-wp-e-commerce'),
+                'neq': _x('Not equal to !=', "select options - operator for 'numeric' data type fields", 'smart-manager-for-wp-e-commerce'),
+                'lt': _x('Less than <', "select options - operator for 'numeric' data type fields", 'smart-manager-for-wp-e-commerce'),
+                'gt': _x('Greater than >', "select options - operator for 'numeric' data type fields", 'smart-manager-for-wp-e-commerce'),
+                'lte': _x('Less than or equal to <=', "select options - operator for 'numeric' data type fields", 'smart-manager-for-wp-e-commerce'),
+                'gte': _x('Greater than or equal to >=', "select options - operator for 'numeric' data type fields", 'smart-manager-for-wp-e-commerce')
             };
             this.possibleOperators = {
                 'numeric': intOperators,

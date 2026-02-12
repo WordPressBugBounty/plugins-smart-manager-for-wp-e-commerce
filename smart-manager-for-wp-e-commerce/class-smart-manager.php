@@ -484,7 +484,7 @@ class Smart_Manager {
 		}
 
 		// Action to declare WooCommerce HPOS compatibility.
-		add_action( 'before_woocommerce_init', array( $this, 'declare_hpos_compatibility' ) );
+		add_action( 'before_woocommerce_init', array( $this, 'declare_compatibility' ) );
 		add_filter( 'plugin_row_meta', array( $this, 'add_additonal_links' ), 99, 4 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'sa_sm_dequeue_styles' ), 999 );
 		add_filter('sa_plugin_key', function () {
@@ -2047,11 +2047,14 @@ class Smart_Manager {
 	}
 
 	/**
-	 * Function to declare WooCommerce HPOS compatibility
+	 * Function to declare WooCommerce features compatibility
 	 */
-	public function declare_hpos_compatibility() {
+	public function declare_compatibility() {
 		if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+			//HPOS compatibility
 			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', 'smart-manager-for-wp-e-commerce/smart-manager.php', true );
+			//Product instance caching compatibility
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'product_instance_caching', 'smart-manager-for-wp-e-commerce/smart-manager.php', true );
 		}
 	}
 

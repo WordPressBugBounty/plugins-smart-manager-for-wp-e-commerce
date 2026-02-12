@@ -7,7 +7,7 @@ Tags: woocommerce bulk edit, woocommerce inventory management, woocommerce order
 Requires at least: 5.0
 Tested up to: 6.9
 Requires PHP: 7.0
-Stable tag: 8.80.0
+Stable tag: 8.81.0
 License: GPLv2
 
 WooCommerce Advanced Bulk Edit products, orders, & posts in an Excel-like sheet editor. Get advanced WooCommerce stock, pricing, & order management.
@@ -312,6 +312,13 @@ Please report security bugs found in the source code of the Smart Manager plugin
 2. Bulk edit / Batch update (only in Pro version)
 
 == Changelog ==
+
+= 8.81.0 (12.02.2026) =
+* New: WooCommerce 10.5.1 Compatible
+* Fix: Undo not working when updating standard post fields like 'Title', 'Post Status', 'Post Date', etc. (Pro)
+* Fix: Advanced Search not working for non-existing or empty meta values on Users dashboard (Pro)
+* Update: UI/UX improvements in selected areas to enhance user experience
+* Update: POT file
 
 = 8.80.0 (06.02.2026) =
 * New: WordPress 6.9.1 compatible
@@ -752,6 +759,9 @@ Please report security bugs found in the source code of the Smart Manager plugin
 [See changelog for all versions](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 8.81.0 =
+WooCommerce 10.5.1 Compatible, Fixes related to Undo not working when updating standard post fields like 'Title', 'Post Status', 'Post Date', etc. (Pro), Advanced Search not working for non-existing or empty meta values on Users dashboard (Pro), Updates related to UI/UX improvements in selected areas to enhance user experience. Recommended upgrade.
 
 = 8.80.0 =
 WordPress 6.9.1 compatible, Updates related to UI/UX improvements in selected areas to enhance user experience. Recommended upgrade.
