@@ -49,6 +49,53 @@
 		});
 		return subscriptionIds;
 	}
+
+	// Helper function to generate attribute card HTML
+	SmartManager.prototype.generateAttributeCardHtml = function(params) {
+		const { attrKey, attrLabel, attrValue, attrType, isTaxonomy, visibilityChecked, variationChecked, position, selectedValues } = params;
+		const idx = window.smart_manager.prodAttrDisplayIndex;
+		const inputClass = 'w-full px-3 py-1.5 text-sm border border-sm-base-input rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-sm-base-primary focus:border-sm-base-primary';
+		const checkboxClass = 'm-0 w-4 h-4 rounded border-sm-base-input text-sm-base-primary focus:ring-sm-base-primary';
+		const btnPrimaryClass = 'select_all_attributes px-3 py-1.5 text-sm font-medium text-sm-base-primary-foreground bg-sm-base-primary rounded-md hover:bg-[#5850d6] transition-colors cursor-pointer';
+		const btnSecondaryClass = 'select_no_attributes px-3 py-1.5 text-sm font-medium text-sm-base-foreground bg-sm-base-muted border border-sm-base-input rounded-md hover:bg-[#e5e5e5] transition-colors cursor-pointer';
+
+		let html = '<div class="mt-4 sm-attribute-card flex gap-4 items-start border-b border-sm-base-border last:border-b-0">';
+		
+		// Left column
+		html += '<div class="flex flex-col gap-2 min-w-[10rem]">';
+		html += (isTaxonomy == 1)
+			? '<p class="m-0 font-semibold text-sm text-sm-base-foreground">'+attrLabel+':</p><input type="hidden" name="attribute_names['+idx+']" index="'+idx+'" value="'+attrKey+'" />'
+			: '<input type="text" class="'+inputClass+'" name="attribute_names['+idx+']" index="'+idx+'" placeholder="'+_x('Name', 'placeholder', 'smart-manager-for-wp-e-commerce')+'" value="'+attrLabel+'">';
+		
+		// Checkboxes
+		html += '<label class="flex items-center gap-2 text-sm text-sm-base-foreground cursor-pointer"><input type="checkbox" class="'+checkboxClass+'" id="attribute_visibility_'+attrKey+'" name="attribute_visibility['+idx+']" '+visibilityChecked+'>'+_x('Visible on the product page', 'visibility option for WooCommerce product attributes', 'smart-manager-for-wp-e-commerce')+'</label>';
+		html += '<label class="flex items-center gap-2 text-sm text-sm-base-foreground cursor-pointer"><input type="checkbox" class="'+checkboxClass+'" id="attribute_variation_'+attrKey+'" name="attribute_variation['+idx+']" '+variationChecked+'>'+_x('Used for variations', 'use for variations option for WooCommerce product attributes', 'smart-manager-for-wp-e-commerce')+'</label>';
+		
+		// Position
+		html += '<div class="flex items-center gap-2 mb-4"><span class="text-sm text-sm-base-muted-foreground">'+_x('Position:', 'position checkbox for WooCommerce product attributes', 'smart-manager-for-wp-e-commerce')+'</span>';
+		html += '<input type="number" class="w-16 px-2 py-1 text-sm border border-sm-base-input rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-sm-base-primary focus:border-sm-base-primary" name="attribute_position['+idx+']" value="'+position+'">';
+		html += '<input type="hidden" name="attribute_taxonomy['+idx+']" value="'+isTaxonomy+'"></div></div>';
+		
+		// Right column
+		html += '<div class="flex-1 flex flex-col gap-2">';
+		if (isTaxonomy == 1 && attrType !== 'text') {
+			html += '<select id="'+attrKey+'" multiple="multiple" data-placeholder="'+_x('Select terms', 'placeholder', 'smart-manager-for-wp-e-commerce')+'" name="attribute_values['+idx+'][]" class="multiselect">';
+			if (attrValue && typeof attrValue === 'object') {
+				Object.entries(attrValue).forEach(([termKey, termValue]) => {
+					const selected = (selectedValues && selectedValues.hasOwnProperty(termKey)) ? ' selected' : '';
+					html += '<option value="'+termKey+'"'+selected+'>'+termValue+'</option>';
+				});
+			}
+			html += '</select><div class="flex gap-2"><button type="button" class="'+btnPrimaryClass+'">'+_x('Select all', 'button for selecting WooCommerce product attribute', 'smart-manager-for-wp-e-commerce')+'</button>';
+			html += '<button type="button" class="'+btnSecondaryClass+'">'+_x('Select none', 'button for selecting WooCommerce product attribute', 'smart-manager-for-wp-e-commerce')+'</button></div>';
+		} else {
+			html += '<input type="text" class="'+inputClass+'" id="'+attrLabel+'" name="attribute_values['+idx+']" value="'+attrValue+'" placeholder="'+_x('Pipe (|) separate terms', 'placeholder', 'smart-manager-for-wp-e-commerce')+'">';
+		}
+		html += '</div></div>';
+		
+		return html;
+	}
+
 	//Function to handle Product Attribute Inline Edit
 	SmartManager.prototype.prodAttributeInlineEdit = function (params) {
 		if ('undefined' === typeof (window.smart_manager.editedAttribueSlugs)) {
@@ -163,7 +210,7 @@
 			<label class="gap-2 text-[0.8125rem] leading-4 text-sm-base-foreground md:inline-flex items-center select-none cursor-pointer shrink-0" for="sm-toggle-variations">
 				<span>${_x('Show variations', 'toggle', 'smart-manager-for-wp-e-commerce')}</span>
 				<span class="w-8.5 h-4.5 relative inline-flex items-center">
-					<input id="sm-toggle-variations" type="checkbox" class="peer sr-only" ${showVariationsChecked} />
+					<input id="sm-toggle-variations" type="checkbox" class="m-0 peer sr-only" ${showVariationsChecked} />
 					<span class="sm-toggle-track absolute inset-0 rounded-[0.625rem] bg-[#d4d4d8] peer-checked:bg-sm-base-primary transition-colors duration-200"></span>
 					<span class="sm-toggle-thumb absolute left-0.5 w-3 h-3 rounded-lg bg-white shadow-[0_1px_2px_rgba(0,0,0,0.1)] peer-checked:translate-x-4 transition-transform duration-200"></span>
 				</span>
@@ -396,40 +443,17 @@ jQuery(document).on('sm_dashboard_change', '#sm_editor_grid', function() {
 				attrValue = ( obj.hasOwnProperty('value') ) ? obj.value : '';
 			}
 
-			let attrVisibilityFlag = ( ( obj.hasOwnProperty('is_visible') && obj.is_visible == 1 ) ? 'checked' : '' ),
-				attrVariationFlag = ( ( obj.hasOwnProperty('is_variation') && obj.is_variation == 1 ) ? 'checked' : '' ),
-				attrPosition = ( ( obj.hasOwnProperty('position') ) ? obj.position : '' ),
-				attrChkboxList = '';
-
-			attrChkboxList += '<tr> <td> <input type="checkbox" id="attribute_visibility_'+key+'" name="attribute_visibility['+window.smart_manager.prodAttrDisplayIndex+']" '+attrVisibilityFlag+'>'+_x('Visible on the product page', 'visibility option for WooCommerce product attributes', 'smart-manager-for-wp-e-commerce')+'</td> </tr>';
-			attrChkboxList += '<tr> <td> <input type="checkbox" id="attribute_variation_'+key+'" name="attribute_variation['+window.smart_manager.prodAttrDisplayIndex+']" '+attrVariationFlag+'>'+_x('Used for variations', 'use for variations option for WooCommerce product attributes', 'smart-manager-for-wp-e-commerce')+'</td> </tr>';
-			attrChkboxList += '<tr> <td> <label>'+_x('Position:', 'position checkbox for WooCommerce product attributes', 'smart-manager-for-wp-e-commerce')+'</label> <input type="number" style="width:23% !important;" name="attribute_position['+window.smart_manager.prodAttrDisplayIndex+']" value="'+attrPosition+'">';
-			attrChkboxList += '<input type="hidden" name="attribute_taxonomy['+window.smart_manager.prodAttrDisplayIndex+']" value='+isTaxonomy+'> </td> </tr>';
-
-			if (isTaxonomy == 1) {
-				attrSelectedList += '<tr> <td class="sm-attribute-modal-attribute-name"> <label style="font-weight: bold;"> '+attrLabel+': </label> </td>';
-				if( "text" === attrType ) {
-					attrSelectedList += '<td rowspan="4"> <input type="text" id="'+attrLabel+'" name="attribute_values['+window.smart_manager.prodAttrDisplayIndex+']" value="'+attrValue+'" placeholder="'+_x('Pipe (|) separate terms', 'placeholder', 'smart-manager-for-wp-e-commerce')+'" /> </ td>';
-				} else {
-					attrSelectedList += '<td rowspan="4" class="sm-attribute-modal-select-td"> <select id="'+key+'" multiple="multiple" data-placeholder="'+_x('Select terms', 'placeholder', 'smart-manager-for-wp-e-commerce')+'" name="attribute_values['+window.smart_manager.prodAttrDisplayIndex+'][]" class="multiselect">';
-
-					if( attrValue != '' ) {
-						Object.entries(attrValue).forEach(([key, value]) => {
-							attrSelectedList += ( obj.hasOwnProperty('value') && obj.value.hasOwnProperty(key) ) ? '<option value="'+ key +'" selected>'+ value +'</option>' : '<option value="'+ key +'">'+ value +'</option>';
-						});
-					}
-					attrSelectedList += '</select> <br />';
-					attrSelectedList += '<button class="bg-sm-base-primary button hover:bg-[#5850d6] select_all_attributes text-sm-base-primary-foreground" style="margin-right: 1em;">'+_x('Select all', 'button for selecting WooCommerce product attribute', 'smart-manager-for-wp-e-commerce')+'</button> ';
-					attrSelectedList += '<button class="bg-sm-base-muted button select_no_attributes text-sm-base-foreground">'+_x('Select none', 'button for selecting WooCommerce product attribute', 'smart-manager-for-wp-e-commerce')+'</button> </td>';
-				}
-				attrSelectedList += '<td> <input type="hidden" name="attribute_names['+window.smart_manager.prodAttrDisplayIndex+']" index="'+window.smart_manager.prodAttrDisplayIndex+'" value="'+key+'" /></td>';
-			} else if (isTaxonomy == 0) {
-				attrSelectedList += '<tr> <td> <input type="text" name="attribute_names['+window.smart_manager.prodAttrDisplayIndex+']" index="'+window.smart_manager.prodAttrDisplayIndex+'" placeholder="'+_x('Name', 'placeholder', 'smart-manager-for-wp-e-commerce')+'" value="'+attrLabel+'"> </td>';
-				attrSelectedList += '<td rowspan="4"> <input type="text" id="'+attrLabel+'" name="attribute_values['+window.smart_manager.prodAttrDisplayIndex+']" value="'+attrValue+'" placeholder="'+_x('Pipe (|) separate terms', 'placeholder', 'smart-manager-for-wp-e-commerce')+'" /> </td>';
-			}
-			attrSelectedList += '</tr>';
-			attrSelectedList += attrChkboxList;
-
+			attrSelectedList += window.smart_manager.generateAttributeCardHtml({
+				attrKey: key,
+				attrLabel: attrLabel,
+				attrValue: attrValue,
+				attrType: attrType,
+				isTaxonomy: isTaxonomy,
+				visibilityChecked: (obj.hasOwnProperty('is_visible') && obj.is_visible == 1) ? 'checked' : '',
+				variationChecked: (obj.hasOwnProperty('is_variation') && obj.is_variation == 1) ? 'checked' : '',
+				position: obj.hasOwnProperty('position') ? obj.position : '',
+				selectedValues: obj.value || null
+			});
 			window.smart_manager.prodAttrDisplayIndex++;
 		});
 	}
@@ -439,16 +463,20 @@ jQuery(document).on('sm_dashboard_change', '#sm_editor_grid', function() {
 	  	attributeList += '<option value="'+key+'" '+ disabled +' >'+value.lbl+'</option>';
 	});
 
-	dlgContent += '<div id="edit_product_attributes">'+
-						'<input type="hidden" name="isVariation" value="'+ ( ( isVariation ) ? 1 : 0 ) +'">'+
-						'<table id= "table_edit_attributes" width="100%">'+
-							attrSelectedList +
-						'</table>'+
-						'<div id="edit_attributes_toolbar">'+
-							'<button type="button" class= "button bg-sm-base-primary text-sm-base-primary-foreground" id="edit_attributes_add" style="float:right;">'+_x('Add', 'add attribute button for WooCommerce products', 'smart-manager-for-wp-e-commerce')+'</button>'+
-							'<select id="edit_attributes_taxonomy_list" style="float: right; margin-right: 1em;">'+attributeList+'</select>'+
-						'</div>'+
-					'</div>';
+	dlgContent += '<div id="edit_product_attributes" class="flex flex-col">';
+	dlgContent += '<input type="hidden" name="isVariation" value="'+ ( ( isVariation ) ? 1 : 0 ) +'">';
+	
+	// Attributes list container
+	dlgContent += '<div id="sm_attributes_list" class="flex flex-col">';
+	dlgContent += attrSelectedList;
+	dlgContent += '</div>';
+	
+	// Toolbar - Add attribute
+	dlgContent += '<div id="edit_attributes_toolbar" class="flex items-center justify-end gap-3 pt-4 border-t border-sm-base-border">';
+	dlgContent += '<select id="edit_attributes_taxonomy_list" class="py-2 text-sm border border-sm-base-input rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-sm-base-primary focus:border-sm-base-primary cursor-pointer">'+attributeList+'</select>';
+	dlgContent += '<button type="button" class="px-4 py-2 text-sm font-medium text-sm-base-primary-foreground bg-sm-base-primary rounded-md hover:bg-[#5850d6] transition-colors cursor-pointer" id="edit_attributes_add">'+_x('Add', 'add attribute button for WooCommerce products', 'smart-manager-for-wp-e-commerce')+'</button>';
+	dlgContent += '</div>';
+	dlgContent += '</div>';
 
 		let initializeAttributesSelect2 = function() {
 			jQuery("select.multiselect").select2({
@@ -461,14 +489,14 @@ jQuery(document).on('sm_dashboard_change', '#sm_editor_grid', function() {
 			//Code for select all and none attributes
 			jQuery(document)
 			.off('click', 'button.select_all_attributes').on('click', 'button.select_all_attributes', function(){
-				jQuery(this).closest('td').find('select option').attr("selected","selected");
-				jQuery(this).closest('td').find('select').trigger('change.select2');
+				jQuery(this).closest('.sm-attribute-card').find('select.multiselect option').attr("selected","selected");
+				jQuery(this).closest('.sm-attribute-card').find('select.multiselect').trigger('change.select2');
 				return false;
 			})
 
 			.off('click', 'button.select_no_attributes').on('click', 'button.select_no_attributes', function(){
-				jQuery(this).closest('td').find('select option').removeAttr("selected");
-				jQuery(this).closest('td').find('select').trigger('change.select2');
+				jQuery(this).closest('.sm-attribute-card').find('select.multiselect option').removeAttr("selected");
+				jQuery(this).closest('.sm-attribute-card').find('select.multiselect').trigger('change.select2');
 				return false;
 			});
 		}
@@ -477,8 +505,7 @@ jQuery(document).on('sm_dashboard_change', '#sm_editor_grid', function() {
 			title: _x('Attribute', 'modal title', 'smart-manager-for-wp-e-commerce'),
 			content: dlgContent,
 			autoHide: false,
-			width: 'max-w-lg',
-			// modalClass: 'max-w-lg',
+			width: 'max-w-xl',
 			cta: {
 				title: _x('Ok', 'button', 'smart-manager-for-wp-e-commerce'),
 				callback: function() {
@@ -495,55 +522,36 @@ jQuery(document).on('sm_dashboard_change', '#sm_editor_grid', function() {
 
 .off('click', '#edit_attributes_add').on('click', '#edit_attributes_add', function(){
 	let taxonomySelected = jQuery("#edit_attributes_taxonomy_list").val(),
-		isVariation = jQuery("#edit_product_attributes [name=isVariation]").val(),
-		newAttribute = '',
 		attrType = 'text',
 		attrVal = '',
 		isTaxonomy = 0,
-		attrChkboxList = '';
+		attrLabel = '';
 
 	//Code to reset the taxonomy list
 	jQuery('#edit_attributes_taxonomy_list').find('option[value="custom"]').prop('selected', true);
-
 	jQuery('#edit_attributes_taxonomy_list').find('option[value="'+ taxonomySelected +'"]').prop('disabled', true);
 
 	if(taxonomySelected && ("custom" !== taxonomySelected)){
-		attrType = ( typeof(window.smart_manager.prodAttributeActualValues) != 'undefined' && typeof(window.smart_manager.prodAttributeActualValues[taxonomySelected]) != 'undefined' && window.smart_manager.prodAttributeActualValues[taxonomySelected].hasOwnProperty('type') ) ? window.smart_manager.prodAttributeActualValues[taxonomySelected].type : '';
-		attrVal = ( typeof(window.smart_manager.prodAttributeActualValues) != 'undefined' && typeof(window.smart_manager.prodAttributeActualValues[taxonomySelected]) != 'undefined' && window.smart_manager.prodAttributeActualValues[taxonomySelected].hasOwnProperty('val') ) ? window.smart_manager.prodAttributeActualValues[taxonomySelected].val : '';
+		const attrData = window.smart_manager.prodAttributeActualValues?.[taxonomySelected] || {};
+		attrType = attrData.type || '';
+		attrVal = attrData.val || '';
+		attrLabel = attrData.lbl || '';
 		isTaxonomy = 1;
 	}
 
-	attrChkboxList += '<tr> <td> <input type="checkbox" id="attribute_visibility_'+taxonomySelected+'" name="attribute_visibility['+window.smart_manager.prodAttrDisplayIndex+']">'+_x('Visible on the product page', 'visibility option for WooCommerce product attributes', 'smart-manager-for-wp-e-commerce')+'</td> </tr>';
-	attrChkboxList += '<tr> <td> <input type="checkbox" id="attribute_variation_'+taxonomySelected+'" name="attribute_variation['+window.smart_manager.prodAttrDisplayIndex+']">'+_x('Used for variations', 'use for variations option for WooCommerce product attributes', 'smart-manager-for-wp-e-commerce')+'</td> </tr>';
-	attrChkboxList += '<tr> <td> <label>'+_x('Position:', 'position checkbox for WooCommerce product attributes', 'smart-manager-for-wp-e-commerce')+'</label> <input type="number" style="width:23% !important;" name="attribute_position['+window.smart_manager.prodAttrDisplayIndex+']" value="'+window.smart_manager.prodAttrDisplayIndex+'">';
-	attrChkboxList += '<input type="hidden" name="attribute_taxonomy['+window.smart_manager.prodAttrDisplayIndex+']" value="'+isTaxonomy+'"> </td> </tr>';
+	const newAttribute = window.smart_manager.generateAttributeCardHtml({
+		attrKey: taxonomySelected,
+		attrLabel: attrLabel,
+		attrValue: attrVal,
+		attrType: attrType,
+		isTaxonomy: isTaxonomy,
+		visibilityChecked: '',
+		variationChecked: '',
+		position: window.smart_manager.prodAttrDisplayIndex,
+		selectedValues: null
+	});
 
-	if (isTaxonomy == 1) {
-		newAttribute += '<tr> <td class="sm-attribute-modal-attribute-name"> <label style="font-weight: bold;">'+window.smart_manager.prodAttributeActualValues[taxonomySelected].lbl+':</label> </td>';
-		if( "text" === attrType ) {
-			newAttribute += '<td rowspan="4"> <input type="text" id="'+attrLabel+'" name="attribute_values['+window.smart_manager.prodAttrDisplayIndex+']" value="'+attrValue+'" placeholder="'+_x('Pipe (|) separate terms', 'placeholder', 'smart-manager-for-wp-e-commerce')+'" /> </ td>';
-		} else {
-			newAttribute += '<td rowspan="4" class="sm-attribute-modal-select-td"> <select multiple="multiple" data-placeholder="'+_x('Select terms', 'placeholder', 'smart-manager-for-wp-e-commerce')+'" name="attribute_values['+window.smart_manager.prodAttrDisplayIndex+'][]" class="multiselect" style="">';
-
-			if( attrVal != '' ) {
-				Object.entries(attrVal).forEach(([key, value]) => {
-					newAttribute += '<option value="'+ key +'">'+ value +'</option>';
-				});
-			}
-			newAttribute += '</select> <br />';
-			newAttribute += '<button class="bg-sm-base-primary button hover:bg-[#5850d6] select_all_attributes text-sm-base-primary-foreground" style="margin-right: 1em;">'+_x('Select all', 'button for selecting WooCommerce product attribute', 'smart-manager-for-wp-e-commerce')+'</button> ';
-			newAttribute += '<button class="bg-sm-base-muted button select_no_attributes text-sm-base-foreground">'+_x('Select none', 'button for selecting WooCommerce product attribute', 'smart-manager-for-wp-e-commerce')+'</button> </td>';
-		}
-		newAttribute += '<td> <input type="hidden" name="attribute_names['+window.smart_manager.prodAttrDisplayIndex+']" index="'+window.smart_manager.prodAttrDisplayIndex+'" value="'+ taxonomySelected +'"/></td>';
-	} else if (isTaxonomy == 0) {
-		newAttribute += '<tr> <td> <input type="text" name="attribute_names['+window.smart_manager.prodAttrDisplayIndex+']" index="'+window.smart_manager.prodAttrDisplayIndex+'" placeholder="'+_x('Name', 'placeholder', 'smart-manager-for-wp-e-commerce')+'"> </td>';
-		newAttribute += '<td rowspan="4"> <input type="text" name="attribute_values['+window.smart_manager.prodAttrDisplayIndex+']" value="" placeholder="'+_x('Pipe (|) separate terms', 'placeholder', 'smart-manager-for-wp-e-commerce')+'" /> </td>';
-	}
-
-	newAttribute += '</tr>';
-	newAttribute += attrChkboxList;
-
-	jQuery('#table_edit_attributes').append(newAttribute);
+	jQuery('#sm_attributes_list').append(newAttribute);
 	jQuery("select.multiselect").select2({
 		tags: true,
 		containerCssClass: 'sm-attribute-modal-select2-container',

@@ -13,6 +13,46 @@ body.smart-manager-dashboard #wpfooter {
 	margin-left: 0;
 }
 
+/* Smart Manager Custom Footer Styles */
+#smart-manager-footer.sm-footer {
+	display: flex;
+	gap: 0.5rem;
+	align-items: center;
+	justify-content: flex-end;
+}
+
+#smart-manager-footer .sm-footer-btn {
+	color: #737373 !important;
+	display: flex;
+	gap: 0.375rem;
+	cursor: pointer;
+	height: 2rem;
+	align-items: center;
+	padding: 0.5rem 0.75rem;
+	border-radius: 0.5rem;
+	flex-shrink: 0;
+	text-decoration: none;
+	background: transparent;
+	font-size: 0.875rem;
+	font-weight: 500;
+	line-height: 1.25rem;
+}
+
+#smart-manager-footer .sm-footer-btn:hover, .sm-footer-btn:focus {
+	text-decoration: underline;
+	color: #333;
+}
+
+#smart-manager-footer .sm-footer-btn-text {
+	font-size: 0.75rem;
+	font-weight: 500;
+	line-height: 1rem;
+	white-space: nowrap;
+}
+body.smart-manager-dashboard #wpfooter .sm-footer-version-text{
+	font-size: 12px;
+	color: #A3A3A3;
+}
 body.smart-manager-dashboard #wpfooter #footer-left,
 body.smart-manager-dashboard #wpfooter #footer-upgrade {
 	margin: 0;

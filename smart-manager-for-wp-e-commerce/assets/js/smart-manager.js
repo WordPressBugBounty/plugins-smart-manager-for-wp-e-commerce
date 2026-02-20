@@ -248,7 +248,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 		if ( !jQuery(document.body).hasClass('folded') && window.smart_manager.sm_beta_pro == 1 && window.smart_manager.forceCollapseAdminMenu == 1) {
 			jQuery(document.body).addClass('folded');
 		}
-		let contentwidth = jQuery('#wpbody-content').width() - 5,
+		let contentwidth = jQuery('#wpbody-content').width() - 8,
 			contentheight = 910;
 		let grid_height = contentheight - ( contentheight * 0.20 );
 		window.smart_manager.grid_width = contentwidth;
@@ -351,7 +351,6 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 				let colWidth = c.width || 0;
 				let header_text = window.smart_manager.column_names[i],
 					font = '30px Arial';
-				// font = '26px ' + window.smart_manager.body_font_family;
 
 				let newWidth = window.smart_manager.getTextWidth(header_text, font);
 
@@ -1050,7 +1049,11 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 					${window.smart_manager.getAdvancedSearchButtonHtml()}
 					<div id="search_switch_container" class="hidden">
 						<input type="checkbox" id="search_switch" switchSearchType="${switchSearchType.toLowerCase()}" />
-						<label title="${sprintf(_x('Switch to %s', 'tooltip', 'smart-manager-for-wp-e-commerce'), switchSearchType)}" for="search_switch">${sprintf(_x('%s Search', 'search type', 'smart-manager-for-wp-e-commerce'), switchSearchType)}</label>
+						<label title="${
+							/* translators: %s is the search type (Simple or Advanced) */
+							sprintf(_x('Switch to %s', 'tooltip', 'smart-manager-for-wp-e-commerce'), switchSearchType)}" for="search_switch">${
+							/* translators: %s is the search type (Simple or Advanced) */
+							sprintf(_x('%s Search', 'search type', 'smart-manager-for-wp-e-commerce'), switchSearchType)}</label>
 					</div>
 				</div>
 			</div>
@@ -1119,8 +1122,8 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 		window.smart_manager.initNavbarDropdown();
 
 		// Build the new header component
-		let sm_bottom_bar = "<div id='sm_bottom_bar' style='font-weight:500 !important;color:#5850ec;width:" + window.smart_manager.grid_width + "px;'>" +
-			"<div id='sm_bottom_bar_left' class='sm_beta_left'></div>" +
+		let sm_bottom_bar = "<div id='sm_bottom_bar' class='mt-6' style='font-weight:500 !important;color:#5850ec;width:" + window.smart_manager.grid_width + "px;'>" +
+			"<div id='sm_bottom_bar_left' class='ml-3 sm_beta_left'></div>" +
 			"<div id='sm_bottom_bar_right' class='sm_beta_right mr-2'>" +
 			"<div id='sm_beta_load_more_records' class='sm_beta_right' style='cursor: pointer;' title='" + _x('Load more records', 'tooltip', 'smart-manager-for-wp-e-commerce') + "'>" + window.smart_manager.loadMoreBtnHtml + "</div>" +
 			"<div id='sm_beta_display_records' class='sm_beta_select_blue sm_beta_right'></div>" +
@@ -1172,7 +1175,8 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 		let conditionCount = window.smart_manager.advancedSearchRuleCount || 0;
 		if (window.smart_manager.searchType === 'advanced' && window.smart_manager.advancedSearchRuleCount > 0) {
 			// Active state: purple border with dot badge indicator
-			return `<button class="advanced-search-icon relative flex items-center justify-center w-[2.25rem] h-[2.25rem] px-[0.625rem] py-[0.5rem] border border-[#6B63F1] rounded-[0.5rem] bg-transparent shrink-0 transition-colors duration-200 cursor-pointer hover:bg-[#6B63F10A]" title="${sprintf(_x('%d filter%s applied - Click to edit', 'tooltip', 'smart-manager-for-wp-e-commerce'), conditionCount, (conditionCount > 1 ? 's' : ''))}">
+			/* translators: 1: number of filters, 2: pluralized 's' for filters */
+			return `<button class="advanced-search-icon relative flex items-center justify-center w-[2.25rem] h-[2.25rem] px-[0.625rem] py-[0.5rem] border border-[#6B63F1] rounded-[0.5rem] bg-transparent shrink-0 transition-colors duration-200 cursor-pointer hover:bg-[#6B63F10A]" title="${sprintf(_x('%1$d filter%2$s applied - Click to edit', 'tooltip', 'smart-manager-for-wp-e-commerce'), conditionCount, (conditionCount > 1 ? 's' : ''))}">
 				<div class="w-[1rem] h-[1rem] flex items-center justify-center">
 					<svg width="16" height="12" viewBox="0 0 14 10" fill="none" xmlns="http://www.w3.org/2000/svg">
 						<path d="M12.665 0.664978H0.665039M5.33171 4.66498H0.665039M5.33171 8.66498H0.665039M12.6651 9.33171L11.3984 8.06504M11.9984 6.66498C11.9984 7.76955 11.1029 8.66498 9.99837 8.66498C8.8938 8.66498 7.99837 7.76955 7.99837 6.66498C7.99837 5.56041 8.8938 4.66498 9.99837 4.66498C11.1029 4.66498 11.9984 5.56041 11.9984 6.66498Z" stroke="#6B63F1" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/>
@@ -1387,8 +1391,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 							window.smart_manager.hot.updateSettings({
 								data: window.smart_manager.currentDashboardData,
 								columns: window.smart_manager.currentVisibleColumns,
-								colHeaders: window.smart_manager.column_names,
-								// forceRender: window.smart_manager.firstLoad
+								colHeaders: window.smart_manager.column_names
 							})
 						} else {
 							window.smart_manager.hot.updateSettings({
@@ -1687,16 +1690,53 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 		return customRenderer;
 	}
 
+	// Helper: Generate single image item HTML (for both gallery and featured)
+	SmartManager.prototype.generateImageItemHtml = function(options) {
+		let defaults = {
+			imageId: '',
+			imageSrc: '',
+			itemClass: 'sm_gallery_image',
+			deleteClass: 'sm_gallery_image_delete',
+			deleteTitle: _x('Remove image', 'tooltip', 'smart-manager-for-wp-e-commerce'),
+			showDelete: true
+		};
+		let opts = Object.assign({}, defaults, options);
+		
+		let deleteBtn = '';
+		if (opts.showDelete) {
+			// Add 'flex' class only if deleteClass does not contain '!hidden'
+			const hasHidden = opts.deleteClass && opts.deleteClass.includes('!hidden');
+			const btnClass = opts.deleteClass + ' absolute -top-[0.4375rem] -right-[0.4375rem] bg-white rounded-full p-1 shadow-sm cursor-pointer items-center justify-center' + (hasHidden ? '' : ' flex');
+			deleteBtn = `<button type="button" class="${btnClass}" title="${opts.deleteTitle}">${window.smart_manager.getIcons('close')}</button>`;
+		}
+		
+		return `<div class="${opts.itemClass} relative border border-sm-base-border rounded-lg w-16 h-16 shrink-0 overflow-visible group" data-id="${opts.imageId}"><img data-id="${opts.imageId}" src="${opts.imageSrc}" class="absolute inset-0 w-full object-cover rounded-lg pointer-events-none" />${deleteBtn}</div>`;
+	}
+
+	// Helper: Generate add image button HTML
+	SmartManager.prototype.generateAddImageBtnHtml = function(btnId, iconSize = 24) {
+		return `<button type="button" id="${btnId}" class="border-sm-base-border rounded-lg flex flex-col items-center justify-center w-16 h-16 shrink-0 cursor-pointer bg-sm-base-muted transition-colors">${window.smart_manager.getIcons('plus')}</button>`;
+	}
+
+	// Helper: Close gallery modal
+	SmartManager.prototype.closeGalleryModal = function() {
+		window.smart_manager.modal = {};
+		if(typeof window.smart_manager.showPannelDialog === 'function' && typeof window.smart_manager.getDefaultRoute === 'function'){
+			window.smart_manager.showPannelDialog(window.smart_manager.getDefaultRoute(true));
+		}
+	}
+
 	SmartManager.prototype.generateImageGalleryDlgHtml = function (imageObj) {
 		let html = '';
 
 		if (typeof (imageObj) !== "undefined") {
 			Object.entries(imageObj).forEach(([id, imageUrl]) => {
-				html += '<div class="sm_beta_left sm_gallery_image">' +
-					'<img data-id="' + imageUrl.id + '" src="' + imageUrl.val + '" width="150" height="150"></img>' +
-					'<div style="text-align:center;"> <span class="dashicons dashicons-trash sm_beta_select_red sm_gallery_image_delete" title="' + _x('Remove gallery image', 'tooltip', 'smart-manager-for-wp-e-commerce') + '"> </div>' +
-					'</div>';
-
+				html += window.smart_manager.generateImageItemHtml({
+					imageId: imageUrl.id,
+					imageSrc: imageUrl.val,
+					itemClass: 'sm_gallery_image',
+					deleteClass: 'sm_gallery_image_delete'
+				});
 			});
 		}
 
@@ -1771,10 +1811,6 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 				window.smart_manager.hot.render();
 			} else {
 				window.smart_manager.refresh();
-			}
-
-			if (1 == window.smart_manager.sm_beta_pro && 'undefined' !== typeof (window.smart_manager.displayGalleryImagesModal) && 'function' === typeof (window.smart_manager.displayGalleryImagesModal)) {
-				window.smart_manager.displayGalleryImagesModal({ id: galleryImages.id, src: galleryImages.src, imageGalleryHtml: galleryImages.imageGalleryHtml, rowNo: galleryImages.rowNo || 0 })
 			}
 		});
 	};
@@ -1875,6 +1911,23 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 					
 					headerWrapper.appendChild(btn);
 					TH.appendChild(headerWrapper);
+				} else {
+					// Add column type class for sorting icon differentiation.
+					if (window.smart_manager.currentVisibleColumns && window.smart_manager.currentVisibleColumns[col]) {
+						const colObj = window.smart_manager.currentVisibleColumns[col];
+						const colType = colObj.type || 'text';
+						const colName = colObj.col_name || '';
+						// Remove existing type classes.
+						TH.classList.remove('sm-col-numeric', 'sm-col-text', 'sm-col-id');
+						// Add appropriate class based on column type or source.
+						if (['_sale_price', '_regular_price', '_price'].some(field => colName.includes(field))) {
+							TH.classList.add('sm-col-id');
+						} else if (colType === 'numeric') {
+							TH.classList.add('sm-col-numeric');
+						} else {
+							TH.classList.add('sm-col-text');
+						}
+					}
 				}
 			},
 
@@ -2309,7 +2362,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 					});
 					// Add the search box before the checkbox list and generate final checkbox list.
 					multiselect_chkbox_list = `<div id="sm_multiselect_container">
-					<div class="bg-sm-base-muted border border-sm-base-input flex gap-1 h-9 items-center overflow-hidden px-3 py-1 rounded-lg shadow-[0_0.0625rem_0.125rem_0_rgba(0,0,0,0.05)] w-full focus-within:border-[#8781f1]"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0"><path d="M14 14L10 10M11.3333 6.66667C11.3333 9.244 9.244 11.3333 6.66667 11.3333C4.08934 11.3333 2 9.244 2 6.66667C2 4.08934 4.08934 2 6.66667 2C9.244 2 11.3333 4.08934 11.3333 6.66667Z" stroke="#737373" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"></path></svg><input data-ul-id="sm-multilist-data" onkeyup="window.smart_manager.processListSearch(this)" type="text" placeholder="${_x('Search ' + (col.key || 'Taxonomy') + '...', 'placeholder', 'smart-manager-for-wp-e-commerce')}" class="sm-input flex-1 font-normal text-sm leading-5 text-sm-base-foreground bg-transparent border-0 outline-none overflow-hidden text-ellipsis whitespace-nowrap focus:outline-none focus:ring-0 focus:shadow-none"></div>
+					<div class="mb-4 bg-sm-base-muted border border-sm-base-input flex gap-1 h-9 items-center overflow-hidden px-3 py-1 rounded-lg shadow-[0_0.0625rem_0.125rem_0_rgba(0,0,0,0.05)] w-full focus-within:border-[#8781f1]"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0"><path d="M14 14L10 10M11.3333 6.66667C11.3333 9.244 9.244 11.3333 6.66667 11.3333C4.08934 11.3333 2 9.244 2 6.66667C2 4.08934 4.08934 2 6.66667 2C9.244 2 11.3333 4.08934 11.3333 6.66667Z" stroke="#737373" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"></path></svg><input data-ul-id="sm-multilist-data" onkeyup="window.smart_manager.processListSearch(this)" type="text" placeholder="${_x('Search ' + (col.key || 'Taxonomy') + '...', 'placeholder', 'smart-manager-for-wp-e-commerce')}" class="sm-input flex-1 font-normal text-sm leading-5 text-sm-base-foreground bg-transparent border-0 outline-none overflow-hidden text-ellipsis whitespace-nowrap focus:outline-none focus:ring-0 focus:shadow-none"></div>
 					${window.smart_manager.generateCheckboxList(multiselect_data, current_value)}
 				</div>`
 					window.smart_manager.modal = {
@@ -2411,7 +2464,6 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 			if (sm_dashboard_valid == 1) {
 
 				window.smart_manager.state_apply = true;
-				// window.smart_manager.refreshDashboardStates(); //function to save the state
 
 				if ("undefined" !== typeof (window.smart_manager.updateState) && "function" === typeof (window.smart_manager.updateState)) {
 					("undefined" !== typeof (window.smart_manager.isTasksEnabled) && "function" === typeof (window.smart_manager.isTasksEnabled) && window.smart_manager.isTasksEnabled()) ? window.smart_manager.updateState({ isTasksEnabled: 1 }) : window.smart_manager.updateState();
@@ -2713,27 +2765,6 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 			})
 
 			//Code for handling refresh event
-			.off('click', ".sm_gallery_image .sm_gallery_image_delete").on('click', ".sm_gallery_image .sm_gallery_image_delete", function () {
-				let colSrc = jQuery(this).parents('div.sm_gallery_image_parent').data('col') || '',
-					updateId = jQuery(this).parents('div.sm_gallery_image_parent').data('id') || 0,
-					rowNo = parseInt(jQuery(this).parents('div.sm_gallery_image_parent').data('row') || 0);
-				jQuery(this).parents('.sm_gallery_image').remove();
-				let imageIds = new Array();
-				jQuery('.sm_gallery_image').find('img').each(function () {
-					imageIds.push(jQuery(this).data('id'));
-				});
-				let updatedGalleryImages = {};
-				updatedGalleryImages[updateId] = {};
-				updatedGalleryImages[updateId][colSrc] = imageIds.join(',');
-				let params = { id: updateId, src: colSrc, values: updatedGalleryImages[updateId][colSrc], imageGalleryHtml: jQuery('div.modal-body').html(), rowNo: rowNo };
-				if (1 == window.smart_manager.sm_beta_pro && "undefined" !== typeof (window.smart_manager.displayTitleModal) && "function" === typeof (window.smart_manager.displayTitleModal)) {
-					window.smart_manager.displayTitleModal(params);
-				} else if ("undefined" !== typeof (window.smart_manager.inlineUpdateMultipleImages) && "function" === typeof (window.smart_manager.inlineUpdateMultipleImages)) {
-					window.smart_manager.inlineUpdateMultipleImages(params);
-				}
-			})
-
-			//Code for handling refresh event
 			.off('click', "#refresh_sm_editor_grid").on('click', "#refresh_sm_editor_grid", function () {
 				window.smart_manager.refresh();
 			})
@@ -2754,7 +2785,6 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 					window.smart_manager.showNotification()
 				}
 
-				/*Review*/
 				window.smart_manager.hot.updateSettings({ 'width': window.smart_manager.grid_width });
 				window.smart_manager.hot.render();
 
@@ -2978,15 +3008,20 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 					if (isScheduledAction) {
 						showProUpsell(_x('This feature is available only in the %s version', 'modal content', 'smart-manager-for-wp-e-commerce'));
 					} else if (isBulkEdit) {
+						/* translators: %s is a link to documentation on how to use bulk edit */
 						let description = sprintf(_x('You can change/update multiple fields of the entire store OR for selected items using the Bulk Edit feature. Refer to this doc on %s or watch the video below.', 'modal description', 'smart-manager-for-wp-e-commerce'), '<a href="https://www.storeapps.org/docs/sm-how-to-use-batch-update/?utm_source=sm&utm_medium=in_app&utm_campaign=view_docs" target="_blank">' + _x('how to do bulk edit', 'modal description', 'smart-manager-for-wp-e-commerce') + '</a>');
+						
 						window.smart_manager.modal = {
-							title: _x('Bulk Edit', 'modal title', 'smart-manager-for-wp-e-commerce') + ' - <span style="color: red;">' + _x('Biggest Time Saver', 'modal title', 'smart-manager-for-wp-e-commerce') + '</span> ' + sprintf(_x('(Only in %s)', 'modal title', 'smart-manager-for-wp-e-commerce'), '<a href="' + window.smart_manager.pricingPageURL + '" target="_blank">' + _x('Pro', 'modal title', 'smart-manager-for-wp-e-commerce') + '</a>'),
+							title: _x('Bulk Edit', 'modal title', 'smart-manager-for-wp-e-commerce') + ' - <span style="color: red;">' + _x('Biggest Time Saver', 'modal title', 'smart-manager-for-wp-e-commerce') + '</span> ' + sprintf(/* translators: %s is a link to the Pro version */
+								_x('(Only in %s)', 'modal title', 'smart-manager-for-wp-e-commerce'), '<a href="' + window.smart_manager.pricingPageURL + '" target="_blank">' + _x('Pro', 'modal title', 'smart-manager-for-wp-e-commerce') + '</a>'
+							),
 							content: '<div><p>' + description + '</p><div><iframe width="100%" height="100%" src="https://www.youtube.com/embed/COXCuX2rFrk" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div></div>',
 							width: 'w-2/6', autoHide: false, isFooterItemsCenterAligned: true,
 							cta: { title: _x('Upgrade Now', 'button', 'smart-manager-for-wp-e-commerce'), callback: () => window.open(window.smart_manager.pricingPageURL, "_blank") }
 						};
 						window.smart_manager.showModal();
 					} else if (isDuplicate) {
+						/* translators: %s is the Pro version name */
 						showProUpsell(_x('Duplicate Records (Only in %s)', 'notification', 'smart-manager-for-wp-e-commerce'));
 					}
 				}
@@ -3535,9 +3570,11 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 			autoHide: false,
 			showCloseIcon: (params.hasOwnProperty('showCloseIcon')) ? params.showCloseIcon : true,
 			modalClass: params?.modalClass || '',
+			showCloseCTAFirst: params.showCloseCTAFirst,
 			cta: {
 				title: ((params.btnParams.hasOwnProperty('yesText')) ? params.btnParams.yesText : _x('Yes', 'button', 'smart-manager-for-wp-e-commerce')),
 				closeModalOnClick: (params.btnParams.hasOwnProperty('hideOnYes')) ? params.btnParams.hideOnYes : true,
+				btnClass: (params.btnParams.hasOwnProperty('yesBtnClass')) ? params.btnParams.yesBtnClass : '',
 				callback: function () {
 					if (params.btnParams.hasOwnProperty('yesCallback') && typeof params.btnParams.yesCallback === "function") {
 						if (params.btnParams.hasOwnProperty('yesCallbackParams')) {
@@ -3550,6 +3587,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 			},
 			closeCTA: {
 				title: ((params.btnParams.hasOwnProperty('noText')) ? params.btnParams.noText : _x('No', 'button', 'smart-manager-for-wp-e-commerce')),
+				btnClass: (params.btnParams.hasOwnProperty('noBtnClass')) ? params.btnParams.noBtnClass : '',
 				callback: function () {
 					if (params.btnParams.hasOwnProperty('noCallback') && typeof params.btnParams.noCallback === "function") {
 						params.btnParams.noCallback();
@@ -3850,16 +3888,16 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 		window[pluginKey].showPannelDialog(this.getDefaultRoute());
 	}
 
-	SmartManager.prototype.renderMultilistValuesInGrid = function (values_str, td, addTitleAttr = false, bgColor = '', color = '') {
+	SmartManager.prototype.renderMultilistValuesInGrid = function (values_str, td, addTitleAttr = true, bgColor = '', color = '') {
 		// Split the comma-separated values and create elements.
 		const options = values_str.split(',').map(cat => cat.trim()).filter(Boolean);
 		let badgesDiv = '';
 		if(options){
 			options.forEach(category => {
-				badgesDiv += `<div class="${!Array.from(td.classList).some(cls => cls.startsWith('sm_beta_select_')) ? 'text-sm-base-foreground' : ''} px-2 py-0.5 rounded-lg text-xs leading-4  whitespace-nowrap ${!color ? 'border border-sm-base-border font-normal' : 'font-medium'}" style="background-color: ${bgColor ? bgColor : '#fff'}; ${color ? `color:${color} !important` : ''}">${category}</div>`;
+				badgesDiv += `<div class="inline-block ${!Array.from(td.classList).some(cls => cls.startsWith('sm_beta_select_')) ? 'text-sm-base-foreground' : ''} px-2 py-0.5 rounded-lg text-xs leading-4  whitespace-nowrap mt-1 mr-1 ${!color ? 'border border-sm-base-border font-normal' : 'font-medium'}" style="background-color: ${bgColor ? bgColor : '#fff'}; ${color ? `color:${color} !important` : ''}">${category}</div>`;
 			});
 		}
-		td.innerHTML = `<div class="wrapper" ${addTitleAttr ? `title="${td.innerText}"` : ""}>${badgesDiv}</div>`;
+		td.innerHTML = `<div style="overflow:hidden;max-height:${String(window.smart_manager.rowHeight).includes('px') ? window.smart_manager.rowHeight : window.smart_manager.rowHeight+'px'}" ${addTitleAttr ? `title="${td.innerText}"` : ""}>${badgesDiv}</div>`;
 		return td;
 	}
 	let instance = new SmartManager();
@@ -4071,8 +4109,12 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 
 	  	function customTextRenderer(hotInstance, td, row, col, prop, value, cellProperties) {
 		    Handsontable.renderers.TextRenderer.apply(this, arguments);
-		    td.innerHTML = '<div title="'+ td.innerHTML +'" class="wrapper">' + td.innerHTML + '</div>';
-
+			if (['_sale_price', '_regular_price', '_price'].some(field => prop.includes(field)) && value.length) {
+				td.classList.add('sm-price-cell')
+				td.innerHTML = '<div title="'+ td.innerHTML +'" class="wrapper sm-price-cell">' + wc.wcSettings.CURRENCY.symbol + td.innerHTML + '</div>';
+			} else {
+				td.innerHTML = '<div title="'+ td.innerHTML +'" class="wrapper">' + td.innerHTML + '</div>';
+			}
 		    return td;
 		}
 	  	Handsontable.renderers.registerRenderer('customTextRenderer', customTextRenderer);
@@ -4370,79 +4412,292 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 			return;
 		}
 		let rowNo = (galleryImageParams.hasOwnProperty('rowNo')) ? galleryImageParams.rowNo : 0;
+		
+		// Get featured image data from currentDashboardData
+		let featuredImageData = null;
+		let featuredImageId = null;
+		let featuredImageUrl = '';
+		if(window.smart_manager.currentDashboardData && window.smart_manager.currentDashboardData[rowNo]){
+			let rowData = window.smart_manager.currentDashboardData[rowNo];
+			featuredImageData = rowData['postmeta_meta_key__thumbnail_id_meta_value__thumbnail_id'] || null;
+			if(featuredImageData && typeof featuredImageData === 'object'){
+				featuredImageId = featuredImageData.id || null;
+				featuredImageUrl = featuredImageData.val || '';
+			} else if(featuredImageData){
+				featuredImageUrl = featuredImageData;
+			}
+		}
+		
+		// Build featured image HTML
+		let featuredImageHtml = '';
+		if(featuredImageUrl){
+			featuredImageHtml = window.smart_manager.generateImageItemHtml({
+				imageId: featuredImageId || '',
+				imageSrc: featuredImageUrl,
+				itemClass: 'sm_featured_image',
+				deleteClass: 'sm_featured_image_delete !hidden',
+				deleteTitle: _x('Remove featured image', 'tooltip', 'smart-manager-for-wp-e-commerce')
+			});
+		}
+		
+		// Build the modal content with new design
+		let modalContent = `
+			<div class="sm_gallery_image_parent" data-id="${galleryImageParams.id}" data-col="${galleryImageParams.src || ''}" data-row="${rowNo || 0}">
+				<!-- Featured Image Section -->
+				<div class=" flex-col gap-2 w-full !hidden">
+					<div class="flex items-center pt-1.5 pb-0.5 w-full">
+						<p class="flex-1 text-xs font-normal leading-4 text-sm-base-muted-foreground m-0">${_x('Featured', 'modal section', 'smart-manager-for-wp-e-commerce')}</p>
+					</div>
+					<div class="flex gap-4 items-center w-full">
+						<div class="sm_featured_image_container flex gap-3 items-center">
+							${featuredImageHtml ? featuredImageHtml : window.smart_manager.generateAddImageBtnHtml('sm_featured_add_image_btn', 16)}
+						</div>
+					</div>
+				</div>
+				<!-- Image Gallery Section -->
+				<div class="flex flex-col w-full">
+					<div class="flex items-center pt-1.5 pb-0.5 w-full">
+						<p class="flex-1 text-xs font-normal leading-4 text-sm-base-muted-foreground m-0">${_x('Image Gallery', 'modal section', 'smart-manager-for-wp-e-commerce')}</p>
+					</div>
+					<div class="flex gap-2 items-center w-full">
+						<!-- Upload Image Button -->
+						${window.smart_manager.generateAddImageBtnHtml('sm_gallery_add_image_btn', 24)}
+						<!-- Images Container -->
+						<div class="sm_gallery_images_container flex flex-wrap items-center overflow-x-auto">
+							${galleryImageParams.imageGalleryHtml.replace(/<div class="sm_gallery_image_parent"[^>]*>/gi, '').replace(/<\/div>$/gi, '')}
+						</div>
+					</div>
+				</div>
+			</div>
+		`;
+
 		window.smart_manager.modal = {
-			title: _x('Gallery Images','gallery modal title','smart-manager-for-wp-e-commerce'),
-			content: galleryImageParams.imageGalleryHtml,
+			title: _x('Add Images', 'gallery modal title', 'smart-manager-for-wp-e-commerce'),
+			content: modalContent,
 			autoHide: false,
+			width: 'max-w-lg w-full',
+			contentClass: '',
+			hideFooter: true,
+			showCloseCTAFirst: false,
 			cta: {
-					title: _x('Add','button','smart-manager-for-wp-e-commerce'),
-					closeModalOnClick: false,
-					callback: function(){
-						if("undefined" !== typeof(window.smart_manager.handleMediaUpdate) && "function" === typeof(window.smart_manager.handleMediaUpdate)){
-							jQuery('.sm_ui_dialog_class, .ui-widget-overlay').hide();
-							let params = {
-								UploaderText: _x('Add images to product gallery','button','smart-manager-for-wp-e-commerce'),
-								UploaderButtonText: _x('Add to gallery','button','smart-manager-for-wp-e-commerce'),
-								allowMultiple: true,
-								row_data_id: galleryImageParams.id
-							};
-							params.callback = function(attachments){
-								jQuery('.sm_ui_dialog_class , .ui-widget-overlay').show();
-								if('undefined' === typeof(attachments)){
-									return;
-								}
-								let imageGalleryHtml = `<div class="sm_gallery_image_parent" data-id="${galleryImageParams.id}" data-col="${galleryImageParams.src || ''}" data-row="${rowNo || 0}">`,
-									modifiedGalleryImages = [],
-									imageIds = new Set();
-								jQuery('.sm_gallery_image').find('img').each(function(){
-									modifiedGalleryImages.push({
-										id:jQuery(this).data('id'),
-										val:jQuery(this).attr('src')
-									});
-									imageIds.add(jQuery(this).data('id'));
-								});
-								attachments.forEach(function(attachmentObj){
-									modifiedGalleryImages.push({
-										id:attachmentObj.id,
-										val:attachmentObj.sizes.full.url
-									});
-									imageIds.add(attachmentObj.id);
-								});
-								if("undefined" !== typeof(window.smart_manager.generateImageGalleryDlgHtml) && "function" === typeof(window.smart_manager.generateImageGalleryDlgHtml)){
-									imageGalleryHtml += window.smart_manager.generateImageGalleryDlgHtml(modifiedGalleryImages);
-								}
-								imageGalleryHtml += '</div>';
-								let args = {id:galleryImageParams.id,src:galleryImageParams.src,values:[...imageIds].join(','),imageGalleryHtml:imageGalleryHtml,rowNo:rowNo};
-								if(1 == window.smart_manager.sm_beta_pro && "undefined" !== typeof(window.smart_manager.displayTitleModal) && "function" === typeof(window.smart_manager.displayTitleModal)){
-									window.smart_manager.displayTitleModal(args);
-								}else if("undefined" !== typeof(window.smart_manager.inlineUpdateMultipleImages) && "function" === typeof(window.smart_manager.inlineUpdateMultipleImages)){
-									jQuery('div.modal-body').html(imageGalleryHtml);
-									window.smart_manager.inlineUpdateMultipleImages(args);
-								}
-							}
-							window.smart_manager.handleMediaUpdate( params );
-						}
-					}
+				title: ''
 			},
+			closeCTA: {
+				title: ''
+			},
+			onCreate: function(){
+				// Add footer HTML after modal is created
+				let footerHtml = `
+					<div class="flex items-center gap-2.5 px-4 py-3 border-t border-sm-base-border bg-white">
+						<!-- Remove All Button (Left) -->
+						<button type="button" id="sm_gallery_remove_all_btn" class="flex gap-2 items-center justify-center h-9 px-2.5 py-2 rounded-lg hover:bg-red-50 cursor-pointer shrink-0">
+							${window.smart_manager.getIcons('delete', '#DC2626')}
+							<span class="text-sm font-medium leading-5 text-sm-base-destructive whitespace-nowrap">${_x('Remove all', 'button', 'smart-manager-for-wp-e-commerce')}</span>
+						</button>
+						<!-- Spacer -->
+						<div class="flex-1"></div>
+						<!-- Cancel Button -->
+						<button type="button" id="sm_gallery_cancel_btn" class="flex gap-2 items-center justify-center h-9 px-4 py-2 rounded-lg shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] cursor-pointer shrink-0 text-sm font-medium leading-5 text-sm-base-foreground hover:bg-sm-base-muted transition-colors">
+							${_x('Cancel', 'button', 'smart-manager-for-wp-e-commerce')}
+						</button>
+						<!-- Save Button -->
+						<button type="button" id="sm_gallery_save_btn" class="flex gap-2 items-center justify-center h-9 px-4 py-2 bg-sm-base-primary rounded-lg shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] cursor-pointer shrink-0 text-sm font-medium leading-5 text-sm-base-primary-foreground hover:bg-[#5850d6] transition-colors">
+							${_x('Save', 'button', 'smart-manager-for-wp-e-commerce')}
+						</button>
+					</div>
+				`;
+				
+				let modalBodyEl = document.querySelector('#' + window[pluginKey].pluginSlug + '_modal .modal-body, #' + window[pluginKey].pluginSlug + '_modal > div > div > div:nth-child(2)');
+				if(modalBodyEl){
+					modalBodyEl.classList.remove('px-4', 'py-4');
+					modalBodyEl.classList.add('px-4', 'pb-4', 'pt-2');
+				}
+				
+				// Insert footer after modal body
+				let modalContentEl = document.querySelector('#' + window[pluginKey].pluginSlug + '_modal > div > div');
+				if(modalContentEl){
+					let existingFooter = modalContentEl.querySelector('.border-t.border-sm-base-border:last-child');
+					if(existingFooter){
+						existingFooter.remove();
+					}
+					modalContentEl.insertAdjacentHTML('beforeend', footerHtml);
+				}
+
+				// Bind event handlers
+				window.smart_manager.bindGalleryModalEvents(galleryImageParams, rowNo);
+			}
 		}
 		window.smart_manager.showModal()
 	}
-	// Code for displaying title modal in case of gallery images.
+	
+	// Bind gallery modal event handlers
+	SmartManager.prototype.bindGalleryModalEvents = function(galleryImageParams, rowNo){
+		// Add featured image button click handler
+		jQuery(document).off('click', '#sm_featured_add_image_btn').on('click', '#sm_featured_add_image_btn', function(){
+			if(typeof window.smart_manager.handleMediaUpdate === 'function'){
+				let params = {
+					uploaderTitle: _x('Set featured image', 'button', 'smart-manager-for-wp-e-commerce'),
+					uploaderButtonText: _x('Set featured image', 'button', 'smart-manager-for-wp-e-commerce'),
+					allowMultiple: false,
+					row_data_id: galleryImageParams.id
+				};
+				params.callback = function(attachment){
+					if(!attachment) return;
+					let featuredImageHtml = window.smart_manager.generateImageItemHtml({
+						imageId: attachment.id,
+						imageSrc: attachment.url,
+						itemClass: 'sm_featured_image',
+						deleteClass: 'sm_featured_image_delete',
+						deleteTitle: _x('Remove featured image', 'tooltip', 'smart-manager-for-wp-e-commerce')
+					});
+					jQuery('.sm_featured_image_container').html(featuredImageHtml);
+				}
+				window.smart_manager.handleMediaUpdate(params);
+			}
+		});
+
+		// Delete featured image button click handler
+		jQuery(document).off('click', '.sm_featured_image_delete').on('click', '.sm_featured_image_delete', function(e){
+			e.preventDefault();
+			e.stopPropagation();
+			jQuery('.sm_featured_image_container').html(window.smart_manager.generateAddImageBtnHtml('sm_featured_add_image_btn', 16));
+		});
+
+		// Add image button click handler
+		jQuery(document).off('click', '#sm_gallery_add_image_btn').on('click', '#sm_gallery_add_image_btn', function(){
+			if(typeof window.smart_manager.handleMediaUpdate === 'function'){
+				let params = {
+					uploaderTitle: _x('Add images to product gallery', 'button', 'smart-manager-for-wp-e-commerce'),
+					uploaderButtonText: _x('Add to gallery', 'button', 'smart-manager-for-wp-e-commerce'),
+					allowMultiple: true,
+					row_data_id: galleryImageParams.id
+				};
+				params.callback = function(attachments){
+					if(!attachments) return;
+					attachments.forEach(function(attachmentObj){
+						let newImageHtml = window.smart_manager.generateImageItemHtml({
+							imageId: attachmentObj.id,
+							imageSrc: attachmentObj.sizes.full.url,
+							itemClass: 'sm_gallery_image',
+							deleteClass: 'sm_gallery_image_delete'
+						});
+						jQuery('.sm_gallery_images_container').append(newImageHtml);
+					});
+				}
+				window.smart_manager.handleMediaUpdate(params);
+			}
+		});
+
+		// Remove all button click handler
+		jQuery(document).off('click', '#sm_gallery_remove_all_btn').on('click', '#sm_gallery_remove_all_btn', function(){
+			// Remove all gallery images
+			jQuery('.sm_gallery_images_container').empty();
+			// // Remove featured image and show add button
+			// let addButtonHtml = `
+			// 	<button type="button" id="sm_featured_add_image_btn" class="bg-sm-base-accent border border-sm-base-border rounded-lg flex flex-col items-center justify-center w-16 h-16 shrink-0 cursor-pointer hover:bg-sm-base-muted transition-colors">
+			// 		<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+			// 			<path d="M0.99707 7.99756H14.9971M7.99707 0.997559V14.9976" stroke="#737373" stroke-width="1.995" stroke-linecap="round" stroke-linejoin="round"/>
+			// 		</svg>
+			// 	</button>
+			// `;
+			// jQuery('.sm_featured_image_container').html(addButtonHtml);
+		});
+
+		// Cancel button click handler
+		jQuery(document).off('click', '#sm_gallery_cancel_btn').on('click', '#sm_gallery_cancel_btn', function(){
+			window.smart_manager.closeGalleryModal();
+		});
+
+		// Save button click handler
+		jQuery(document).off('click', '#sm_gallery_save_btn').on('click', '#sm_gallery_save_btn', function(){
+			// Get gallery image IDs
+			let imageIds = [];
+			jQuery('.sm_gallery_images_container .sm_gallery_image img').each(function(){
+				imageIds.push(jQuery(this).data('id'));
+			});
+			
+			let productId = jQuery('.sm_gallery_image_parent').data('id') || galleryImageParams.id;
+			let rowNoVal = parseInt(jQuery('.sm_gallery_image_parent').data('row') || rowNo || 0);
+			
+			let args = {
+				id: productId,
+				src: jQuery('.sm_gallery_image_parent').data('col') || galleryImageParams.src,
+				values: imageIds.join(','),
+				imageGalleryHtml: jQuery('.sm_gallery_images_container').html(),
+				rowNo: rowNoVal
+			};
+			
+			// Update featured image if changed
+			// if("undefined" !== typeof(window.smart_manager.updateFeaturedImage) && "function" === typeof(window.smart_manager.updateFeaturedImage)){
+			// 	window.smart_manager.updateFeaturedImage({
+			// 		id: productId,
+			// 		featuredImageId: featuredImageId,
+			// 		rowNo: rowNoVal
+			// 	});
+			// }
+			
+			//call inlineUpdateMultipleImages to update gallery images
+			if (1 == window.smart_manager.sm_beta_pro && "undefined" !== typeof (window.smart_manager.displayTitleModal) && "function" === typeof (window.smart_manager.displayTitleModal)) {
+				setTimeout(() => {
+					window.smart_manager.displayTitleModal(args);
+				}, 100);
+			} else if ("undefined" !== typeof (window.smart_manager.inlineUpdateMultipleImages) && "function" === typeof (window.smart_manager.inlineUpdateMultipleImages)) {
+				window.smart_manager.inlineUpdateMultipleImages(args);
+			}
+			window.smart_manager.closeGalleryModal();
+		});
+
+		// Individual image delete button click handler (delegated)
+		jQuery(document).off('click', '.sm_gallery_images_container .sm_gallery_image_delete').on('click', '.sm_gallery_images_container .sm_gallery_image_delete', function(e){
+			e.preventDefault();
+			e.stopPropagation();
+			jQuery(this).closest('.sm_gallery_image').remove();
+		});
+	}
+	
+	// Function to update featured image\n\t
+	SmartManager.prototype.updateFeaturedImage = function(params){
+		if(!params?.id) return;
+		
+		let requestParams = {
+			data: {
+				cmd: 'inline_update',
+				active_module: window.smart_manager.dashboardKey,
+				edited_data: JSON.stringify({ [params.id]: { 'postmeta_meta_key__thumbnail_id_meta_value__thumbnail_id': params.featuredImageId || '' } }),
+				security: window.smart_manager.saCommonNonce,
+				pro: window.smart_manager.sm_beta_pro || 0,
+				table_model: window.smart_manager.currentDashboardModel?.tables || ''
+			}
+		};
+		
+		if(typeof window.smart_manager.addTasksParams === 'function' && window.smart_manager.sm_beta_pro == 1){
+			requestParams.data = window.smart_manager.addTasksParams(requestParams.data);
+		}
+		
+		window.smart_manager.sendRequest(requestParams, function(response){
+			if(window.smart_manager.isJSON(response)){
+				response = JSON.parse(response);
+				if(response?.show_feedback) window[pluginKey].showFeedbackModal();
+			}
+		});
+	}
+	
+	// Code for displaying title modal in case of gallery images.\n\t
 	SmartManager.prototype.displayTitleModal = function(params){
-		if(!params || !((Object.keys(params)).every(param => params.hasOwnProperty(param)))){
-			return;
-		}
-		let editedColumnName = '';
-		if("undefined" !== typeof(window.smart_manager.getColDisplayName) && "function" === typeof(window.smart_manager.getColDisplayName)){
-			editedColumnName = window.smart_manager.getColDisplayName(params.src);
-		}
+		if(!params || !Object.keys(params).every(param => params.hasOwnProperty(param))) return;
+		
+		let editedColumnName = typeof window.smart_manager.getColDisplayName === 'function' 
+			? window.smart_manager.getColDisplayName(params.src) : '';
+		
 		window.smart_manager.processName = _x('Inline Edit','process name','smart-manager-for-wp-e-commerce');
-		window.smart_manager.processContent = (editedColumnName) ? editedColumnName : params.src;
-		if("undefined" !== typeof(window.smart_manager.inlineUpdateMultipleImages) && "function" === typeof(window.smart_manager.inlineUpdateMultipleImages)){
+		window.smart_manager.processContent = editedColumnName || params.src;
+		
+		if(typeof window.smart_manager.inlineUpdateMultipleImages === 'function'){
 			window.smart_manager.processCallback = window.smart_manager.inlineUpdateMultipleImages;
 		}
 		window.smart_manager.processCallbackParams = params;
-		if("undefined" !== typeof(window.smart_manager.showTitleModal) && "function" === typeof (window.smart_manager.showTitleModal)){
+		
+		if(typeof window.smart_manager.showTitleModal === 'function'){
 			window.smart_manager.showTitleModal()
 		}
 	}
@@ -4595,7 +4850,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 			
 			<!-- History Header - Right Section Actions -->
 			<div class="flex items-center gap-2 shrink-0">
-				<button id="sm-clear-history-btn" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-red-600 cursor-pointer hover:bg-gray-100 hover:text-sm-base-foreground transition-colors">
+				<button id="sm-clear-history-btn" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-red-600 cursor-pointer hover:bg-red-50 transition-colors">
 					${window.smart_manager.getIcons('delete','#DC2626')}
 					<span>${_x('Clear History', 'button', 'smart-manager-for-wp-e-commerce')}</span>
 				</button>
@@ -4824,6 +5079,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 	// Build the header HTML component
 	SmartManager.prototype.buildHeaderHtml = function() {
 		const dashboardTitle = window.smart_manager.dashboardDisplayName || _x('Products', 'dashboard name', 'smart-manager-for-wp-e-commerce');
+		/* translators: %s is the dashboard name (e.g., Product, Order, etc.) */
 		const addBtnText = sprintf(_x('New %s', 'button', 'smart-manager-for-wp-e-commerce'), dashboardTitle.replace(/s$/, ''));
 		return `
 		<header id="sm-header" class="flex items-center justify-between w-full px-3 md:px-6 py-3 bg-[#FBFBFB] border-b border-sm-base-border gap-2 md:gap-4 mt-2">
@@ -4900,7 +5156,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 				</button>
 
 				<!-- Discard Changes Button (shown when there are unsaved changes) -->
-				<button id="sm-discard-btn" class="!hidden cursor-pointer gap-1.5 rounded-md px-2 md:px-3.5 py-2 text-[0.8125rem] leading-4 font-medium text-sm-base-destructive items-center shrink-0 hover:bg-sm-base-muted transition-colors">
+				<button id="sm-discard-btn" class="!hidden cursor-pointer gap-1.5 rounded-md px-2 md:px-3.5 py-2 text-[0.8125rem] leading-4 font-medium text-sm-base-destructive items-center shrink-0 hover:bg-red-50 transition-colors">
 					<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0">
 						<path d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/>
 					</svg>
@@ -4928,8 +5184,24 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 		// Initialize discard button click handler
 		jQuery(document).off('click', '#sm-discard-btn').on('click', '#sm-discard-btn', function(e) {
 			e.preventDefault();
-			if (typeof window.smart_manager.discardChanges === 'function') {
-				window.smart_manager.discardChanges();
+			if (typeof window.smart_manager.showConfirmDialog === 'function') {
+				window.smart_manager.showConfirmDialog({
+					title: _x('Discard Changes?', 'modal title', 'smart-manager-for-wp-e-commerce'),
+					content: '<span class="text-sm-base-muted-foreground">' + _x("The changes you've made cannot be reverted. Do you want to discard all changes?", 'modal content', 'smart-manager-for-wp-e-commerce') + '</span>',
+					showCloseIcon: true,
+					showCloseCTAFirst: false,
+					btnParams: {
+						yesText: _x('Yes, Discard', 'button', 'smart-manager-for-wp-e-commerce'),
+						yesBtnClass: 'bg-transparent text-sm-base-destructive hover:bg-red-50',
+						yesCallback: function() {
+							if (typeof window.smart_manager.discardChanges === 'function') {
+								window.smart_manager.discardChanges();
+							}
+						},
+						noText: _x('No', 'button', 'smart-manager-for-wp-e-commerce'),
+						noBtnClass: 'bg-sm-base-primary text-sm-base-primary-foreground hover:bg-[#5850d6]'
+					}
+				});
 			}
 		});
 
@@ -4947,6 +5219,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 			let viewName = window.smart_manager.dashboardName || '';
 			let confirmParams = {
 				title: `<span class="sm-error-icon"><span class="dashicons dashicons-warning" style="vertical-align: text-bottom;"></span>&nbsp;${_x('Attention', 'modal title', 'smart-manager-for-wp-e-commerce')}!</span>`,
+				/* translators: %s is the custom view name */
 				content: sprintf(_x('Are you sure you want to delete the custom view "%s"? This action cannot be undone.', 'modal content', 'smart-manager-for-wp-e-commerce'), viewName),
 				btnParams: {
 					yesText: _x('Delete', 'button', 'smart-manager-for-wp-e-commerce'),
@@ -4954,6 +5227,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 						if (typeof window.smart_manager.deleteView === 'function') {
 							window.smart_manager.deleteView({
 								type: 'custom_views',
+								/* translators: %s is the custom view name */
 								success_msg: sprintf(_x('Custom view "%s" deleted successfully!', 'notification', 'smart-manager-for-wp-e-commerce'), viewName)
 							});
 						}
@@ -5171,7 +5445,8 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 	            if (window.smart_manager.sm_beta_pro == 0 && columnsType === 'visible') {
 					window.smart_manager.notification = {
 						status: 'warning',
-						message: sprintf(
+						message: 
+						sprintf(/* translators: %s is a link to the Pro version */
 							_x('Please upgrade to %s to use this feature.', 'notification', 'smart-manager-for-wp-e-commerce'),
 							'<a href="' + window.smart_manager.pricingPageURL + '" target="_blank">' + _x('Pro', 'notification', 'smart-manager-for-wp-e-commerce') + '</a>'
 						),
@@ -5855,6 +6130,10 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 				return `<svg width="14" height="15" viewBox="0 0 14 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.665039 3.33164H12.665M11.3317 3.33164V12.665C11.3317 13.3316 10.665 13.9983 9.99837 13.9983H3.33171C2.66504 13.9983 1.99837 13.3316 1.99837 12.665V3.33164M3.99837 3.33164V1.99831C3.99837 1.33164 4.66504 0.664978 5.33171 0.664978H7.99837C8.66504 0.664978 9.33171 1.33164 9.33171 1.99831V3.33164M5.33171 6.66498V10.665M7.99837 6.66498V10.665" stroke="${stroke}" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>`
 			case ('export'):
 				return `<svg width="15" height="12" viewBox="0 0 15 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.99837 1.99831C1.64475 1.99831 1.30561 2.13879 1.05556 2.38884C0.805515 2.63888 0.665039 2.97802 0.665039 3.33164V9.99831C0.665039 10.3519 0.805515 10.6911 1.05556 10.9411C1.30561 11.1912 1.64475 11.3316 1.99837 11.3316H12.665C13.0187 11.3316 13.3578 11.1912 13.6078 10.9411C13.8579 10.6911 13.9984 10.3519 13.9984 9.99831V3.33164C13.9984 2.97802 13.8579 2.63888 13.6078 2.38884C13.3578 2.13879 13.0187 1.99831 12.665 1.99831M7.33171 8.66498V0.664978M7.33171 0.664978L4.66504 3.33164M7.33171 0.664978L9.99837 3.33164" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"></path></svg>`
+			case ('close'):
+				return `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 3L3 9M3 3L9 9" stroke="#737373" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+			case ('plus'):
+				return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5V19M5 12H19" stroke="#737373" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
 			default:
 				return '';
 		}
