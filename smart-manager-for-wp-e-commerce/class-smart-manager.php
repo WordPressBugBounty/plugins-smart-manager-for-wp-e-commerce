@@ -1397,6 +1397,7 @@ class Smart_Manager {
 							'taxonomy_dashboards' => wp_json_encode( self::$taxonomy_dashboards ),
 							'all_taxonomy_dashboards' => SM_ALL_TAXONOMY_DASHBOARDS,
 							'recent_taxonomy_dashboards' => json_encode( $recent_taxonomy_dashboards ),
+							'recent_simple_searches' => json_encode( get_user_meta( get_current_user_id(), 'sa_sm_recent_simple_searches', true ) ),
 							'SM_IS_WOO36' => self::$sm_is_woo36,
 							'SM_IS_WOO30' => self::$sm_is_woo30,
 							'SM_IS_WOO22' => self::$sm_is_woo22,

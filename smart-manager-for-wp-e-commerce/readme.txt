@@ -7,7 +7,7 @@ Tags: woocommerce bulk edit, woocommerce inventory management, woocommerce order
 Requires at least: 5.0
 Tested up to: 6.9
 Requires PHP: 7.0
-Stable tag: 8.82.0
+Stable tag: 8.83.0
 License: GPLv2
 
 WooCommerce Advanced Bulk Edit products, orders, & posts in an Excel-like sheet editor. Get advanced WooCommerce stock, pricing, & order management.
@@ -312,6 +312,13 @@ Please report security bugs found in the source code of the Smart Manager plugin
 2. Bulk edit / Batch update (only in Pro version)
 
 == Changelog ==
+
+= 8.83.0 (27.02.2026) =
+* New: Recent searches support for Simple Search (Pro)
+* Fix: Undo not working for Inline Edit updates on WooCommerce Orders and Subscriptions dashboard (Pro)
+* Update: Replaced "Load More" with pagination in the grid
+* Update: UI/UX improvements for the Inline Edit modal for WooCommerce Product Attributes
+* Update: POT file
 
 = 8.82.0 (20.02.2026) =
 * New: WooCommerce 10.5.2 compatible
@@ -764,6 +771,9 @@ Please report security bugs found in the source code of the Smart Manager plugin
 [See changelog for all versions](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 8.83.0 =
+Recent searches support for Simple Search (Pro), Fixes related to Undo not working for Inline Edit updates on WooCommerce Orders and Subscriptions dashboard (Pro), Updates related to Replaced "Load More" with pagination in the grid, UI/UX improvements for the Inline Edit modal for WooCommerce Product Attributes. Recommended upgrade.
 
 = 8.82.0 =
 WooCommerce 10.5.2 compatible, Updates related to UI/UX improvements in the grid and popup screens. Recommended upgrade.

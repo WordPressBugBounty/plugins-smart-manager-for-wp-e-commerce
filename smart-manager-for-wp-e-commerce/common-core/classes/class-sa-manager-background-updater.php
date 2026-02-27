@@ -761,7 +761,7 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 			}
 			?>
 			<script type="text/javascript">
-				let sa_background_process_heartbeat = function(delay = 0, process = '', pluginKey){
+				sa_background_process_heartbeat = function(delay = 0, process = '', pluginKey){
 					if(!pluginKey) {
 						return;
 					}

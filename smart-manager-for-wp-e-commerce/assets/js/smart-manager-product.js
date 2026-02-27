@@ -56,8 +56,8 @@
 		const idx = window.smart_manager.prodAttrDisplayIndex;
 		const inputClass = 'w-full px-3 py-1.5 text-sm border border-sm-base-input rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-sm-base-primary focus:border-sm-base-primary';
 		const checkboxClass = 'm-0 w-4 h-4 rounded border-sm-base-input text-sm-base-primary focus:ring-sm-base-primary';
-		const btnPrimaryClass = 'select_all_attributes px-3 py-1.5 text-sm font-medium text-sm-base-primary-foreground bg-sm-base-primary rounded-md hover:bg-[#5850d6] transition-colors cursor-pointer';
-		const btnSecondaryClass = 'select_no_attributes px-3 py-1.5 text-sm font-medium text-sm-base-foreground bg-sm-base-muted border border-sm-base-input rounded-md hover:bg-[#e5e5e5] transition-colors cursor-pointer';
+		const btnPrimaryClass = 'select_all_attributes px-3 py-1.5 text-sm text-sm-base-primary-foreground bg-sm-base-primary rounded-md hover:bg-[#5850d6] transition-colors cursor-pointer';
+		const btnSecondaryClass = 'select_no_attributes px-3 py-1.5 text-sm text-sm-base-foreground bg-sm-base-muted border border-sm-base-input rounded-md hover:bg-[#e5e5e5] transition-colors cursor-pointer';
 
 		let html = '<div class="mt-4 sm-attribute-card flex gap-4 items-start border-b border-sm-base-border last:border-b-0">';
 		
@@ -264,6 +264,466 @@
 		}
 		window.open(window.smart_manager.WCProductImportURL, '_blank');
 	}
+	// ======================================
+	// Image Gallery Functions
+	// ======================================
+
+	// Helper: Generate single image item HTML (for both gallery and featured)
+	SmartManager.prototype.generateImageItemHtml = function(options) {
+		let defaults = {
+			imageId: '',
+			imageSrc: '',
+			itemClass: 'sm_gallery_image',
+			deleteClass: 'sm_gallery_image_delete',
+			deleteTitle: _x('Remove image', 'tooltip', 'smart-manager-for-wp-e-commerce'),
+			showDelete: true
+		};
+		let opts = Object.assign({}, defaults, options);
+		
+		let deleteBtn = '';
+		if (opts.showDelete) {
+			// Add 'flex' class only if deleteClass does not contain '!hidden'
+			const hasHidden = opts.deleteClass && opts.deleteClass.includes('!hidden');
+			const btnClass = opts.deleteClass + ' absolute -top-[0.4375rem] -right-[0.4375rem] bg-white rounded-full p-1 shadow-sm cursor-pointer items-center justify-center' + (hasHidden ? '' : ' flex');
+			deleteBtn = `<button type="button" class="${btnClass}" title="${opts.deleteTitle}">${window.smart_manager.getIcons('close')}</button>`;
+		}
+		
+		return `<div class="${opts.itemClass} relative border border-sm-base-border rounded-lg w-16 h-16 shrink-0 overflow-visible group" data-id="${opts.imageId}"><img data-id="${opts.imageId}" src="${opts.imageSrc}" class="absolute inset-0 w-full object-cover rounded-lg pointer-events-none" />${deleteBtn}</div>`;
+	}
+
+	// Helper: Generate add image button HTML
+	SmartManager.prototype.generateAddImageBtnHtml = function(btnId, iconSize = 24) {
+		return `<button type="button" id="${btnId}" class="border-sm-base-border rounded-lg flex flex-col items-center justify-center w-16 h-16 shrink-0 cursor-pointer bg-sm-base-muted transition-colors">${window.smart_manager.getIcons('plus')}</button>`;
+	}
+
+	// Helper: Close gallery modal
+	SmartManager.prototype.closeGalleryModal = function() {
+		window.smart_manager.modal = {};
+		if(typeof window.smart_manager.showPannelDialog === 'function' && typeof window.smart_manager.getDefaultRoute === 'function'){
+			window.smart_manager.showPannelDialog(window.smart_manager.getDefaultRoute(true));
+		}
+	}
+
+	SmartManager.prototype.generateImageGalleryDlgHtml = function (imageObj) {
+		let html = '';
+
+		if (typeof (imageObj) !== "undefined") {
+			Object.entries(imageObj).forEach(([id, imageUrl]) => {
+				html += window.smart_manager.generateImageItemHtml({
+					imageId: imageUrl.id,
+					imageSrc: imageUrl.val,
+					itemClass: 'sm_gallery_image',
+					deleteClass: 'sm_gallery_image_delete'
+				});
+			});
+		}
+
+		return html;
+	}
+
+	SmartManager.prototype.handleMediaUpdate = function (params) {
+
+		let file_frame;
+
+		// If the media frame already exists, reopen it.
+		if (file_frame) {
+			file_frame.open();
+			return;
+		}
+
+		let allowMultiple = (params.hasOwnProperty('allowMultiple')) ? params.allowMultiple : false;
+
+		// Code for attaching media to the posts
+		wp.media.model.settings.post.id = 0
+		if ('posts_id' === window.smart_manager.getKeyID() && params.hasOwnProperty('row_data_id')) {
+			wp.media.model.settings.post.id = params.row_data_id
+		}
+
+		// Create the media frame.
+		file_frame = wp.media.frames.file_frame = wp.media({
+			title: (params.hasOwnProperty('uploaderTitle')) ? params.uploaderTitle : jQuery(this).data('uploader_title'),
+			button: {
+				text: (params.hasOwnProperty('uploader_button_text')) ? params.uploaderButtonText : jQuery(this).data('uploader_button_text'),
+			},
+			library: {
+				type: 'image'
+			},
+			multiple: allowMultiple  // Set to true to allow multiple files to be selected
+		});
+
+		if (params.hasOwnProperty('callback')) {
+			file_frame.on('select', function () {
+
+				let attachments = (allowMultiple) ? file_frame.state().get('selection').toJSON() : file_frame.state().get('selection').first().toJSON();
+				params.callback(attachments)
+			});
+		}
+
+		file_frame.open();
+
+	}
+
+	SmartManager.prototype.inlineUpdateMultipleImages = function (galleryImages) {
+		if (!galleryImages || !((Object.keys(galleryImages)).every(galleryImage => galleryImages.hasOwnProperty(galleryImage)))) {
+			return;
+		}
+		let params = {};
+		params.data = {
+			cmd: 'inline_update',
+			active_module: window.smart_manager.dashboardKey,
+			edited_data: JSON.stringify({ [galleryImages.id]: { [galleryImages.src]: galleryImages.values } }),
+			security: window.smart_manager.saCommonNonce,
+			pro: ('undefined' !== typeof (window.smart_manager.sm_beta_pro)) ? window.smart_manager.sm_beta_pro : 0,
+			table_model: (window.smart_manager.currentDashboardModel.hasOwnProperty('tables')) ? window.smart_manager.currentDashboardModel.tables : ''
+		};
+		params.data = ("undefined" !== typeof (window.smart_manager.addTasksParams) && "function" === typeof (window.smart_manager.addTasksParams) && 1 == window.smart_manager.sm_beta_pro) ? window.smart_manager.addTasksParams(params.data) : params.data;
+		window.smart_manager.sendRequest(params, function (response) {
+			if (window.smart_manager.isJSON(response)) {
+				response = JSON.parse(response);
+				if(response?.show_feedback){
+					window[pluginKey].showFeedbackModal()
+				}
+			}
+			if (galleryImages.hasOwnProperty('rowNo')) {
+				window.smart_manager.getData({ refreshPage: (Math.ceil((parseInt(galleryImages.rowNo) / window.smart_manager.limit))) });
+				window.smart_manager.hot.render();
+			} else {
+				window.smart_manager.refresh();
+			}
+		});
+	};
+
+	SmartManager.prototype.showImagePreview = function (params) {
+		let xOffset = 150,
+			yOffset = 30;
+
+		if (jQuery('#sm_img_preview').length == 0) {
+			jQuery("body").append("<div id='sm_img_preview' style='z-index:100199;'><div style='margin: 1em; padding: 1em; border-radius: 0.1em; border: 0.1em solid #ece0e0;'><img src='" + params.current_cell_value + "' width='300' /></div><div id='sm_img_preview_text'>" + params.title + "</div></div>");
+		}
+
+		jQuery("#sm_img_preview")
+			.css("top", (params.event.pageY - xOffset) + "px")
+			.css("left", (params.event.pageX + yOffset) + "px")
+			.fadeIn("fast")
+			.show();
+	}
+
+	// Code for handling gallery image modal.
+	SmartManager.prototype.displayGalleryImagesModal = function(galleryImageParams){
+		if(!galleryImageParams || !((Object.keys(galleryImageParams)).every(galleryImageParam => galleryImageParams.hasOwnProperty(galleryImageParam)))){
+			return;
+		}
+		let rowNo = (galleryImageParams.hasOwnProperty('rowNo')) ? galleryImageParams.rowNo : 0;
+		
+		// Get featured image data from currentDashboardData
+		let featuredImageData = null;
+		let featuredImageId = null;
+		let featuredImageUrl = '';
+		if(window.smart_manager.currentDashboardData && window.smart_manager.currentDashboardData[rowNo]){
+			let rowData = window.smart_manager.currentDashboardData[rowNo];
+			featuredImageData = rowData['postmeta_meta_key__thumbnail_id_meta_value__thumbnail_id'] || null;
+			if(featuredImageData && typeof featuredImageData === 'object'){
+				featuredImageId = featuredImageData.id || null;
+				featuredImageUrl = featuredImageData.val || '';
+			} else if(featuredImageData){
+				featuredImageUrl = featuredImageData;
+			}
+		}
+		
+		// Build featured image HTML
+		let featuredImageHtml = '';
+		if(featuredImageUrl){
+			featuredImageHtml = window.smart_manager.generateImageItemHtml({
+				imageId: featuredImageId || '',
+				imageSrc: featuredImageUrl,
+				itemClass: 'sm_featured_image',
+				deleteClass: 'sm_featured_image_delete !hidden',
+				deleteTitle: _x('Remove featured image', 'tooltip', 'smart-manager-for-wp-e-commerce')
+			});
+		}
+		
+		// Build the modal content with new design
+		let modalContent = `
+			<div class="sm_gallery_image_parent" data-id="${galleryImageParams.id}" data-col="${galleryImageParams.src || ''}" data-row="${rowNo || 0}">
+				<!-- Featured Image Section -->
+				<div class=" flex-col gap-2 w-full !hidden">
+					<div class="flex items-center pt-1.5 pb-0.5 w-full">
+						<p class="flex-1 text-xs font-normal leading-4 text-sm-base-muted-foreground m-0">${_x('Featured', 'modal section', 'smart-manager-for-wp-e-commerce')}</p>
+					</div>
+					<div class="flex gap-4 items-center w-full">
+						<div class="sm_featured_image_container flex gap-3 items-center">
+							${featuredImageHtml ? featuredImageHtml : window.smart_manager.generateAddImageBtnHtml('sm_featured_add_image_btn', 16)}
+						</div>
+					</div>
+				</div>
+				<!-- Image Gallery Section -->
+				<div class="flex flex-col w-full">
+					<div class="flex items-center pt-1.5 pb-0.5 w-full">
+						<p class="flex-1 text-xs font-normal leading-4 text-sm-base-muted-foreground m-0">${_x('Image Gallery', 'modal section', 'smart-manager-for-wp-e-commerce')}</p>
+					</div>
+					<div class="flex gap-2 items-center w-full">
+						<!-- Upload Image Button -->
+						${window.smart_manager.generateAddImageBtnHtml('sm_gallery_add_image_btn', 24)}
+						<!-- Images Container -->
+						<div class="sm_gallery_images_container flex flex-wrap items-center overflow-x-auto">
+							${galleryImageParams.imageGalleryHtml.replace(/<div class="sm_gallery_image_parent"[^>]*>/gi, '').replace(/<\/div>$/gi, '')}
+						</div>
+					</div>
+				</div>
+			</div>
+		`;
+
+		window.smart_manager.modal = {
+			title: _x('Add Images', 'gallery modal title', 'smart-manager-for-wp-e-commerce'),
+			content: modalContent,
+			autoHide: false,
+			width: 'max-w-lg w-full',
+			contentClass: '',
+			hideFooter: true,
+			showCloseCTAFirst: false,
+			cta: {
+				title: ''
+			},
+			closeCTA: {
+				title: ''
+			},
+			onCreate: function(){
+				// Add footer HTML after modal is created
+				let footerHtml = `
+					<div class="flex items-center gap-2.5 px-4 py-3 border-t border-sm-base-border bg-white">
+						<!-- Remove All Button (Left) -->
+						<button type="button" id="sm_gallery_remove_all_btn" class="flex gap-2 items-center justify-center h-9 px-2.5 py-2 rounded-lg hover:bg-red-50 cursor-pointer shrink-0">
+							${window.smart_manager.getIcons('delete', '#DC2626')}
+							<span class="text-sm font-medium leading-5 text-sm-base-destructive whitespace-nowrap">${_x('Remove all', 'button', 'smart-manager-for-wp-e-commerce')}</span>
+						</button>
+						<!-- Spacer -->
+						<div class="flex-1"></div>
+						<!-- Cancel Button -->
+						<button type="button" id="sm_gallery_cancel_btn" class="flex gap-2 items-center justify-center h-9 px-4 py-2 rounded-lg shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] cursor-pointer shrink-0 text-sm font-medium leading-5 text-sm-base-foreground hover:bg-sm-base-muted transition-colors">
+							${_x('Cancel', 'button', 'smart-manager-for-wp-e-commerce')}
+						</button>
+						<!-- Save Button -->
+						<button type="button" id="sm_gallery_save_btn" class="flex gap-2 items-center justify-center h-9 px-4 py-2 bg-sm-base-primary rounded-lg shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] cursor-pointer shrink-0 text-sm font-medium leading-5 text-sm-base-primary-foreground hover:bg-[#5850d6] transition-colors">
+							${_x('Save', 'button', 'smart-manager-for-wp-e-commerce')}
+						</button>
+					</div>
+				`;
+				
+				let modalBodyEl = document.querySelector('#' + window[pluginKey].pluginSlug + '_modal .modal-body, #' + window[pluginKey].pluginSlug + '_modal > div > div > div:nth-child(2)');
+				if(modalBodyEl){
+					modalBodyEl.classList.remove('px-4', 'py-4');
+					modalBodyEl.classList.add('px-4', 'pb-4', 'pt-2');
+				}
+				
+				// Insert footer after modal body
+				let modalContentEl = document.querySelector('#' + window[pluginKey].pluginSlug + '_modal > div > div');
+				if(modalContentEl){
+					let existingFooter = modalContentEl.querySelector('.border-t.border-sm-base-border:last-child');
+					if(existingFooter){
+						existingFooter.remove();
+					}
+					modalContentEl.insertAdjacentHTML('beforeend', footerHtml);
+				}
+
+				// Bind event handlers
+				window.smart_manager.bindGalleryModalEvents(galleryImageParams, rowNo);
+			}
+		}
+		window.smart_manager.showModal()
+	}
+	
+	// Bind gallery modal event handlers
+	SmartManager.prototype.bindGalleryModalEvents = function(galleryImageParams, rowNo){
+		// Add featured image button click handler
+		jQuery(document).off('click', '#sm_featured_add_image_btn').on('click', '#sm_featured_add_image_btn', function(){
+			if(typeof window.smart_manager.handleMediaUpdate === 'function'){
+				let params = {
+					uploaderTitle: _x('Set featured image', 'button', 'smart-manager-for-wp-e-commerce'),
+					uploaderButtonText: _x('Set featured image', 'button', 'smart-manager-for-wp-e-commerce'),
+					allowMultiple: false,
+					row_data_id: galleryImageParams.id
+				};
+				params.callback = function(attachment){
+					if(!attachment) return;
+					let featuredImageHtml = window.smart_manager.generateImageItemHtml({
+						imageId: attachment.id,
+						imageSrc: attachment.url,
+						itemClass: 'sm_featured_image',
+						deleteClass: 'sm_featured_image_delete',
+						deleteTitle: _x('Remove featured image', 'tooltip', 'smart-manager-for-wp-e-commerce')
+					});
+					jQuery('.sm_featured_image_container').html(featuredImageHtml);
+				}
+				window.smart_manager.handleMediaUpdate(params);
+			}
+		});
+
+		// Delete featured image button click handler
+		jQuery(document).off('click', '.sm_featured_image_delete').on('click', '.sm_featured_image_delete', function(e){
+			e.preventDefault();
+			e.stopPropagation();
+			jQuery('.sm_featured_image_container').html(window.smart_manager.generateAddImageBtnHtml('sm_featured_add_image_btn', 16));
+		});
+
+		// Add image button click handler
+		jQuery(document).off('click', '#sm_gallery_add_image_btn').on('click', '#sm_gallery_add_image_btn', function(){
+			if(typeof window.smart_manager.handleMediaUpdate === 'function'){
+				let params = {
+					uploaderTitle: _x('Add images to product gallery', 'button', 'smart-manager-for-wp-e-commerce'),
+					uploaderButtonText: _x('Add to gallery', 'button', 'smart-manager-for-wp-e-commerce'),
+					allowMultiple: true,
+					row_data_id: galleryImageParams.id
+				};
+				params.callback = function(attachments){
+					if(!attachments) return;
+					attachments.forEach(function(attachmentObj){
+						let newImageHtml = window.smart_manager.generateImageItemHtml({
+							imageId: attachmentObj.id,
+							imageSrc: attachmentObj.sizes.full.url,
+							itemClass: 'sm_gallery_image',
+							deleteClass: 'sm_gallery_image_delete'
+						});
+						jQuery('.sm_gallery_images_container').append(newImageHtml);
+					});
+				}
+				window.smart_manager.handleMediaUpdate(params);
+			}
+		});
+
+		// Remove all button click handler
+		jQuery(document).off('click', '#sm_gallery_remove_all_btn').on('click', '#sm_gallery_remove_all_btn', function(){
+			// Remove all gallery images
+			jQuery('.sm_gallery_images_container').empty();
+		});
+
+		// Cancel button click handler
+		jQuery(document).off('click', '#sm_gallery_cancel_btn').on('click', '#sm_gallery_cancel_btn', function(){
+			window.smart_manager.closeGalleryModal();
+		});
+
+		// Save button click handler
+		jQuery(document).off('click', '#sm_gallery_save_btn').on('click', '#sm_gallery_save_btn', function(){
+			// Get gallery image IDs
+			let imageIds = [];
+			jQuery('.sm_gallery_images_container .sm_gallery_image img').each(function(){
+				imageIds.push(jQuery(this).data('id'));
+			});
+			
+			let productId = jQuery('.sm_gallery_image_parent').data('id') || galleryImageParams.id;
+			let rowNoVal = parseInt(jQuery('.sm_gallery_image_parent').data('row') || rowNo || 0);
+			
+			let args = {
+				id: productId,
+				src: jQuery('.sm_gallery_image_parent').data('col') || galleryImageParams.src,
+				values: imageIds.join(','),
+				imageGalleryHtml: jQuery('.sm_gallery_images_container').html(),
+				rowNo: rowNoVal
+			};
+			
+			//call inlineUpdateMultipleImages to update gallery images
+			if (1 == window.smart_manager.sm_beta_pro && "undefined" !== typeof (window.smart_manager.displayTitleModal) && "function" === typeof (window.smart_manager.displayTitleModal)) {
+				setTimeout(() => {
+					window.smart_manager.displayTitleModal(args);
+				}, 100);
+			} else if ("undefined" !== typeof (window.smart_manager.inlineUpdateMultipleImages) && "function" === typeof (window.smart_manager.inlineUpdateMultipleImages)) {
+				window.smart_manager.inlineUpdateMultipleImages(args);
+			}
+			window.smart_manager.closeGalleryModal();
+		});
+
+		// Individual image delete button click handler (delegated)
+		jQuery(document).off('click', '.sm_gallery_images_container .sm_gallery_image_delete').on('click', '.sm_gallery_images_container .sm_gallery_image_delete', function(e){
+			e.preventDefault();
+			e.stopPropagation();
+			jQuery(this).closest('.sm_gallery_image').remove();
+		});
+	}
+	
+	// Function to update featured image
+	SmartManager.prototype.updateFeaturedImage = function(params){
+		if(!params?.id) return;
+		
+		let requestParams = {
+			data: {
+				cmd: 'inline_update',
+				active_module: window.smart_manager.dashboardKey,
+				edited_data: JSON.stringify({ [params.id]: { 'postmeta_meta_key__thumbnail_id_meta_value__thumbnail_id': params.featuredImageId || '' } }),
+				security: window.smart_manager.saCommonNonce,
+				pro: window.smart_manager.sm_beta_pro || 0,
+				table_model: window.smart_manager.currentDashboardModel?.tables || ''
+			}
+		};
+		
+		if(typeof window.smart_manager.addTasksParams === 'function' && window.smart_manager.sm_beta_pro == 1){
+			requestParams.data = window.smart_manager.addTasksParams(requestParams.data);
+		}
+		
+		window.smart_manager.sendRequest(requestParams, function(response){
+			if(window.smart_manager.isJSON(response)){
+				response = JSON.parse(response);
+				if(response?.show_feedback) window[pluginKey].showFeedbackModal();
+			}
+		});
+	}
+	
+	// Code for displaying title modal in case of gallery images.
+	SmartManager.prototype.displayTitleModal = function(params){
+		if(!params || !Object.keys(params).every(param => params.hasOwnProperty(param))) return;
+		
+		let editedColumnName = typeof window.smart_manager.getColDisplayName === 'function' 
+			? window.smart_manager.getColDisplayName(params.src) : '';
+		
+		window.smart_manager.processName = _x('Inline Edit','process name','smart-manager-for-wp-e-commerce');
+		window.smart_manager.processContent = editedColumnName || params.src;
+		
+		if(typeof window.smart_manager.inlineUpdateMultipleImages === 'function'){
+			window.smart_manager.processCallback = window.smart_manager.inlineUpdateMultipleImages;
+		}
+		window.smart_manager.processCallbackParams = params;
+		
+		if(typeof window.smart_manager.showTitleModal === 'function'){
+			window.smart_manager.showTitleModal()
+		}
+	}
+
+	// For updating image
+	SmartManager.prototype.inlineUpdateImage = function(imageParams){
+		if(!imageParams || !((Object.keys(imageParams)).every(imageParam => imageParams.hasOwnProperty(imageParam)))){
+			return;
+		}
+		let params = {};
+		params.data = {
+			cmd: 'inline_update',
+			active_module: window.smart_manager.dashboardKey,
+			edited_data: imageParams.editedImage,
+			security: window.smart_manager.saCommonNonce,
+			pro: ('undefined' !== typeof(window.smart_manager.sm_beta_pro)) ? window.smart_manager.sm_beta_pro : 0,
+			table_model: (window.smart_manager.currentDashboardModel.hasOwnProperty('tables')) ? window.smart_manager.currentDashboardModel.tables : ''
+		};
+		params.data = ("undefined" !== typeof(window.smart_manager.addTasksParams) && "function" === typeof(window.smart_manager.addTasksParams) && 1 == window.smart_manager.sm_beta_pro) ? window.smart_manager.addTasksParams(params.data) : params.data;
+		window.smart_manager.sendRequest(params, function(response){
+			if('failed' !== response){
+				if(window.smart_manager.isJSON(response)){
+					response = JSON.parse(response);
+				}
+				window.smart_manager.hot.setDataAtCell(imageParams.row, imageParams.col, imageParams.value, imageParams.source);
+				if(('undefined' === typeof(window.smart_manager.sm_beta_pro) || ('undefined' !== typeof(window.smart_manager.sm_beta_pro) && 1 != window.smart_manager.sm_beta_pro))){
+					msg = response.msg;
+					if('undefined' !== typeof(response.sm_inline_update_count)){
+						if("undefined" !== typeof(window.smart_manager.updateLitePromoMessage) && "function" === typeof(window.smart_manager.updateLitePromoMessage)){
+							window.smart_manager.updateLitePromoMessage(response.sm_inline_update_count);
+						}
+					}
+				}else{
+					msg = response;
+				}
+				if(response?.show_feedback){
+					window[pluginKey].showFeedbackModal()
+				}
+			}
+		});
+	};
+
 	if (typeof window.smart_manager_product === 'undefined') {
 		window.smart_manager = new SmartManagerProduct();
 	}
@@ -467,7 +927,7 @@ jQuery(document).on('sm_dashboard_change', '#sm_editor_grid', function() {
 	dlgContent += '<input type="hidden" name="isVariation" value="'+ ( ( isVariation ) ? 1 : 0 ) +'">';
 	
 	// Attributes list container
-	dlgContent += '<div id="sm_attributes_list" class="flex flex-col">';
+	dlgContent += '<div id="sm_attributes_list" class="flex flex-col text-sm-base-foreground">';
 	dlgContent += attrSelectedList;
 	dlgContent += '</div>';
 	

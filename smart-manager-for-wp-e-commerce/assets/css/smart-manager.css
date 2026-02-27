@@ -207,7 +207,6 @@ ul.children{list-style:none outside;margin:0px 0 0 24px}
 
 #sm_beta_display_records {
 	margin: 0em 1em 0em 1em;
-	font-style: italic;
 	line-height: 2em;
 }
 
@@ -1480,4 +1479,7 @@ body.smart-manager-dashboard .select2-results__options{
 }
 body.smart-manager-dashboard #wpcontent{
 	border-bottom: 0.5px solid var(--base-border, #E5E5E5);
+}
+body.smart-manager-dashboard #sm_attributes_list li.select2-selection__choice{
+	margin-bottom: 0 !important;
 }

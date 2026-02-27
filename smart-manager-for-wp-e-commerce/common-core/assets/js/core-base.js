@@ -437,7 +437,7 @@
         try {
             this.modal = {
                 title: (title != '') ? title : _x('Please Wait', 'progressbar modal title', 'smart-manager-for-wp-e-commerce'),
-                content: '<div class="sa_background_update_progressbar"> <span class="sa_background_update_progressbar_text" style="" >' + _x('Initializing...', 'progressbar modal content', 'smart-manager-for-wp-e-commerce') + '</span></div><div class="sa_' + this.pluginSlug + '_batch_update_background_link" >' + _x('Continue in background', 'progressbar modal content', 'smart-manager-for-wp-e-commerce') + '</div>',
+                content: '<div class="sa_background_update_progressbar"> <span class="sa_background_update_progressbar_text text-sm-base-foreground" style="" >' + _x('Initializing...', 'progressbar modal content', 'smart-manager-for-wp-e-commerce') + '</span></div><div class="sa_' + this.pluginSlug + '_batch_update_background_link" >' + _x('Continue in background', 'progressbar modal content', 'smart-manager-for-wp-e-commerce') + '</div>',
                 autoHide: false,
                 showCloseIcon: false,
                 cta: {}
