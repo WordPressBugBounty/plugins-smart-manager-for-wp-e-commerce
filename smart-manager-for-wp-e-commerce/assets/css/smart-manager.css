@@ -1350,7 +1350,7 @@ input.sm-title-input {
 	font-weight: 400;
 	line-height: 1.25rem;
 }
-.handsontable th{
+.handsontable th, .sm-changes-made-table th{
 	border-bottom: 1px solid #E5E5E5 !important;
 	background-color: #F5F5F5 !important;
 	color: #737373 !important;
@@ -1482,4 +1482,7 @@ body.smart-manager-dashboard #wpcontent{
 }
 body.smart-manager-dashboard #sm_attributes_list li.select2-selection__choice{
 	margin-bottom: 0 !important;
+}
+body.smart-manager-dashboard .htAutocomplete .htAutocompleteArrow {
+	display: none;
 }

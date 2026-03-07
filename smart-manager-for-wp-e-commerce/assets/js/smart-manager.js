@@ -1369,9 +1369,11 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 
 			if (window.smart_manager.totalRecords == 0) {
 				jQuery('#sm_beta_display_records').show();
-				jQuery('#sm_beta_display_records').text(sprintf(
-					/* translators: %s: dashboard display name */
-					_x('No %s Found', 'bottom bar status', 'smart-manager-for-wp-e-commerce'), window.smart_manager.dashboardDisplayName));
+				setTimeout(() => {
+					if(window.smart_manager.isTasksEnabled()){
+						jQuery(window.smart_manager.getEmptyTasksListUI()).insertAfter(".ht_master.handsontable.emptyRows .wtHolder .wtHider");
+					}
+				}, 200);
 				jQuery('#sm_pagination_controls').remove();
 			} else {
 				jQuery('#sm_beta_display_records').show();
@@ -1389,14 +1391,11 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 	//Function to refresh the bottom bar of grid
 	SmartManager.prototype.refreshBottomBar = function () {
 		// Calculate pagination info
-		const startRecord = (window.smart_manager.currentPageNumber - 1) * window.smart_manager.limit + 1;
-		const endRecord = Math.min(window.smart_manager.currentPageNumber * window.smart_manager.limit, window.smart_manager.displayTotalRecords);
-		
-		let msg = (window.smart_manager.currentDashboardData.length > 0) ? `
-			<span class="text-sm text-sm-base-muted-foreground leading-5">Showing <span class="text-sm-base-foreground font-normal">${startRecord}-${endRecord}</span> of ${window.smart_manager.displayTotalRecords} ${window.smart_manager.dashboardDisplayName.toLowerCase()}</span>
-		` : sprintf(
-				/* translators: %s: dashboard display name */
-				_x('No %s Found', 'bottom bar status', 'smart-manager-for-wp-e-commerce'), window.smart_manager.dashboardDisplayName);
+		let msg = (window.smart_manager.currentDashboardData.length > 0) ? `<span class="text-sm text-sm-base-muted-foreground leading-5"> Showing <span class="text-sm-base-foreground font-normal">${((window.smart_manager.currentPageNumber - 1) * window.smart_manager.limit + 1)}-${(Math.min(window.smart_manager.currentPageNumber * window.smart_manager.limit, window.smart_manager.displayTotalRecords))}</span> of ${window.smart_manager.displayTotalRecords} ${window.smart_manager.isTasksViewActive ? 'changes found' : window.smart_manager.dashboardDisplayName.toLowerCase()}</span>` : ( ! window.smart_manager.isTasksEnabled() ) ?
+		sprintf(
+			/* translators: %s: dashboard display name */
+			_x('No %s Found', 'bottom bar status', 'smart-manager-for-wp-e-commerce'), window.smart_manager.dashboardDisplayName
+		) : '';
 		jQuery('#sm_beta_display_records').html(msg);
 	}
 
@@ -1469,6 +1468,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 				window.smart_manager.currentGetDataParams.data.sort_params = window.smart_manager.currentDashboardModel.sort_params;
 			}
 		}
+		jQuery('.sm-empty-tasks-list-section').remove();
 		window.smart_manager.sendRequest(window.smart_manager.currentGetDataParams, window.smart_manager.set_data);
 	}
 
@@ -1611,6 +1611,16 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 		}
 	}
 
+	// Helper function to escape HTML special characters
+	SmartManager.prototype.escapeHtml = function (text) {
+		if (text === null || text === undefined) {
+			return '';
+		}
+		const div = document.createElement('div');
+		div.textContent = String(text);
+		return div.innerHTML;
+	}
+
 	SmartManager.prototype.getCustomRenderer = function (col) {
 
 		let customRenderer = '';
@@ -1638,14 +1648,6 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 
 		return customRenderer;
 	}
-
-
-
-
-
-
-
-
 
 	SmartManager.prototype.loadGrid = function () {
 		jQuery('#sm_editor_grid').html('');
@@ -2109,44 +2111,53 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 				}
 
 				if (col.editor == 'sm.serialized') { //Code for handling serialized complex data handling
+					// Check if we're in Tasks view and displaying the 'actions' column
+					const isTasksView = window.smart_manager.isTasksViewActive === true || window.location.search.includes('show_edit_history');
+					const isActionsColumn = col.key && col.key.toLowerCase() === 'actions';
 
-					window.smart_manager.JSONEditorObj = {} // hold JSONEditor instance
+					if (isTasksView && isActionsColumn && typeof window.smart_manager.handleTasksViewActionsColumn === 'function') {
+						// Call pro function to handle Tasks view Actions column
+						window.smart_manager.handleTasksViewActionsColumn(current_cell_value, coords);
+					} else {
+						// Use the original JSONEditor for other serialized fields
+						window.smart_manager.JSONEditorObj = {} // hold JSONEditor instance
 
-					let initializeJSONEditor = function () {
-						let container = document.getElementById("sm_beta_json_editor");
-						jQuery(container).html('');
-						let options = {
-							"mode": 'tree',
-							"search": true
-						};
-						window.smart_manager.JSONEditorObj = new JSONEditor(container, options);
-						let val = (window.smart_manager.isJSON(current_cell_value)) ? JSON.parse(current_cell_value) : current_cell_value;
+						let initializeJSONEditor = function () {
+							let container = document.getElementById("sm_beta_json_editor");
+							jQuery(container).html('');
+							let options = {
+								"mode": 'tree',
+								"search": true
+							};
+							window.smart_manager.JSONEditorObj = new JSONEditor(container, options);
+							let val = (window.smart_manager.isJSON(current_cell_value)) ? JSON.parse(current_cell_value) : current_cell_value;
 
-						if (col.editor_schema && window.smart_manager.isJSON(col.editor_schema)) {
-							window.smart_manager.JSONEditorObj.setSchema(JSON.parse(col.editor_schema));
+							if (col.editor_schema && window.smart_manager.isJSON(col.editor_schema)) {
+								window.smart_manager.JSONEditorObj.setSchema(JSON.parse(col.editor_schema));
+							}
+
+							window.smart_manager.JSONEditorObj.set(val);
+							window.smart_manager.JSONEditorObj.expandAll();
 						}
 
-						window.smart_manager.JSONEditorObj.set(val);
-						window.smart_manager.JSONEditorObj.expandAll();
+						window.smart_manager.modal = {
+							title: col.key || '',
+							content: '<div id="sm_beta_json_editor"></div>',
+							autoHide: false,
+							cta: {
+								title: _x('Ok', 'button', 'smart-manager-for-wp-e-commerce'),
+								callback: function () {
+									let content = (window.smart_manager.JSONEditorObj) ? JSON.stringify(window.smart_manager.JSONEditorObj.get()) : '';
+									window.smart_manager.hot.setDataAtCell(coords.row, coords.col, content, 'sm.serialized_inline_update');
+									window.smart_manager.JSONEditorObj = {}
+									wp.editor.remove('sm_beta_json_editor')
+								}
+							},
+							onCreate: initializeJSONEditor,
+							onUpdate: initializeJSONEditor
+						}
+						window.smart_manager.showModal()
 					}
-
-					window.smart_manager.modal = {
-						title: col.key || '',
-						content: '<div id="sm_beta_json_editor"></div>',
-						autoHide: false,
-						cta: {
-							title: _x('Ok', 'button', 'smart-manager-for-wp-e-commerce'),
-							callback: function () {
-								let content = (window.smart_manager.JSONEditorObj) ? JSON.stringify(window.smart_manager.JSONEditorObj.get()) : '';
-								window.smart_manager.hot.setDataAtCell(coords.row, coords.col, content, 'sm.serialized_inline_update');
-								window.smart_manager.JSONEditorObj = {}
-								wp.editor.remove('sm_beta_json_editor')
-							}
-						},
-						onCreate: initializeJSONEditor,
-						onUpdate: initializeJSONEditor
-					}
-					window.smart_manager.showModal()
 				}
 
 				if (typeof (col.type) != 'undefined' && col.type == 'sm.multilist') { // code to handle the functionality to handle editing of 'multilist' data types
@@ -3940,7 +3951,8 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 		    Handsontable.renderers.TextRenderer.apply(this, arguments);
 			if (['_sale_price', '_regular_price', '_price'].some(field => prop.includes(field)) && value.length) {
 				td.classList.add('sm-price-cell')
-				td.innerHTML = '<div title="'+ td.innerHTML +'" class="wrapper sm-price-cell">' + wc.wcSettings.CURRENCY.symbol + td.innerHTML + '</div>';
+				// Sanity check for WooCommerce currency symbol
+				td.innerHTML = '<div title="'+ td.innerHTML +'" class="wrapper sm-price-cell">' + ( (typeof wc === 'object' && wc.wcSettings && wc.wcSettings.CURRENCY && wc.wcSettings.CURRENCY.symbol) ? wc.wcSettings.CURRENCY.symbol : '' ) + td.innerHTML + '</div>';
 			} else {
 				td.innerHTML = '<div title="'+ td.innerHTML +'" class="wrapper">' + td.innerHTML + '</div>';
 			}
@@ -3975,6 +3987,9 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 	  	Handsontable.renderers.registerRenderer('customPasswordRenderer', customPasswordRenderer);
 
       function datetimeRenderer(hotInstance, td, row, column, prop, value, cellProperties) {
+		if (['tasks_completed_date', 'tasks_date'].some(key => prop.includes(key))) {
+			value = window.smart_manager?.formatDateTimeStr(value) || value;
+		}
         if( typeof(cellProperties.className) != 'undefined' ) { //code to higlight the cell on selection
             td.setAttribute('class',cellProperties.className);
         }
@@ -5590,7 +5605,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 		}
 	}
 
-	// Toggle quick column manager panel
+	// Toggle quick column manager panel.
 	SmartManager.prototype.toggleQuickColumnManager = function(btn, e) {
 		if (e) {
 			e.preventDefault();
@@ -5618,6 +5633,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 		}
 	}
 
+	//Function to get svg icons.
 	SmartManager.prototype.getIcons = function(slug='', stroke=''){
 		switch (slug) {
 			case ('undo'):
@@ -5633,6 +5649,19 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 			default:
 				return '';
 		}
+	}
+
+	/**
+	 * Format datetime string to "D Mon YYYY, HH:MM"
+	 *
+	 * @param {string} datetime - Datetime string (YYYY-MM-DD HH:MM:SS)
+	 */
+	SmartManager.prototype.formatDateTimeStr = function(datetime = '') {
+		const parts = (datetime) ? datetime.split(/[- :]/) : '';
+		if (!parts || parts.length < 5){
+			return datetime;
+		}
+		return `${parseInt(parts[2], 10)} ${window.smart_manager.month_names_short[parseInt(parts[1], 10) - 1]} ${parts[0]}, ${parts[3]}:${parts[4]}`;
 	}
 
 	// Register an alias for datetime

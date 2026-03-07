@@ -745,6 +745,11 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				$store_model_transient = false;
 				update_option( '_sm_update_8780_' . $this->dashboard_key, 1, 'no' );
 			}
+			if ( false === get_option( '_sm_update_8840_' . $this->dashboard_key ) ) {
+				delete_transient( 'sa_sm_' . $this->dashboard_key . '_tasks' );
+				$store_model_transient = false;
+				update_option( '_sm_update_8840_' . $this->dashboard_key, 1, 'no' );
+			}
 			$store_model_and_old_model_transient['store_model_transient'] = $store_model_transient;
 			$store_model_and_old_model_transient['old_col_model'] = $old_col_model;
 			return $store_model_and_old_model_transient;
