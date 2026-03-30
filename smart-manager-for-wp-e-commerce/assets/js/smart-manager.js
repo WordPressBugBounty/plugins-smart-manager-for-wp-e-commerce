@@ -265,6 +265,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 			let rowHeightValue = String(window.smart_manager.rowHeight).includes('px') ? window.smart_manager.rowHeight : window.smart_manager.rowHeight+'px';
 			r.style.setProperty('--row-height', rowHeightValue);
 		}
+		window.smart_manager.isUndoFeatureEnabled = true;
     };
 
 	SmartManager.prototype.loadDashboard = function() {
@@ -1123,8 +1124,8 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 
 		// Build the new header component
 		let sm_bottom_bar = "<div id='sm_bottom_bar' class='mt-6' style='width:" + window.smart_manager.grid_width + "px;'>" +
-			"<div id='sm_bottom_bar_left' class='sm_beta_left'><div id='sm_beta_display_records' class='sm_beta_select_blue'></div></div>" +
-			"<div id='sm_bottom_bar_right' class='sm_beta_right mr-2'>" +
+			"<div id='sm_bottom_bar_left' class='sm_beta_left pl-6'><div id='sm_beta_display_records' class='sm_beta_select_blue'></div></div>" +
+			"<div id='sm_bottom_bar_right' class='sm_beta_right pr-6'>" +
 			"</div>" +
 			"</div>";
 
@@ -1296,63 +1297,65 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 				window.smart_manager.totalRecords = parseInt(res.total_count);
 				window.smart_manager.displayTotalRecords = (res.hasOwnProperty('display_total_count')) ? res.display_total_count : res.total_count;
 
-				// Calculate total pages for pagination
-				window.smart_manager.totalPages = Math.ceil(window.smart_manager.displayTotalRecords / window.smart_manager.limit);
-				window.smart_manager.currentPageNumber = window.smart_manager.page;
-
-				// For pagination, always replace data instead of appending
-				window.smart_manager.currentDashboardData = (window.smart_manager.totalRecords > 0) ? res.items : [];
-			} else {
-				window.smart_manager.currentDashboardData = [];
+			// Calculate total pages for pagination
+			// When show variations is enabled, use totalRecords instead of displayTotalRecords
+			let paginationCount = window.smart_manager.displayTotalRecords;
+			if (window.smart_manager.dashboardKey === 'product' && typeof window.smart_manager.getShowVariationsState === 'function' && window.smart_manager.getShowVariationsState()) {
+				paginationCount = window.smart_manager.totalRecords;
 			}
+			window.smart_manager.totalPages = Math.ceil(paginationCount / window.smart_manager.limit);
+			window.smart_manager.currentPageNumber = window.smart_manager.page;
+			// For pagination, always replace data instead of appending
+			window.smart_manager.currentDashboardData = (window.smart_manager.totalRecords > 0) ? res.items : [];
+			window.smart_manager.hot.scrollViewportTo(0, 0);
+		} else {
+			window.smart_manager.currentDashboardData = [];
+		}
 
-			// Load data into grid and handle UI updates consistently for all pages
-			if (window.smart_manager.columnSort) {
-				window.smart_manager.hot.loadData(window.smart_manager.currentDashboardData);
-				window.smart_manager.hot.scrollViewportTo(0, 0);
-			} else {
+		// Load data into grid and handle UI updates consistently for all pages
+		if (window.smart_manager.columnSort) {
+			window.smart_manager.hot.loadData(window.smart_manager.currentDashboardData);
+			window.smart_manager.hot.scrollViewportTo(0, 0);
+		} else {
 
-					jQuery('#sm_dashboard_kpi').remove();
+				jQuery('#sm_dashboard_kpi').remove();
 
-					if (res.hasOwnProperty('kpi_data')) {
-						window.smart_manager.kpiData = res.kpi_data;
-						if (Object.entries(window.smart_manager.kpiData).length > 0) {
-							let kpi_html = new Array();
+				if (res.hasOwnProperty('kpi_data')) {
+				window.smart_manager.kpiData = res.kpi_data;
+				if (Object.entries(window.smart_manager.kpiData).length > 0) {
+					let kpi_html = new Array();
 
-							Object.entries(window.smart_manager.kpiData).forEach(([kpiTitle, kpiObj]) => {
-								kpi_html.push('<span class="sm_beta_select_' + ((kpiObj.hasOwnProperty('color') !== false && kpiObj['color'] != '') ? kpiObj['color'] : 'grey') + '"> ' + kpiTitle + '(' + ((kpiObj.hasOwnProperty('count') !== false) ? kpiObj['count'] : 0) + ') </span>');
-							});
+					Object.entries(window.smart_manager.kpiData).forEach(([kpiTitle, kpiObj]) => {
+						kpi_html.push('<span class="sm_beta_select_' + ((kpiObj.hasOwnProperty('color') !== false && kpiObj['color'] != '') ? kpiObj['color'] : 'grey') + '"> ' + kpiTitle + '(' + ((kpiObj.hasOwnProperty('count') !== false) ? kpiObj['count'] : 0) + ') </span>');
+					});
 
-							if (kpi_html.length > 0) {
-								jQuery('#sm_bottom_bar_left').append('<div id="sm_dashboard_kpi" class="ml-4 mt-2">' + kpi_html.join("<span class='sm_separator'> | </span>") + '</div>');
-							}
-						}
-					} else {
-						window.smart_manager.kpiData = {};
-					}
-
-				if (window.smart_manager.currentVisibleColumns.length > 0) {
-					if (window.smart_manager.isColumnModelUpdated) {
-						window.smart_manager.formatGridColumns();
-
-						window.smart_manager.hot.updateSettings({
-							data: window.smart_manager.currentDashboardData,
-							columns: window.smart_manager.currentVisibleColumns,
-							colHeaders: window.smart_manager.column_names
-						})
-					} else {
-						window.smart_manager.hot.updateSettings({
-							data: window.smart_manager.currentDashboardData,
-							forceRender: window.smart_manager.firstLoad
-						})
-					}
-					if (window.smart_manager.firstLoad) {
-						window.smart_manager.firstLoad = false
+					if (kpi_html.length > 0) {
+						jQuery('#sm_bottom_bar_left').append('<div id="sm_dashboard_kpi" class="mt-4">' + kpi_html.join("<span class='sm_separator'> | </span>") + '</div>');
 					}
 				}
-				window.smart_manager.showLoader(false);
-				
-				// Handle pro version row limitations
+			} else {
+				window.smart_manager.kpiData = {};
+			}
+
+		if (window.smart_manager.currentVisibleColumns.length > 0) {
+			if (window.smart_manager.isColumnModelUpdated) {
+				window.smart_manager.formatGridColumns();
+
+				window.smart_manager.hot.updateSettings({
+					data: window.smart_manager.currentDashboardData,
+					columns: window.smart_manager.currentVisibleColumns,
+					colHeaders: window.smart_manager.column_names
+				})
+			} else {
+				window.smart_manager.hot.updateSettings({
+					data: window.smart_manager.currentDashboardData,
+					forceRender: window.smart_manager.firstLoad
+				})
+			}
+			if (window.smart_manager.firstLoad) {
+				window.smart_manager.firstLoad = false
+			}
+		}
 				if (window.smart_manager.sm_beta_pro == 0) {
 					if (typeof (window.smart_manager.modifiedRows) != 'undefined') {
 						if (window.smart_manager.modifiedRows.length >= window.smart_manager.sm_updated_successful) {
@@ -1391,7 +1394,15 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 	//Function to refresh the bottom bar of grid
 	SmartManager.prototype.refreshBottomBar = function () {
 		// Calculate pagination info
-		let msg = (window.smart_manager.currentDashboardData.length > 0) ? `<span class="text-sm text-sm-base-muted-foreground leading-5"> Showing <span class="text-sm-base-foreground font-normal">${((window.smart_manager.currentPageNumber - 1) * window.smart_manager.limit + 1)}-${(Math.min(window.smart_manager.currentPageNumber * window.smart_manager.limit, window.smart_manager.displayTotalRecords))}</span> of ${window.smart_manager.displayTotalRecords} ${window.smart_manager.isTasksViewActive ? 'changes found' : window.smart_manager.dashboardDisplayName.toLowerCase()}</span>` : ( ! window.smart_manager.isTasksEnabled() ) ?
+		// When show variations is enabled, use totalRecords for accurate pagination display
+		let paginationDisplayCount = window.smart_manager.displayTotalRecords;
+		if (window.smart_manager.dashboardKey === 'product' && 
+		    typeof window.smart_manager.getShowVariationsState === 'function' && 
+		    window.smart_manager.getShowVariationsState()) {
+			paginationDisplayCount = window.smart_manager.totalRecords;
+		}
+		
+		let msg = (window.smart_manager.currentDashboardData.length > 0) ? `<span class="text-sm text-sm-base-muted-foreground leading-5"> Showing <span class="text-sm-base-foreground font-normal">${((window.smart_manager.currentPageNumber - 1) * window.smart_manager.limit + 1)}-${(Math.min(window.smart_manager.currentPageNumber * window.smart_manager.limit, paginationDisplayCount))}</span> of ${paginationDisplayCount} ${window.smart_manager.isTasksViewActive ? 'changes found' : `${window.smart_manager.dashboardDisplayName.toLowerCase()}${window.smart_manager.getShowVariationsState() ? _x( ' (Including variations)', 'pagination text', 'smart-manager-for-wp-e-commerce' ) : ''}`}</span>` : ( ! window.smart_manager.isTasksEnabled() ) ?
 		sprintf(
 			/* translators: %s: dashboard display name */
 			_x('No %s Found', 'bottom bar status', 'smart-manager-for-wp-e-commerce'), window.smart_manager.dashboardDisplayName
@@ -3988,7 +3999,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 
       function datetimeRenderer(hotInstance, td, row, column, prop, value, cellProperties) {
 		if (['tasks_completed_date', 'tasks_date'].some(key => prop.includes(key))) {
-			value = window.smart_manager?.formatDateTimeStr(value) || value;
+			value = (value !== '0000-00-00 00:00:00') ? window.smart_manager?.formatDateTimeStr(value) || value : '-';
 		}
         if( typeof(cellProperties.className) != 'undefined' ) { //code to higlight the cell on selection
             td.setAttribute('class',cellProperties.className);

@@ -206,7 +206,6 @@ ul.children{list-style:none outside;margin:0px 0 0 24px}
 }
 
 #sm_beta_display_records {
-	margin: 0em 1em 0em 1em;
 	line-height: 2em;
 }
 
@@ -516,34 +515,6 @@ td[aria-describedby*="postmeta_meta_key__thumbnail_id_meta_value__thumbnail_id"]
 
 .sm-ui-state-disabled {
 	opacity: 0.4;
-}
-
-.sa_background_update_progressbar {
-	text-align: center;
-	line-height: 2.5em;
-	height: 2.5em;
-	position: relative;
-	margin: 0 auto;
-	width: 98%;
-	margin-top: 2em;
-	margin-bottom: 2.5em;
-}
-
-.sa_background_update_progressbar_text {
-	position: absolute;
-	width: 50%;
-	left: 25%;
-	font-size: 1.5em;
-	font-weight: bold;
-}
-
-.sa_sm_batch_update_background_link {
-	text-align: right;
-	cursor: pointer;
-	text-decoration: underline;
-	color: #508991;
-	margin-right: 0.5em;
-	font-size: 1.2em;
 }
 
 /*Column Visibility*/
@@ -1485,4 +1456,10 @@ body.smart-manager-dashboard #sm_attributes_list li.select2-selection__choice{
 }
 body.smart-manager-dashboard .htAutocomplete .htAutocompleteArrow {
 	display: none;
+}
+body.smart-manager-dashboard #wpfooter .sm-footer-version-text{
+	margin-left: 8.5rem;
+}
+body.smart-manager-dashboard.folded #wpfooter .sm-footer-version-text{
+	margin-left: 0.75rem;
 }

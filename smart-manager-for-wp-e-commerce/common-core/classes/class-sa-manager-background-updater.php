@@ -169,7 +169,6 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 			$this->action = self::$action_name;
 			add_action( 'storeapps_batch_handler', array( $this, 'storeapps_batch_handler' ) );
 			add_action( 'action_scheduler_failed_action', array( $this, 'restart_failed_action' ) );
-			add_action( 'admin_notices', array( $this, 'background_process_notice' ) );
 			add_action( 'admin_head', array( $this, 'background_heartbeat' ) );
 			add_filter('cron_schedules', array($this, 'cron_schedules'), 1000); // phpcs:ignore
 			add_filter('action_scheduler_run_schedule', array($this, 'modify_action_scheduler_run_schedule'), 1000); // phpcs:ignore
@@ -411,6 +410,8 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 				'ack'               => 'Success',
 				'per'               => $percent,
 				'remaining_seconds' => $remaining_seconds,
+				'total_records'     => ( ( ! empty( $progress ) ) && ( is_array( $progress ) ) && ( ! empty( $progress['total_records'] ) ) ) ? absint( $progress['total_records'] ) : 0,
+				'records_updated'     => ( ( ! empty( $progress ) ) && ( is_array( $progress ) ) && ( ! empty( $progress['records_updated'] ) ) ) ? absint( $progress['records_updated'] ) : 0
 			);
 			if ( 100 === $progress['percent_completion'] && ( ! empty( $_POST['pluginKey'] ) ) && ( 'smart_manager' === sanitize_key( wp_unslash( $_POST['pluginKey'] ) ) ) ) {
 				if ( ! class_exists( 'SA_Manager_Feedback' ) ) {
@@ -435,7 +436,7 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 			);
 			$start_time            = get_option( $this->identifier . '_start_time', false );
 			$current_time          = get_option( $this->identifier . '_current_time', false );
-			$all_tasks_count       = get_option( $this->identifier . '_tot', false );
+			$all_tasks_count       = $progress['total_records'] = get_option( $this->identifier . '_tot', false );
 			$remaining_tasks_count = get_option( $this->identifier . '_remaining', false );
 			if ( empty( $start_time ) && empty( $current_time ) && empty( $all_tasks_count ) && empty( $remaining_tasks_count ) ) {
 				$progress = array(
@@ -457,6 +458,7 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 					$this->clean_scheduled_action_data();
 				}
 			}
+			$progress['records_updated'] = ( ! empty( $progress['total_records'] ) ) ? absint( ( absint( $progress['total_records'] ) ) - ( absint( $remaining_tasks_count ) ) ) : 0;
 			return $progress;
 		}
 
@@ -493,47 +495,43 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 			$admin_email       = get_option( 'admin_email', false );
 			$admin_email       = ( empty( $admin_email ) ) ? 'admin email' : $admin_email;
 			?>
-			<div id="sa_background_process_progress" class="error" style="display: none;">
+			<div id="sa_background_process_progress" class="border-l-4 border-sm-base-primary rounded-r-lg p-4 m-4 shadow-sm" style="display: none;">
 				<?php
 				if ( empty( $this->is_action_scheduled() ) && empty( $initial_process ) ) {
 					$this->clean_scheduled_action_data( true );
 					?>
-					<p>
+					<p class="text-sm text-sm-base-foreground m-0">
 						<?php
 						/* translators: 1. Error title 2. The bulk process */
-						echo sprintf( esc_html__( '%1$s: The %2$s process has stopped. Please review the dashboard to check the status.', 'smart-manager-for-wp-e-commerce' ), '<strong>' . esc_html__( 'Error', 'smart-manager-for-wp-e-commerce' ) . '</strong>', '<strong>' . esc_html( strtolower( $process_name ) ) . '</strong>' );
+						echo sprintf( esc_html__( '%1$s: The %2$s process has stopped. Please review the dashboard to check the status.', 'smart-manager-for-wp-e-commerce' ), '<span class="font-semibold">' . esc_html__( 'Error', 'smart-manager-for-wp-e-commerce' ) . '</span>', '<span class="font-semibold">' . esc_html( strtolower( $process_name ) ) . '</span>' );
 						?>
 					</p>
 					</div>
 					<?php
 				} else {
 					?>
-					<p>
+					<p class="text-sm text-sm-base-foreground m-0 mb-2">
 						<?php
-						echo '<strong>' . esc_html__( 'Important', 'smart-manager-for-wp-e-commerce' ) . '</strong>:';
-						echo '&nbsp;' . esc_html( $process_name ) . '&nbsp;' . esc_html__( 'request is running', 'smart-manager-for-wp-e-commerce' ) . '&nbsp;';
-						echo esc_html__( 'in the background. You will be notified on', 'smart-manager-for-wp-e-commerce' ) . '&nbsp; <code>' . esc_html( $admin_email ) . '</code>&nbsp; ' . esc_html__( 'when it is completed.', 'smart-manager-for-wp-e-commerce' ) . '&nbsp;';
+						/* translators: %s: process name */
+						echo '<span class="font-semibold">' . sprintf( esc_html__( '%s', 'smart-manager-for-wp-e-commerce' ), esc_html( $process_name ) ) . '</span> process is ';
+						/* translators: %s: admin email */
+						echo sprintf( esc_html__( 'running in the background. You\'ll be notified at %s when it\'s done.', 'smart-manager-for-wp-e-commerce' ), '<code class="bg-sm-base-muted px-1.5 py-0.5 rounded text-sm font-mono text-sm-base-foreground">' . esc_html( $admin_email ) . '</code>' );
 						?>
 					</p>
 					<?php do_action( 'sa_background_process_after_admin_notice_heading', $batch_params ); ?>
-					<p>
-						<span id="sa_remaining_time_label">
-							<?php echo esc_html__( 'Progress', 'smart-manager-for-wp-e-commerce' ); ?>:&nbsp;
-							<strong><span id="sa_remaining_time"><?php echo esc_html__( '--:--:--', 'smart-manager-for-wp-e-commerce' ); ?></span></strong>&nbsp;&nbsp;
-							<a id="sa-stop-batch-process" href="javascript:void(0);" style="color: #dc3232;"><?php echo esc_html__( 'Stop', 'smart-manager-for-wp-e-commerce' ); ?></a>
-						</span>
+					<p class="text-sm text-sm-base-foreground m-0 mb-2 flex items-center gap-2">
+						<span class="font-semibold"><?php echo esc_html__( 'Progress', 'smart-manager-for-wp-e-commerce' ); ?>:</span>
+						<span class="font-semibold text-sm-base-primary"><span id="sa_remaining_time"><?php echo esc_html__( '-- • --:--:-- remaining', 'smart-manager-for-wp-e-commerce' ); ?></span></span>
+						<a id="sa-stop-batch-process" href="javascript:void(0);" class="text-sm font-medium text-sm-base-destructive hover:underline cursor-pointer transition-colors duration-200"><?php echo esc_html__( 'Stop', 'smart-manager-for-wp-e-commerce' ); ?></a>
 					</p>
-					<p class="<?php echo esc_attr( $batch_params['plugin_data']['plugin_obj_key'] ); ?>_background_note">
-						<?php
-						echo '<strong>' . esc_html__( 'NOTE', 'smart-manager-for-wp-e-commerce' ) . '</strong>:&nbsp;';
-						echo wp_kses_post( $batch_params['backgroundProcessRunningMessage'] );
-						?>
+					<p class="<?php echo esc_attr( $batch_params['plugin_data']['plugin_obj_key'] ); ?>_background_note text-sm text-sm-base-muted-foreground m-0">
+						<?php echo esc_html__( $batch_params['backgroundProcessRunningMessage'] ); ?>
 					</p>
 			</div>
-			<div id="sa_background_process_complete" class="updated" style="display: none;">
-				<p>
-					<strong><?php echo esc_html( $process_name ); ?></strong>
-					<?php echo esc_html__( 'for', 'smart-manager-for-wp-e-commerce' ) . ' <strong>' . esc_html( $no_of_records ) . '</strong> ' . esc_html__( 'completed successfully', 'smart-manager-for-wp-e-commerce' ); ?>
+			<div id="sa_background_process_complete" class="mt-2 mx-4 smart-manager-dashboard bg-success/50 border-l-4 border-green-600 rounded-r-lg p-4 mb-4 shadow-sm" style="display: none;">
+				<p class="text-sm text-sm-base-foreground m-0">
+					<span class="font-semibold"><?php echo esc_html( $process_name ); ?></span>
+					<?php echo esc_html__( 'for', 'smart-manager-for-wp-e-commerce' ) . ' <span class="font-semibold">' . esc_html( $no_of_records ) . '</span> ' . esc_html__( 'completed successfully', 'smart-manager-for-wp-e-commerce' ); ?>
 				</p>
 			</div>
 			<script type="text/javascript">
@@ -798,8 +796,10 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 								//Code for updating the progressbar
 								let per = parseInt(response.per),
 									remainingSeconds = response.remaining_seconds;
+									totalRecords = response?.total_records || 0
+									recordsUpdated = response?.records_updated || 0
 								if (isBackground) {
-									jQuery('#sa_remaining_time').html(Math.round(parseInt(per)) + '<?php echo esc_html_x( '% completed', 'percentage progress', 'smart-manager-for-wp-e-commerce' ); ?>');
+									jQuery('#sa_remaining_time').html(Math.round(parseInt(per)) + '<?php echo esc_html_x( '%', 'percentage symbol', 'smart-manager-for-wp-e-commerce' ); ?>');
 									let hours = 0,
 										minutes = 0,
 										seconds = 0;
@@ -810,19 +810,32 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 									hours = hours < 10 ? "0" + hours : hours;
 									minutes = minutes < 10 ? "0" + minutes : minutes;
 									seconds = seconds < 10 ? "0" + seconds : seconds;
-									jQuery('#sa_remaining_time').append(' [' + hours + ":" + minutes + ":" + seconds + ' left]')
+									jQuery('#sa_remaining_time').append(' • ' + hours + ":" + minutes + ":" + seconds + ' <?php echo esc_html__( 'remaining', 'smart-manager-for-wp-e-commerce' ); ?>')
 								} else {
-									if (jQuery('.sa_background_update_progressbar').html() == 'Initializing...') {
-										jQuery('.sa_background_update_progressbar').html('');
+									let recordsAffectedText = 'records processed';
+									switch (process) {
+										case 'bulk_edit':
+											recordsAffectedText = _x('records updated', 'records processed text', 'smart-manager-for-wp-e-commerce')
+											break;
+										case 'Stock Log Synchronization':
+											recordsAffectedText = _x('records inserted', 'records processed text', 'smart-manager-for-wp-e-commerce')
+											break;
+										case 'move_to_trash':
+											recordsAffectedText = _x('records trashed', 'records processed text', 'smart-manager-for-wp-e-commerce')
+											break;
+										case 'delete_permanently':
+											recordsAffectedText = _x('records deleted', 'records processed text', 'smart-manager-for-wp-e-commerce')
+											break;
+										case 'duplicate':
+											recordsAffectedText = _x('duplicates created', 'records processed text', 'smart-manager-for-wp-e-commerce')
+											break;
+										default:
+											break;
 									}
-									jQuery('.sa_background_update_progressbar').progressbar({
-										value: parseInt(per)
-									}).children('.ui-progressbar-value').css({
-										"background": "#508991",
-										"height": "2.5em",
-										"color": "#FFF"
-									});
-									jQuery('.sa_background_update_progressbar_text').html(Math.round(parseInt(per)) + '<?php echo esc_html__( '% Completed', 'smart-manager-for-wp-e-commerce' ); ?>');
+									let recordsUpdatedHTML = `${recordsUpdated ? `<div class="mt-1 text-[#737373] text-sm font-normal"> (${recordsUpdated}/${totalRecords} ${recordsAffectedText})</div>` : ''}`
+									// Update progress bar with Tailwind CSS
+									jQuery('.sa_background_update_progressbar_fill').css('width', per + '%');
+									jQuery('.sa_background_update_progressbar_text').html(Math.round(parseInt(per)) + '<?php echo esc_html__( '% Completed', 'smart-manager-for-wp-e-commerce' ); ?>' + recordsUpdatedHTML ) ;
 								}
 								if (per < 100) {
 									setTimeout(function() {

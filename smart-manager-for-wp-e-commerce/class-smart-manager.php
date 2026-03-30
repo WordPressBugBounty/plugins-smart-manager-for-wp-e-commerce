@@ -498,7 +498,7 @@ class Smart_Manager {
 		});
 		add_action( 'wp_ajax_dismiss_feature_notice', array( $this, 'dismiss_feature_notice' ) );
 		add_filter( 'sa_sm_manager_request_handler_allowed_dir_path', array( $this, 'request_handler_allowed_dir_path' ), 10 );
-		if ( ( defined('SMPRO') ) && ( SMPRO === true ) && ! class_exists( 'Smart_Manager_Pro_Product_Changes_Tracker' ) && file_exists( ( dirname( SM_PLUGIN_FILE ) ) . '/pro/classes/class-smart-manager-pro-product-changes-tracker.php' ) ) {
+		if ( ( defined('SMPRO') ) && ( SMPRO === true ) && ( class_exists( 'Smart_Manager_Settings' ) ) && ( is_callable( array( 'Smart_Manager_Settings', 'get' ) ) ) && ( 'yes' === Smart_Manager_Settings::get( 'track_external_product_changes' ) ) && ! class_exists( 'Smart_Manager_Pro_Product_Changes_Tracker' ) && file_exists( ( dirname( SM_PLUGIN_FILE ) ) . '/pro/classes/class-smart-manager-pro-product-changes-tracker.php' ) ) {
 			require_once 'pro/classes/class-smart-manager-pro-product-changes-tracker.php';
 		}
 		//Add custom body class to Smart Manager dashboard page.
@@ -936,6 +936,9 @@ class Smart_Manager {
 		}
 		if ( ( defined('SMPRO') ) && ( SMPRO === true ) && ( ( ! empty( $_GET['post_type'] ) ) && ( 'product' === sanitize_text_field( $_GET['post_type'] ) ) && ( ( ! empty( $_GET['page'] ) ) && ( 'product_importer' === sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) ) ) && ! class_exists( 'Smart_Manager_Pro_Product_Import_CSV' ) && file_exists( ( dirname( SM_PLUGIN_FILE ) ) . '/pro/classes/class-smart-manager-pro-product-import-csv.php' ) ) {
 			require_once 'pro/classes/class-smart-manager-pro-product-import-csv.php';
+		}
+		if ( ! defined( 'SM_BACKGROUND_PROCESS_RUNNING_MESSAGE' ) ) {
+			define( 'SM_BACKGROUND_PROCESS_RUNNING_MESSAGE', __( 'You can continue working. Please wait before running bulk actions or export.', 'smart-manager-for-wp-e-commerce' ) );
 		}
 	}
 
@@ -1416,7 +1419,7 @@ class Smart_Manager {
 							'search_type' => ( ( !empty( $search_type ) ) ? $search_type : 'simple' ),
 							'wpdb_prefix' => $wpdb->prefix,
 							'trashEnabled' => $trash_enabled,
-							'background_process_running_message' => __( 'In the meanwhile, you can use Smart Manager. But before using actions like ', 'smart-manager-for-wp-e-commerce') .' <strong>'. __( 'Bulk Edit', 'smart-manager-for-wp-e-commerce') .'</strong>/ <strong>'. __('Duplicate Records', 'smart-manager-for-wp-e-commerce') .'</strong>/ <strong>'. __( 'Delete Records', 'smart-manager-for-wp-e-commerce') .'</strong>/ <strong>'. __( 'Undo Tasks', 'smart-manager-for-wp-e-commerce') .'</strong>/ <strong>'. __( 'Delete Tasks', 'smart-manager-for-wp-e-commerce') .'</strong>/ <strong>'. __( 'Export CSV', 'smart-manager-for-wp-e-commerce') .'</strong>, '. __('you will have to wait for the current background process to finish.', 'smart-manager-for-wp-e-commerce' ),
+							'background_process_running_message' => ( defined('SM_BACKGROUND_PROCESS_RUNNING_MESSAGE') ) ? SM_BACKGROUND_PROCESS_RUNNING_MESSAGE : '',
 							'trashAndDeletePermanently' => array( 'disable' => $disable_trash_and_delete_permanently, 'error_message' => $trash_and_delete_permanently_disable_message ),
 							'colEditDisableMessage' => array( 'disable' => $disable_col_edit, 'error_message' => $col_edit_disable_message ),
 							'forceCollapseAdminMenu' => ( 'no' === Smart_Manager_Settings::get( 'wp_force_collapse_admin_menu' ) ) ? 0 : 1,
@@ -1796,6 +1799,12 @@ class Smart_Manager {
 				<?php if ( SMPRO === true && function_exists( 'smart_support_ticket_content' ) ) smart_support_ticket_content();  ?>
 
 				<div id="sm_nav_bar"></div>
+				<?php 
+					if ( class_exists( 'SA_Manager_Background_Updater' ) && ( is_callable( array( 'SA_Manager_Background_Updater', 'instance' ) ) ) && is_callable( array( 'SA_Manager_Background_Updater', 'background_process_notice' ) ) ) {
+						$background_updater_instance = SA_Manager_Background_Updater::instance();
+						$background_updater_instance->background_process_notice();
+					}
+				?>
 		<?php
 			}
 			if (! $is_pro_updated) {

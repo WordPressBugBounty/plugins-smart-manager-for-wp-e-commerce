@@ -7,7 +7,7 @@ Tags: woocommerce bulk edit, woocommerce inventory management, woocommerce order
 Requires at least: 5.0
 Tested up to: 6.9
 Requires PHP: 7.0
-Stable tag: 8.84.0
+Stable tag: 8.85.0
 License: GPLv2
 
 WooCommerce Advanced Bulk Edit products, orders, & posts in an Excel-like sheet editor. Get advanced WooCommerce stock, pricing, & order management.
@@ -312,6 +312,17 @@ Please report security bugs found in the source code of the Smart Manager plugin
 2. Bulk edit / Batch update (only in Pro version)
 
 == Changelog ==
+
+= 8.85.0 (30.03.2026) =
+* New: WordPress 6.9.4 compatible
+* New: WooCommerce 10.6.1 compatible
+* New: Setting to enable/disable logging of WooCommerce Product changes not made from Smart Manager dashboard (Pro)
+* New: Setting to auto-delete Edit History after a specified number of days (Pro)
+* Fix: Products missing from the grid on pagination change when 'Show Variations' is enabled
+* Fix: Advanced Search not working for 'WC Last Active' column on Users dashboard (Pro)
+* Fix: Auto-delete Edit History process not working in some cases (Pro)
+* Update: UI/UX improvements for background process progress modal and admin notices (Pro)
+* Update: POT file
 
 = 8.84.0 (07.03.2026) =
 * New: WooCommerce 10.5.3 compatible
@@ -777,6 +788,9 @@ Please report security bugs found in the source code of the Smart Manager plugin
 [See changelog for all versions](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 8.85.0 =
+WordPress 6.9.4 compatible, WooCommerce 10.6.1 compatible, Setting to enable/disable logging of WooCommerce Product changes not made from Smart Manager dashboard (Pro), Setting to auto-delete Edit History after a specified number of days (Pro), Fixes related to Products missing from the grid on pagination change when 'Show Variations' is enabled, Advanced Search not working for 'WC Last Active' column on Users dashboard (Pro), Auto-delete Edit History process not working in some cases (Pro), Updates related to UI/UX improvements for background process progress modal and admin notices (Pro). Recommended upgrade.
 
 = 8.84.0 =
 WooCommerce 10.5.3 compatible, Fixes related to WooCommerce Products dashboard sometimes loads only a few products in the grid, Updates related to UI/UX enhancements for the History/Tasks dashboard (Pro). Recommended upgrade.

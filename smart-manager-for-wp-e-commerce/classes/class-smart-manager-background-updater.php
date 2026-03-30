@@ -54,7 +54,7 @@ if ( ! class_exists( 'Smart_Manager_Background_Updater' ) ) {
 		 * @return bool True if the current screen is associated with a valid post type, otherwise false.
 		 */
 		public function is_valid_page() {
-			return ( ( ( ! empty( $_GET['page'] ) ) && ( 'smart-manager' === sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) ) || ( wp_doing_ajax() ) ) ? true : false;
+			return ( ( ( ! empty( $_GET['page'] ) ) && ( ( empty( $_GET['landing-page'] ) ) && 'smart-manager' === sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) ) || ( wp_doing_ajax() ) ) ? true : false;
 		}
 
 		/**

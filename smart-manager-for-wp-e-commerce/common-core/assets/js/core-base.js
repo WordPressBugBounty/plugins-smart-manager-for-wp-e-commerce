@@ -437,9 +437,18 @@
         try {
             this.modal = {
                 title: (title != '') ? title : _x('Please Wait', 'progressbar modal title', 'smart-manager-for-wp-e-commerce'),
-                content: '<div class="sa_background_update_progressbar"> <span class="sa_background_update_progressbar_text text-sm-base-foreground" style="" >' + _x('Initializing...', 'progressbar modal content', 'smart-manager-for-wp-e-commerce') + '</span></div><div class="sa_' + this.pluginSlug + '_batch_update_background_link" >' + _x('Continue in background', 'progressbar modal content', 'smart-manager-for-wp-e-commerce') + '</div>',
+                content: '<div class="flex flex-col items-center justify-center py-4 px-4">' +
+                    '<div class="sa_background_update_progressbar w-full bg-sm-base-muted rounded-full h-2.5 mb-4 overflow-hidden">' +
+                        '<div class="sa_background_update_progressbar_fill bg-sm-base-primary h-full rounded-full transition-all duration-300 ease-out" style="width: 0%"></div>' +
+                    '</div>' +
+                    '<span class="sa_background_update_progressbar_text text-center text-lg font-semibold text-sm-base-foreground mb-2">' + _x('Initializing...', 'progressbar modal content', 'smart-manager-for-wp-e-commerce') + '</span>' +
+                '</div>' +
+                '<div class="flex justify-end px-4 pb-4">' +
+                    '<a href="javascript:void(0);" class="sa_' + this.pluginSlug + '_batch_update_background_link text-sm font-medium text-sm-base-primary hover:underline cursor-pointer transition-colors duration-200">' + _x('Continue in background', 'progressbar modal content', 'smart-manager-for-wp-e-commerce') + '</a>' +
+                '</div>',
                 autoHide: false,
                 showCloseIcon: false,
+                hideFooter: true,
                 cta: {}
             }
             this.showModal()
@@ -474,6 +483,162 @@
 
     String.prototype.capitalize = function() {
         return this.charAt(0).toUpperCase() + this.slice(1);
+    }
+
+    // Display title modal with schedule toggle
+    SaCommonManager.prototype.showTitleModal = function (params = {}) {
+        if (!window[pluginKey].processName || !window[pluginKey].processContent) {
+            return;
+        }
+
+        let isUndoEnabled = window[pluginKey].isUndoFeatureEnabled === true;
+        let showScheduleOption = params.showScheduleOption === true;
+
+        let title = sprintf(
+            /* translators: %s: Task process content */
+            _x('Edited %s', 'process title', 'smart-manager-for-wp-e-commerce'), window[pluginKey].processContent)
+        
+        // Modal title and description based on undo feature
+        let modalTitle = isUndoEnabled 
+            ? _x('Task Title', 'modal title', 'smart-manager-for-wp-e-commerce')
+            : _x('Bulk Edit', 'modal title', 'smart-manager-for-wp-e-commerce');
+        
+        let taskContent = isUndoEnabled 
+            ? '<input type="text" id="sm_add_title" placeholder="' + _x('Enter desired title here...', 'title placeholder', 'smart-manager-for-wp-e-commerce') + '" value="' + title + '" style="flex: 1; padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;">'
+            : '<input type="hidden" id="sm_add_title" value="' + title + '">';
+        
+        let taskDesc = isUndoEnabled
+            ? sprintf(
+                /* translators: %s: Undo modal description */
+                _x('Name the task for easier reference and future actions, especially for %s option. A pre-filled title has been suggested based on your changes.', 'modal description', 'smart-manager-for-wp-e-commerce'), '<strong class="text-sm-base-foreground">' + _x('Undo', 'modal description', 'smart-manager-for-wp-e-commerce') + '</strong>')
+            : _x('Your bulk edit is ready to be applied. Click "Apply Changes" to run it immediately, or toggle the schedule option below to run it at a specific date and time.', 'modal description', 'smart-manager-for-wp-e-commerce');
+
+        // Schedule toggle with inline styles for compatibility - only show for bulk edit
+        let scheduleToggle = showScheduleOption ? `
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-top: 1rem; margin-bottom: 0.5rem;">
+                <label style="position: relative; display: inline-flex; align-items: center; cursor: pointer;">
+                    <input type="checkbox" id="sm_schedule_toggle" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;">
+                    <div id="sm_schedule_toggle_track" style="width: 2.25rem; height: 1.25rem; background-color: #e5e7eb; border-radius: 9999px; position: relative; transition: background-color 0.2s ease;">
+                        <div id="sm_schedule_toggle_knob" style="position: absolute; top: 2px; left: 2px; width: 1rem; height: 1rem; background-color: white; border-radius: 9999px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: transform 0.2s ease;"></div>
+                    </div>
+                </label>
+                <span style="font-size: 0.875rem; font-weight: 500; color: #374151;">${_x('Schedule this bulk edit', 'schedule toggle label', 'smart-manager-for-wp-e-commerce')}</span>
+            </div>
+        ` : '';
+
+        let scheduledForContent = showScheduleOption ? `
+            <div id="sm_schedule_fields" style="display: none; margin-top: 0.75rem; padding: 0.75rem; background-color: #f9fafb; border-radius: 0.5rem; border: 1px solid #e5e7eb;">
+                <div style="display: flex; align-items: center; margin-bottom: 0.75rem;">
+                    <label style="font-size: 0.875rem; font-weight: 500; color: #374151; margin-right: 0.75rem; white-space: nowrap;">${_x('Schedule For', 'modal title', 'smart-manager-for-wp-e-commerce')}</label>
+                    <input type="text" id="scheduled_for" placeholder="YYYY-MM-DD HH:MM:SS" style="flex: 1; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.85rem;"/>
+                </div>
+                ${window[pluginKey].scheduledActionAdminUrl
+                    ? `<div style="margin-bottom: 0.5rem; font-size: 0.875rem; color: #4b5563;">
+                        ${_x(`Check all scheduled actions <a target='_blank' href='${window[pluginKey].scheduledActionAdminUrl}' style='color: #6366f1; text-decoration: none;'>here</a>.`, 'scheduled action list', 'smart-manager-for-wp-e-commerce')}
+                    </div>`
+                    : ''}
+                <div style="font-size: 0.75rem; color: #6b7280; font-style: italic;">
+                    <strong class="text-sm-base-foreground">${_x('Note: ', 'modal description', 'smart-manager-for-wp-e-commerce')}</strong>${_x('Scheduled actions follow timezone of your site. Avoid overlaps to prevent delays.', 'modal description', 'smart-manager-for-wp-e-commerce')}
+                </div>
+            </div>
+        ` : '';
+
+        if (0 === window[pluginKey].showTasksTitleModal) {
+            window[pluginKey].updatedTitle = title
+            if ("function" === typeof (window[pluginKey].processCallback)) {
+                ("undefined" !== typeof (window[pluginKey].processCallbackParams) && Object.keys(window[pluginKey].processCallbackParams).length > 0) ? window[pluginKey].processCallback(window[pluginKey].processCallbackParams) : window[pluginKey].processCallback()
+            }
+            return;
+        }
+
+        // Build unified content with schedule toggle
+        let titleFieldSection = isUndoEnabled 
+            ? `<div style="display: flex; align-items: center; margin-bottom: 0.75rem;">
+                    <label for="sm_add_title" style="font-size: 0.875rem; font-weight: 500; color: #374151; margin-right: 0.75rem;">${_x('Title', 'modal title', 'smart-manager-for-wp-e-commerce')}</label>
+                    ${taskContent}
+                </div>`
+            : taskContent;
+
+        content = `
+            <div id="show_modal_content">
+                <div style="padding-bottom: 1em; color: #6b7280!important;">${taskDesc}</div>
+                ${titleFieldSection}
+                ${scheduleToggle}
+                ${scheduledForContent}
+            </div>
+        `;
+
+        // CTA button text based on undo feature
+        let ctaTitle = isUndoEnabled 
+            ? _x('Ok', 'button', 'smart-manager-for-wp-e-commerce')
+            : _x('Apply Changes', 'button', 'smart-manager-for-wp-e-commerce');
+        
+        let closeCTATitle = isUndoEnabled
+            ? _x('Cancel', 'button', 'smart-manager-for-wp-e-commerce')
+            : _x('Cancel', 'button', 'smart-manager-for-wp-e-commerce');
+
+        window[pluginKey].modal = {
+            title: modalTitle,
+            content: content,
+            autoHide: false,
+            cta: {
+                title: ctaTitle,
+                closeModalOnClick: params.hasOwnProperty('btnParams') ? ((params.btnParams.hasOwnProperty('hideOnYes')) ? params.btnParams.hideOnYes : true) : true,
+                callback: function () {
+                    // Check if scheduling is enabled via toggle
+                    let isScheduleEnabled = jQuery('#sm_schedule_toggle').is(':checked');
+                    window[pluginKey].isScheduled = isScheduleEnabled;
+
+                    if (isScheduleEnabled) {
+                        if ("undefined" !== typeof (window[pluginKey].scheduledForVal) && "function" === typeof (window[pluginKey].scheduledForVal)) {
+                            window[pluginKey].scheduledForVal();
+                        }
+                        if (!(window[pluginKey].scheduledFor)) {
+                            window[pluginKey].notification = { message: _x('Please select your desired date & time for scheduling an action.', 'notification', 'smart-manager-for-wp-e-commerce') }
+                            window[pluginKey].showNotification()
+                            return;
+                        }
+                        if ("undefined" !== typeof (window[pluginKey].hideModal) && "function" === typeof (window[pluginKey].hideModal)) {
+                            window[pluginKey].hideModal();
+                        }
+                    }
+                    let updatedTitle = jQuery('#sm_add_title').val();
+                    if (updatedTitle) {
+                        window[pluginKey].updatedTitle = updatedTitle;
+                        if ("function" === typeof (window[pluginKey].processCallback)) {
+                            ("undefined" !== typeof (window[pluginKey].processCallbackParams) && Object.keys(window[pluginKey].processCallbackParams).length > 0) ? window[pluginKey].processCallback(window[pluginKey].processCallbackParams) : window[pluginKey].processCallback()
+                        }
+                    }
+                }
+            },
+            closeCTA: { title: closeCTATitle },
+            onCreate: function () {
+                // Initialize datepicker
+                if ("undefined" !== typeof (window[pluginKey].scheduleDatePicker) && "function" === typeof (window[pluginKey].scheduleDatePicker)) {
+                    window[pluginKey].scheduleDatePicker('#scheduled_for');
+                }
+                // Handle schedule toggle click
+                jQuery('#sm_schedule_toggle_track').on('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    let $track = jQuery(this);
+                    let $knob = jQuery('#sm_schedule_toggle_knob');
+                    let $checkbox = jQuery('#sm_schedule_toggle');
+                    let isChecked = !$checkbox.is(':checked');
+                    
+                    $checkbox.prop('checked', isChecked);
+                    $track.css('background-color', isChecked ? '#6366f1' : '#e5e7eb');
+                    $knob.css('transform', isChecked ? 'translateX(1rem)' : 'translateX(0)');
+                    jQuery('#sm_schedule_fields')[isChecked ? 'slideDown' : 'slideUp'](200);
+                    
+                    if (!isChecked) {
+                        window[pluginKey].scheduledFor = '';
+                    }
+                });
+            }
+        }
+        window[pluginKey].showModal()
     }
     window.SaCommonManager = SaCommonManager;
 })(window);

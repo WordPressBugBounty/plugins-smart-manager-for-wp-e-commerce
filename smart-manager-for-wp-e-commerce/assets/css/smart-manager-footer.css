@@ -68,3 +68,6 @@ body.smart-manager-dashboard #wpfooter #footer-upgrade {
 	flex-shrink: 0;
 	margin-left: auto;
 }
+body.smart-manager-dashboard #wpfooter .sm-footer-version-text{
+	margin-left: 9rem;
+}

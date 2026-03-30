@@ -136,8 +136,8 @@ if ( ! class_exists( 'Smart_Manager_Settings' ) ) {
             if( empty( $default_settings ) || ( ! empty( $default_settings ) && empty( $default_settings['general'] ) ) || empty( $settings['general'] ) ){
                 return false;
             }
+            do_action( 'sa_sm_before_settings_update', $settings );
             return update_option( self::$db_option_key, self::merge( $default_settings, $settings ), 'no' );
-            
         }
 	}
 }
