@@ -750,6 +750,16 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				$store_model_transient = false;
 				update_option( '_sm_update_8840_' . $this->dashboard_key, 1, 'no' );
 			}
+			if ( 'user' === $this->dashboard_key && false === get_option( '_sm_update_8860_' . $this->dashboard_key ) ) {
+				delete_transient( 'sa_sm_' . $this->dashboard_key );
+				$store_model_transient = false;
+				update_option( '_sm_update_8860_' . $this->dashboard_key, 1, 'no' );
+			}
+			if ( false === get_option( '_sm_update_8860_' . $this->dashboard_key . '_tasks' ) ) {
+				delete_transient( 'sa_sm_' . $this->dashboard_key . '_tasks' );
+				$store_model_transient = false;
+				update_option( '_sm_update_8860_' . $this->dashboard_key . '_tasks', 1, 'no' );
+			}
 			$store_model_and_old_model_transient['store_model_transient'] = $store_model_transient;
 			$store_model_and_old_model_transient['old_col_model'] = $old_col_model;
 			return $store_model_and_old_model_transient;
@@ -1636,7 +1646,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 							//Code for handling image fields
         					if( in_array( $meta_key, $image_postmeta_cols ) ) {
 								if( ! empty( $meta_value ) ){
-									$attachment = wp_get_attachment_image_url( $meta_value, 'thumbnail' );
+									$attachment = wp_get_attachment_image_url( $meta_value, ( ( ! empty( $this->req_params['cmd'] ) ) && ( 'get_export_csv' === sanitize_key( wp_unslash( $this->req_params['cmd'] ) ) ) ) ? 'full' : 'thumbnail' );
 									$meta_value = ( ! empty( $attachment ) ) ? $attachment : '';
 								}
 							}
@@ -1649,7 +1659,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 										$meta_value = array();
 										$img_url = '';
 										foreach( $image_ids as $image_id ) {
-											$img_url = wp_get_attachment_image_url( $image_id, 'thumbnail' );
+											$img_url = wp_get_attachment_image_url( $image_id, ( ( ! empty( $this->req_params['cmd'] ) ) && ( 'get_export_csv' === sanitize_key( wp_unslash( $this->req_params['cmd'] ) ) ) ) ? 'full' : 'thumbnail' );
 											$meta_value[] = ( !empty( $this->req_params['cmd'] ) && $this->req_params['cmd'] == 'get_export_csv' ) ? $img_url : array( 'id' => $image_id, 'val' => $img_url );
 										}
 									}

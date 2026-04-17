@@ -55,6 +55,7 @@ if ( ! class_exists( 'Smart_Manager_Controller' ) ) {
 			);
 			parent::__construct( $this->sa_manager_common_params );
 
+			add_filter( 'sa_sm_check_dashboard_access', array( $this, 'check_dashboard_access' ), 10, 2 );
 			add_filter( 'sa_sm_manager_handler', array( $this, 'req_handler' ), 10, 2 );
 			add_action( 'sa_sm_manager_func_handler', array( $this, 'func_handler' ) );
 			$this->plugin_path  = untrailingslashit( plugin_dir_path( __FILE__ ) );
@@ -79,6 +80,37 @@ if ( ! class_exists( 'Smart_Manager_Controller' ) ) {
 		 */
 		public function is_common_module_available( $is_common_module_available = false, $current_dashboard = 'posts' ) {
 			return ( 'product' === $current_dashboard ) ? true :false;
+		}
+
+		/**
+		 * Check if the current user has access to the specified dashboard.
+		 *
+		 * @param array  $access_check   Array with 'has_access' (bool) and 'message' (string).
+		 * @param string $dashboard_key  The dashboard key to check access for.
+		 * @return array Modified access check array.
+		 */
+		public function check_dashboard_access( $access_check = array(), $dashboard_key = '' ) {
+			$current_user_role = ( class_exists( 'Smart_Manager' ) && is_callable( array( 'Smart_Manager', 'get_current_user_role' ) ) ) ? Smart_Manager::get_current_user_role() : '';
+			if ( empty( $current_user_role ) ) {
+				return array(
+					'has_access' => false,
+					'message'    => _x( 'Access denied. Your user role could not be determined.', 'Security error message', 'smart-manager-for-wp-e-commerce' )
+				);
+			}
+			// Administrators have full access
+			if ( 'administrator' === $current_user_role ) {
+				return array( 'has_access' => true, 'message' => '' );
+			}
+			// Check access privilege for non-admin users
+			if ( ( defined('SMPRO') && true === SMPRO ) && class_exists( 'Smart_Manager_Pro_Access_Privilege' ) && is_callable( array( 'Smart_Manager_Pro_Access_Privilege', 'is_dashboard_accessible' ) ) ) {
+				if ( ! Smart_Manager_Pro_Access_Privilege::is_dashboard_accessible( $dashboard_key ) ) {
+					return array(
+						'has_access' => false,
+						'message'    => _x( 'You do not have access to this dashboard.', 'Security error message', 'smart-manager-for-wp-e-commerce' )
+					);
+				}
+			}
+			return array( 'has_access' => true, 'message' => '' );
 		}
 
 		/**

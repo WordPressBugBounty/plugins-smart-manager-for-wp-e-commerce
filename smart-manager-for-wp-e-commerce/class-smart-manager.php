@@ -1826,7 +1826,10 @@ class Smart_Manager {
 			}
 			if( ! $is_pricing_page ) {
 		?>
-				<div id="sm_editor_grid" class="sm-custom-scrollbar" ></div>
+				<div id="sm-loading-messages-root"></div>
+				<div id="sm_grid_wrapper" class="relative">
+					<div id="sm_editor_grid" class="sm-custom-scrollbar" ></div>
+				</div>
 				<div id="sm_pagging_bar"></div>
 				<div id="sm_inline_dialog"></div>
 				<div class="sa-loader-container">
@@ -2395,7 +2398,7 @@ class Smart_Manager {
 		<?php
 		
 		printf(
-			'<div class="sm_feature_notice notice notice-%s is-dismissible" id="sm_%s_notice" style="display:block !important;"><p> %s </p></div>',
+			'<div class="ml-4 sm_feature_notice notice notice-%s is-dismissible" id="sm_%s_notice" style="display:block !important;"><p> %s </p></div>',
 			'success',
 			esc_attr( $notice_key ),
 			$description

@@ -4,7 +4,7 @@
  *
  * @package common-core/
  * @since       8.64.0
- * @version     8.67.0
+ * @version     8.86.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -142,6 +142,17 @@ if ( ! class_exists( 'SA_Manager_Controller' ) ) {
 			}
 			check_ajax_referer( 'sa-' . $this->plugin_sku . '-manager-security', 'security' );
 			$this->dashboard_key            = ( ! empty( $_REQUEST['active_module'] ) ) ? sanitize_text_field( wp_unslash( $_REQUEST['active_module'] ) ) : '';
+			
+			if ( ( 'get_background_progress' !== sanitize_key( $_REQUEST['cmd'] ) ) ) {
+				// Security: Verify the dashboard key is accessible for the current user
+				$access_check = apply_filters( 'sa_' . $this->plugin_sku . '_check_dashboard_access', array( 'has_access' => true, 'message' => '' ), $this->dashboard_key );
+				if ( empty( $access_check ) || ! is_array( $access_check ) || empty( $access_check['has_access'] ) ) {
+					wp_send_json_error( array( 
+						'message' => ! empty( $access_check['message'] ) ? $access_check['message'] : _x( 'You do not have access to this dashboard.', 'Security error message', 'smart-manager-for-wp-e-commerce' )
+					), 403 );
+				}
+			}
+			
 			$is_common_module_available     = ( ! empty( $_REQUEST['cmd'] ) && ( 'get_background_progress' !== $_REQUEST['cmd'] ) ) ? apply_filters( 'sa_common_module_available', false, $this->dashboard_key ) : false;
 			$this->sa_manager_common_params = ( ! empty( $this->dashboard_key ) ) ? array_merge( $this->sa_manager_common_params, array( 'dashboard_key' => $this->dashboard_key ) ) : $this->sa_manager_common_params;
 			$this->folder_flag              = ( ! empty( $this->folder_flag ) ) ? $this->folder_flag : '';

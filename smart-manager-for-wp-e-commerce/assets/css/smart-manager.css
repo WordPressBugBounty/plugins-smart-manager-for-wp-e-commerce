@@ -610,7 +610,6 @@ input[type=checkbox]:checked{
 
 .handsontable th input[type=checkbox]:checked, #sm_products_show_variations_span input[type=checkbox]:checked, #sm_show_tasks_container input[type=checkbox]:checked, .sm-settings-table input[type=checkbox]:checked{
 	background-color: var(--color-sm-base-primary);
-	opacity: 0.8;
 }
 
 .handsontable td, .handsontable th {
@@ -1232,7 +1231,7 @@ input.sm-title-input {
 .dashboard-names .select2-selection__choice{
 	margin-bottom: 0rem;
 }
-#sm_editor_grid .handsontable tbody tr td.sm-grid-dirty-cell {
+#sm_editor_grid .handsontable tbody tr td.sm-grid-dirty-cell, #sm_editor_grid .handsontable td.htInvalid {
 	background-color: #FFFBEB !important
 }
 #sa_manager_main .sm_advanced_search_select2_dropdown {

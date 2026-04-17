@@ -953,7 +953,7 @@ if ( ! class_exists( 'Smart_Manager_Product' ) ) {
 						$variation_title = ( ! empty( $data['posts_post_title'] ) && empty( $variation_title ) ) ? $data['posts_post_title'] : ( $parent_title .''. substr( $variation_title, 0, strlen( $variation_title ) - 2 ) );
 
 						if( ! empty( $variation_title ) ){
-							$data_model['items'][$key]['posts_post_title'] = ( ( ! empty( $this->req_params['cmd'] ) && 'get_export_csv' == $this->req_params['cmd'] ) || true === $this->prod_sort ) ? $variation_title : '<div style="margin-left: 2px;color: #469BDD;" class="dashicons dashicons-minus"></div>'.' <div>'.$variation_title.'</div>';
+							$data_model['items'][$key]['posts_post_title'] = ( ( ! empty( $this->req_params['cmd'] ) && 'get_export_csv' == $this->req_params['cmd'] ) || true === $this->prod_sort ) ? $variation_title : '<div style="margin-left: 2px;color: #737373;" class="dashicons dashicons-minus"></div>'.' <div>'.$variation_title.'</div>';
 						}
 
 

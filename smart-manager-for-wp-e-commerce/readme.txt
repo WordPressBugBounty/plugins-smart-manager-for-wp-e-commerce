@@ -7,7 +7,7 @@ Tags: woocommerce bulk edit, woocommerce inventory management, woocommerce order
 Requires at least: 5.0
 Tested up to: 6.9
 Requires PHP: 7.0
-Stable tag: 8.85.0
+Stable tag: 8.86.0
 License: GPLv2
 
 WooCommerce Advanced Bulk Edit products, orders, & posts in an Excel-like sheet editor. Get advanced WooCommerce stock, pricing, & order management.
@@ -312,6 +312,18 @@ Please report security bugs found in the source code of the Smart Manager plugin
 2. Bulk edit / Batch update (only in Pro version)
 
 == Changelog ==
+
+= 8.86.0 (17.04.2026) =
+* New: WooCommerce 10.7.0 compatible
+* New: Advanced Search support for 'Orders Total' field on Users dashboard (Pro)
+* Fix: Privilege escalation vulnerability allowing users to gain Administrator access [Thanks to Patchstack team]
+* Fix: WooCommerce Product thumbnail image URL exporting (150x150) size instead of full-size image in CSV export
+* Fix: Undo not working when updating 'Sale Price' and 'Regular Price' in some cases (Pro)
+* Fix: 'Add Row' not working on WooCommerce Products dashboard when 'Sale Price' fields are visible in the grid (Pro)
+* Update: Save Inline Edit prompt reintroduced with updated UI
+* Update: UI/UX improvements in the grid
+* Update: UI improvements for 'Changes Made' column values in Edit History dashboard (Pro)
+* Update: POT file
 
 = 8.85.0 (30.03.2026) =
 * New: WordPress 6.9.4 compatible
@@ -788,6 +800,9 @@ Please report security bugs found in the source code of the Smart Manager plugin
 [See changelog for all versions](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 8.86.0 =
+WooCommerce 10.7.0 compatible, Advanced Search support for 'Orders Total' field on Users dashboard (Pro), Fixes related to Privilege escalation vulnerability allowing users to gain Administrator access [Thanks to Patchstack team], WooCommerce Product thumbnail image URL exporting (150x150) size instead of full-size image in CSV export, Undo not working when updating 'Sale Price' and 'Regular Price' in some cases (Pro), 'Add Row' not working on WooCommerce Products dashboard when 'Sale Price' fields are visible in the grid (Pro), Updates related to Save Inline Edit prompt reintroduced with updated UI, UI/UX improvements in the grid, UI improvements for 'Changes Made' column values in Edit History dashboard (Pro). Recommended upgrade.
 
 = 8.85.0 =
 WordPress 6.9.4 compatible, WooCommerce 10.6.1 compatible, Setting to enable/disable logging of WooCommerce Product changes not made from Smart Manager dashboard (Pro), Setting to auto-delete Edit History after a specified number of days (Pro), Fixes related to Products missing from the grid on pagination change when 'Show Variations' is enabled, Advanced Search not working for 'WC Last Active' column on Users dashboard (Pro), Auto-delete Edit History process not working in some cases (Pro), Updates related to UI/UX improvements for background process progress modal and admin notices (Pro). Recommended upgrade.

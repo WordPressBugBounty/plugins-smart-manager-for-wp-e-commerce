@@ -16,6 +16,24 @@
             this.currentColModel = '';
             this.hideDialog = '';
             this.bulkEditRoute = "bulkEdit";
+            // Loading messages configuration
+            this.dashboardLoadingMessages = [
+                _x("Brewing something good for you ☕", "loading message", "smart-manager-for-wp-e-commerce"),
+                _x("Hang tight, we are getting things ready ⏳", "loading message", "smart-manager-for-wp-e-commerce"),
+                _x("Putting everything in its right place 🧩", "loading message", "smart-manager-for-wp-e-commerce"),
+                _x("Just a moment, making things neat ⚙️", "loading message", "smart-manager-for-wp-e-commerce"),
+                _x("Good things are coming together ✨", "loading message", "smart-manager-for-wp-e-commerce"),
+                _x("Almost there, adding the final touches 🎯", "loading message", "smart-manager-for-wp-e-commerce"),
+                _x("Sit tight, magic in progress 🪄", "loading message", "smart-manager-for-wp-e-commerce"),
+                _x("Getting everything lined up just right 📐", "loading message", "smart-manager-for-wp-e-commerce"),
+                _x("Warming things up behind the scenes 🔥", "loading message", "smart-manager-for-wp-e-commerce"),
+                _x("Making things look effortless 🙂", "loading message", "smart-manager-for-wp-e-commerce"),
+                _x("All set in a moment, promise 🤝", "loading message", "smart-manager-for-wp-e-commerce"),
+                _x("Keeping things sharp and ready ⚡", "loading message", "smart-manager-for-wp-e-commerce"),
+                _x("Bringing it all together…", "loading message", "smart-manager-for-wp-e-commerce"),
+            ];
+            // Loading message state
+            this.loadingMessageTimer = null;
             // defining operators for diff datatype for advanced search
             let intOperators = {
                 'eq': _x('Equal to ==', "select options - operator for 'numeric' data type fields", 'smart-manager-for-wp-e-commerce'),
@@ -72,7 +90,14 @@
 
     SaCommonManager.prototype.getDashboardModel = function (sendRequest = true) {
         try{
+            var self = this;
             this.currentDashboardModel = '';
+            // Hide grid and start loading message timer (show after 3 seconds)
+            jQuery('#sm_editor_grid').css('visibility', 'hidden');
+            self.loadingMessageTimer = setTimeout(function() {
+                self.showDashboardLoadingMessage();
+            }, 3000);
+
            // Ajax request params to get the dashboard model.
             this.ajaxParams = {
                 data_type: 'json',
@@ -94,6 +119,9 @@
 
     SaCommonManager.prototype.setDashboardModel = function (response) {
         try{
+            // Hide loading messages and restore grid visibility
+            SaCommonManager.prototype.hideDashboardLoadingMessage.call(window[pluginKey] || this);
+
             if (typeof response == 'undefined' || response == '') {
                 return;
             }
@@ -304,8 +332,21 @@
                     }
                     return ((typeof (callbackParams) != 'undefined') ? callback(callbackParams, resp) : callback(resp));
                 },
-                error: function (error) {
-                    console.log('AJAX failed::', error);
+                error: function (jqXHR, textStatus, errorThrown) {
+                    SaCommonManager.prototype.showLoader(false);
+                    console.log('AJAX failed::', jqXHR, textStatus, errorThrown);
+                    let message = jqXHR.responseJSON?.data?.message;
+                    if (!message && jqXHR.responseText) {
+                        try {
+                            message = JSON.parse(jqXHR.responseText)?.data?.message;
+                        } catch (e) {}
+                    }
+                    let errorResponse = {
+                        error: true,
+                        status: jqXHR.status,
+                        message: message || errorThrown || textStatus
+                    };
+                    return ((typeof (callbackParams) != 'undefined') ? callback(callbackParams, errorResponse) : callback(errorResponse));
                 }
             });
         }catch(e){
@@ -640,5 +681,63 @@
         }
         window[pluginKey].showModal()
     }
+
+    // Get random message (different from current)
+    SaCommonManager.prototype.getRandomLoadingMessage = function() {
+        var self = this;
+        var newIndex;
+        do {
+            newIndex = Math.floor(Math.random() * self.dashboardLoadingMessages.length);
+        } while (newIndex === (window[pluginKey]?.dashboardLoadingOverlay?.currentMessageIndex ?? -1) && self.dashboardLoadingMessages.length > 1);
+        return { index: newIndex, message: self.dashboardLoadingMessages[newIndex] };
+    };
+
+    // Show loading message overlay (renders HTML directly)
+    SaCommonManager.prototype.showDashboardLoadingMessage = function() {
+        var self = this;
+        var randomMsg = self.getRandomLoadingMessage();
+        
+        // Set state on window[pluginKey]
+        window[pluginKey].dashboardLoadingOverlay = {
+            isVisible: true,
+            currentMessageIndex: randomMsg.index,
+            currentMessage: randomMsg.message
+        };
+        
+        // Render overlay HTML directly
+        var $container = jQuery('#sm-loading-messages-root');
+        if ($container.length) {
+            $container.html(
+                '<div class="fixed inset-0 flex items-center justify-center transition-opacity duration-300 bottom-[5%] left-[6%]" style="z-index: 99; pointer-events: none;">' +
+                    '<div class="p-8 max-w-lg mx-4 text-center transform transition-all duration-500 animate-fadeIn" style="pointer-events: auto;">' +
+                        '<p class="text-lg font-medium text-gray-700">' + randomMsg.message + '</p>' +
+                    '</div>' +
+                '</div>'
+            );
+        }
+    };
+
+    // Hide loading message overlay
+    SaCommonManager.prototype.hideDashboardLoadingMessage = function() {
+        var self = this;
+        // Clear timers
+        if (self.loadingMessageTimer) {
+            clearTimeout(self.loadingMessageTimer);
+            self.loadingMessageTimer = null;
+        }
+        // Clear state
+        window[pluginKey].dashboardLoadingOverlay = {
+            isVisible: false,
+            currentMessageIndex: -1,
+            currentMessage: null
+        };
+        
+        // Clear overlay HTML
+        jQuery('#sm-loading-messages-root').empty();
+        
+        // Restore grid visibility and remove blur
+        jQuery('#sm_editor_grid').css('visibility', 'visible');
+    };
+
     window.SaCommonManager = SaCommonManager;
 })(window);

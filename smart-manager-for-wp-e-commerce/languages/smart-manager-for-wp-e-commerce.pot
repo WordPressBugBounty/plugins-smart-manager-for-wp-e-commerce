@@ -2,14 +2,14 @@
 # This file is distributed under the GNU General Public License v2.0.
 msgid ""
 msgstr ""
-"Project-Id-Version: Smart Manager - Advanced WooCommerce Bulk Edit & Inventory Management 8.85.0\n"
+"Project-Id-Version: Smart Manager - Advanced WooCommerce Bulk Edit & Inventory Management 8.86.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/smart-manager-for-wp-e-commerce\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-03-30T12:54:59+00:00\n"
+"POT-Creation-Date: 2026-04-17T10:16:07+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.10.0\n"
 "X-Domain: smart-manager-for-wp-e-commerce\n"
@@ -84,7 +84,7 @@ msgstr ""
 
 #. translators: %s: pricing page link
 #: class-smart-manager.php:1055
-#: class-smart-manager.php:2529
+#: class-smart-manager.php:2532
 msgid "Click here"
 msgstr ""
 
@@ -109,75 +109,75 @@ msgstr ""
 msgid "Click to upgrade."
 msgstr ""
 
-#: class-smart-manager.php:1921
+#: class-smart-manager.php:1924
 msgctxt "footer button"
 msgid "Visit StoreApps"
 msgstr ""
 
-#: class-smart-manager.php:1930
+#: class-smart-manager.php:1933
 msgctxt "footer button"
 msgid "Request a Feature"
 msgstr ""
 
-#: class-smart-manager.php:1939
+#: class-smart-manager.php:1942
 msgctxt "footer button"
 msgid "Rate Us"
 msgstr ""
 
-#: class-smart-manager.php:1955
+#: class-smart-manager.php:1958
 msgid "A required Smart Manager file is missing. Can't continue. "
 msgstr ""
 
-#: class-smart-manager.php:1970
+#: class-smart-manager.php:1973
 msgid "Error:"
 msgstr ""
 
-#: class-smart-manager.php:2028
+#: class-smart-manager.php:2031
 msgid "Auto-updates are not available for this plugin."
 msgstr ""
 
-#: class-smart-manager.php:2086
-#: class-smart-manager.php:2095
+#: class-smart-manager.php:2089
+#: class-smart-manager.php:2098
 msgctxt "WooCommerce post type label"
 msgid "WooCommerce - "
 msgstr ""
 
-#: class-smart-manager.php:2121
+#: class-smart-manager.php:2124
 msgctxt "go pro link title"
 msgid "Go Pro"
 msgstr ""
 
-#: class-smart-manager.php:2121
+#: class-smart-manager.php:2124
 msgctxt "go pro link"
 msgid "Go Pro"
 msgstr ""
 
 #. translators: %1\$: 5-star link %2s: 5-star link
-#: class-smart-manager.php:2126
+#: class-smart-manager.php:2129
 msgid "Boost us with %1$s&#11088;&#11088;&#11088;&#11088;&#11088; &#128640;%2$s"
 msgstr ""
 
-#: class-smart-manager.php:2127
+#: class-smart-manager.php:2130
 msgctxt "5-star link title"
 msgid "5-star review"
 msgstr ""
 
 #. translators: %1$s: user name, %2$s: saved man-hours
-#: class-smart-manager.php:2293
+#: class-smart-manager.php:2296
 msgid "Hey %1$s, you’ve just saved <strong>%2$s productive hours</strong> with Smart Manager! 🎉"
 msgstr ""
 
 #. translators: %1$s: discount percentage, %2$s: additional man-hours
-#: class-smart-manager.php:2301
+#: class-smart-manager.php:2304
 msgid "Upgrade to Smart Manager Pro to save <strong>additional %1$s hours</strong> (minimum) and unlock all features. %2$s"
 msgstr ""
 
-#: class-smart-manager.php:2303
+#: class-smart-manager.php:2306
 msgid "Get it at"
 msgstr ""
 
 #. translators: %s: clickable link text
-#: class-smart-manager.php:2528
+#: class-smart-manager.php:2531
 msgid "Smart Manager has detected stock logs from an earlier installation of <a href=\"https://wordpress.org/plugins/woocommerce-stock-manager/\" target=\"_blank\">Stock Manager for WooCommerce</a> plugin. %s to sync and import them into Smart Manager."
 msgstr ""
 
@@ -298,7 +298,7 @@ msgstr ""
 
 #: classes/class-smart-manager-admin-welcome.php:350
 #: classes/class-smart-manager-admin-welcome.php:372
-#: classes/class-smart-manager-base.php:2228
+#: classes/class-smart-manager-base.php:2238
 msgid "Pro"
 msgstr ""
 
@@ -425,52 +425,63 @@ msgstr ""
 msgid "Slug"
 msgstr ""
 
-#: classes/class-smart-manager-base.php:840
-#: classes/class-smart-manager-base.php:841
-#: classes/class-smart-manager-base.php:842
+#: classes/class-smart-manager-base.php:850
+#: classes/class-smart-manager-base.php:851
+#: classes/class-smart-manager-base.php:852
 #: classes/class-smart-manager-shop-order.php:1786
 msgid "Trash"
 msgstr ""
 
 #. translators: %1$s: time saved in minutes/hours, %2$s: Pro upgrade link, %3$s: additional savings possible
-#: classes/class-smart-manager-base.php:2216
+#: classes/class-smart-manager-base.php:2226
 msgid "You saved <strong>%1$s</strong>! Upgrade to %2$s to save more <strong>%3$s</strong> and unlock undo."
 msgstr ""
 
 #. translators: %1$d: number of updated record %2$s: record update message
-#: classes/class-smart-manager-base.php:2239
+#: classes/class-smart-manager-base.php:2249
 msgid "%1$d record%2$s updated successfully!"
 msgstr ""
 
 #. translators: %1$d: number of updated record %2$s: record update message
-#: classes/class-smart-manager-base.php:2246
+#: classes/class-smart-manager-base.php:2256
 msgid "%1$d record%2$s updated successfully! %3$s"
 msgstr ""
 
 #. translators: %1$d: number of updated record %2$s: record update message
-#: classes/class-smart-manager-base.php:2293
+#: classes/class-smart-manager-base.php:2303
 msgid "%1$d record%2$s deleted successfully!"
 msgstr ""
 
 #. translators: %1$s: exports schedule success message
-#: classes/class-smart-manager-base.php:3362
+#: classes/class-smart-manager-base.php:3372
 msgctxt "success notification"
 msgid "Export scheduled successfully. Check all your scheduled export actions <a target='_blank' href='%s'>here</a>."
 msgstr ""
 
-#: classes/class-smart-manager-base.php:3412
+#: classes/class-smart-manager-base.php:3422
 msgctxt "export data model"
 msgid "Export CSV: no data found "
 msgstr ""
 
-#: classes/class-smart-manager-base.php:3482
+#: classes/class-smart-manager-base.php:3492
 msgctxt "export file data"
 msgid "Export CSV: no file data found"
 msgstr ""
 
-#: classes/class-smart-manager-base.php:3787
+#: classes/class-smart-manager-base.php:3797
 msgctxt "background update process name"
 msgid "Stock Log Synchronization"
+msgstr ""
+
+#: classes/class-smart-manager-controller.php:97
+msgctxt "Security error message"
+msgid "Access denied. Your user role could not be determined."
+msgstr ""
+
+#: classes/class-smart-manager-controller.php:109
+#: common-core/classes/class-sa-manager-controller.php:151
+msgctxt "Security error message"
+msgid "You do not have access to this dashboard."
 msgstr ""
 
 #: classes/class-smart-manager-product-stock-log.php:115
@@ -880,13 +891,13 @@ msgid "[%1$1s] %2$2s process completed!"
 msgstr ""
 
 #. translators: 1: Method name, 2: Class name.
-#: common-core/classes/class-sa-manager-controller.php:230
+#: common-core/classes/class-sa-manager-controller.php:241
 msgctxt "Ajax request handler background progress"
 msgid "Method %1$s is not callable in class %2$s"
 msgstr ""
 
 #. Translators: %1$s is the method name, %2$s is the class name.
-#: common-core/classes/class-sa-manager-controller.php:255
+#: common-core/classes/class-sa-manager-controller.php:266
 msgctxt "Error message for non-callable method in Ajax request handler"
 msgid "Method %1$s is not callable in class %2$s."
 msgstr ""
@@ -1611,71 +1622,121 @@ msgctxt "column name"
 msgid "Record"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-task.php:593
+#: pro/classes/class-smart-manager-pro-task.php:596
 msgctxt "column name"
 msgid "Changes Made"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:109
+#: pro/classes/class-smart-manager-pro-user.php:111
 msgctxt "AFWC Affiliate Tags field name"
 msgid "AFWC Affiliate Tags"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:226
+#: pro/classes/class-smart-manager-pro-user.php:228
 msgid "Nickname"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:405
+#: pro/classes/class-smart-manager-pro-user.php:407
 msgctxt "AFWC Is Affiliate field name"
 msgid "AFWC Is Affiliate"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:406
+#: pro/classes/class-smart-manager-pro-user.php:408
 msgctxt "AFWC Referral URL ID field name"
 msgid "AFWC Referral URL ID"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:407
+#: pro/classes/class-smart-manager-pro-user.php:409
 msgctxt "AFWC PayPal Email field name"
 msgid "AFWC PayPal Email"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:408
+#: pro/classes/class-smart-manager-pro-user.php:410
 msgctxt "AFWC Parent Chain field name"
 msgid "AFWC Parent Chain"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:409
+#: pro/classes/class-smart-manager-pro-user.php:411
 msgctxt "AFWC Lifetime Customers field name"
 msgid "AFWC Lifetime Customers"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:410
+#: pro/classes/class-smart-manager-pro-user.php:412
 msgctxt "AFWC Affiliate Form Description field name"
 msgid "AFWC Affiliate Form Description"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:411
+#: pro/classes/class-smart-manager-pro-user.php:413
 msgctxt "AFWC Affiliate Form Contact field name"
 msgid "AFWC Affiliate Form Contact"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:412
+#: pro/classes/class-smart-manager-pro-user.php:414
 msgctxt "AFWC Affiliate Skype Handle field name"
 msgid "AFWC Affiliate Skype Handle"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:414
+#: pro/classes/class-smart-manager-pro-user.php:416
 msgctxt "AFWC Additional Form Fields field name"
 msgid "AFWC Additional Form Fields"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:1447
+#: pro/classes/class-smart-manager-pro-user.php:1482
 msgid "Email cannot be empty"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-user.php:1453
+#: pro/classes/class-smart-manager-pro-user.php:1488
 msgid "Email already exists. Please enter another email."
+msgstr ""
+
+#: pro/classes/class-smart-manager-pro-user.php:1731
+msgctxt "delete user process"
+msgid "Delete user failed: insufficient permissions"
+msgstr ""
+
+#: pro/classes/class-smart-manager-pro-user.php:1969
+msgctxt "Security error message"
+msgid "You do not have permission to edit users."
+msgstr ""
+
+#: pro/classes/class-smart-manager-pro-user.php:1986
+msgctxt "Security error message"
+msgid "You do not have permission to edit this user."
+msgstr ""
+
+#: pro/classes/class-smart-manager-pro-user.php:2004
+msgctxt "Security error message"
+msgid "You cannot modify an administrator account."
+msgstr ""
+
+#: pro/classes/class-smart-manager-pro-user.php:2025
+msgctxt "Security error message"
+msgid "You do not have permission to change user roles."
+msgstr ""
+
+#: pro/classes/class-smart-manager-pro-user.php:2032
+msgctxt "Security error message"
+msgid "Invalid role specified."
+msgstr ""
+
+#: pro/classes/class-smart-manager-pro-user.php:2039
+msgctxt "Security error message"
+msgid "You cannot assign the administrator role."
+msgstr ""
+
+#: pro/classes/class-smart-manager-pro-user.php:2052
+msgctxt "Security error message"
+msgid "You cannot promote yourself to a higher role."
+msgstr ""
+
+#: pro/classes/class-smart-manager-pro-user.php:2072
+msgctxt "Security error message"
+msgid "Modifying this field is not allowed."
+msgstr ""
+
+#: pro/classes/class-smart-manager-pro-user.php:2099
+msgctxt "batch update process"
+msgid "User batch update validation failed: "
 msgstr ""
 
 #: pro/classes/class-smart-manager-pro-views.php:119
@@ -1727,19 +1788,29 @@ msgctxt "process name"
 msgid "Bulk edit / Batch update"
 msgstr ""
 
-#: pro/common-pro/classes/class-sa-manager-pro-base.php:319
+#: pro/common-pro/classes/class-sa-manager-pro-base.php:291
+msgctxt "Security error message"
+msgid "You do not have permission to perform this action."
+msgstr ""
+
+#: pro/common-pro/classes/class-sa-manager-pro-base.php:293
+msgctxt "batch update process"
+msgid "Batch update permission denied: "
+msgstr ""
+
+#: pro/common-pro/classes/class-sa-manager-pro-base.php:334
 #: assets/js/admin.js:1
 msgctxt "process name"
 msgid "Bulk Edit"
 msgstr ""
 
 #. translators: %s process name
-#: pro/common-pro/classes/class-sa-manager-pro-base.php:793
+#: pro/common-pro/classes/class-sa-manager-pro-base.php:808
 msgctxt "update status"
 msgid "%s failed"
 msgstr ""
 
-#: pro/common-pro/classes/class-sa-manager-pro-base.php:1543
+#: pro/common-pro/classes/class-sa-manager-pro-base.php:1558
 msgctxt "bulk update process"
 msgid "Bulk update posts batch failed"
 msgstr ""
@@ -2350,13 +2421,13 @@ msgstr ""
 
 #. translators: %s: pricing page link
 #: assets/js/admin.js:1
-#: assets/js/smart-manager.js:2628
-#: assets/js/smart-manager.js:2854
-#: assets/js/smart-manager.js:2924
-#: assets/js/smart-manager.js:2936
+#: assets/js/smart-manager.js:2637
+#: assets/js/smart-manager.js:2863
+#: assets/js/smart-manager.js:2933
 #: assets/js/smart-manager.js:2945
-#: assets/js/smart-manager.js:2967
-#: assets/js/smart-manager.js:3399
+#: assets/js/smart-manager.js:2954
+#: assets/js/smart-manager.js:2976
+#: assets/js/smart-manager.js:3419
 #: src/views/SettingsDialog.js:78
 msgctxt "modal content"
 msgid "This feature is available only in the %s version"
@@ -2364,13 +2435,13 @@ msgstr ""
 
 #: assets/js/admin.js:1
 #: assets/js/smart-manager.js:303
-#: assets/js/smart-manager.js:2346
-#: assets/js/smart-manager.js:2628
-#: assets/js/smart-manager.js:2924
-#: assets/js/smart-manager.js:2936
+#: assets/js/smart-manager.js:2355
+#: assets/js/smart-manager.js:2637
+#: assets/js/smart-manager.js:2933
 #: assets/js/smart-manager.js:2945
-#: assets/js/smart-manager.js:2967
-#: assets/js/smart-manager.js:3399
+#: assets/js/smart-manager.js:2954
+#: assets/js/smart-manager.js:2976
+#: assets/js/smart-manager.js:3419
 #: src/views/SettingsDialog.js:79
 msgctxt "modal content"
 msgid "Pro"
@@ -2459,10 +2530,10 @@ msgid "Saved Searches available (Only in %s)"
 msgstr ""
 
 #: assets/js/admin.js:1
-#: assets/js/smart-manager.js:2716
-#: assets/js/smart-manager.js:2743
-#: assets/js/smart-manager.js:2798
-#: assets/js/smart-manager.js:4973
+#: assets/js/smart-manager.js:2725
+#: assets/js/smart-manager.js:2752
+#: assets/js/smart-manager.js:2807
+#: assets/js/smart-manager.js:5165
 #: src/views/AdvancedSearchDialog.js:124
 #: src/views/AdvancedSearchDialog.js:398
 msgctxt "notification"
@@ -2582,7 +2653,7 @@ msgstr ""
 
 #: assets/js/admin.js:1
 #: assets/js/smart-manager-product.js:507
-#: assets/js/smart-manager.js:4620
+#: assets/js/smart-manager.js:4752
 msgctxt "button"
 msgid "Save"
 msgstr ""
@@ -2594,10 +2665,10 @@ msgstr ""
 
 #: assets/js/admin.js:1
 #: assets/js/smart-manager-product.js:503
-#: assets/js/smart-manager.js:2693
-#: assets/js/smart-manager.js:4684
-#: common-core/assets/js/core-base.js:577
-#: common-core/assets/js/core-base.js:578
+#: assets/js/smart-manager.js:2702
+#: assets/js/smart-manager.js:4816
+#: common-core/assets/js/core-base.js:618
+#: common-core/assets/js/core-base.js:619
 #: pro/assets/js/smart-manager.js:2368
 #: pro/common-pro/assets/js/base.js:82
 msgctxt "button"
@@ -2612,10 +2683,10 @@ msgstr ""
 #: assets/js/admin.js:1
 #: assets/js/smart-manager-product.js:261
 #: assets/js/smart-manager.js:1213
-#: assets/js/smart-manager.js:2728
-#: assets/js/smart-manager.js:2806
-#: assets/js/smart-manager.js:2821
-#: assets/js/smart-manager.js:5044
+#: assets/js/smart-manager.js:2737
+#: assets/js/smart-manager.js:2815
+#: assets/js/smart-manager.js:2830
+#: assets/js/smart-manager.js:5236
 #: pro/assets/js/smart-manager.js:1155
 #: pro/assets/js/smart-manager.js:2287
 msgctxt "modal title"
@@ -2629,7 +2700,7 @@ msgid "Do you really want to"
 msgstr ""
 
 #: assets/js/admin.js:1
-#: assets/js/smart-manager.js:2729
+#: assets/js/smart-manager.js:2738
 #: pro/assets/js/smart-manager.js:1168
 #: pro/assets/js/smart-manager.js:2288
 msgctxt "modal content"
@@ -3888,10 +3959,10 @@ msgstr ""
 
 #: assets/js/admin.js:1
 #: assets/js/smart-manager-product.js:970
-#: assets/js/smart-manager.js:2111
-#: assets/js/smart-manager.js:2159
-#: assets/js/smart-manager.js:2212
-#: common-core/assets/js/core-base.js:573
+#: assets/js/smart-manager.js:2120
+#: assets/js/smart-manager.js:2168
+#: assets/js/smart-manager.js:2221
+#: common-core/assets/js/core-base.js:614
 #: pro/common-pro/assets/js/base.js:61
 msgctxt "button"
 msgid "Ok"
@@ -4022,8 +4093,8 @@ msgid "Add to gallery"
 msgstr ""
 
 #: assets/js/smart-manager-product.js:676
-#: assets/js/smart-manager.js:2065
-#: assets/js/smart-manager.js:2563
+#: assets/js/smart-manager.js:2074
+#: assets/js/smart-manager.js:2572
 msgctxt "process name"
 msgid "Inline Edit"
 msgstr ""
@@ -4075,7 +4146,7 @@ msgstr ""
 
 #. translators: %1$s: dashboard display name %2$s: success message %3$s: pricing page link
 #: assets/js/smart-manager.js:303
-#: assets/js/smart-manager.js:2346
+#: assets/js/smart-manager.js:2355
 msgctxt "modal content"
 msgid "For managing %1$s, %2$s %3$s version"
 msgstr ""
@@ -4254,7 +4325,7 @@ msgid "Advanced Search"
 msgstr ""
 
 #: assets/js/smart-manager.js:1208
-#: assets/js/smart-manager.js:2601
+#: assets/js/smart-manager.js:2610
 msgctxt "modal content"
 msgid "the selected record"
 msgstr ""
@@ -4287,24 +4358,24 @@ msgctxt "bottom bar status"
 msgid "No %s Found"
 msgstr ""
 
-#: assets/js/smart-manager.js:1500
+#: assets/js/smart-manager.js:1503
 msgctxt "button"
 msgid "OK"
 msgstr ""
 
-#: assets/js/smart-manager.js:1730
+#: assets/js/smart-manager.js:1739
 msgctxt "action column header title"
 msgid "Column Manager"
 msgstr ""
 
-#: assets/js/smart-manager.js:2452
+#: assets/js/smart-manager.js:2461
 msgctxt "search switch notice for custom views"
 msgid "Cannot switch search when using Custom Views"
 msgstr ""
 
-#: assets/js/smart-manager.js:2494
-#: assets/js/smart-manager.js:2837
-#: assets/js/smart-manager.js:2841
+#: assets/js/smart-manager.js:2503
+#: assets/js/smart-manager.js:2846
+#: assets/js/smart-manager.js:2850
 #: pro/assets/js/smart-manager.js:1669
 #: pro/assets/js/smart-manager.js:1691
 #: pro/assets/js/smart-manager.js:2213
@@ -4313,752 +4384,840 @@ msgctxt "modal title"
 msgid "Note:"
 msgstr ""
 
-#: assets/js/smart-manager.js:2495
+#: assets/js/smart-manager.js:2504
 msgctxt "modal content"
 msgid "Currently simple search cannot be applied when advanced search is active. If you want the ability to apply simple search on top of advanced search results, please consider submitting a"
 msgstr ""
 
-#: assets/js/smart-manager.js:2495
-#: assets/js/smart-manager.js:2838
-#: assets/js/smart-manager.js:2841
+#: assets/js/smart-manager.js:2504
+#: assets/js/smart-manager.js:2847
+#: assets/js/smart-manager.js:2850
 #: pro/assets/js/smart-manager.js:2401
 msgctxt "modal content"
 msgid "feature request"
 msgstr ""
 
-#: assets/js/smart-manager.js:2495
-#: assets/js/smart-manager.js:2838
+#: assets/js/smart-manager.js:2504
+#: assets/js/smart-manager.js:2847
 msgctxt "modal content"
 msgid "to help us prioritize this enhancement."
 msgstr ""
 
-#: assets/js/smart-manager.js:2504
+#: assets/js/smart-manager.js:2513
 msgctxt "simple search notice for custom views"
 msgid "Search string cannot be edited when using Custom Views"
 msgstr ""
 
-#: assets/js/smart-manager.js:2526
+#: assets/js/smart-manager.js:2535
 msgctxt "notification"
 msgid "Please edit a record"
 msgstr ""
 
-#: assets/js/smart-manager.js:2534
+#: assets/js/smart-manager.js:2543
 msgctxt "notification"
 msgid "Please enter user email"
 msgstr ""
 
-#: assets/js/smart-manager.js:2534
+#: assets/js/smart-manager.js:2543
 msgctxt "notification"
 msgid "Enable"
 msgstr ""
 
-#: assets/js/smart-manager.js:2534
+#: assets/js/smart-manager.js:2543
 msgctxt "notification"
 msgid "User Email"
 msgstr ""
 
-#: assets/js/smart-manager.js:2534
+#: assets/js/smart-manager.js:2543
 msgctxt "notification"
 msgid "column if not enabled using"
 msgstr ""
 
-#: assets/js/smart-manager.js:2534
+#: assets/js/smart-manager.js:2543
 msgctxt "notification"
 msgid "column show/hide functionality"
 msgstr ""
 
-#: assets/js/smart-manager.js:2589
-#: assets/js/smart-manager.js:2773
+#: assets/js/smart-manager.js:2598
+#: assets/js/smart-manager.js:2782
 msgctxt "notification"
 msgid "Please select a record"
 msgstr ""
 
-#: assets/js/smart-manager.js:2595
+#: assets/js/smart-manager.js:2604
 msgctxt "notification"
 msgid "To delete more than"
 msgstr ""
 
-#: assets/js/smart-manager.js:2595
+#: assets/js/smart-manager.js:2604
 msgctxt "notification"
 msgid "records at a time"
 msgstr ""
 
-#: assets/js/smart-manager.js:2595
+#: assets/js/smart-manager.js:2604
 msgctxt "notification"
 msgid "upgrade to Pro"
 msgstr ""
 
-#: assets/js/smart-manager.js:2600
+#: assets/js/smart-manager.js:2609
 msgctxt "modal content"
 msgid "all items in search results"
 msgstr ""
 
-#: assets/js/smart-manager.js:2600
+#: assets/js/smart-manager.js:2609
 msgctxt "modal content"
 msgid "all"
 msgstr ""
 
-#: assets/js/smart-manager.js:2601
+#: assets/js/smart-manager.js:2610
 msgctxt "modal content"
 msgid "the selected records"
 msgstr ""
 
-#: assets/js/smart-manager.js:2654
+#: assets/js/smart-manager.js:2663
 msgctxt "notification"
 msgid "For editing more records upgrade to Pro"
 msgstr ""
 
 #. translators: %s: dashboard display name
-#: assets/js/smart-manager.js:2666
+#: assets/js/smart-manager.js:2675
 msgctxt "modal title"
 msgid "New %s"
 msgstr ""
 
 #. translators: %s: dashboard display name
-#: assets/js/smart-manager.js:2672
+#: assets/js/smart-manager.js:2681
 msgctxt "modal content"
 msgid "Choose how many %s you want to add to the table"
 msgstr ""
 
-#: assets/js/smart-manager.js:2679
+#: assets/js/smart-manager.js:2688
 msgctxt "modal note"
 msgid "These rows will be added to your table and marked as drafts until you save"
 msgstr ""
 
-#: assets/js/smart-manager.js:2685
+#: assets/js/smart-manager.js:2694
 #: pro/assets/js/smart-manager.js:2341
 msgctxt "button"
 msgid "Create"
 msgstr ""
 
 #. translators: %s: pricing page link
-#: assets/js/smart-manager.js:2716
-#: assets/js/smart-manager.js:2743
+#: assets/js/smart-manager.js:2725
+#: assets/js/smart-manager.js:2752
 msgctxt "notification"
 msgid "Custom Views available (Only in %s)"
 msgstr ""
 
-#: assets/js/smart-manager.js:2729
+#: assets/js/smart-manager.js:2738
 msgctxt "modal content"
 msgid "This will"
 msgstr ""
 
-#: assets/js/smart-manager.js:2729
+#: assets/js/smart-manager.js:2738
 msgctxt "modal content"
 msgid "the current view. Are you sure you want to continue?"
 msgstr ""
 
-#: assets/js/smart-manager.js:2734
+#: assets/js/smart-manager.js:2743
 msgctxt "notification"
 msgid "View deleted successfully!"
 msgstr ""
 
-#: assets/js/smart-manager.js:2806
+#: assets/js/smart-manager.js:2815
 msgctxt "modal title"
 msgid "Selected Records - Visible Columns"
 msgstr ""
 
-#: assets/js/smart-manager.js:2816
+#: assets/js/smart-manager.js:2825
 msgctxt "notification"
 msgid "Comming soon"
 msgstr ""
 
-#: assets/js/smart-manager.js:2822
+#: assets/js/smart-manager.js:2831
 msgctxt "button"
 msgid "selected records"
 msgstr ""
 
-#: assets/js/smart-manager.js:2823
+#: assets/js/smart-manager.js:2832
 msgctxt "modal content"
 msgid "This will duplicate only the records in posts, postmeta and related taxonomies."
 msgstr ""
 
-#: assets/js/smart-manager.js:2824
+#: assets/js/smart-manager.js:2833
 msgctxt "modal content"
 msgid "Are you sure you want to duplicate the "
 msgstr ""
 
-#: assets/js/smart-manager.js:2838
+#: assets/js/smart-manager.js:2847
 msgctxt "modal content"
 msgid "Individual variation duplication is not currently supported. Please consider submitting a"
 msgstr ""
 
-#: assets/js/smart-manager.js:2841
+#: assets/js/smart-manager.js:2850
 msgctxt "modal content"
 msgid "Product duplication applies to the parent product and all its variations collectively. Individual variations cannot be duplicated separately at this time. If this feature is important to you, please consider submitting a"
 msgstr ""
 
 #. translators: %s is a link to documentation on how to use bulk edit
-#: assets/js/smart-manager.js:2857
+#: assets/js/smart-manager.js:2866
 msgctxt "modal description"
 msgid "You can change/update multiple fields of the entire store OR for selected items using the Bulk Edit feature. Refer to this doc on %s or watch the video below."
 msgstr ""
 
-#: assets/js/smart-manager.js:2857
+#: assets/js/smart-manager.js:2866
 msgctxt "modal description"
 msgid "how to do bulk edit"
 msgstr ""
 
-#: assets/js/smart-manager.js:2860
-#: common-core/assets/js/core-base.js:504
+#: assets/js/smart-manager.js:2869
+#: common-core/assets/js/core-base.js:545
 #: pro/assets/js/smart-manager.js:737
 msgctxt "modal title"
 msgid "Bulk Edit"
 msgstr ""
 
-#: assets/js/smart-manager.js:2860
+#: assets/js/smart-manager.js:2869
 msgctxt "modal title"
 msgid "Biggest Time Saver"
 msgstr ""
 
 #. translators: %s is a link to the Pro version
-#: assets/js/smart-manager.js:2861
+#: assets/js/smart-manager.js:2870
 msgctxt "modal title"
 msgid "(Only in %s)"
 msgstr ""
 
-#: assets/js/smart-manager.js:2861
+#: assets/js/smart-manager.js:2870
 msgctxt "modal title"
 msgid "Pro"
 msgstr ""
 
-#: assets/js/smart-manager.js:2865
+#: assets/js/smart-manager.js:2874
 msgctxt "button"
 msgid "Upgrade Now"
 msgstr ""
 
 #. translators: %s is the Pro version name
-#: assets/js/smart-manager.js:2870
+#: assets/js/smart-manager.js:2879
 msgctxt "notification"
 msgid "Duplicate Records (Only in %s)"
 msgstr ""
 
-#: assets/js/smart-manager.js:3383
+#: assets/js/smart-manager.js:3348
+msgctxt "notification"
+msgid "An error occurred while saving data."
+msgstr ""
+
+#: assets/js/smart-manager.js:3403
 msgctxt "notification"
 msgid "You have entered incorrect data in the highlighted cells."
 msgstr ""
 
-#: assets/js/smart-manager.js:3396
+#: assets/js/smart-manager.js:3416
 msgctxt "modal title"
 msgid "Note"
 msgstr ""
 
-#: assets/js/smart-manager.js:3409
-#: common-core/assets/js/core-base.js:332
+#: assets/js/smart-manager.js:3429
+#: common-core/assets/js/core-base.js:373
 msgctxt "modal title"
 msgid "Warning"
 msgstr ""
 
-#: assets/js/smart-manager.js:3410
-#: common-core/assets/js/core-base.js:333
+#: assets/js/smart-manager.js:3430
+#: common-core/assets/js/core-base.js:374
 msgctxt "modal content"
 msgid "Are you sure?"
 msgstr ""
 
-#: assets/js/smart-manager.js:3416
-#: assets/js/smart-manager.js:5049
-#: common-core/assets/js/core-base.js:337
+#: assets/js/smart-manager.js:3436
+#: assets/js/smart-manager.js:5241
+#: common-core/assets/js/core-base.js:378
 msgctxt "button"
 msgid "Yes"
 msgstr ""
 
-#: assets/js/smart-manager.js:3430
-#: assets/js/smart-manager.js:4650
-#: assets/js/smart-manager.js:5066
-#: common-core/assets/js/core-base.js:350
+#: assets/js/smart-manager.js:3450
+#: assets/js/smart-manager.js:4782
+#: assets/js/smart-manager.js:5258
+#: common-core/assets/js/core-base.js:391
 msgctxt "button"
 msgid "No"
 msgstr ""
 
-#: assets/js/smart-manager.js:3632
+#: assets/js/smart-manager.js:3652
 msgctxt "notification"
 msgid "Settings saved successfully!"
 msgstr ""
 
-#: assets/js/smart-manager.js:3650
+#: assets/js/smart-manager.js:3670
 msgctxt "export button"
 msgid "Entire Store"
 msgstr ""
 
-#: assets/js/smart-manager.js:3652
+#: assets/js/smart-manager.js:3672
 msgctxt "schedule export button"
 msgid "Schedule Export"
 msgstr ""
 
-#: assets/js/smart-manager.js:3653
+#: assets/js/smart-manager.js:3673
 msgctxt "manage scheduled exports button"
 msgid "Manage Scheduled Exports"
 msgstr ""
 
-#: assets/js/smart-manager.js:4152
+#: assets/js/smart-manager.js:4283
 msgctxt "bottom bar display name for tasks"
 msgid "Tasks"
 msgstr ""
 
-#: assets/js/smart-manager.js:4249
+#: assets/js/smart-manager.js:4380
 msgctxt "button"
 msgid "Undo Selected"
 msgstr ""
 
-#: assets/js/smart-manager.js:4260
+#: assets/js/smart-manager.js:4391
 msgctxt "button"
 msgid "Delete Selected"
 msgstr ""
 
-#: assets/js/smart-manager.js:4287
+#: assets/js/smart-manager.js:4418
 msgctxt "tooltip"
 msgid "Back to Dashboard"
 msgstr ""
 
-#: assets/js/smart-manager.js:4291
+#: assets/js/smart-manager.js:4422
 msgctxt "button"
 msgid "Back to Dashboard"
 msgstr ""
 
-#: assets/js/smart-manager.js:4297
+#: assets/js/smart-manager.js:4428
 msgctxt "dashboard title"
 msgid "History"
 msgstr ""
 
-#: assets/js/smart-manager.js:4304
+#: assets/js/smart-manager.js:4435
 msgctxt "button"
 msgid "Clear History"
 msgstr ""
 
-#: assets/js/smart-manager.js:4308
+#: assets/js/smart-manager.js:4439
 msgctxt "button"
 msgid "Undo all"
 msgstr ""
 
-#: assets/js/smart-manager.js:4329
+#: assets/js/smart-manager.js:4460
 msgctxt "delete all history"
 msgid "All History"
 msgstr ""
 
-#: assets/js/smart-manager.js:4337
+#: assets/js/smart-manager.js:4468
 msgctxt "undo all tasks"
 msgid "All Tasks"
 msgstr ""
 
-#: assets/js/smart-manager.js:4367
+#: assets/js/smart-manager.js:4498
 msgctxt "tooltip"
 msgid "(Click to sort)"
 msgstr ""
 
-#: assets/js/smart-manager.js:4510
-#: assets/js/smart-manager.js:4512
+#: assets/js/smart-manager.js:4644
+#: assets/js/smart-manager.js:4646
 msgctxt "custom view"
 msgid "None"
 msgstr ""
 
-#: assets/js/smart-manager.js:4519
+#: assets/js/smart-manager.js:4653
 msgctxt "custom views"
 msgid "No custom views"
 msgstr ""
 
-#: assets/js/smart-manager.js:4530
+#: assets/js/smart-manager.js:4664
 msgctxt "dashboard name"
 msgid "Products"
 msgstr ""
 
 #. translators: %s is the dashboard name (e.g., Product, Order, etc.)
-#: assets/js/smart-manager.js:4532
-#: assets/js/smart-manager.js:4755
+#: assets/js/smart-manager.js:4666
+#: assets/js/smart-manager.js:4885
 msgctxt "button"
 msgid "New %s"
 msgstr ""
 
-#: assets/js/smart-manager.js:4544
-#: assets/js/smart-manager.js:4554
+#: assets/js/smart-manager.js:4678
+#: assets/js/smart-manager.js:4688
 msgctxt "label"
 msgid "Custom view:"
 msgstr ""
 
-#: assets/js/smart-manager.js:4575
+#: assets/js/smart-manager.js:4709
 msgctxt "label"
 msgid "Custom view"
 msgstr ""
 
-#: assets/js/smart-manager.js:4576
+#: assets/js/smart-manager.js:4710
 #: pro/assets/js/smart-manager.js:732
 msgctxt "button"
 msgid "Reset"
 msgstr ""
 
-#: assets/js/smart-manager.js:4593
+#: assets/js/smart-manager.js:4727
 msgctxt "button"
 msgid "Create Custom View"
 msgstr ""
 
-#: assets/js/smart-manager.js:4612
+#: assets/js/smart-manager.js:4744
+#: assets/js/smart-manager.js:5030
 msgctxt "button"
 msgid "Discard Changes"
 msgstr ""
 
-#: assets/js/smart-manager.js:4638
+#: assets/js/smart-manager.js:4770
 msgctxt "modal title"
 msgid "Discard Changes?"
 msgstr ""
 
-#: assets/js/smart-manager.js:4639
+#: assets/js/smart-manager.js:4771
 msgctxt "modal content"
 msgid "The changes you've made cannot be reverted. Do you want to discard all changes?"
 msgstr ""
 
-#: assets/js/smart-manager.js:4643
+#: assets/js/smart-manager.js:4775
 msgctxt "button"
 msgid "Yes, Discard"
 msgstr ""
 
-#: assets/js/smart-manager.js:4670
+#: assets/js/smart-manager.js:4802
 msgctxt "modal title"
 msgid "Attention"
 msgstr ""
 
 #. translators: %s is the custom view name
-#: assets/js/smart-manager.js:4672
+#: assets/js/smart-manager.js:4804
 msgctxt "modal content"
 msgid "Are you sure you want to delete the custom view \"%s\"? This action cannot be undone."
 msgstr ""
 
-#: assets/js/smart-manager.js:4674
-#: assets/js/smart-manager.js:4889
+#: assets/js/smart-manager.js:4806
+#: assets/js/smart-manager.js:5018
 msgctxt "button"
 msgid "Delete"
 msgstr ""
 
 #. translators: %s is the custom view name
-#: assets/js/smart-manager.js:4680
+#: assets/js/smart-manager.js:4812
 msgctxt "notification"
 msgid "Custom view \"%s\" deleted successfully!"
 msgstr ""
 
-#: assets/js/smart-manager.js:4826
+#: assets/js/smart-manager.js:4956
 msgctxt "pagination button"
 msgid "Previous"
 msgstr ""
 
-#: assets/js/smart-manager.js:4833
+#: assets/js/smart-manager.js:4963
 msgctxt "pagination button"
 msgid "Next"
 msgstr ""
 
-#: assets/js/smart-manager.js:4848
+#: assets/js/smart-manager.js:4978
+#: assets/js/smart-manager.js:5073
 msgctxt "tooltip"
 msgid "Clear selection"
 msgstr ""
 
-#: assets/js/smart-manager.js:4856
+#: assets/js/smart-manager.js:4985
+#: assets/js/smart-manager.js:5072
 msgctxt "selection status"
 msgid "selected"
 msgstr ""
 
-#: assets/js/smart-manager.js:4865
+#: assets/js/smart-manager.js:4994
 msgctxt "button"
 msgid "Bulk edit"
 msgstr ""
 
-#: assets/js/smart-manager.js:4872
+#: assets/js/smart-manager.js:5001
 msgctxt "button"
 msgid "Duplicate"
 msgstr ""
 
-#: assets/js/smart-manager.js:4876
+#: assets/js/smart-manager.js:5005
 msgctxt "button"
 msgid "Export selected"
 msgstr ""
 
-#: assets/js/smart-manager.js:4883
+#: assets/js/smart-manager.js:5012
 msgctxt "button"
 msgid "Print Invoice"
 msgstr ""
 
-#: assets/js/smart-manager.js:4902
+#: assets/js/smart-manager.js:5025
+msgctxt "button"
+msgid "Save Changes"
+msgstr ""
+
+#: assets/js/smart-manager.js:5055
+msgctxt "inline edit status"
+msgid "unsaved changes"
+msgstr ""
+
+#: assets/js/smart-manager.js:5056
+msgctxt "tooltip"
+msgid "Discard changes"
+msgstr ""
+
+#: assets/js/smart-manager.js:5064
 msgctxt "dashboard name"
 msgid "products"
 msgstr ""
 
-#: assets/js/smart-manager.js:4926
+#: assets/js/smart-manager.js:5118
 msgctxt "option"
 msgid "All (Search Results)"
 msgstr ""
 
-#: assets/js/smart-manager.js:4926
+#: assets/js/smart-manager.js:5118
 msgctxt "option"
 msgid "All (Entire Store)"
 msgstr ""
 
-#: assets/js/smart-manager.js:4934
+#: assets/js/smart-manager.js:5126
 msgctxt "option"
 msgid "Selected"
 msgstr ""
 
-#: assets/js/smart-manager.js:4943
-#: assets/js/smart-manager.js:4946
+#: assets/js/smart-manager.js:5135
+#: assets/js/smart-manager.js:5138
 msgctxt "option"
 msgid "Visible"
 msgstr ""
 
-#: assets/js/smart-manager.js:4944
+#: assets/js/smart-manager.js:5136
 msgctxt "option"
 msgid "Stock"
 msgstr ""
 
-#: assets/js/smart-manager.js:4952
+#: assets/js/smart-manager.js:5144
 msgctxt "modal content"
 msgid "Do you want to export"
 msgstr ""
 
-#: assets/js/smart-manager.js:4954
+#: assets/js/smart-manager.js:5146
 msgctxt "modal content"
 msgid " records "
 msgstr ""
 
-#: assets/js/smart-manager.js:4955
+#: assets/js/smart-manager.js:5147
 msgctxt "modal content"
 msgid "with "
 msgstr ""
 
-#: assets/js/smart-manager.js:4957
+#: assets/js/smart-manager.js:5149
 msgctxt "modal content"
 msgid "columns?"
 msgstr ""
 
 #. translators: %s is a link to the Pro version
-#: assets/js/smart-manager.js:4972
+#: assets/js/smart-manager.js:5164
 msgctxt "notification"
 msgid "Please upgrade to %s to use this feature."
 msgstr ""
 
-#: assets/js/smart-manager.js:5046
+#: assets/js/smart-manager.js:5238
 msgctxt "modal content"
 msgid "You have unsaved changes. Are you sure you want to continue?"
 msgstr ""
 
-#: assets/js/smart-manager.js:5147
+#: assets/js/smart-manager.js:5339
 msgctxt "modal title"
 msgid "Sync Stock Log Data"
 msgstr ""
 
-#: assets/js/smart-manager.js:5155
+#: assets/js/smart-manager.js:5347
 msgctxt "modal content"
 msgid "Are you sure you want to sync stock log data from"
 msgstr ""
 
-#: assets/js/smart-manager.js:5157
+#: assets/js/smart-manager.js:5349
 msgctxt "modal content"
 msgid "into Smart Manager?"
 msgstr ""
 
-#: assets/js/smart-manager.js:5162
+#: assets/js/smart-manager.js:5354
 msgctxt "section heading"
 msgid "Please Note:"
 msgstr ""
 
-#: assets/js/smart-manager.js:5165
+#: assets/js/smart-manager.js:5357
 msgctxt "modal content"
 msgid "Synced records will <strong class=\"text-sm-base-foreground\">not support the Undo feature</strong>."
 msgstr ""
 
-#: assets/js/smart-manager.js:5168
+#: assets/js/smart-manager.js:5360
 msgctxt "modal content"
 msgid "Some field data (such as author and previous values) may be missing because this information was not captured by the Stock Manager for WooCommerce plugin."
 msgstr ""
 
-#: assets/js/smart-manager.js:5177
+#: assets/js/smart-manager.js:5369
 msgctxt "button text"
 msgid "Sync Now"
 msgstr ""
 
-#: assets/js/smart-manager.js:5178
+#: assets/js/smart-manager.js:5370
 msgctxt "button text"
 msgid "Cancel"
 msgstr ""
 
-#: assets/js/smart-manager.js:5188
+#: assets/js/smart-manager.js:5380
 msgctxt "progressbar modal title"
 msgid "Stock Log Synchronization"
 msgstr ""
 
-#: assets/js/smart-manager.js:5246
+#: assets/js/smart-manager.js:5438
 msgctxt "modal content"
 msgid "this record"
 msgstr ""
 
-#: assets/js/smart-manager.js:5333
+#: assets/js/smart-manager.js:5525
 msgctxt "quick column manager title"
 msgid "Manage columns"
 msgstr ""
 
-#: assets/js/smart-manager.js:5340
+#: assets/js/smart-manager.js:5532
 msgctxt "button"
 msgid "Open Column Manager"
 msgstr ""
 
-#: assets/js/smart-manager.js:5391
+#: assets/js/smart-manager.js:5583
 msgctxt "tooltip"
 msgid "Edit column name"
 msgstr ""
 
 #: common-core/assets/js/core-base.js:21
+msgctxt "loading message"
+msgid "Brewing something good for you ☕"
+msgstr ""
+
+#: common-core/assets/js/core-base.js:22
+msgctxt "loading message"
+msgid "Hang tight, we are getting things ready ⏳"
+msgstr ""
+
+#: common-core/assets/js/core-base.js:23
+msgctxt "loading message"
+msgid "Putting everything in its right place 🧩"
+msgstr ""
+
+#: common-core/assets/js/core-base.js:24
+msgctxt "loading message"
+msgid "Just a moment, making things neat ⚙️"
+msgstr ""
+
+#: common-core/assets/js/core-base.js:25
+msgctxt "loading message"
+msgid "Good things are coming together ✨"
+msgstr ""
+
+#: common-core/assets/js/core-base.js:26
+msgctxt "loading message"
+msgid "Almost there, adding the final touches 🎯"
+msgstr ""
+
+#: common-core/assets/js/core-base.js:27
+msgctxt "loading message"
+msgid "Sit tight, magic in progress 🪄"
+msgstr ""
+
+#: common-core/assets/js/core-base.js:28
+msgctxt "loading message"
+msgid "Getting everything lined up just right 📐"
+msgstr ""
+
+#: common-core/assets/js/core-base.js:29
+msgctxt "loading message"
+msgid "Warming things up behind the scenes 🔥"
+msgstr ""
+
+#: common-core/assets/js/core-base.js:30
+msgctxt "loading message"
+msgid "Making things look effortless 🙂"
+msgstr ""
+
+#: common-core/assets/js/core-base.js:31
+msgctxt "loading message"
+msgid "All set in a moment, promise 🤝"
+msgstr ""
+
+#: common-core/assets/js/core-base.js:32
+msgctxt "loading message"
+msgid "Keeping things sharp and ready ⚡"
+msgstr ""
+
+#: common-core/assets/js/core-base.js:33
+msgctxt "loading message"
+msgid "Bringing it all together…"
+msgstr ""
+
+#: common-core/assets/js/core-base.js:39
 msgctxt "select options - operator for 'numeric' data type fields"
 msgid "Equal to =="
 msgstr ""
 
-#: common-core/assets/js/core-base.js:22
+#: common-core/assets/js/core-base.js:40
 msgctxt "select options - operator for 'numeric' data type fields"
 msgid "Not equal to !="
 msgstr ""
 
-#: common-core/assets/js/core-base.js:23
+#: common-core/assets/js/core-base.js:41
 msgctxt "select options - operator for 'numeric' data type fields"
 msgid "Less than <"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:24
+#: common-core/assets/js/core-base.js:42
 msgctxt "select options - operator for 'numeric' data type fields"
 msgid "Greater than >"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:25
+#: common-core/assets/js/core-base.js:43
 msgctxt "select options - operator for 'numeric' data type fields"
 msgid "Less than or equal to <="
 msgstr ""
 
-#: common-core/assets/js/core-base.js:26
+#: common-core/assets/js/core-base.js:44
 msgctxt "select options - operator for 'numeric' data type fields"
 msgid "Greater than or equal to >="
 msgstr ""
 
-#: common-core/assets/js/core-base.js:34
+#: common-core/assets/js/core-base.js:52
 msgctxt "select options - operator for 'dropdown' data type fields"
 msgid "is"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:35
+#: common-core/assets/js/core-base.js:53
 msgctxt "select options - operator for 'dropdown' data type fields"
 msgid "is not"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:38
+#: common-core/assets/js/core-base.js:56
 msgctxt "select options - operator for 'text' data type fields"
 msgid "is"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:39
+#: common-core/assets/js/core-base.js:57
 msgctxt "select options - operator for 'text' data type fields"
 msgid "contains"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:40
+#: common-core/assets/js/core-base.js:58
 msgctxt "select options - operator for 'text' data type fields"
 msgid "is not"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:41
+#: common-core/assets/js/core-base.js:59
 msgctxt "select options - operator for 'text' data type fields"
 msgid "not contains"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:50
+#: common-core/assets/js/core-base.js:68
 #: pro/assets/js/smart-manager.js:2051
 #: pro/common-pro/assets/js/base.js:5
 msgctxt "bulk edit action - 'date' fields"
 msgid "increase by"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:50
+#: common-core/assets/js/core-base.js:68
 #: pro/assets/js/smart-manager.js:2051
 #: pro/common-pro/assets/js/base.js:5
 msgctxt "bulk edit action - 'date' fields"
 msgid "decrease by"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:52
+#: common-core/assets/js/core-base.js:70
 #: pro/assets/js/smart-manager.js:2054
 msgctxt "bulk edit action - 'number' fields"
 msgid "increase by %"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:52
+#: common-core/assets/js/core-base.js:70
 #: pro/assets/js/smart-manager.js:2054
 msgctxt "bulk edit action - 'number' fields"
 msgid "decrease by %"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:52
+#: common-core/assets/js/core-base.js:70
 #: pro/assets/js/smart-manager.js:2054
 msgctxt "bulk edit action - 'number' fields"
 msgid "increase by number"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:52
+#: common-core/assets/js/core-base.js:70
 #: pro/assets/js/smart-manager.js:2054
 msgctxt "bulk edit action - 'number' fields"
 msgid "decrease by number"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:55
+#: common-core/assets/js/core-base.js:73
 #: pro/assets/js/smart-manager.js:2057
 msgctxt "bulk edit action - 'datetime' fields"
 msgid "set datetime to"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:55
+#: common-core/assets/js/core-base.js:73
 #: pro/assets/js/smart-manager.js:2057
 msgctxt "bulk edit action - 'datetime' fields"
 msgid "set date to"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:55
+#: common-core/assets/js/core-base.js:73
 #: pro/assets/js/smart-manager.js:2057
 msgctxt "bulk edit action - 'datetime' fields"
 msgid "set time to"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:56
+#: common-core/assets/js/core-base.js:74
 #: pro/assets/js/smart-manager.js:2058
 msgctxt "bulk edit action - 'date' fields"
 msgid "set date to"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:57
+#: common-core/assets/js/core-base.js:75
 #: pro/assets/js/smart-manager.js:2059
 msgctxt "bulk edit action - 'time' fields"
 msgid "set time to"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:59
+#: common-core/assets/js/core-base.js:77
 #: pro/assets/js/smart-manager.js:2061
 msgctxt "bulk edit action - 'multiselect list' fields"
 msgid "add to"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:59
+#: common-core/assets/js/core-base.js:77
 #: pro/assets/js/smart-manager.js:2061
 msgctxt "bulk edit action - 'multiselect list' fields"
 msgid "remove from"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:61
+#: common-core/assets/js/core-base.js:79
 #: pro/assets/js/smart-manager.js:2063
 msgctxt "bulk edit action - 'text' fields"
 msgid "prepend"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:61
+#: common-core/assets/js/core-base.js:79
 #: pro/assets/js/smart-manager.js:2063
 msgctxt "bulk edit action - 'text' fields"
 msgid "append"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:61
+#: common-core/assets/js/core-base.js:79
 #: pro/assets/js/smart-manager.js:2063
 msgctxt "bulk edit action - 'text' fields"
 msgid "search & replace"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:65
+#: common-core/assets/js/core-base.js:83
 #: pro/assets/js/smart-manager.js:655
 #: pro/assets/js/smart-manager.js:791
 #: pro/assets/js/smart-manager.js:2069
@@ -5066,100 +5225,100 @@ msgctxt "bulk edit action"
 msgid "set to"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:66
+#: common-core/assets/js/core-base.js:84
 #: pro/assets/js/smart-manager.js:2070
 msgctxt "bulk edit action"
 msgid "copy from"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:66
+#: common-core/assets/js/core-base.js:84
 #: pro/assets/js/smart-manager.js:2070
 msgctxt "bulk edit action"
 msgid "copy from field"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:439
+#: common-core/assets/js/core-base.js:480
 msgctxt "progressbar modal title"
 msgid "Please Wait"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:444
+#: common-core/assets/js/core-base.js:485
 msgctxt "progressbar modal content"
 msgid "Initializing..."
 msgstr ""
 
-#: common-core/assets/js/core-base.js:447
+#: common-core/assets/js/core-base.js:488
 msgctxt "progressbar modal content"
 msgid "Continue in background"
 msgstr ""
 
 #. translators: %s: Task process content
-#: common-core/assets/js/core-base.js:499
+#: common-core/assets/js/core-base.js:540
 msgctxt "process title"
 msgid "Edited %s"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:503
+#: common-core/assets/js/core-base.js:544
 msgctxt "modal title"
 msgid "Task Title"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:507
+#: common-core/assets/js/core-base.js:548
 msgctxt "title placeholder"
 msgid "Enter desired title here..."
 msgstr ""
 
 #. translators: %s: Undo modal description
-#: common-core/assets/js/core-base.js:513
+#: common-core/assets/js/core-base.js:554
 msgctxt "modal description"
 msgid "Name the task for easier reference and future actions, especially for %s option. A pre-filled title has been suggested based on your changes."
 msgstr ""
 
-#: common-core/assets/js/core-base.js:513
+#: common-core/assets/js/core-base.js:554
 msgctxt "modal description"
 msgid "Undo"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:514
+#: common-core/assets/js/core-base.js:555
 msgctxt "modal description"
 msgid "Your bulk edit is ready to be applied. Click \"Apply Changes\" to run it immediately, or toggle the schedule option below to run it at a specific date and time."
 msgstr ""
 
-#: common-core/assets/js/core-base.js:525
+#: common-core/assets/js/core-base.js:566
 msgctxt "schedule toggle label"
 msgid "Schedule this bulk edit"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:532
+#: common-core/assets/js/core-base.js:573
 #: pro/common-pro/assets/js/base.js:43
 msgctxt "modal title"
 msgid "Schedule For"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:541
+#: common-core/assets/js/core-base.js:582
 #: pro/common-pro/assets/js/base.js:53
 msgctxt "modal description"
 msgid "Note: "
 msgstr ""
 
-#: common-core/assets/js/core-base.js:541
+#: common-core/assets/js/core-base.js:582
 #: pro/assets/js/smart-manager.js:1424
 #: pro/common-pro/assets/js/base.js:53
 msgctxt "modal description"
 msgid "Scheduled actions follow timezone of your site. Avoid overlaps to prevent delays."
 msgstr ""
 
-#: common-core/assets/js/core-base.js:557
+#: common-core/assets/js/core-base.js:598
 msgctxt "modal title"
 msgid "Title"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:574
+#: common-core/assets/js/core-base.js:615
 msgctxt "button"
 msgid "Apply Changes"
 msgstr ""
 
-#: common-core/assets/js/core-base.js:597
+#: common-core/assets/js/core-base.js:638
 #: pro/common-pro/assets/js/base.js:69
 msgctxt "notification"
 msgid "Please select your desired date & time for scheduling an action."
@@ -5655,7 +5814,7 @@ msgctxt "modal title"
 msgid "Schedule Bulk Edit"
 msgstr ""
 
-#: pro/common-pro/assets/js/bulk-edit.js:25
+#: pro/common-pro/assets/js/bulk-edit.js:31
 msgctxt "progressbar modal title"
 msgid "Bulk Edit"
 msgstr ""

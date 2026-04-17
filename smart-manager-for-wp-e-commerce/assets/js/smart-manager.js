@@ -1481,6 +1481,9 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 		}
 		jQuery('.sm-empty-tasks-list-section').remove();
 		window.smart_manager.sendRequest(window.smart_manager.currentGetDataParams, window.smart_manager.set_data);
+		if (!window.smart_manager.selectedRows.length && !window.smart_manager.selectAll) {
+			window.smart_manager.hideFloatingActionBar();
+		}
 	}
 
 	SmartManager.prototype.inline_edit_dlg = function (params) {
@@ -1641,8 +1644,14 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 		if (typeof (colObj) != 'undefined') {
 
 			let renderer = (colObj.hasOwnProperty('renderer')) ? colObj.renderer : '';
+			let colName = (colObj.hasOwnProperty('data')) ? colObj.data : '';
 
-			if (colObj.hasOwnProperty('type')) {
+			// Check for history dashboard badge columns
+			if (['sm_tasks_post_type', 'sm_tasks_type', 'sm_tasks_status'].includes(colName)) {
+				customRenderer = 'badgeRenderer';
+			} else if (colName === 'sm_tasks_actions') {
+				customRenderer = 'taskActionsRenderer';
+			} else if (colObj.hasOwnProperty('type')) {
 				if (colObj.type == 'numeric') {
 					customRenderer = 'numericRenderer';
 				} else if (colObj.type == 'text' && renderer != 'html') {
@@ -2520,7 +2529,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 			})
 
 			//Code to handle the inline save functionality
-			.off('click', '#sm-save-btn').on('click', '#sm-save-btn', function () {
+			.off('click', '#sm-save-inline-edit-btn, #sm-floating-save-btn').on('click', '#sm-save-inline-edit-btn, #sm-floating-save-btn', function () {
 				jQuery('.sm-notification-close').trigger('click');
 				if (Object.keys(window.smart_manager.editedData).length == 0) {
 					window.smart_manager.notification = { message: _x('Please edit a record', 'notification', 'smart-manager-for-wp-e-commerce') }
@@ -2978,7 +2987,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 				window.smart_manager.toggleTasksView(false);
 			})
 			jQuery(document).on('click', '#sm_floating_save_bar .save-btn', function () {
-				jQuery('#sm-save-btn').trigger('click');
+				jQuery('#sm-save-inline-edit-btn').trigger('click');
 				jQuery('.sm-notification-close').trigger('click');
 			})
 			jQuery(document).on('click', '#sm_floating_save_bar .close-btn', function () {
@@ -3316,6 +3325,10 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 		if (Object.getOwnPropertyNames(window.smart_manager.editedData).length <= 0) {
 			return;
 		}
+		//hide floating action bar
+		if (typeof window.smart_manager.hideFloatingActionBar === 'function') {
+			window.smart_manager.hideFloatingActionBar();
+		}
 		let params = {};
 		params.data = {
 			cmd: 'inline_update',
@@ -3330,6 +3343,13 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 		let hasInvalidClass = jQuery('.sm-grid-dirty-cell').hasClass('htInvalid');
 		if (hasInvalidClass == false) {
 			window.smart_manager.sendRequest(params, function (response) {
+				// Handle AJAX error responses (403, etc.)
+				if (response && response.error === true) {
+					let errorMessage = response.message || _x('An error occurred while saving data.', 'notification', 'smart-manager-for-wp-e-commerce');
+					window.smart_manager.notification = { status: 'error', message: errorMessage };
+					window.smart_manager.showNotification();
+					return;
+				}
 				if ('failed' !== response) {
 					let title = 'success'
 					if (window.smart_manager.isJSON(response)) {
@@ -3960,7 +3980,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 
 	  	function customTextRenderer(hotInstance, td, row, col, prop, value, cellProperties) {
 		    Handsontable.renderers.TextRenderer.apply(this, arguments);
-			if (['_sale_price', '_regular_price', '_price'].some(field => prop.includes(field)) && value.length) {
+			if (['_sale_price', '_regular_price', '_price'].some(field => prop.includes(field)) && value && value.length) {
 				td.classList.add('sm-price-cell')
 				// Sanity check for WooCommerce currency symbol
 				td.innerHTML = '<div title="'+ td.innerHTML +'" class="wrapper sm-price-cell">' + ( (typeof wc === 'object' && wc.wcSettings && wc.wcSettings.CURRENCY && wc.wcSettings.CURRENCY.symbol) ? wc.wcSettings.CURRENCY.symbol : '' ) + td.innerHTML + '</div>';
@@ -3996,6 +4016,117 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 		    return td;
 		}
 	  	Handsontable.renderers.registerRenderer('customPasswordRenderer', customPasswordRenderer);
+
+		// Badge renderer for history dashboard columns (post_type, type, status)
+		function badgeRenderer(hotInstance, td, row, col, prop, value, cellProperties) {
+			Handsontable.renderers.TextRenderer.apply(this, arguments);
+			
+			if (typeof(cellProperties.className) != 'undefined') {
+				td.setAttribute('class', cellProperties.className);
+			}
+
+			let displayValue = value || '';
+			let badgeClasses = '';
+
+			// Format display value and determine badge classes based on column and value
+			if (prop === 'sm_tasks_post_type') {
+				// Post Type - blue text with light blue background
+				displayValue = displayValue.charAt(0).toUpperCase() + displayValue.slice(1).replace(/_/g, ' ');
+				badgeClasses = 'inline-block px-2.5 py-1 rounded-lg bg-[#EFF6FF] text-xs font-medium text-[#2563EB]';
+			} else if (prop === 'sm_tasks_type') {
+				// Type - bordered badge
+				displayValue = displayValue.charAt(0).toUpperCase() + displayValue.slice(1).replace(/_/g, ' ');
+				badgeClasses = 'inline-block px-2.5 py-1 rounded-lg border border-[#E5E5E5] bg-white text-xs font-normal text-sm-base-foreground';
+			} else if (prop === 'sm_tasks_status') {
+				// Status - colored based on status value
+				displayValue = displayValue.charAt(0).toUpperCase() + displayValue.slice(1).replace(/_/g, ' ');
+				if (value === 'completed') {
+					badgeClasses = 'inline-block px-2.5 py-1 rounded-lg bg-[#F0FDF4] text-xs font-medium text-[#15803D]';
+				} else if (value === 'in-progress') {
+					badgeClasses = 'inline-block px-2.5 py-1 rounded-lg bg-[#FEFCE8] text-xs font-medium text-[#CA8A04]';
+				} else {
+					badgeClasses = 'inline-block px-2.5 py-1 rounded-lg bg-sm-base-muted text-xs font-medium text-sm-base-foreground';
+				}
+			}
+
+			td.innerHTML = '<div class="wrapper"><span class="' + badgeClasses + '">' + displayValue + '</span></div>';
+
+			return td;
+		}
+		Handsontable.renderers.registerRenderer('badgeRenderer', badgeRenderer);
+
+		// Actions renderer for history dashboard sm_tasks_actions column
+		function taskActionsRenderer(hotInstance, td, row, col, prop, value, cellProperties) {
+			Handsontable.renderers.TextRenderer.apply(this, arguments);
+			if (cellProperties && cellProperties.className) {
+				td.setAttribute('class', cellProperties.className);
+			}
+			if (!value || value === '') { 
+				td.innerHTML = '<div class="wrapper">-</div>'; 
+				return td; 
+			}
+
+			const toTitle = s => {
+				if (!s || typeof s !== 'string') return '';
+				return s.replace(/^_+/, '').replace(/_/g, ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+			};
+			const extractField = p => {
+				if (!p || typeof p !== 'string') return '';
+				return toTitle(p.includes('=') ? p.split('=').pop() : p.split('/').pop());
+			};
+
+			try {
+				let data = (typeof value === 'string') ? JSON.parse(value) : value;
+				if (!data || typeof data !== 'object') {
+					td.innerHTML = '<div class="wrapper">-</div>';
+					return td;
+				}
+
+				let items = [];
+				const processObj = obj => {
+					if (!obj || typeof obj !== 'object') return [];
+					return Object.keys(obj).map(k => ({ 
+						field: extractField(k), 
+						operator: 'set to', 
+						value: obj[k] != null ? obj[k] : '' 
+					}));
+				};
+
+				if (Array.isArray(data)) {
+					data.forEach(o => { if (o) items.push(...processObj(o)); });
+				} else if (Object.keys(data).some(k => !isNaN(k) && data[k] && data[k].meta && data[k].meta.displayTitles)) {
+					Object.keys(data).forEach(k => {
+						if (!isNaN(k) && data[k] && data[k].meta && data[k].meta.displayTitles) {
+							let displayTitles = data[k].meta.displayTitles;
+							let field = displayTitles.field || '';
+							let operator = displayTitles.operator || '';
+							if (field && operator) items.push({ field, operator, value: data[k].value || '' });
+						}
+					});
+				} else {
+					items = processObj(data);
+				}
+
+				if (!items || items.length === 0) {
+					td.innerHTML = '<div class="wrapper">-</div>';
+					return td;
+				}
+
+				const maxVisible = 1, hiddenCount = (items.length - maxVisible);
+				const fmt = i => `${i.field || ''} ${i.operator || ''} ${i.value != null ? i.value : ''}`;
+				let html = items.slice(0, maxVisible).map(i => {
+					let v = (i.value != null ? String(i.value) : '').substring(0, 20) + ((i.value?.length > 20) ? '...' : '');
+					return `<span class="items-center gap-1 px-2 py-0.5 rounded text-xs"><span class="font-medium">${i.field || ''}</span><span> ${i.operator || ''}</span><span class="font-medium"> ${v}</span></span>`;
+				}).join(' ');
+				if (hiddenCount > 0) html += `<span class="inline-flex items-center h-5 bg-white border border-[#E5E5E5] px-1.5 py-0.5 rounded-lg text-xs ml-1" title="${items.slice(maxVisible).map(fmt).join(' | ')}">+${hiddenCount}</span>`;
+				td.classList.add('pl-0');
+				td.innerHTML = `<div class="wrapper inline-flex items-center gap-1 pl-0" title="${items.map(fmt).join(' | ')}">${html}</div>`;
+			} catch (e) {
+				td.innerHTML = '<div class="wrapper text-xs text-sm-base-muted-foreground">-</div>';
+			}
+			return td;
+		}
+		Handsontable.renderers.registerRenderer('taskActionsRenderer', taskActionsRenderer);
 
       function datetimeRenderer(hotInstance, td, row, column, prop, value, cellProperties) {
 		if (['tasks_completed_date', 'tasks_date'].some(key => prop.includes(key))) {
@@ -4375,8 +4506,11 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 		if (typeof window.smart_manager.toggleUnsavedChangesUI === 'function') {
 			window.smart_manager.toggleUnsavedChangesUI(enabled);
 		}
+		// Update floating action bar for inline edits
+		if (typeof window.smart_manager.updateFloatingBarForInlineEdit === 'function') {
+			window.smart_manager.updateFloatingBarForInlineEdit();
+		}
 	}
-
 
 	SmartManager.prototype.reset = function (fullReset = false) {
 		SaCommonManager.prototype.reset.call(this, fullReset);
@@ -4531,7 +4665,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 		/* translators: %s is the dashboard name (e.g., Product, Order, etc.) */
 		const addBtnText = sprintf(_x('New %s', 'button', 'smart-manager-for-wp-e-commerce'), dashboardTitle.replace(/s$/, ''));
 		return `
-		<header id="sm-header" class="flex items-center justify-between w-full px-3 md:px-6 py-3 bg-[#FBFBFB] border-b border-sm-base-border gap-2 md:gap-4 mt-2">
+		<header id="sm-header" class="flex items-center justify-between w-full px-3 md:px-6 py-3 bg-[#FBFBFB] border-b border-sm-base-border gap-2 md:gap-4 pt-4">
 			<!-- Left Section - Title -->
 			<div class="flex items-center gap-1 shrink-0">
 				<h1 id="sm-header-title" class="p-0 text-base leading-5 font-semibold text-sm-base-foreground whitespace-nowrap">${dashboardTitle}</h1>
@@ -4606,15 +4740,13 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 
 				<!-- Discard Changes Button (shown when there are unsaved changes) -->
 				<button id="sm-discard-btn" class="!hidden cursor-pointer gap-1.5 rounded-md px-2 md:px-3.5 py-2 text-[0.8125rem] leading-4 font-medium text-sm-base-destructive items-center shrink-0 hover:bg-red-50 transition-colors">
-					<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0">
-						<path d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/>
-					</svg>
+					${window.smart_manager.getIcons('cross', 'currentColor')}
 					<span class="hidden sm:inline">${_x('Discard Changes', 'button', 'smart-manager-for-wp-e-commerce')}</span>
 				</button>
 
 				<!-- Save Button (changes appearance when there are unsaved changes) -->
-				<button id="sm-save-btn" class="cursor-pointer gap-1.5 rounded-md px-2 md:px-3.5 py-2 text-[0.8125rem] leading-4 font-medium text-sm-base-muted-foreground inline-flex items-center shrink-0 hover:bg-sm-base-muted transition-colors">
-					<svg id="sm-save-btn-icon" width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0">
+				<button id="sm-save-inline-edit-btn" class="cursor-pointer gap-1.5 rounded-md px-2 md:px-3.5 py-2 text-[0.8125rem] leading-4 font-medium text-sm-base-muted-foreground inline-flex items-center shrink-0 hover:bg-sm-base-muted transition-colors">
+					<svg id="sm-save-inline-edit-btn-icon" width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0">
 						<path d="M9.99837 12.665V7.99831C9.99837 7.8215 9.92814 7.65193 9.80311 7.52691C9.67809 7.40188 9.50852 7.33164 9.33171 7.33164H3.99837C3.82156 7.33164 3.65199 7.40188 3.52697 7.52691C3.40194 7.65193 3.33171 7.8215 3.33171 7.99831V12.665M3.33171 0.664978V3.33164C3.33171 3.50846 3.40194 3.67802 3.52697 3.80305C3.65199 3.92807 3.82156 3.99831 3.99837 3.99831H8.66504M8.79837 0.664978C9.15006 0.669987 9.48553 0.813759 9.73171 1.06498L12.265 3.59831C12.5163 3.84449 12.66 4.17995 12.665 4.53164V11.3316C12.665 11.6853 12.5246 12.0244 12.2745 12.2745C12.0245 12.5245 11.6853 12.665 11.3317 12.665H1.99837C1.64475 12.665 1.30561 12.5245 1.05556 12.2745C0.805515 12.0244 0.665039 11.6853 0.665039 11.3316V1.99831C0.665039 1.64469 0.805515 1.30555 1.05556 1.0555C1.30561 0.805454 1.64475 0.664978 1.99837 0.664978H8.79837Z" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/>
 					</svg>
 					<span class="hidden sm:inline">${_x('Save', 'button', 'smart-manager-for-wp-e-commerce')}</span>
@@ -4631,7 +4763,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 		}
 		
 		// Initialize discard button click handler
-		jQuery(document).off('click', '#sm-discard-btn').on('click', '#sm-discard-btn', function(e) {
+		jQuery(document).off('click', '#sm-discard-btn, #sm-floating-discard-btn').on('click', '#sm-discard-btn, #sm-floating-discard-btn', function(e) {
 			e.preventDefault();
 			if (typeof window.smart_manager.showConfirmDialog === 'function') {
 				window.smart_manager.showConfirmDialog({
@@ -4716,22 +4848,20 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 	SmartManager.prototype.toggleUnsavedChangesUI = function(hasChanges) {
 		const addBtn = jQuery('#sm-add-new-btn');
 		const discardBtn = jQuery('#sm-discard-btn');
-		const saveBtn = jQuery('#sm-save-btn');
+		const saveBtn = jQuery('#sm-save-inline-edit-btn');
 		
 		if (hasChanges) {
 			// Hide add new, show discard
 			addBtn.removeClass('inline-flex').addClass('!hidden');
 			discardBtn.removeClass('!hidden').addClass('inline-flex');
 			// Update save button to primary style
-			saveBtn.removeClass('text-sm-base-muted-foreground hover:bg-sm-base-muted')
-				.addClass('bg-sm-base-primary text-white hover:bg-sm-base-primary/90');
+			saveBtn.removeClass('text-sm-base-muted-foreground hover:bg-sm-base-muted').addClass('bg-sm-base-primary text-white hover:bg-sm-base-primary/90');
 		} else {
 			// Show add new, hide discard
 			addBtn.removeClass('!hidden').addClass('inline-flex');
 			discardBtn.removeClass('inline-flex').addClass('!hidden');
 			// Reset save button to default style
-			saveBtn.addClass('text-sm-base-muted-foreground hover:bg-sm-base-muted')
-				.removeClass('bg-sm-base-primary text-white hover:bg-sm-base-primary/90');
+			saveBtn.addClass('text-sm-base-muted-foreground hover:bg-sm-base-muted').removeClass('bg-sm-base-primary text-white hover:bg-sm-base-primary/90');
 		}
 	}
 
@@ -4841,9 +4971,9 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 	// Build the floating action bar HTML component
 	SmartManager.prototype.buildFloatingActionBarHtml = function() {
 		return `
-		<div id="sm-floating-action-bar" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] p-0 transition-all duration-200 ease-out opacity-0 invisible translate-y-5 pointer-events-none">
-			<div class="bg-[#0a0a0a] border border-white/10 rounded-xl overflow-hidden shadow-2xl min-w-[25rem] max-w-[90vw] w-[55rem]">
-				<!-- Top Row - Close button and selected count -->
+		<div id="sm-floating-action-bar" data-mode="selection" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] p-0 transition-all duration-200 ease-out opacity-0 invisible translate-y-5 pointer-events-none">
+			<div class="bg-[#0a0a0a] border border-white/10 rounded-xl overflow-hidden shadow-2xl min-w-[25rem] max-w-[90vw]">
+				<!-- Top Row - Close button and status text -->
 				<div class="flex items-center gap-2.5 px-3 py-2 border-b border-white/10">
 					<button id="sm-floating-bar-close" class="flex items-center justify-center w-8 h-8 p-2 bg-transparent border-none rounded-lg cursor-pointer text-[#fafafa] transition-colors duration-150 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-[#5850ec]/50" title="${_x('Clear selection', 'tooltip', 'smart-manager-for-wp-e-commerce')}">
 						<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -4852,12 +4982,11 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 					</button>
 					<div class="flex items-center gap-1 flex-1 font-['Inter',system-ui,sans-serif] text-sm font-normal leading-5 text-[#fafafa]">
 						<span id="sm-floating-bar-count" class="font-medium">0</span>
-						<span id="sm-floating-bar-dashboard-name">${window.smart_manager.dashboardDisplayName || ''}</span>
-						<span>${_x('selected', 'selection status', 'smart-manager-for-wp-e-commerce')}</span>
+						<span id="sm-floating-bar-text">${window.smart_manager.dashboardDisplayName || ''} ${_x('selected', 'selection status', 'smart-manager-for-wp-e-commerce')}</span>
 					</div>
 				</div>
-				<!-- Actions Row -->
-				<div class="flex items-center gap-4 p-3 flex-wrap">
+				<!-- Selection Mode Actions (Bulk Edit, Duplicate, Export, Delete) -->
+				<div id="sm-floating-selection-actions" class="flex items-center gap-4 p-3 flex-wrap">
 					<button id="sm-floating-bulk-edit-btn" class="inline-flex items-center gap-2 h-9 py-2 pl-2.5 pr-4 rounded-lg border-none font-['Inter',system-ui,sans-serif] text-sm font-medium leading-5 cursor-pointer transition-colors duration-150 whitespace-nowrap shadow-sm bg-[#262626] text-[#fafafa] hover:bg-[#333333] focus:outline-none focus:ring-2 focus:ring-[#5850ec]/50">
 						<svg width="14" height="15" viewBox="0 0 14 15" fill="none" xmlns="http://www.w3.org/2000/svg">
 							<path d="M9.9974 2.66504L8.38806 1.05571C8.13807 0.80564 7.79899 0.665115 7.4454 0.665039H1.9974C1.64377 0.665039 1.30464 0.805515 1.05459 1.05556C0.804538 1.30561 0.664063 1.64475 0.664062 1.99837V12.665C0.664063 13.0187 0.804538 13.3578 1.05459 13.6078C1.30464 13.8579 1.64377 13.9984 1.9974 13.9984H9.9974C10.351 13.9984 10.6902 13.8579 10.9402 13.6078C11.1903 13.3578 11.3307 13.0187 11.3307 12.665M3.33073 11.3317H3.9974M12.2494 7.74898C12.5149 7.48341 12.6641 7.12321 12.6641 6.74764C12.6641 6.37207 12.5149 6.01188 12.2494 5.74631C11.9838 5.48074 11.6236 5.33154 11.248 5.33154C10.8725 5.33154 10.5123 5.48074 10.2467 5.74631L7.57338 8.42097C7.41488 8.57939 7.29886 8.7752 7.23605 8.99031L6.67805 10.9036C6.66132 10.961 6.66031 11.0218 6.67514 11.0797C6.68997 11.1376 6.72009 11.1904 6.76234 11.2327C6.8046 11.2749 6.85743 11.305 6.91532 11.3199C6.97321 11.3347 7.03401 11.3337 7.09138 11.317L9.00471 10.759C9.21982 10.6962 9.41563 10.5801 9.57405 10.4216L12.2494 7.74898Z" stroke="#FAFAFA" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/>
@@ -4889,29 +5018,92 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 						<span>${_x('Delete', 'button', 'smart-manager-for-wp-e-commerce')}</span>
 					</button>
 				</div>
+				<!-- Inline Edit Mode Actions (Save, Discard) -->
+				<div id="sm-floating-inline-edit-actions" class="hidden items-center gap-4 p-3 flex-wrap">
+					<button id="sm-floating-save-btn" class="inline-flex items-center gap-2 py-2 pl-2.5 pr-4 rounded-lg border-none text-sm font-medium leading-5 cursor-pointer shadow-sm bg-[#262626] text-[#fafafa] hover:bg-[#333333] focus:outline-none focus:ring-2 focus:ring-[#5850ec]/50">
+						${window.smart_manager.getIcons('save', 'currentColor')}
+						<span>${_x('Save Changes', 'button', 'smart-manager-for-wp-e-commerce')}</span>
+					</button>
+					<div class="flex-1 min-w-[1.25rem]"></div>
+					<button id="sm-floating-discard-btn" class="inline-flex items-center gap-2 h-9 py-2 pl-2.5 pr-4 rounded-lg border-none font-['Inter',system-ui,sans-serif] text-sm font-medium leading-5 cursor-pointer transition-colors duration-150 whitespace-nowrap shadow-sm bg-transparent text-[#f87171] hover:bg-[#f87171]/10 focus:outline-none focus:ring-2 focus:ring-[#5850ec]/50">
+						${window.smart_manager.getIcons('cross', 'currentColor')}
+						<span>${_x('Discard Changes', 'button', 'smart-manager-for-wp-e-commerce')}</span>
+					</button>
+				</div>
 			</div>
 		</div>`;
 	}
 
-	// Show the floating action bar
-	SmartManager.prototype.showFloatingActionBar = function() {
+	// Show the floating action bar with specified mode
+	// mode: 'selection' (default) or 'inline-edit'
+	SmartManager.prototype.showFloatingActionBar = function(params = {}) {
 		if (window.smart_manager.dashboardKey === 'product_stock_log') {
 			return;
 		}
-		let selectedCount = window.smart_manager.selectAll ? window.smart_manager.displayTotalRecords : window.smart_manager.selectedRows.length;
-		let dashboardName = window.smart_manager.dashboardDisplayName || _x('products', 'dashboard name', 'smart-manager-for-wp-e-commerce');
-		// Use singular form for single selection
-		if (selectedCount === 1) {
-			dashboardName = dashboardName.replace(/s$/, '');
+		let mode = params.mode || 'selection';
+		let floatingBar = jQuery('#sm-floating-action-bar');
+		
+		// Set mode attribute
+		floatingBar.attr('data-mode', mode);
+		
+		// Set width on the inner container
+		floatingBar.find('> div').first().removeClass('w-[55rem] w-[35rem]').addClass(`${params.width || (mode === 'inline-edit' ? 'w-[35rem]' : 'w-[55rem]')}`);
+		
+		// Update content based on mode
+		if (mode === 'inline-edit') {
+			jQuery('#sm-floating-bar-count').text( 'You have ' + window?.smart_manager?.modifiedRows?.length || 0);
+			jQuery('#sm-floating-bar-text').text(_x('unsaved changes', 'inline edit status', 'smart-manager-for-wp-e-commerce'));
+			jQuery('#sm-floating-bar-close').attr('title', _x('Discard changes', 'tooltip', 'smart-manager-for-wp-e-commerce'));
+			
+			// Show inline edit actions, hide selection actions
+			jQuery('#sm-floating-selection-actions').removeClass('flex').addClass('hidden');
+			jQuery('#sm-floating-inline-edit-actions').removeClass('hidden').addClass('flex');
+		} else {
+			// Selection mode
+			let selectedCount = window.smart_manager.selectAll ? window.smart_manager.displayTotalRecords : window.smart_manager.selectedRows.length;
+			let dashboardName = window.smart_manager.dashboardDisplayName || _x('products', 'dashboard name', 'smart-manager-for-wp-e-commerce');
+			
+			// Use singular form for single selection
+			if (selectedCount === 1) {
+				dashboardName = dashboardName.replace(/s$/, '');
+			}
+			
+			jQuery('#sm-floating-bar-count').text(`${window.smart_manager.selectAll ? 'All' : selectedCount}`);
+			jQuery('#sm-floating-bar-text').text(dashboardName.toLowerCase() + ' ' + _x('selected', 'selection status', 'smart-manager-for-wp-e-commerce'));
+			jQuery('#sm-floating-bar-close').attr('title', _x('Clear selection', 'tooltip', 'smart-manager-for-wp-e-commerce'));
+			
+			// Show selection actions, hide inline edit actions
+			jQuery('#sm-floating-selection-actions').removeClass('hidden').addClass('flex');
+			jQuery('#sm-floating-inline-edit-actions').removeClass('flex').addClass('hidden');
 		}
-		jQuery('#sm-floating-bar-count').text(`${window.smart_manager.selectAll ? `All` : selectedCount}`);
-		jQuery('#sm-floating-bar-dashboard-name').text(dashboardName.toLowerCase());
-		jQuery('#sm-floating-action-bar').removeClass('opacity-0 invisible translate-y-5 pointer-events-none').addClass('opacity-100 visible translate-y-0 pointer-events-auto');
+		
+		// Show the bar
+		floatingBar.removeClass('opacity-0 invisible translate-y-5 pointer-events-none').addClass('opacity-100 visible translate-y-0 pointer-events-auto');
 	}
 
 	// Hide the floating action bar
 	SmartManager.prototype.hideFloatingActionBar = function() {
 		jQuery('#sm-floating-action-bar').removeClass('opacity-100 visible translate-y-0 pointer-events-auto').addClass('opacity-0 invisible translate-y-5 pointer-events-none');
+	}
+	
+	// Update floating action bar for inline edits (called when edits are made)
+	SmartManager.prototype.updateFloatingBarForInlineEdit = function() {
+		if ((typeof window.smart_manager.modifiedRows !== 'undefined') && (window.smart_manager.modifiedRows.length > 0 )) {
+			// Check if bar is already visible in selection mode
+			let currentMode = jQuery('#sm-floating-action-bar').attr('data-mode');
+			let isVisible = jQuery('#sm-floating-action-bar').hasClass('opacity-100');
+			// Only show inline-edit mode if no rows are selected
+			window.smart_manager.showFloatingActionBar({ mode: 'inline-edit' });
+			if (isVisible && currentMode === 'inline-edit') {
+				// Update count if already in inline-edit mode
+				jQuery('#sm-floating-bar-count').text( 'You have ' + window?.smart_manager?.modifiedRows?.length || 0);
+			}
+		} else {
+			// Hide if no edits and no selection
+			if (!window.smart_manager.selectedRows.length && !window.smart_manager.selectAll) {
+				window.smart_manager.hideFloatingActionBar();
+			}
+		}
 	}
 		
 	// Show/hide print invoice button
@@ -5657,6 +5849,10 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 				return `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 3L3 9M3 3L9 9" stroke="#737373" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>`
 			case ('plus'):
 				return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5V19M5 12H19" stroke="#737373" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+			case ('cross'):
+				return `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0"><path d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5" stroke="${stroke}" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+			case ('save'):
+				return `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0"><path d="M9.99837 12.665V7.99831C9.99837 7.8215 9.92814 7.65193 9.80311 7.52691C9.67809 7.40188 9.50852 7.33164 9.33171 7.33164H3.99837C3.82156 7.33164 3.65199 7.40188 3.52697 7.52691C3.40194 7.65193 3.33171 7.8215 3.33171 7.99831V12.665M3.33171 0.664978V3.33164C3.33171 3.50846 3.40194 3.67802 3.52697 3.80305C3.65199 3.92807 3.82156 3.99831 3.99837 3.99831H8.66504M8.79837 0.664978C9.15006 0.669987 9.48553 0.813759 9.73171 1.06498L12.265 3.59831C12.5163 3.84449 12.66 4.17995 12.665 4.53164V11.3316C12.665 11.6853 12.5246 12.0244 12.2745 12.2745C12.0245 12.5245 11.6853 12.665 11.3317 12.665H1.99837C1.64475 12.665 1.30561 12.5245 1.05556 12.2745C0.805515 12.0244 0.665039 11.6853 0.665039 11.3316V1.99831C0.665039 1.64469 0.805515 1.30555 1.05556 1.0555C1.30561 0.805454 1.64475 0.664978 1.99837 0.664978H8.79837Z" stroke="${stroke}" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"></path></svg>`
 			default:
 				return '';
 		}
