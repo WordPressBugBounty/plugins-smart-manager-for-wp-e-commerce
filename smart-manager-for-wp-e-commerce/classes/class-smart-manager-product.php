@@ -1520,7 +1520,7 @@ if ( ! class_exists( 'Smart_Manager_Product' ) ) {
 
 						foreach ($attr_editd_val as $attr_editd) {
 
-							$term_id = array_search( htmlspecialchars( $attr_editd ), $attr_val );
+							$term_id = array_search( htmlspecialchars( $attr_editd, ENT_NOQUOTES ), $attr_val );
 
 							if ($term_id === false && $attr_type == 'text') {
 								$new_term = wp_insert_term($attr_editd, $taxonomy_nm);

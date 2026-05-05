@@ -7,7 +7,7 @@ Tags: woocommerce bulk edit, woocommerce inventory management, woocommerce order
 Requires at least: 5.0
 Tested up to: 6.9
 Requires PHP: 7.0
-Stable tag: 8.86.0
+Stable tag: 8.87.0
 License: GPLv2
 
 WooCommerce Advanced Bulk Edit products, orders, & posts in an Excel-like sheet editor. Get advanced WooCommerce stock, pricing, & order management.
@@ -312,6 +312,12 @@ Please report security bugs found in the source code of the Smart Manager plugin
 2. Bulk edit / Batch update (only in Pro version)
 
 == Changelog ==
+
+= 8.87.0 (05.05.2026) =
+* Fix: Adding/Removing WooCommerce Product attribute terms containing quotes not working when using Inline Edit functionality
+* Update: UI/UX improvements for Column Manager - displaying it at the top of the grid and showing a prompt to open it when scrolling horizontally
+* Update: Allow admins to manage Custom Views of non-admin users and deleted users (Pro)
+* Update: POT file
 
 = 8.86.0 (17.04.2026) =
 * New: WooCommerce 10.7.0 compatible
@@ -800,6 +806,9 @@ Please report security bugs found in the source code of the Smart Manager plugin
 [See changelog for all versions](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 8.87.0 =
+Fixes related to Adding/Removing WooCommerce Product attribute terms containing quotes not working when using Inline Edit functionality, Updates related to UI/UX improvements for Column Manager - displaying it at the top of the grid and showing a prompt to open it when scrolling horizontally, Allow admins to manage Custom Views of non-admin users and deleted users (Pro). Recommended upgrade.
 
 = 8.86.0 =
 WooCommerce 10.7.0 compatible, Advanced Search support for 'Orders Total' field on Users dashboard (Pro), Fixes related to Privilege escalation vulnerability allowing users to gain Administrator access [Thanks to Patchstack team], WooCommerce Product thumbnail image URL exporting (150x150) size instead of full-size image in CSV export, Undo not working when updating 'Sale Price' and 'Regular Price' in some cases (Pro), 'Add Row' not working on WooCommerce Products dashboard when 'Sale Price' fields are visible in the grid (Pro), Updates related to Save Inline Edit prompt reintroduced with updated UI, UI/UX improvements in the grid, UI improvements for 'Changes Made' column values in Edit History dashboard (Pro). Recommended upgrade.

@@ -65,6 +65,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 		this.currentGetDataParams = {};
 		this.modifiedRows = [];
 		this.dirtyRowColIds = {};
+		this.FloatingColumnManagerPromptDismissed = false; // Track if user dismissed the column manager prompt
 		this.wpToolsPanelWidth = 0;
 		this.kpiData = {};
 		this.defaultSortParams = { orderby: 'ID', order: 'DESC', default: true };
@@ -1141,8 +1142,10 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 		jQuery(sm_bottom_bar).insertAfter("#sm_editor_grid");
 		
 		// Add floating multi-select action bar
-		let sm_floating_action_bar = window.smart_manager.buildFloatingActionBarHtml();
-		jQuery(sm_floating_action_bar).insertAfter("#sm_bottom_bar");
+		jQuery(window.smart_manager.buildFloatingActionBarHtml()).insertAfter("#sm_bottom_bar");
+		
+		// Add floating column manager prompt (shown when scrolled horizontally)
+		jQuery(window.smart_manager.buildFloatingColumnManagerPromptHtml()).insertAfter("#sm_bottom_bar");
 		
 		// Initialize header functionality
 		window.smart_manager.initHeaderControls();
@@ -1275,8 +1278,12 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 	SmartManager.prototype.isTasksEnabled = function () {
 		return (window.smart_manager.isTasksViewActive === true || (window.location.search.includes('show_edit_history'))) ? 1 : 0;
 	}
-	SmartManager.prototype.displayShowHideColumnSettings = function (isShow = true) {
-		jQuery('#sm-edit-custom-view-btn, #sm-delete-custom-view-btn').removeClass((!isShow) ? 'inline-flex' : '!hidden').addClass((!isShow)?'!hidden':'inline-flex');
+	SmartManager.prototype.displayShowHideColumnSettings = function (params = {}) {
+		let showEdit = (typeof params === 'object') ? (params.showEdit || false) : params;
+		let showDelete = (typeof params === 'object') ? (params.showDelete || false) : params;
+		jQuery('.sm-header-column-manager').removeClass((!showEdit && window.smart_manager.isCustomView) ? 'flex' : 'hidden').addClass((!showEdit && window.smart_manager.isCustomView)?'hidden':'flex');
+		jQuery('#sm-edit-custom-view-btn').removeClass((!showEdit) ? 'inline-flex' : '!hidden').addClass((!showEdit)?'!hidden':'inline-flex');
+		jQuery('#sm-delete-custom-view-btn').removeClass((!showDelete) ? 'inline-flex' : '!hidden').addClass((!showDelete)?'!hidden':'inline-flex');
 	}
 
 	SmartManager.prototype.set_data = function (response) {
@@ -2255,6 +2262,8 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 				if ("undefined" !== typeof (window.smart_manager.refreshColumnsTitleAttribute) && "function" === typeof (window.smart_manager.refreshColumnsTitleAttribute)) {
 					window.smart_manager.refreshColumnsTitleAttribute();
 				}
+				// Show/hide floating column manager prompt based on scroll percentage
+				window.smart_manager.checkHorizontalScrollForColumnPrompt();
 			},
 			afterOnCellMouseDown: function (e, coords, td) {
 				if ((!coords) || (coords && (coords.row === -1) && (coords.col !== -1))) {
@@ -2336,7 +2345,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 					jQuery('#print_invoice_sm_editor_grid_btn').hide();
 				}
 
-				window.smart_manager.displayShowHideColumnSettings(true);
+				window.smart_manager.displayShowHideColumnSettings({ showEdit: false, showDelete: false });
 				jQuery('#sm_editor_grid').trigger('sm_dashboard_change'); //custom trigger
 				if ('undefined' !== typeof (window.smart_manager.displayTasks) && 'function' === typeof (window.smart_manager.displayTasks)) {
 					window.smart_manager.displayTasks({ dashboardChange: true });
@@ -2753,6 +2762,25 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 					}
 					window.smart_manager.showNotification()
 				}
+			})
+
+			// ========================================================================
+			// FLOATING COLUMN MANAGER PROMPT HANDLERS
+			// ========================================================================
+
+			// Open column manager button
+			.off('click', '#sm-floating-column-prompt-btn, .sm-header-column-manager').on('click', '#sm-floating-column-prompt-btn, .sm-header-column-manager', function(e) {
+				e.preventDefault();
+				if (typeof (window.smart_manager.openColumnManager) !== "undefined" && typeof (window.smart_manager.openColumnManager) === "function") {
+					window.smart_manager.openColumnManager()
+				}
+			})
+
+			// Close button - dismiss prompt
+			.off('click', '#sm-floating-column-prompt-close').on('click', '#sm-floating-column-prompt-close', function(e) {
+				e.preventDefault();
+				window.smart_manager.hideFloatingColumnManagerPrompt();
+				window.smart_manager.FloatingColumnManagerPromptDismissed = true;
 			})
 
 			// ========================================================================
@@ -3282,8 +3310,9 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 			slug: viewSlug,
 		};
 		window.smart_manager.sendRequest(params, function (response) {
-			window.smart_manager.isViewAuthor = (response) ? true : false
-			window.smart_manager.displayShowHideColumnSettings(response);
+			window.smart_manager.isViewAuthor = (response && response.is_author) ? true : false;
+			let canDelete = (response && response.can_delete) ? true : false;
+			window.smart_manager.displayShowHideColumnSettings({ showEdit: canDelete, showDelete: canDelete });
 		});
 	}
 
@@ -4533,6 +4562,11 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 		if (typeof (this.hideFloatingActionBar) !== "undefined" && typeof (this.hideFloatingActionBar) === "function") {
 			this.hideFloatingActionBar();
 		}
+		// Reset floating column prompt dismissed state
+		this.FloatingColumnManagerPromptDismissed = false;
+		if (typeof (this.hideFloatingColumnManagerPrompt) !== "undefined" && typeof (this.hideFloatingColumnManagerPrompt) === "function") {
+			this.hideFloatingColumnManagerPrompt();
+		}
 		this.updatedEditedData = {};
 		this.processContent = '';
 		this.updatedTitle = '';
@@ -4672,7 +4706,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 			</div>
 
 			<!-- Center Section - Controls -->
-			<div class="flex items-center gap-2 md:gap-4 flex-1 min-w-0 relative">
+			<div class="flex items-center gap-4 flex-1 min-w-0 relative">
 				<!-- Custom view dropdown trigger (shown when NOT on custom view) -->
 				<button id="sm-custom-view-btn" aria-haspopup="true" aria-expanded="false" class="${window.smart_manager.isCustomView ? '!hidden' : 'inline-flex'} cursor-pointer gap-1.5 rounded-md border border-sm-base-border bg-sm-base-background px-2 md:px-3 hover:bg-[#FBFBFB] py-1.5 text-[0.8125rem] leading-4 text-sm-base-foreground group items-center shrink-0">
 					<span class="text-sm-base-foreground hidden sm:inline">${_x('Custom view:', 'label', 'smart-manager-for-wp-e-commerce')}</span>
@@ -4681,7 +4715,16 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 						<path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 					</svg>
 				</button>
-
+				<div class="flex items-center gap-3.75 justify-center sm-header-column-manager">
+					<span class="text-[#D4D4D4] text-[1.45rem] mt-[0.1rem]">|</span>
+						<div class="flex items-center gap-1">
+							<button type="button" class="border-none cursor-pointer duration-150 flex h-7 items-center justify-center p-0 rounded sm-action-header-btn text-[#737373] mx-0.5" title="Column Manager">
+								<svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.665 6.33164V1.99831C12.665 1.26193 12.0681 0.664978 11.3317 0.664978H1.99837C1.26199 0.664978 0.665039 1.26193 0.665039 1.99831V11.3316C0.665039 12.068 1.26199 12.665 1.99837 12.665H6.66504M4.66504 0.664978V12.665M8.66504 0.664978V6.99831M8.64135 10.9983H13.3554M10.9984 13.3553V8.6413" stroke="#6B63F1" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+							</button>
+							<label class="text-sm-base-foreground cursor-pointer text-[0.8125rem]">${_x('Manage Columns', 'label', 'smart-manager-for-wp-e-commerce')}</label>
+						</div>
+					<span class="text-[#D4D4D4] sm-header-show-variations-separator hidden text-[1.45rem] mt-[0.1rem]">|</span>
+				</div>
 				<!-- Custom view active display (shown when ON custom view) -->
 				<div id="sm-custom-view-active" class="${window.smart_manager.isCustomView ? 'flex' : '!hidden'} items-center gap-1 shrink-0">
 					<button id="sm-custom-view-active-btn" class="cursor-pointer gap-2 rounded-lg border border-sm-colors-violet-200 bg-sm-base-background px-4 py-1.5 text-sm leading-5 text-sm-base-primary shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] inline-flex items-center shrink-0">
@@ -5079,11 +5122,85 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 		
 		// Show the bar
 		floatingBar.removeClass('opacity-0 invisible translate-y-5 pointer-events-none').addClass('opacity-100 visible translate-y-0 pointer-events-auto');
+		// Hide column prompt when action bar is shown to avoid overlap
+		window.smart_manager.hideFloatingColumnManagerPrompt();
 	}
 
 	// Hide the floating action bar
 	SmartManager.prototype.hideFloatingActionBar = function() {
 		jQuery('#sm-floating-action-bar').removeClass('opacity-100 visible translate-y-0 pointer-events-auto').addClass('opacity-0 invisible translate-y-5 pointer-events-none');
+	}
+	
+	// Build floating column manager prompt HTML (shown when scrolled horizontally)
+	SmartManager.prototype.buildFloatingColumnManagerPromptHtml = function() {
+		const missingText = (typeof _x === 'function') ? _x('Missing column?', 'floating prompt', 'smart-manager-for-wp-e-commerce') : 'Missing column?';
+		const openText = (typeof _x === 'function') ? _x('Open Column Manager', 'floating prompt button', 'smart-manager-for-wp-e-commerce') : 'Open Column Manager';
+		
+		return `
+		<div id="sm-floating-column-prompt" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9998] transition-all duration-300 ease-out opacity-0 invisible translate-y-5 pointer-events-none">
+			<div class="flex items-center gap-3 bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 shadow-2xl">
+				<svg width="18" height="18" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-[#6B63F1] shrink-0">
+					<path d="M12.665 6.33164V1.99831C12.665 1.26193 12.0681 0.664978 11.3317 0.664978H1.99837C1.26199 0.664978 0.665039 1.26193 0.665039 1.99831V11.3316C0.665039 12.068 1.26199 12.665 1.99837 12.665H6.66504M4.66504 0.664978V12.665M8.66504 0.664978V6.99831M8.64135 10.9983H13.3554M10.9984 13.3553V8.6413" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/>
+				</svg>
+				<span class="text-[#fafafa] text-sm font-normal">${missingText}</span>
+				<button id="sm-floating-column-prompt-btn" class="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border-none text-sm font-medium cursor-pointer transition-colors duration-150 bg-[#262626] text-[#fafafa] hover:bg-[#333333] focus:outline-none focus:ring-2 focus:ring-[#5850ec]/50">
+					${openText}
+				</button>
+				<button id="sm-floating-column-prompt-close" class="flex items-center justify-center w-8 h-8 p-2 bg-transparent border-none rounded-lg cursor-pointer text-[#fafafa] transition-colors duration-150 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-[#5850ec]/50" title="Close">
+					<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M12 4L4 12M4 4L12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+					</svg>
+				</button>
+			</div>
+		</div>`;
+	}
+	// Show floating column prompt
+	SmartManager.prototype.showFloatingColumnManagerPrompt = function() {
+		// Don't show if floating action bar is visible (to avoid overlap)
+		if (jQuery('#sm-floating-action-bar').hasClass('opacity-100') || jQuery('th .sm-action-header-btn').is( ':visible' )) {
+			return;
+		}
+		jQuery('#sm-floating-column-prompt').removeClass('opacity-0 invisible translate-y-5 pointer-events-none').addClass('opacity-100 visible translate-y-0 pointer-events-auto');
+	}
+	
+	// Hide floating column prompt
+	SmartManager.prototype.hideFloatingColumnManagerPrompt = function() {
+		jQuery('#sm-floating-column-prompt').removeClass('opacity-100 visible translate-y-0 pointer-events-auto').addClass('opacity-0 invisible translate-y-5 pointer-events-none');
+	}
+	
+	// Check horizontal scroll and show/hide column manager prompt
+	SmartManager.prototype.checkHorizontalScrollForColumnPrompt = function() {
+		if (!window.smart_manager.hot){
+			return;
+		} 
+		const gridContainer = document.getElementById('sm_editor_grid');
+		if (!gridContainer){
+			return;
+		}
+		const hotHolder = gridContainer.querySelector('.ht_master .wtHolder');
+		if (!hotHolder){
+			return;
+		}
+		
+		// Calculate scroll percentage
+		const scrollWidth = (hotHolder?.scrollWidth || 0) - (hotHolder?.clientWidth || 0);
+		
+		// Only show if there's actually scrollable content
+		if (scrollWidth <= 0) {
+			window.smart_manager.hideFloatingColumnManagerPrompt();
+			return;
+		}
+		
+		const scrollPercent = (hotHolder.scrollLeft / scrollWidth) * 100;
+		
+		// Show prompt when scrolled 20% or more, hide when scrolled back
+		if (scrollPercent >= 20 && !window.smart_manager.FloatingColumnManagerPromptDismissed) {
+			window.smart_manager.showFloatingColumnManagerPrompt();
+		} else if (scrollPercent < 10) {
+			window.smart_manager.hideFloatingColumnManagerPrompt();
+			// Reset dismissed state when user scrolls back to start
+			window.smart_manager.FloatingColumnManagerPromptDismissed = false;
+		}
 	}
 	
 	// Update floating action bar for inline edits (called when edits are made)

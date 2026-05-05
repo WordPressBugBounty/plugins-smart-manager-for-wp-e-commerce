@@ -158,6 +158,21 @@ class Smart_Manager_Admin_Welcome {
 				display: none;
 			}
 
+			.sm-welcome-footer-btn {
+				display: inline-flex;
+				gap: 0.375rem;
+				align-items: center;
+				padding: 0.5rem 0.5rem;
+				font-size: 0.875rem;
+				line-height: 1.25rem;
+			}
+
+			.sm-welcome-footer-btn-text {
+				font-size: 0.75rem;
+				line-height: 1rem;
+				white-space: nowrap;
+			}
+
 			.sm-video-container {
 				position: relative;
 				padding-top: 56.25%;
@@ -245,8 +260,19 @@ class Smart_Manager_Admin_Welcome {
 							}
 							add_thickbox();
 						}
-						?> <a href="https://www.storeapps.org/support/contact-us/?utm_source=sm&utm_medium=welcome_page&utm_campaign=view_docs" target="_blank"> 
-								<?php echo __( 'Questions? Need Help?', 'smart-manager-for-wp-e-commerce' );?>
+						?>
+							<a href="https://www.storeapps.org/support/contact-us/?utm_source=sm&utm_medium=welcome_page&utm_campaign=view_docs" target="_blank" class="sm-welcome-footer-btn">
+								<svg width="10" height="15" viewBox="0 0 10 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<path d="M6.66504 8.66501C6.79837 7.99834 7.13171 7.53167 7.66504 6.99834C8.33171 6.39834 8.66504 5.53167 8.66504 4.66501C8.66504 3.60414 8.24361 2.58673 7.49347 1.83658C6.74332 1.08644 5.72591 0.665009 4.66504 0.665009C3.60417 0.665009 2.58676 1.08644 1.83661 1.83658C1.08647 2.58673 0.665039 3.60414 0.665039 4.66501C0.665039 5.33167 0.798372 6.13167 1.66504 6.99834C2.13171 7.46501 2.53171 7.99834 2.66504 8.66501M2.66504 11.3317H6.66504M3.33171 13.9983H5.99837" stroke="#2271b1" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/>
+								</svg>
+								<span class="sm-welcome-footer-btn-text"><?php echo __( 'Questions? Need Help?', 'smart-manager-for-wp-e-commerce' ); ?></span>
+							</a>
+							<?php echo __( 'or', 'smart-manager-for-wp-e-commerce' ); ?>
+							<a href="https://calendly.com/storeapps/15min" target="_blank" class="sm-welcome-footer-btn">
+								<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<path d="M13.3317 9.88001V11.6867C13.3324 11.8556 13.298 12.023 13.2306 12.178C13.1633 12.333 13.0646 12.4722 12.9409 12.5867C12.8173 12.7012 12.6713 12.7887 12.5121 12.8437C12.3529 12.8987 12.1839 12.9201 12.0157 12.9067C10.1575 12.7043 8.37302 12.0711 6.80566 11.0567C5.34829 10.1306 4.10578 8.88813 3.17967 7.43075C2.16202 5.85686 1.52875 4.06463 1.33041 2.19949C1.31707 2.03188 1.33823 1.86337 1.39277 1.70457C1.44731 1.54577 1.53406 1.40011 1.64758 1.27651C1.76111 1.15291 1.89917 1.05403 2.05306 0.986175C2.20695 0.918323 2.37321 0.882962 2.54167 0.882353H4.34834C4.64278 0.879565 4.92818 0.984338 5.1505 1.17718C5.37282 1.37002 5.51691 1.63762 5.55567 1.92949C5.62799 2.51306 5.76649 3.08668 5.96834 3.63949C6.05242 3.86807 6.0696 4.11588 6.01786 4.3541C5.96611 4.59231 5.84752 4.81072 5.67567 4.98416L4.91434 5.74549C5.77333 7.2559 7.05894 8.54151 8.56934 9.40049L9.33067 8.63916C9.5041 8.46731 9.72252 8.34872 9.96073 8.29697C10.1989 8.24523 10.4468 8.2624 10.6753 8.34649C11.2281 8.54834 11.8018 8.68684 12.3853 8.75916C12.6805 8.79827 12.9506 8.94505 13.1437 9.17115C13.3369 9.39724 13.4397 9.68697 13.4337 9.98401L13.3317 9.88001Z" stroke="#2271b1" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/>
+								</svg>
+								<span class="sm-welcome-footer-btn-text"><?php echo __( 'Book a Call', 'smart-manager-for-wp-e-commerce' ); ?></span>
 							</a>
 						<br>
 					<?php if ( SMPRO === true ) { ?>

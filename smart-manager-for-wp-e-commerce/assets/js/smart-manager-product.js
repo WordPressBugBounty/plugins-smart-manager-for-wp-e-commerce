@@ -202,6 +202,7 @@
 	SmartManager.prototype.showVariationsHtml = function () {
 		if (window.smart_manager.dashboardKey !== 'product') {
 			jQuery('#sm-header-center-extras').empty();
+			jQuery('.sm-header-show-variations-separator').addClass('hidden');
 			return;
 		}
 		
@@ -217,6 +218,7 @@
 			</label>
 		`;
 		jQuery('#sm-header-center-extras').html(toggleHtml);
+		jQuery('.sm-header-show-variations-separator').removeClass('hidden');
 	}
 
 	// Function to get show variations state for getData params
@@ -733,6 +735,7 @@ jQuery(document).on('sm_dashboard_change', '#sm_editor_grid', function() {
 	// Clear variations toggle if not on product dashboard
 	if (window.smart_manager.dashboardKey !== 'product') {
 		jQuery('#sm-header-center-extras').empty();
+		jQuery('.sm-header-show-variations-separator').addClass('hidden');
 	}
 })
 
