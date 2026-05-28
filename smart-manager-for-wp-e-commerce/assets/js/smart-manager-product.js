@@ -10,9 +10,24 @@
 	SmartManagerProduct.prototype = (typeof SmartManagerPro != 'undefined') ? Object.create(SmartManagerPro.prototype) : Object.create(SmartManager.prototype);
 	SmartManagerProduct.prototype.constructor = SmartManagerProduct;
 
+	// Helper function to check if current dashboard is product or product-based custom view
+	SmartManager.prototype.isProductDashboard = function() {
+		if (window.smart_manager.dashboardKey === 'product') {
+			return true;
+		}
+		if (window.smart_manager.isCustomView) {
+			let viewSlug = window.smart_manager.getViewSlug(window.smart_manager.dashboardName);
+			if (viewSlug && window.smart_manager.viewPostTypes && window.smart_manager.viewPostTypes[viewSlug] === 'product') {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	SmartManagerProduct.prototype.refreshDashboardStates = function() {
 		SmartManager.prototype.refreshDashboardStates.apply(this);
-		if( window.smart_manager.dashboardKey == 'product' ) {
+		
+		if( window.smart_manager.isProductDashboard() ) {
 			let tempDashModel = JSON.parse(JSON.stringify(window.smart_manager.currentDashboardModel));
 			window.smart_manager.dashboardStates[window.smart_manager.dashboardKey] = JSON.parse( window.smart_manager.dashboardStates[window.smart_manager.dashboardKey] );
 			window.smart_manager.dashboardStates[window.smart_manager.dashboardKey]['treegrid'] = ( tempDashModel.hasOwnProperty('treegrid') ) ? tempDashModel.treegrid : false;
@@ -200,7 +215,7 @@
 
 	//Function to handle 'show variations' checkbox - renders toggle HTML in header
 	SmartManager.prototype.showVariationsHtml = function () {
-		if (window.smart_manager.dashboardKey !== 'product') {
+		if (!window.smart_manager.isProductDashboard()) {
 			jQuery('#sm-header-center-extras').empty();
 			jQuery('.sm-header-show-variations-separator').addClass('hidden');
 			return;
@@ -234,7 +249,7 @@
 		}
 	}
 	SmartManager.prototype.setExportButtonHTML = function () {
-		if (window.smart_manager.dashboardKey === 'product') {
+		if (window.smart_manager.isProductDashboard()) {
 			if (document.getElementById('sm_export_entire_store_stock_cols') !== null) {
 				document.getElementById('sm_export_entire_store_stock_cols').innerHTML = (window.smart_manager.isFilteredData()) ? _x('All Items In Search Results - Stock Columns', 'export button', 'smart-manager-for-wp-e-commerce') : _x('Entire Store - Stock Columns', 'export button', 'smart-manager-for-wp-e-commerce');
 			}
@@ -732,8 +747,8 @@
 })(window);
 
 jQuery(document).on('sm_dashboard_change', '#sm_editor_grid', function() {
-	// Clear variations toggle if not on product dashboard
-	if (window.smart_manager.dashboardKey !== 'product') {
+	// Clear variations toggle if not on product dashboard or product-based custom view
+	if (!window.smart_manager.isProductDashboard()) {
 		jQuery('#sm-header-center-extras').empty();
 		jQuery('.sm-header-show-variations-separator').addClass('hidden');
 	}
@@ -781,7 +796,7 @@ jQuery(document).on('sm_dashboard_change', '#sm_editor_grid', function() {
 })
 
 .on('smart_manager_post_load_grid','#sm_editor_grid', function() {
-	if( window.smart_manager.dashboardKey == 'product' ) {
+	if( window.smart_manager.isProductDashboard() ) {
 		window.smart_manager.excludedEditedFieldKeys = ['postmeta/meta_key=_product_attributes/meta_value=_product_attributes'];
 
 		window.smart_manager.showVariationsHtml(); //Call to function for 'show variations' checkbox
@@ -842,11 +857,16 @@ jQuery(document).on('sm_dashboard_change', '#sm_editor_grid', function() {
 })
 
 .on('sm_grid_on_afterOnCellMouseUp','#sm_editor_grid', function(e, params) { //for handling attribute inline edit
-
-	if( typeof( params.colObj.prop ) == 'undefined' || (typeof( params.colObj.prop ) != 'undefined' && params.colObj.prop != 'custom_product_attributes') || window.smart_manager.dashboardKey != 'product' ) {
+	let isProductDashboard = false;
+	if (window.smart_manager.dashboardKey === 'product') {
+		isProductDashboard = true;
+	} else{
+		let viewSlug = window.smart_manager.getViewSlug(window.smart_manager.dashboardName);
+		isProductDashboard = (viewSlug && window.smart_manager.viewPostTypes && window.smart_manager.viewPostTypes[viewSlug] === 'product') ? true : false;
+	}
+	if( typeof( params.colObj.prop ) == 'undefined' || (typeof( params.colObj.prop ) != 'undefined' && params.colObj.prop != 'custom_product_attributes') || !isProductDashboard ) {
 		return;
 	}
-
 
 	window.smart_manager.defaultEditor = false;
 	window.smart_manager.prodIsVariation = false;
@@ -1026,7 +1046,7 @@ jQuery(document).on('sm_dashboard_change', '#sm_editor_grid', function() {
 })
 // Code for handling the export records functionality
 .off( 'click', "#sm_navbar_export_btn .sm_beta_dropdown_content a").on( 'click', "#sm_navbar_export_btn .sm_beta_dropdown_content a", function(e){
-	if(window.smart_manager.dashboardKey === 'product'){
+	if(window.smart_manager.isProductDashboard()){
 		window.smart_manager.stockCols = ['sm_export_selected_stock_cols', 'sm_export_entire_store_stock_cols'];
 		window.smart_manager.visibleCols = ['sm_export_selected_visible_cols', 'sm_export_entire_store_visible_cols'];
 		if(window.smart_manager.sm_beta_pro == 0){

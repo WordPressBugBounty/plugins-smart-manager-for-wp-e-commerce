@@ -5,9 +5,9 @@ Author URI: https://www.storeapps.org/woocommerce-plugins/
 Plugin URI: https://www.storeapps.org/product/smart-manager/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme
 Tags: woocommerce bulk edit, woocommerce inventory management, woocommerce order management, woocommerce product manager, wordpress bulk edit
 Requires at least: 5.0
-Tested up to: 6.9
+Tested up to: 7.0
 Requires PHP: 7.0
-Stable tag: 8.87.0
+Stable tag: 8.88.0
 License: GPLv2
 
 WooCommerce Advanced Bulk Edit products, orders, & posts in an Excel-like sheet editor. Get advanced WooCommerce stock, pricing, & order management.
@@ -312,6 +312,17 @@ Please report security bugs found in the source code of the Smart Manager plugin
 2. Bulk edit / Batch update (only in Pro version)
 
 == Changelog ==
+
+= 8.88.0 (28.05.2026) =
+* New: WordPress 7.0 compatible
+* New: WPML 4.9.4 compatible (Pro)
+* Fix: Grid records not preserving sort order when changing pagination while using Advanced Search
+* Fix: Column Manager icon position changing in the grid header when switching to Custom Views (Pro)
+* Fix: 'Show Variations' toggle switch not appearing on Custom Views dashboards for WooCommerce Products (Pro)
+* Fix: Some columns displaying 'null' values in the grid when switching to another dashboard from Custom Views dashboard (Pro)
+* Update: Improved grid UI/UX
+* Update: Improved UI/UX for the Custom Views dashboard (Pro)
+* Update: POT file
 
 = 8.87.0 (05.05.2026) =
 * Fix: Adding/Removing WooCommerce Product attribute terms containing quotes not working when using Inline Edit functionality
@@ -806,6 +817,9 @@ Please report security bugs found in the source code of the Smart Manager plugin
 [See changelog for all versions](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 8.88.0 =
+WordPress 7.0 compatible, WPML 4.9.4 compatible (Pro), Fixes related to Grid records not preserving sort order when changing pagination while using Advanced Search, Column Manager icon position changing in the grid header when switching to Custom Views (Pro), 'Show Variations' toggle switch not appearing on Custom Views dashboards for WooCommerce Products (Pro), Some columns displaying 'null' values in the grid when switching to another dashboard from Custom Views dashboard (Pro), Updates related to Improved grid UI/UX, Improved UI/UX for the Custom Views dashboard (Pro). Recommended upgrade.
 
 = 8.87.0 =
 Fixes related to Adding/Removing WooCommerce Product attribute terms containing quotes not working when using Inline Edit functionality, Updates related to UI/UX improvements for Column Manager - displaying it at the top of the grid and showing a prompt to open it when scrolling horizontally, Allow admins to manage Custom Views of non-admin users and deleted users (Pro). Recommended upgrade.

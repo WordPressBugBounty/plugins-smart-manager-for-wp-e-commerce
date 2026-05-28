@@ -3723,7 +3723,8 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				$sort_order = ( ! empty( $sort_params['sortOrder'] ) ) ? $sort_params['sortOrder'] : 'ASC';
 				if ( ! empty( $sort_params['table'] ) ) {
 					if ( 'posts' === $sort_params['table'] ) {
-						$params['order_by'] = $sort_params['column_nm'] .' '. $sort_order;
+						// Secondary sort by ID ensures deterministic ordering when multiple posts have the same column value (e.g., same title/date).
+						$params['order_by'] = $sort_params['column_nm'] .' '. $sort_order .', '. $wpdb->prefix .'posts.ID '. $sort_order;
 					} else if ( ( 'terms' === $sort_params['table'] ) && ( true === $this->terms_sort_join ) ) {
 						$params['order_by'] = ' taxonomy_sort.term_name '.$sort_order ;
 					}
@@ -3741,7 +3742,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 													ON (p.ID = pm.post_id
 														AND pm.meta_key = '". $sort_params['sort_by_meta_key'] ."')
 											WHERE p.post_type IN ('". implode("','", $post_type) ."')
-											ORDER BY ". $meta_value ." ". $sort_order );
+											ORDER BY ". $meta_value ." ". $sort_order .", p.ID ". $sort_order ); // Secondary sort by p.ID ensures deterministic ordering when multiple posts have the same meta_value (e.g., same price/stock).Without this, pagination results become inconsistent when navigating between pages with advanced search + sorting.
 
 				$option_name = 'sm_data_model_sorted_ids';
 				update_option( $option_name, implode( ',', $post_ids ), 'no' );

@@ -496,7 +496,8 @@ class Smart_Manager {
 				require_once 'pro/classes/class-smart-manager-pro-product-import-csv.php';
 			}
 		});
-		add_action( 'wp_ajax_dismiss_feature_notice', array( $this, 'dismiss_feature_notice' ) );
+		add_action( 'wp_ajax_dismiss_admin_notice', array( $this, 'dismiss_admin_notice' ) );
+		add_action( 'wp_ajax_sm_book_call_remind_later', array( $this, 'handle_book_call_remind_later' ) );
 		add_filter( 'sa_sm_manager_request_handler_allowed_dir_path', array( $this, 'request_handler_allowed_dir_path' ), 10 );
 		if ( ( defined('SMPRO') ) && ( SMPRO === true ) && ( class_exists( 'Smart_Manager_Settings' ) ) && ( is_callable( array( 'Smart_Manager_Settings', 'get' ) ) ) && ( 'yes' === Smart_Manager_Settings::get( 'track_external_product_changes' ) ) && ! class_exists( 'Smart_Manager_Pro_Product_Changes_Tracker' ) && file_exists( ( dirname( SM_PLUGIN_FILE ) ) . '/pro/classes/class-smart-manager-pro-product-changes-tracker.php' ) ) {
 			require_once 'pro/classes/class-smart-manager-pro-product-changes-tracker.php';
@@ -947,6 +948,9 @@ class Smart_Manager {
 		if ( ( ! empty( $_GET['page'] ) ) && ( ( ( 'smart-manager' === $_GET['page'] ) && ( ! empty( $_GET['landing-page'] ) && ( 'sm-about' === $_GET['landing-page'] ) ) ) ) ) {
 			if( is_callable( array( $this, 'display_wsm_stock_log_import_notice' ) ) ) {
 				self::display_wsm_stock_log_import_notice();
+			}
+			if( is_callable( array( $this, 'display_book_call_notice' ) ) ) {
+				self::display_book_call_notice();
 			}
 		}
 		if( !( !empty( $_GET['page'] ) && ( 'smart-manager' === $_GET['page'] ) ) ) {
@@ -1821,6 +1825,9 @@ class Smart_Manager {
 			if( is_callable( array( $this, 'display_wsm_stock_log_import_notice' ) ) ) {
 				self::display_wsm_stock_log_import_notice();
 			}
+			if( is_callable( array( $this, 'display_book_call_notice' ) ) ) {
+				self::display_book_call_notice();
+			}
 			if ( ( ! empty( self::$sa_offer_instance ) ) && ( is_callable( array( self::$sa_offer_instance, 'is_show' ) ) ) && ( ! empty( self::$sa_offer_instance->is_show() ) ) && ( is_callable( array( self::$sa_offer_instance, 'show_offer_content' ) ) ) && ( ! $is_pricing_page ) ) {
 				?> <div class="sa_offer_container"><?php self::$sa_offer_instance->show_offer_content(); ?></div> <?php
 			}
@@ -2378,7 +2385,7 @@ class Smart_Manager {
 	 * @param string $notice_key Unique identifier for the feature (e.g., 'sku_generation', 'bulk_edit').
 	 * @return void
 	 */
-	public static function add_dismissible_notice( $notice_key = '', $description = '', $pro_only = false ) {
+	public static function add_admin_notice( $notice_key = '', $description = '', $pro_only = false, $is_dismissible = true) {
 		if ( ( empty( $notice_key ) ) || ( empty( $description ) ) ) {
 			return;
 		}
@@ -2397,7 +2404,7 @@ class Smart_Manager {
 					type: 'post',
 					dataType: 'json',
 					data: {
-						action: 'dismiss_feature_notice',
+						action: 'dismiss_admin_notice',
 						feature_key: '<?php echo $notice_key; ?>',
 						security: '<?php echo wp_create_nonce( "sa-dismiss-{$notice_key}-notice" ); ?>'
 					}
@@ -2407,7 +2414,7 @@ class Smart_Manager {
 		<?php
 		
 		printf(
-			'<div class="ml-4 sm_feature_notice notice notice-%s is-dismissible" id="sm_%s_notice" style="display:block !important;"><p> %s </p></div>',
+			'<div class="ml-4 sm_feature_notice notice notice-%s '.($is_dismissible ? 'is-dismissible' : '').'" id="sm_%s_notice" style="display:block !important;"><p> %s </p></div>',
 			'success',
 			esc_attr( $notice_key ),
 			$description
@@ -2419,13 +2426,188 @@ class Smart_Manager {
 	 *
 	 * @return void
 	 */
-	public function dismiss_feature_notice() {
+	public function dismiss_admin_notice() {
 		if ( empty( $_POST['feature_key'] ) ) {
 			wp_send_json_error();
 		}
 		$notice_key = sanitize_key( $_POST['feature_key'] );
 		check_ajax_referer( "sa-dismiss-{$notice_key}-notice", 'security' );
 		return update_option( "sa_sm_hide_{$notice_key}_notice", true );
+	}
+
+	/**
+	 * Display book a call notice on Smart Manager pages.
+	 *
+	 * Shows a dismissible notice prompting users to book a call for feature suggestions.
+	 * Uses add_admin_notice with styled action buttons.
+	 *
+	 * @return void
+	 */
+	public static function display_book_call_notice() {
+		// Check if dismissed permanently
+		if ( get_option( 'sa_sm_book_call_dismissed', false ) ) {
+			return;
+		}
+		
+		// Check if snoozed (remind later)
+		$remind_later_date = get_option( 'sa_sm_book_call_remind_later', false );
+		if ( $remind_later_date ) {
+			$current_time = current_time( 'timestamp' );
+			if ( $current_time < $remind_later_date ) {
+				return; // Still in snooze period
+			}
+			// Snooze period expired, delete the option
+			delete_option( 'sa_sm_book_call_remind_later' );
+		}
+
+		$book_call_url = 'https://calendly.com/storeapps/15min';
+		$nonce = wp_create_nonce( 'sm_book_call_remind_later_nonce' );
+		
+		// SVG phone icon
+		$phone_svg = '<svg width="13" height="13" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 6px;"><path d="M13.3317 9.88001V11.6867C13.3324 11.8556 13.298 12.023 13.2306 12.178C13.1633 12.333 13.0646 12.4722 12.9409 12.5867C12.8173 12.7012 12.6713 12.7887 12.5121 12.8437C12.3529 12.8987 12.1839 12.9201 12.0157 12.9067C10.1575 12.7043 8.37302 12.0711 6.80566 11.0567C5.34829 10.1306 4.10578 8.88813 3.17967 7.43075C2.16202 5.85686 1.52875 4.06463 1.33041 2.19949C1.31707 2.03188 1.33823 1.86337 1.39277 1.70457C1.44731 1.54577 1.53406 1.40011 1.64758 1.27651C1.76111 1.15291 1.89917 1.05403 2.05306 0.986175C2.20695 0.918323 2.37321 0.882962 2.54167 0.882353H4.34834C4.64278 0.879565 4.92818 0.984338 5.1505 1.17718C5.37282 1.37002 5.51691 1.63762 5.55567 1.92949C5.62799 2.51306 5.76649 3.08668 5.96834 3.63949C6.05242 3.86807 6.0696 4.11588 6.01786 4.3541C5.96611 4.59231 5.84752 4.81072 5.67567 4.98416L4.91434 5.74549C5.77333 7.2559 7.05894 8.54151 8.56934 9.40049L9.33067 8.63916C9.5041 8.46731 9.72252 8.34872 9.96073 8.29697C10.1989 8.24523 10.4468 8.2624 10.6753 8.34649C11.2281 8.54834 11.8018 8.68684 12.3853 8.75916C12.6805 8.79827 12.9506 8.94505 13.1437 9.17115C13.3369 9.39724 13.4397 9.68697 13.4337 9.98401L13.3317 9.88001Z" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
+
+		$notice_content = sprintf(
+			'<style>
+				.sm-book-call-notice-wrap, .sm-book-call-notice-actions, .sm-book-call-btn, .sm-remind-option, .sm-book-call-notice-actions a, .sm-remind-dropdown-wrap button {
+					display: flex !important;
+					align-items: center !important;
+				}
+				.sm-book-call-notice-wrap {
+					flex-wrap: wrap;
+					gap: 0.75rem;
+				}
+				.sm-book-call-notice-text {
+					flex: 1;
+				}
+				.sm-book-call-notice-actions {
+					gap: 0.625rem;
+				}
+				.sm-book-call-notice-actions a{
+					margin-top: 0 !important;
+				}
+				.sm-book-call-btn {
+					justify-content: center !important;
+					margin-top: 0 !important;
+				}
+				.sm-remind-dropdown-wrap {
+					position: relative;
+					display: inline-block;
+				}
+				.sm-remind-dropdown-wrap svg{
+					margin-left: 0.375rem;
+					margin-top: 0.125rem;
+				}
+				.sm-remind-dropdown {
+					display: none;
+					position: absolute;
+					top: 100%%;
+					right: 0;
+					background: #fff;
+					border: 0.0625rem solid #c3c4c7;
+					box-shadow: 0 0.0625rem 0.1875rem rgba(0,0,0,0.1);
+					min-width: max-content;
+					margin-top: 0.0625rem;
+					z-index: 100;
+				}
+				.sm-remind-dropdown-wrap:hover .sm-remind-dropdown {
+					display: block;
+				}
+				.sm-remind-option {
+					gap: 0.5625rem;
+					width: 100%%;
+					padding: 0.5rem 0.5rem 0.5rem 0.375rem;
+					text-align: left;
+					border: none;
+					background: none;
+					cursor: pointer;
+					font-size: 0.8125rem;
+					color: #2c3338;
+				}
+				.sm-remind-option:hover {
+					background: #f0f0f1;
+					color: #3858e9;
+				}
+				.sm-remind-option svg {
+					flex-shrink: 0;
+				}
+			</style>
+			<span class="sm-book-call-notice-wrap">
+				<span style="flex:1;">
+					<strong>💡 %s</strong> %s
+				</span>
+				<span class="sm-book-call-notice-actions">
+					<a href="%s" target="_blank" class="button button-primary">%s%s</a>
+					<span class="sm-remind-dropdown-wrap">
+						<button type="button" class="button">%s <svg width="14" height="7" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M0.665039 0.664978L4.66504 4.66498L8.66504 0.664978" stroke="#3858e9" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"></path>
+						</svg></button>
+						<span class="sm-remind-dropdown">
+							<button type="button" class="sm-remind-option" data-duration="7days">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+								%s
+							</button>
+							<button type="button" class="sm-remind-option" data-duration="never">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13.73 21a2 2 0 0 1-3.46 0"></path><path d="M18.63 13A17.89 17.89 0 0 1 18 8"></path><path d="M6.26 6.26A5.86 5.86 0 0 0 6 8c0 7-3 9-3 9h14"></path><path d="M18 8a6 6 0 0 0-9.33-5"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+								%s
+							</button>
+						</span>
+					</span>
+				</span>
+			</span>
+			<script type="text/javascript">
+				jQuery(document).ready(function($) {
+					$(".sm-remind-option").on("click", function(e) {
+						e.preventDefault();
+						var duration = $(this).data("duration");
+						$(this).closest(".notice").fadeOut();
+						$.ajax({
+							url: ajaxurl,
+							type: "POST",
+							data: {
+								action: "sm_book_call_remind_later",
+								duration: duration,
+								security: "%s"
+							}
+						});
+					});
+				});
+			</script>',
+			esc_html__( 'Got ideas to improve Smart Manager?', 'smart-manager-for-wp-e-commerce' ),
+			esc_html__( 'We\'d love to hear your feature requests and feedback. Schedule a quick 15-minute call with our team!', 'smart-manager-for-wp-e-commerce' ),
+			esc_url( $book_call_url ),
+			$phone_svg,
+			esc_html__( 'Book a Call', 'smart-manager-for-wp-e-commerce' ),
+			esc_html__( 'Later', 'smart-manager-for-wp-e-commerce' ),
+			esc_html__( 'Remind me in 7 days', 'smart-manager-for-wp-e-commerce' ),
+			esc_html__( 'Don\'t show this again', 'smart-manager-for-wp-e-commerce' ),
+			esc_js( $nonce )
+		);
+		self::add_admin_notice( 'book_call', $notice_content, false, false );
+	}
+
+	/**
+	 * AJAX handler for book call remind later action.
+	 *
+	 * Handles snooze options: 7 days or never.
+	 *
+	 * @return void
+	 */
+	public function handle_book_call_remind_later() {
+		check_ajax_referer( 'sm_book_call_remind_later_nonce', 'security' );
+		
+		$duration = isset( $_POST['duration'] ) ? sanitize_text_field( wp_unslash( $_POST['duration'] ) ) : '7days';
+		
+		if ( 'never' === $duration ) {
+			// Dismiss permanently
+			update_option( 'sa_sm_book_call_dismissed', true );
+			delete_option( 'sa_sm_book_call_remind_later' );
+			wp_send_json_success( array( 'message' => 'Notice dismissed permanently' ) );
+		} else {
+			// Snooze for 7 days
+			$remind_date = current_time( 'timestamp' ) + ( 7 * DAY_IN_SECONDS );
+			update_option( 'sa_sm_book_call_remind_later', $remind_date );
+			wp_send_json_success( array( 'message' => 'Notice snoozed for 7 days' ) );
+		}
 	}
 
 	/**
@@ -2533,7 +2715,7 @@ class Smart_Manager {
 		if ( ( empty( self::is_wsm_stock_log_import_required() ) ) || ( ! empty( get_option( 'sa_sm_wsm_stock_log_imported', false ) ) ) ) {
 			return;
 		}
-		self::add_dismissible_notice(
+		self::add_admin_notice(
 			'import_wsm_stock_log',
 			sprintf(
 				/* translators: %s: clickable link text */

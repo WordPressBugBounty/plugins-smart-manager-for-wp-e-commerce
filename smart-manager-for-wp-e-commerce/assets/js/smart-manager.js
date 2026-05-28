@@ -249,12 +249,9 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 		if ( !jQuery(document.body).hasClass('folded') && window.smart_manager.sm_beta_pro == 1 && window.smart_manager.forceCollapseAdminMenu == 1) {
 			jQuery(document.body).addClass('folded');
 		}
-		let contentwidth = jQuery('#wpbody-content').width() - 8,
-			contentheight = 910;
-		let grid_height = contentheight - ( contentheight * 0.20 );
+		let contentwidth = jQuery('#wpbody-content').width() - 8;
 		window.smart_manager.grid_width = contentwidth;
-		let heightDeduction = (window.smart_manager.sm_beta_pro == 1) ? 200 : 400;
-		window.smart_manager.grid_height = ( grid_height < document.body.clientHeight - heightDeduction ) ? document.body.clientHeight - heightDeduction : grid_height;
+		window.smart_manager.grid_height = document.body.clientHeight * 0.66;
 		jQuery('#sm_editor_grid').trigger( 'smart_manager_init' ); //custom trigger
 		window.smart_manager.loadDashboard();
 		window.smart_manager.event_handler();
@@ -1124,7 +1121,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 		window.smart_manager.initNavbarDropdown();
 
 		// Build the new header component
-		let sm_bottom_bar = "<div id='sm_bottom_bar' class='mt-6' style='width:" + window.smart_manager.grid_width + "px;'>" +
+		let sm_bottom_bar = "<div id='sm_bottom_bar' class='mt-4' style='width:" + window.smart_manager.grid_width + "px;'>" +
 			"<div id='sm_bottom_bar_left' class='sm_beta_left pl-6'><div id='sm_beta_display_records' class='sm_beta_select_blue'></div></div>" +
 			"<div id='sm_bottom_bar_right' class='sm_beta_right pr-6'>" +
 			"</div>" +
@@ -1666,7 +1663,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 				} else if (colObj.type == 'html' || renderer == 'html') {
 					customRenderer = 'customHtmlRenderer';
 				} else if (colObj.type == 'checkbox') {
-					// customRenderer = 'customCheckboxRenderer';
+					customRenderer = 'customCheckboxRenderer';
 				} else if (colObj.type == 'password') {
 					customRenderer = 'customPasswordRenderer';
 				}
@@ -1763,6 +1760,14 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 						const colObj = window.smart_manager.currentVisibleColumns[col];
 						const colType = colObj.type || 'text';
 						const colName = colObj.col_name || '';
+						const colData = colObj.data || '';
+						
+						// Add data-column-key attribute to the colHeader span for test automation
+						const colHeader = TH.querySelector('.colHeader');
+						if (colHeader && colData) {
+							colHeader.setAttribute('data-column-key', window.smart_manager.getColumnDataKey(colData));
+						}
+						
 						// Remove existing type classes.
 						TH.classList.remove('sm-col-numeric', 'sm-col-text', 'sm-col-id');
 						// Add appropriate class based on column type or source.
@@ -2393,22 +2398,18 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 			})
 
 			// Custom views panel toggle
-			.off('click', '#sm-custom-view-btn').on('click', '#sm-custom-view-btn', function (e) {
-				//Need not to show the custom views list on custom view dashboard.
-				if(window.smart_manager.isCustomView){
-					return;
-				}
+			.off('click', '#sm-custom-view-btn, #sm-custom-view-active-btn').on('click', '#sm-custom-view-btn, #sm-custom-view-active-btn', function (e) {
 				e.preventDefault();
 				e.stopPropagation();
 				const panel = jQuery('#sm-custom-views-panel');
 				const isExpanded = !panel.hasClass('hidden');
 				panel.toggleClass('hidden');
-				jQuery(this).attr('aria-expanded', !isExpanded);
+				jQuery('#sm-custom-view-btn').attr('aria-expanded', !isExpanded);
 			})
 
 			// Close custom views panel when clicking outside
 			.off('click.smCustomViewPanel').on('click.smCustomViewPanel', function (e) {
-				if (!jQuery(e.target).closest('#sm-custom-view-btn, #sm-custom-views-panel').length) {
+				if (!jQuery(e.target).closest('#sm-custom-view-btn, #sm-custom-view-active-btn, #sm-custom-views-panel').length) {
 					jQuery('#sm-custom-views-panel').addClass('hidden');
 					jQuery('#sm-custom-view-btn').attr('aria-expanded', 'false');
 				}
@@ -3525,7 +3526,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 	SmartManager.prototype.updateState = function (refreshParams = {}) {
 		let viewSlug = window.smart_manager.getViewSlug(window.smart_manager.dashboardName);
 		if (1 == window.smart_manager.sm_beta_pro && viewSlug && !refreshParams.updateView) { //Added for skipping `save_state` when simply switching from custom views dashboards
-			window.smart_manager.refresh();
+			// window.smart_manager.refresh();
 			return;
 		}
 		// do not refresh the states if view
@@ -3957,6 +3958,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
         timeEditor.prototype.createElements = function() { window.smart_manager.dateEditor( this, arguments, 'H:i', 'HH:MM', 'htTimeEditor' ) };
 
         function numericRenderer(hotInstance, td, row, col, prop, value, cellProperties) {
+            td.setAttribute('data-column', window.smart_manager.getColumnDataKey(prop));
 		    Handsontable.renderers.NumericRenderer.apply(this, arguments);
 			let currentRowData = (Object.keys(window.smart_manager.currentDashboardData).length > 0 && window.smart_manager.currentDashboardData.hasOwnProperty(row)) ? window.smart_manager.currentDashboardData[row] : {};
 		    let colObj = ( window.smart_manager.currentVisibleColumns.indexOf(col) != -1 ) ? window.smart_manager.currentVisibleColumns[col] : {};
@@ -4008,6 +4010,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 	  	Handsontable.renderers.registerRenderer('numericRenderer', numericRenderer);
 
 	  	function customTextRenderer(hotInstance, td, row, col, prop, value, cellProperties) {
+			td.setAttribute('data-column', window.smart_manager.getColumnDataKey(prop));
 		    Handsontable.renderers.TextRenderer.apply(this, arguments);
 			if (['_sale_price', '_regular_price', '_price'].some(field => prop.includes(field)) && value && value.length) {
 				td.classList.add('sm-price-cell')
@@ -4021,6 +4024,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 	  	Handsontable.renderers.registerRenderer('customTextRenderer', customTextRenderer);
 
 	  	function customHtmlRenderer(hotInstance, td, row, col, prop, value, cellProperties) {
+			td.setAttribute('data-column', window.smart_manager.getColumnDataKey(prop));
 			Handsontable.renderers.HtmlRenderer.apply(this, arguments);
 			td.innerHTML = '<div title="'+ td.innerText +'" class="wrapper">' + td.innerHTML + '</div>';
 
@@ -4029,16 +4033,23 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 	  	Handsontable.renderers.registerRenderer('customHtmlRenderer', customHtmlRenderer);
 
 	  	function customCheckboxRenderer(hotInstance, td, row, col, prop, value, cellProperties) {
-
+			td.setAttribute('data-column', window.smart_manager.getColumnDataKey(prop));
 		    Handsontable.renderers.CheckboxRenderer.apply(this, arguments);
-		    td.innerHTML = '<div class="wrapper">' + td.innerHTML + '</div>';
+		    
+		    // Wrap existing elements without destroying event listeners
+		    const wrapper = document.createElement('div');
+		    wrapper.className = 'wrapper';
+		    while (td.firstChild) {
+		        wrapper.appendChild(td.firstChild);
+		    }
+		    td.appendChild(wrapper);
 
 		    return td;
 		}
 	  	Handsontable.renderers.registerRenderer('customCheckboxRenderer', customCheckboxRenderer);
 
 	  	function customPasswordRenderer(hotInstance, td, row, col, prop, value, cellProperties) {
-
+			td.setAttribute('data-column', window.smart_manager.getColumnDataKey(prop));
 		    Handsontable.renderers.PasswordRenderer.apply(this, arguments);
 		    td.innerHTML = '<div class="wrapper">' + td.innerHTML + '</div>';
 
@@ -4048,6 +4059,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 
 		// Badge renderer for history dashboard columns (post_type, type, status)
 		function badgeRenderer(hotInstance, td, row, col, prop, value, cellProperties) {
+			td.setAttribute('data-column', window.smart_manager.getColumnDataKey(prop));
 			Handsontable.renderers.TextRenderer.apply(this, arguments);
 			
 			if (typeof(cellProperties.className) != 'undefined') {
@@ -4086,6 +4098,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 
 		// Actions renderer for history dashboard sm_tasks_actions column
 		function taskActionsRenderer(hotInstance, td, row, col, prop, value, cellProperties) {
+			td.setAttribute('data-column', window.smart_manager.getColumnDataKey(prop));
 			Handsontable.renderers.TextRenderer.apply(this, arguments);
 			if (cellProperties && cellProperties.className) {
 				td.setAttribute('class', cellProperties.className);
@@ -4158,6 +4171,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 		Handsontable.renderers.registerRenderer('taskActionsRenderer', taskActionsRenderer);
 
       function datetimeRenderer(hotInstance, td, row, column, prop, value, cellProperties) {
+		td.setAttribute('data-column', window.smart_manager.getColumnDataKey(prop));
 		if (['tasks_completed_date', 'tasks_date'].some(key => prop.includes(key))) {
 			value = (value !== '0000-00-00 00:00:00') ? window.smart_manager?.formatDateTimeStr(value) || value : '-';
 		}
@@ -4176,6 +4190,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
       }
 
 		function longstringRenderer(hotInstance, td, row, column, prop, value, cellProperties) {
+			td.setAttribute('data-column', window.smart_manager.getColumnDataKey(prop));
 			Handsontable.renderers.HtmlRenderer.apply(this, arguments);
 			if( typeof(cellProperties.className) != 'undefined' ) { //code to higlight the cell on selection
 				td.setAttribute('class',cellProperties.className);
@@ -4187,6 +4202,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 		}
 
 		function selectValueRenderer(hotInstance, td, row, column, prop, value, cellProperties) {
+			td.setAttribute('data-column', window.smart_manager.getColumnDataKey(prop));
 			let source = cellProperties.selectOptions || {},
 				className = ( typeof(cellProperties.className) != 'undefined' ) ? cellProperties.className : '',
 				colorCodes = ( typeof(cellProperties.colorCodes) != 'undefined' ) ? cellProperties.colorCodes : '';
@@ -4216,6 +4232,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 		}
 
 		function multilistRenderer(hotInstance, td, row, column, prop, value, cellProperties) {
+			td.setAttribute('data-column', window.smart_manager.getColumnDataKey(prop));
 			// ...renderer logic
 			Handsontable.renderers.TextRenderer.apply(this, arguments);
 			if( typeof(cellProperties.className) != 'undefined' ) { //code to higlight the cell on selection
@@ -4232,7 +4249,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 	  Handsontable.renderers.registerRenderer('selectValueRenderer', selectValueRenderer);
 
 	  	function select2Renderer(instance, td, row, col, prop, value, cellProperties) {
-
+			td.setAttribute('data-column', window.smart_manager.getColumnDataKey(prop));
 		    let selectedId;
 		    let optionsList = (cellProperties.select2Options.data) ? cellProperties.select2Options.data : [];
 		    let dynamicSelect2 = ( cellProperties.select2Options.hasOwnProperty('loadDataDynamically') ) ? true : false;
@@ -4651,13 +4668,20 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 
 	// Function to get custom views for current dashboard
 	SmartManager.prototype.getCustomViewsForDashboard = function() {
-		const currentKey = window.smart_manager.dashboardKey;
+		let currentKey = window.smart_manager.dashboardKey;
 		const views = [];
 		const smViews = window.smart_manager.sm_views || {};
 		const viewPostTypes = window.smart_manager.viewPostTypes || {};
 		const ownedViews = window.smart_manager.ownedViews || [];
 		if (parseInt(window.smart_manager.sm_beta_pro) !== 1) return views;
 		if (!smViews || typeof smViews !== 'object') return views;
+		
+		// If on a custom view, get the parent post type to show sibling views
+		if (window.smart_manager.isCustomView) {
+			const currentViewSlug = window.smart_manager.getViewSlug(window.smart_manager.dashboardName);
+			currentKey = viewPostTypes[currentViewSlug] || currentKey;
+		}
+		
 		Object.keys(smViews).forEach(viewSlug => {
 			const viewPostType = viewPostTypes[viewSlug];
 			if (viewPostType === currentKey) {
@@ -4715,21 +4739,15 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 						<path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 					</svg>
 				</button>
-				<div class="flex items-center gap-3.75 justify-center sm-header-column-manager">
-					<span class="text-[#D4D4D4] text-[1.45rem] mt-[0.1rem]">|</span>
-						<div class="flex items-center gap-1">
-							<button type="button" class="border-none cursor-pointer duration-150 flex h-7 items-center justify-center p-0 rounded sm-action-header-btn text-[#737373] mx-0.5" title="Column Manager">
-								<svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.665 6.33164V1.99831C12.665 1.26193 12.0681 0.664978 11.3317 0.664978H1.99837C1.26199 0.664978 0.665039 1.26193 0.665039 1.99831V11.3316C0.665039 12.068 1.26199 12.665 1.99837 12.665H6.66504M4.66504 0.664978V12.665M8.66504 0.664978V6.99831M8.64135 10.9983H13.3554M10.9984 13.3553V8.6413" stroke="#6B63F1" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-							</button>
-							<label class="text-sm-base-foreground cursor-pointer text-[0.8125rem]">${_x('Manage Columns', 'label', 'smart-manager-for-wp-e-commerce')}</label>
-						</div>
-					<span class="text-[#D4D4D4] sm-header-show-variations-separator hidden text-[1.45rem] mt-[0.1rem]">|</span>
-				</div>
+				
 				<!-- Custom view active display (shown when ON custom view) -->
 				<div id="sm-custom-view-active" class="${window.smart_manager.isCustomView ? 'flex' : '!hidden'} items-center gap-1 shrink-0">
 					<button id="sm-custom-view-active-btn" class="cursor-pointer gap-2 rounded-lg border border-sm-colors-violet-200 bg-sm-base-background px-4 py-1.5 text-sm leading-5 text-sm-base-primary shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] inline-flex items-center shrink-0">
 						<span class="text-sm-base-foreground hidden sm:inline">${_x('Custom view:', 'label', 'smart-manager-for-wp-e-commerce')}</span>
 						<span id="sm-custom-view-active-name" class="font-medium text-sm-base-primary">${window.smart_manager.getCurrentCustomViewName()}</span>
+						<svg width="12" height="12" viewBox="0 0 12 12" fill="none" class="text-sm-base-muted-foreground shrink-0">
+							<path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+						</svg>
 					</button>
 					<button title="Edit View" id="sm-edit-custom-view-btn" class="cursor-pointer gap-1.5 rounded-lg px-3 py-2 text-xs leading-4 font-medium text-sm-base-foreground inline-flex items-center shrink-0 hover:bg-sm-base-muted transition-colors shadow-[0_1px_2px_0_rgba(0,0,0,0.05)]">
 						<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -4740,11 +4758,20 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 						${window.smart_manager.getIcons('delete','#DC2626')}
 					</button>
 				</div>
-
+				<div class="flex items-center gap-3.75 justify-center sm-header-column-manager">
+					<span class="text-[#D4D4D4] text-[1.45rem] mt-[0.1rem]">|</span>
+						<div class="flex items-center gap-1">
+							<button type="button" class="border-none cursor-pointer duration-150 flex h-7 items-center justify-center p-0 rounded sm-action-header-btn text-[#737373] mx-0.5" title="Column Manager">
+								<svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.665 6.33164V1.99831C12.665 1.26193 12.0681 0.664978 11.3317 0.664978H1.99837C1.26199 0.664978 0.665039 1.26193 0.665039 1.99831V11.3316C0.665039 12.068 1.26199 12.665 1.99837 12.665H6.66504M4.66504 0.664978V12.665M8.66504 0.664978V6.99831M8.64135 10.9983H13.3554M10.9984 13.3553V8.6413" stroke="#6B63F1" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+							</button>
+							<label class="text-sm-base-foreground cursor-pointer text-[0.8125rem]">${_x('Manage Columns', 'label', 'smart-manager-for-wp-e-commerce')}</label>
+						</div>
+					<span class="text-[#D4D4D4] sm-header-show-variations-separator hidden text-[1.45rem] mt-[0.1rem]">|</span>
+				</div>
 				<!-- Show variations toggle placeholder (populated by dashboard-specific JS) -->
 				<div id="sm-header-center-extras"></div>
 
-				<!-- Panel: Custom Views (only used when NOT on custom view) -->
+				<!-- Panel: Custom Views -->
 				<div id="sm-custom-views-panel" class="sm-custom-scrollbar absolute left-0 top-8 z-999 w-56 rounded-lg border border-sm-base-border bg-sm-base-background shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)] overflow-hidden hidden">
 					<!-- Header -->
 					<div class="bg-sm-base-background sticky top-0 z-10 pt-1 px-1">
@@ -5988,6 +6015,19 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 		return `${parseInt(parts[2], 10)} ${window.smart_manager.month_names_short[parseInt(parts[1], 10) - 1]} ${parts[0]}, ${parts[3]}:${parts[4]}`;
 	}
 
+	/**
+	 * Get clean column key for data-column attribute
+	 * Removes _meta_value__<key> suffix from postmeta keys
+	 * Example: postmeta_meta_key__variation_description_meta_value__variation_description -> postmeta_meta_key__variation_description
+	 */
+	SmartManager.prototype.getColumnDataKey = function(prop) {
+		if (typeof prop !== 'string') return prop;
+		if (prop.includes('postmeta_meta_key__') && prop.includes('_meta_value__')) {
+			return prop.replace(/_meta_value__[^_].*$/, '');
+		}
+		return prop;
+	}
+
 	// Register an alias for datetime
 	Handsontable.cellTypes.registerCellType('sm.datetime', {
 		editor: dateTimeEditor,
@@ -6045,6 +6085,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 
 	// Action column renderer - renders different buttons based on view mode
 	function actionColumnRenderer(instance, td, row, col, prop, value, cellProperties) {
+		td.setAttribute('data-column', window.smart_manager.getColumnDataKey(prop));
 		const isTasksView = window.smart_manager.isTasksViewActive === true || window.location.search.includes('show_edit_history');
 		
 		if (isTasksView) {
@@ -6106,6 +6147,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 	}
 
 	function imageRenderer(hotInstance, td, row, column, prop, value, cellProperties) {
+		td.setAttribute('data-column', window.smart_manager.getColumnDataKey(prop));
 		try{
 			value = (!value || value == 0) ? window.smart_manager.defaultImagePlaceholder : value
 			Handsontable.dom.empty(td);
@@ -6123,6 +6165,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 	}
 
 	function multipleImageRenderer(hotInstance, td, row, column, prop, value, cellProperties) {
+		td.setAttribute('data-column', window.smart_manager.getColumnDataKey(prop));
 		try{
 			value = (!Array.isArray(value)) ? [] : value;
 			value = (value.length === 0) ? [{id:0, val:window.smart_manager.defaultImagePlaceholder}] : value
