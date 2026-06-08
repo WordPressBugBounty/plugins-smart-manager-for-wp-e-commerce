@@ -239,6 +239,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 		this.proConstName = 'SmartManagerPro';
 		this.support_link = sm_beta_params?.support_link || '';
 		this.review_link = sm_beta_params?.review_link || '';
+		this.calendly_link = sm_beta_params?.calendly_link || '';
 		this.pluginParams = sm_beta_params;
 		//Function to set all the states on unload
 		window.onbeforeunload = function (evt) {
@@ -1130,7 +1131,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 		let sm_msg = jQuery('.sm_design_notice').prop('outerHTML');
 		if (sm_msg) {
 			jQuery(sm_msg).insertAfter("#sm_nav_bar");
-			jQuery('.wrap > .sm_design_notice').show()
+			jQuery('.wrap > .sm_design_notice').css('display', 'flex')
 		}
 
 		setTimeout(() => {
@@ -5354,7 +5355,9 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 	        params['active_view'] = viewSlug;
 	        params['active_module'] = (window.smart_manager.viewPostTypes.hasOwnProperty(viewSlug)) ? window.smart_manager.viewPostTypes[viewSlug] : window.smart_manager.dashboardKey;
 	    }
-	if(data.hasOwnProperty('isScheduledExport') && data.isScheduledExport === true && data.hasOwnProperty('scheduleParams') && data.hasOwnProperty('scheduleExportAjaxCallback') && typeof data.scheduleExportAjaxCallback === 'function'){
+
+		// Handle scheduled export via AJAX
+		if(data.hasOwnProperty('isScheduledExport') && data.isScheduledExport === true && data.hasOwnProperty('scheduleParams') && data.hasOwnProperty('scheduleExportAjaxCallback') && typeof data.scheduleExportAjaxCallback === 'function'){
 			params.is_scheduled_export = data?.isScheduledExport || false;
 			params.scheduled_export_params = data?.scheduleParams || false;
 			params.selected_ids = params.storewide_option = params.advanced_search_query = params.search_text = '';
@@ -5362,6 +5365,44 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 			return;
 		}
 
+		// Check if batch export should be used:
+		let batchExportThreshold = parseInt(sm_beta_params.batchExportThreshold) || 50;
+		let selectedIds = window.smart_manager.getSelectedKeyIds() || [];
+		//check if use batch export
+		if ( ('entire_store' === params.storewide_option || 'entire_store_stock_cols' === params.storewide_option || selectedIds.length > batchExportThreshold) ) {
+			params.use_batch_export  = true;
+			// Add filtered results flag.
+			if (window.smart_manager.isFilteredData()) {
+				params.filteredResults = 1;
+			}
+
+			// Add date params.
+			if (window.smart_manager.date_params) {
+				if (window.smart_manager.date_params.hasOwnProperty('date_filter_params')) {
+					params.date_filter_params = window.smart_manager.date_params['date_filter_params'];
+				}
+				if (window.smart_manager.date_params.hasOwnProperty('date_filter_query')) {
+					params.date_filter_query = window.smart_manager.date_params['date_filter_query'];
+				}
+			}
+
+			// Make AJAX request for batch export
+			window.smart_manager.sendRequest({ data: params, data_type: 'json', showLoader: false }, function(response) {});
+			setTimeout(() => {
+				window.smart_manager.hideFloatingActionBar();
+				window.smart_manager.showProgressDialog(_x('Export CSV', 'progressbar modal title', 'smart-manager-for-wp-e-commerce'));
+				if (typeof sa_background_process_heartbeat === "function") {
+					sa_background_process_heartbeat(1000, 'export_csv', window.pluginKey);
+				}
+			}, 1000);
+			return;
+		}
+		// Use direct download for smaller exports.
+		window.smart_manager.triggerCsvDownload(params, viewSlug);
+	}
+
+	// Direct CSV export via URL redirect (for smaller exports < 50 records)
+	SmartManager.prototype.triggerCsvDownload = function(params, viewSlug) {
 	    let export_url = window.smart_manager.commonManagerAjaxUrl + '&cmd='+ params['cmd'] +'&active_module='+ params['active_module'] +'&security='+ params['security'] +'&pro='+ params['pro'] +'&SM_IS_WOO30='+ params['SM_IS_WOO30'] +'&is_taxonomy='+ params['is_taxonomy'] +'&sort_params='+ encodeURIComponent(JSON.stringify(params['sort_params'])) +'&table_model='+ encodeURIComponent(JSON.stringify(params['table_model'])) +'&advanced_search_query='+params['advanced_search_query']+'&search_text='+ params['search_text'] + '&storewide_option=' + params['storewide_option'] + '&selected_ids=' + params['selected_ids'] + '&columnsToBeExported=' + params['columnsToBeExported'];
 	    export_url += ( window.smart_manager.date_params && window.smart_manager.date_params.hasOwnProperty('date_filter_params') ) ? '&date_filter_params='+ window.smart_manager.date_params['date_filter_params'] : '';
 	    export_url += ( window.smart_manager.date_params && window.smart_manager.date_params.hasOwnProperty('date_filter_query') ) ? '&date_filter_query='+ window.smart_manager.date_params['date_filter_query'] : '';
@@ -5369,11 +5410,13 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 	    if(viewSlug){
 	        export_url += '&is_view='+params['is_view']+'&active_view='+params['active_view'];
 	    }
-
+		if (window.smart_manager.isFilteredData()) {
+			export_url += '&filteredResults=1';
+        }
 	    setTimeout(()=>{window.location = export_url},500);
 	}
 
-// Function for displaying confirm dialog for unsaved changes.
+	// Function for displaying confirm dialog for unsaved changes.
 	SmartManager.prototype.confirmUnsavedChanges = function(params ={}) {
 			try{
 				window.smart_manager.modal = {

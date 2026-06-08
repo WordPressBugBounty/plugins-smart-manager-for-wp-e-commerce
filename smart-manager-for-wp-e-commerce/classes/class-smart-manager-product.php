@@ -885,12 +885,12 @@ if ( ! class_exists( 'Smart_Manager_Product' ) ) {
 					}
 
 					if( ! empty( $data_model['items'][$key]['postmeta_meta_key__regular_price_meta_value__regular_price'] ) ) {
-						$decimal_separator = ( ! empty( $this->req_params['cmd'] ) && 'get_export_csv' == $this->req_params['cmd'] ) ? apply_filters( 'sm_decimal_separator_for_export', wc_get_price_decimal_separator(), array( 'col' => 'postmeta_meta_key__regular_price', 'data' => $data_model['items'][$key] ) ) : wc_get_price_decimal_separator();
+						$decimal_separator = ( ( ! empty( $data_col_params['is_batch_export_process'] ) ) || ( ! empty( $this->req_params['cmd'] ) && 'get_export_csv' == $this->req_params['cmd'] ) ) ? apply_filters( 'sm_decimal_separator_for_export', wc_get_price_decimal_separator(), array( 'col' => 'postmeta_meta_key__regular_price', 'data' => $data_model['items'][$key] ) ) : wc_get_price_decimal_separator();
 						$data_model['items'][$key]['postmeta_meta_key__regular_price_meta_value__regular_price'] = number_format( (float)$data['postmeta_meta_key__regular_price_meta_value__regular_price'], wc_get_price_decimals(), $decimal_separator, '' );
 					}
 
 					if( ! empty( $data_model['items'][$key]['postmeta_meta_key__sale_price_meta_value__sale_price'] ) ) {
-						$decimal_separator = ( ! empty( $this->req_params['cmd'] ) && 'get_export_csv' == $this->req_params['cmd'] ) ? apply_filters( 'sm_decimal_separator_for_export', wc_get_price_decimal_separator(), array( 'col' => 'postmeta_meta_key__sale_price', 'data' => $data_model['items'][$key] ) ) : wc_get_price_decimal_separator();
+						$decimal_separator = ( ( ! empty( $data_col_params['is_batch_export_process'] ) ) || ( ! empty( $this->req_params['cmd'] ) && 'get_export_csv' == $this->req_params['cmd'] ) ) ? apply_filters( 'sm_decimal_separator_for_export', wc_get_price_decimal_separator(), array( 'col' => 'postmeta_meta_key__sale_price', 'data' => $data_model['items'][$key] ) ) : wc_get_price_decimal_separator();
 						$data_model['items'][$key]['postmeta_meta_key__sale_price_meta_value__sale_price'] = number_format( (float)$data['postmeta_meta_key__sale_price_meta_value__sale_price'], wc_get_price_decimals(), $decimal_separator, '' );
 					}
 
@@ -953,7 +953,7 @@ if ( ! class_exists( 'Smart_Manager_Product' ) ) {
 						$variation_title = ( ! empty( $data['posts_post_title'] ) && empty( $variation_title ) ) ? $data['posts_post_title'] : ( $parent_title .''. substr( $variation_title, 0, strlen( $variation_title ) - 2 ) );
 
 						if( ! empty( $variation_title ) ){
-							$data_model['items'][$key]['posts_post_title'] = ( ( ! empty( $this->req_params['cmd'] ) && 'get_export_csv' == $this->req_params['cmd'] ) || true === $this->prod_sort ) ? $variation_title : '<div style="margin-left: 2px;color: #737373;" class="dashicons dashicons-minus"></div>'.' <div>'.$variation_title.'</div>';
+							$data_model['items'][$key]['posts_post_title'] = ( ( ! empty( $data_col_params['is_batch_export_process'] ) ) || ( ! empty( $this->req_params['cmd'] ) && 'get_export_csv' == $this->req_params['cmd'] ) || true === $this->prod_sort ) ? $variation_title : '<div style="margin-left: 2px;color: #737373;" class="dashicons dashicons-minus"></div>'.' <div>'.$variation_title.'</div>';
 						}
 
 

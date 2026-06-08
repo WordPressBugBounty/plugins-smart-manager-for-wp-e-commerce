@@ -88,6 +88,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			add_filter( 'sm_modify_store_model_for_trash_status', array( $this, 'modify_store_model_for_trash_status' ) );
 			add_filter( 'sm_modify_store_model_search_params', array( $this, 'modify_store_model_search_params' ), 10, 2 );
 			add_filter( 'sm_data_model', array( $this, 'on_data_model_load' ), 10, 2 );
+			add_filter( 'sa_sm_get_entire_store_ids',array( &$this, 'get_entire_store_ids' ) );
 		}
 
 		/**
@@ -1389,15 +1390,24 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				$args = array(
 					            'posts_per_page' => $limit,
 					            'offset' => $start_offset,
-					            'meta_query' => array( $meta_query ),
-					            'tax_query' => array( $tax_query ),
 					            'orderby' => ( !empty( $sort_params['column_nm'] ) ? $sort_params['column_nm'] : '' ),
 					            'order' => ( !empty( $sort_params['sortOrder'] ) ? $sort_params['sortOrder'] : '' ),
 								'sm_sort_params' => ( !empty( $sort_params ) ? $sort_params : array() )
 							);
+				if ( ! empty( $meta_query ) ) {
+					$args['meta_query'] = $meta_query;
+				}						
+				if ( ! empty( $tax_query ) ) {
+					$args['tax_query'] = $tax_query;
+				}						
+				// // Add post__in for specific IDs during export (batch export uses this)
+				$can_optimize_dashboard_speed = apply_filters( 'sm_can_optimize_dashboard_speed', false );
+				if ( ! empty( $this->req_params['use_batch_export'] ) ) {
+					$can_optimize_dashboard_speed = false;
+					$data_col_params['is_batch_export_process'] = true;
+				}
 
 				$args = array_merge($args, $post_cond);
-				$can_optimize_dashboard_speed = apply_filters( 'sm_can_optimize_dashboard_speed', false );
 				if ( ! empty( $can_optimize_dashboard_speed ) ) {
 					$exclude_statuses = in_array( 'trash', (array) $post_cond['post_status'], true ) ? array( 'auto-draft' ) : array( 'trash', 'auto-draft' );
 					$join = apply_filters( 'sm_posts_join_paged', '', $sort_params );
@@ -3416,36 +3426,10 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 
 			$col_model = (!empty($current_store_model['columns'])) ? $current_store_model['columns'] : array();
 			$col_model = apply_filters( 'sm_col_model_for_export', $col_model, $this->req_params );
-
-			$data = $this->get_data_model( $col_model );
-			if ( empty( $data ) && is_callable( 'sa_manager_log' ) ) {
-				sa_manager_log( 'error', _x( 'Export CSV: no data found ', 'export data model', 'smart-manager-for-wp-e-commerce' ) );
-			}
-			$columns_header = $select_cols = $numeric_cols = array();
-
-			$getfield = '';
-
-			foreach( $col_model as $col ) {
-				if( empty( $col['exportable'] ) || !empty( $col['hidden'] ) ) {
-					continue;
-				}
-
-				$columns_header[ $col['data'] ] = $col['key'];
-
-				$getfield .= $col['key'] . ',';
-
-				if( ! empty( $col['values'] ) ) {
-					$select_cols[ $col['data'] ] = $col['values'];
-				}
-
-				if( ( ( ! empty( $col['type'] ) && 'numeric' === $col['type'] ) ) || ( ( ! empty( $col['validator'] ) && 'customNumericTextEditor' === $col['validator'] ) ) ){
-					$numeric_cols[] = $col['data'];
-				}
-			}
-
-			$fields = substr_replace($getfield, '', -1);
-			$each_field = array_keys( $columns_header );
-
+			$selected_ids = ( ! empty( $this->req_params['selected_ids'] ) && ! is_array( $this->req_params['selected_ids'] ) ) ? json_decode( stripslashes( $this->req_params['selected_ids'] ), true ) : $this->req_params['selected_ids'];
+			// Check if batch export should be used:
+			$csv_columns = sa_sm_parse_csv_columns( $col_model );
+			//CSV file name.
 			$view_name = ( ! empty( $this->req_params['active_view'] ) ) ? $this->req_params['active_view'] . '-view_' : '';
 			$csv_file_name = sanitize_title(get_bloginfo( 'name' )) . '_' . $this->dashboard_key . '_' . $view_name . gmdate('d-M-Y_H-i-s');
 			if( $is_scheduled_export ) {
@@ -3453,32 +3437,31 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			} else{
 				$csv_file_name = ( ! empty( $this->req_params[ 'storewide_option' ] ) ) ? ( ( 'entire_store' === $this->req_params[ 'storewide_option' ] ? $csv_file_name : $csv_file_name . '_all_products_stock_columns') ) . ".csv" : $csv_file_name . ( ( ! empty( $this->req_params[ 'columnsToBeExported' ] ) && 'visible' === $this->req_params[ 'columnsToBeExported' ] ) ? '_selected_records' : '_selected_products_' . $this->req_params[ 'columnsToBeExported' ] . '_columns' ) . ".csv";
 			}
-			$escaped_html_columns = apply_filters( 'sa_sm_escaped_html_columns', array( 'posts_post_excerpt', 'posts_post_content' ) );
-			foreach( (array) $data['items'] as $row ){
-
-				for($i = 0; $i < count ( $columns_header ); $i++){
-
-					if( $i == 0 ){
-						$fields .= "\n";
-					}
-
-					if( !empty( $select_cols[ $each_field[$i] ] ) && !empty( $row[$each_field[$i]] ) ) {
-						$row_each_field = !empty( $select_cols[ $each_field[$i] ][ $row[$each_field[$i]] ] ) ? $select_cols[ $each_field[$i] ][ $row[$each_field[$i]] ] : $row[$each_field[$i]];
-					} else {
-						$row_each_field = !empty($row[$each_field[$i]]) ? $row[$each_field[$i]] : '';
-					}
-					$array_temp = str_replace(array("\n", "\n\r", "\r\n", "\r"), "\t", $row_each_field);
-					$array = str_replace("<br>", "\n", $array_temp);
-					$array = str_replace('"', '""', $array);
-					if( ! empty( $numeric_cols ) && in_array( $each_field[$i], $numeric_cols ) ){
-						$str = $array;
-					} else{
-						$array = ( ! is_array( $array ) ) ? str_getcsv ( $array , ",", "\"" , "\\") : $array;
-						$str = ( $array && is_array( $array ) ) ? implode( ', ', $array ) : '';
-					}
-					$fields .= ( ! empty( $each_field[ $i ] ) && ! empty( $escaped_html_columns ) && is_array( $escaped_html_columns ) && in_array( $each_field[ $i ], $escaped_html_columns ) ) ? '"'. esc_html( $str ) . '",' : '"'. $str . '",';
+			if ( ( ! empty( $this->req_params[ 'use_batch_export' ] ) )  && ( class_exists( 'Smart_Manager_Batch_Export' ) ) && ( is_callable( array( 'Smart_Manager_Batch_Export', 'initiate_batch_export_process' ) ) ) ) {
+				$batch_params = $this->req_params; 
+				$batch_params['selected_ids'] = $selected_ids;
+				$batch_params['csv_file_name'] = $csv_file_name;
+				$batch_params['csv_columns'] = $csv_columns;
+				$batch_params['col_model'] = $col_model;
+				$batch_params['dashboard_title'] = ! empty( $current_store_model['dashboard_title'] ) ? $current_store_model['dashboard_title'] : ucfirst( $this->dashboard_key );
+				$batch_result = Smart_Manager_Batch_Export::initiate_batch_export_process( $batch_params );
+				if ( ! empty( $batch_result ) && is_array( $batch_result ) ) {
+					return;
 				}
-				$fields = substr_replace($fields, '', -1);
+			}
+			$data = $this->get_data_model( $col_model );
+			if ( empty( $data ) && is_callable( 'sa_manager_log' ) ) {
+				sa_manager_log( 'error', _x( 'Export CSV: no data found ', 'export data model', 'smart-manager-for-wp-e-commerce' ) );
+			}
+			$columns_header = $csv_columns['headers'];
+			$select_cols    = $csv_columns['select_cols'];
+			$numeric_cols   = $csv_columns['numeric_cols'];
+			$each_field     = $csv_columns['fields'];
+			// Build header row.
+			$fields = implode( ',', array_values( $columns_header ) );
+			// Format rows using common function.
+			foreach ( (array) $data['items'] as $row ) {
+				$fields .= "\n" . sa_sm_format_csv_row( $row, $each_field, $select_cols, $numeric_cols );
 			}
 			// Prepare file data.
 			$upload_dir = wp_upload_dir();
@@ -3810,6 +3793,48 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			if ( is_callable( array( SA_Manager_Background_Updater::instance(), 'initiate_batch_process' ) ) ) {
 				SA_Manager_Background_Updater::instance()->initiate_batch_process( $selected_ids );
 			}
+		}
+
+		/**
+		 * Get entire store ids.
+		 */
+		public function get_entire_store_ids()
+		{
+			global $wpdb;
+
+			$selected_ids = array();
+
+			if (!empty($this->req_params['filteredResults'])) {
+				$post_ids = get_transient('sa_sm_search_post_ids');
+				$selected_ids = (!empty($post_ids)) ? explode(",", $post_ids) : array();
+				$selected_ids = apply_filters('sa_sm_search_results_selected_ids', $selected_ids, $this->req_params );
+			} else {
+				$post_type = (!empty($this->req_params['table_model']['posts']['where'])) ? $this->req_params['table_model']['posts']['where'] : array('post_type' => $this->dashboard_key);
+
+				if (!empty($this->req_params['table_model']['posts']['where']['post_type'])) {
+					$post_type = (is_array($this->req_params['table_model']['posts']['where']['post_type'])) ? $this->req_params['table_model']['posts']['where']['post_type'] : array($this->req_params['table_model']['posts']['where']['post_type']);
+				}
+				$this->req_params['post_type'] = $post_type;
+
+				$select = "SELECT ID ";
+				$from = " FROM {$wpdb->prefix}posts ";
+				$where = " WHERE post_type IN ('" . implode("','", $post_type) . "') ";
+
+				$update_trash_records = apply_filters('sm_update_trash_records', ('yes' === get_option('sm_update_trash_records', 'no')));
+				if (empty($update_trash_records) && (is_callable(array($this, 'is_show_trash_records')) && empty($this->is_show_trash_records()))) {
+					$where .= " AND post_status != 'trash'";
+				}
+
+				$select	= apply_filters('sm_beta_background_entire_store_ids_select', $select, $this->req_params);
+				$from	= apply_filters('sm_beta_background_entire_store_ids_from', $from, $this->req_params);
+				$where	= apply_filters('sm_beta_background_entire_store_ids_where', $where, $this->req_params);
+
+				$query = apply_filters('sm_beta_background_entire_store_ids_query', $wpdb->prepare( $select . $from . " " . $where . " AND 1=%d", 1));
+				//Filter to allow using get_results instead of get_col for select entire store ids query.
+				$use_get_results = apply_filters( 'sa_sm_use_get_results_in_select_entire_store_ids_query', false, $this->req_params );
+				$selected_ids = ( ! empty( $use_get_results ) ) ? $wpdb->get_results( $query, ARRAY_A ) : $wpdb->get_col( $query );
+			}
+			return $selected_ids;
 		}
 
 	}

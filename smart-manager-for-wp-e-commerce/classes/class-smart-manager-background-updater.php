@@ -30,15 +30,21 @@ if ( ! class_exists( 'Smart_Manager_Background_Updater' ) ) {
 				if ( empty( $params['process_key'] ) ) {
 					return false;
 				}
-                if ( ( 'import_wsm_stock_log' === $params['process_key'] ) && ( ! class_exists( 'Smart_Manager_Product_Stock_Log' ) ) && ( file_exists( dirname( __FILE__ ) . '/class-smart-manager-product-stock-log.php' ) ) ) {
+				// Include base file for required processes.
+				if ( in_array( $params['process_key'], array( 'import_wsm_stock_log', 'export_csv' ), true ) ) {
 					if ( ! class_exists( 'Smart_Manager_Base' ) && ( file_exists( dirname( __FILE__ ) . '/class-smart-manager-base.php' ) ) ) {
 						include_once dirname( __FILE__ ) . '/class-smart-manager-base.php';
 					}
+				}
+                if ( ( 'import_wsm_stock_log' === $params['process_key'] ) && ( ! class_exists( 'Smart_Manager_Product_Stock_Log' ) ) && ( file_exists( dirname( __FILE__ ) . '/class-smart-manager-product-stock-log.php' ) ) ) {
 					if ( ! class_exists( 'Smart_Manager_Task' ) && ( file_exists( dirname( __FILE__ ) . '/class-smart-manager-task.php' ) ) ) {
 						include_once dirname( __FILE__ ) . '/class-smart-manager-task.php';
 					}
 					include_once dirname( __FILE__ ) . '/class-smart-manager-product-stock-log.php';
                 }
+				if ( ( 'export_csv' === $params['process_key'] ) && ( ! class_exists( 'Smart_Manager_Batch_Export' ) ) && ( file_exists( dirname( __FILE__ ) . '/class-smart-manager-batch-export.php' ) ) ) {
+					include_once dirname( __FILE__ ) . '/class-smart-manager-batch-export.php';
+				}
 				return (
 					( 'bulk_edit' === $params['process_key'] && ( ! empty( $params['is_common'] ) ) ) ||
 					( ( ! in_array( $params['process_key'], array( 'bulk_edit', 'import_wsm_stock_log' ) ) ) && empty( $params['is_common'] ) )

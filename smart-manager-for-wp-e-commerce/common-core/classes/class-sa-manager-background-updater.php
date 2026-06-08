@@ -4,7 +4,7 @@
  *
  * @package common-core/
  * @since       8.77.0
- * @version     8.77.0
+ * @version     8.89.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -384,7 +384,7 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 			$batch_complete         = false;
 			$update_remaining_count = get_option( $this->identifier . '_remaining', false );
 			$update_tot_count       = get_option( $this->identifier . '_tot', false );
-			$excluded_process_names = apply_filters( 'sa_excluded_process_names', array() );
+			$excluded_process_names = apply_filters( 'sa_register_batch_process', array() );
 			$params                 = array(
 				'update_ids'             => $update_ids,
 				'update_remaining_count' => ( ! empty( $update_remaining_count ) ) ? $update_remaining_count : 0,
@@ -403,6 +403,7 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 		 */
 		public function get_background_progress() {
 			$response          = array();
+			$batch_params      = get_option( $this->identifier . '_params', array() );
 			$progress          = $this->calculate_background_process_progress();
 			$percent           = ( ! empty( $progress['percent_completion'] ) ) ? $progress['percent_completion'] : 0;
 			$remaining_seconds = ( ! empty( $progress['remaining_seconds'] ) ) ? $progress['remaining_seconds'] : 0;
@@ -413,6 +414,10 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 				'total_records'     => ( ( ! empty( $progress ) ) && ( is_array( $progress ) ) && ( ! empty( $progress['total_records'] ) ) ) ? absint( $progress['total_records'] ) : 0,
 				'records_updated'     => ( ( ! empty( $progress ) ) && ( is_array( $progress ) ) && ( ! empty( $progress['records_updated'] ) ) ) ? absint( $progress['records_updated'] ) : 0
 			);
+			// Add download URL for export_csv process.
+			if ( ! empty( $batch_params['process_key'] ) && 'export_csv' === $batch_params['process_key'] && ! empty( $batch_params['csv_file_url'] ) ) {
+				$response['export_csv_download_url'] = $batch_params['csv_file_url'];
+			}
 			if ( 100 === $progress['percent_completion'] && ( ! empty( $_POST['pluginKey'] ) ) && ( 'smart_manager' === sanitize_key( wp_unslash( $_POST['pluginKey'] ) ) ) ) {
 				if ( ! class_exists( 'SA_Manager_Feedback' ) ) {
 					self::sa_manager_file_safe_include( SM_PLUGIN_DIR_PATH, '/common-core/classes/class-sa-manager-feedback.php' );
@@ -438,7 +443,7 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 			$current_time          = get_option( $this->identifier . '_current_time', false );
 			$all_tasks_count       = $progress['total_records'] = get_option( $this->identifier . '_tot', false );
 			$remaining_tasks_count = get_option( $this->identifier . '_remaining', false );
-			if ( empty( $start_time ) && empty( $current_time ) && empty( $all_tasks_count ) && empty( $remaining_tasks_count ) ) {
+			if ( ( empty( $start_time ) && empty( $current_time ) && empty( $all_tasks_count ) && empty( $remaining_tasks_count ) && empty( get_option( $this->identifier . '_initial_process', false ) ) ) || ( empty( $all_tasks_count ) && ! empty( get_option( $this->identifier . '_initial_process', false ) ) ) ) {
 				$progress = array(
 					'percent_completion' => 100,
 					'remaining_seconds'  => 0,
@@ -491,7 +496,7 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 			update_option( $this->identifier . '_is_background', 1, 'no' );
 			$process_name      = ( ! empty( $batch_params['process_name'] ) ) ? $batch_params['process_name'] : 'Batch';
 			$current_dashboard = ( ! empty( $batch_params['active_dashboard'] ) ) ? $batch_params['active_dashboard'] : 'Products';
-			$no_of_records     = ( ( ! empty( $batch_params['entire_store'] ) ) ? _x( 'All', 'entire store', 'smart-manager-for-wp-e-commerce' ) : $batch_params['id_count'] ) . ' ' . esc_html( $current_dashboard );
+			$no_of_records     = ( ( ! empty( $batch_params['entire_store'] ) ) ? _x( 'All', 'entire store', 'smart-manager-for-wp-e-commerce' ) : ( ( ! empty( $batch_params['id_count'] ) ) ? $batch_params['id_count'] : 0 ) ) . ' ' . esc_html( $current_dashboard );
 			$admin_email       = get_option( 'admin_email', false );
 			$admin_email       = ( empty( $admin_email ) ) ? 'admin email' : $admin_email;
 			?>
@@ -525,7 +530,7 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 						<a id="sa-stop-batch-process" href="javascript:void(0);" class="text-sm font-medium text-sm-base-destructive hover:underline cursor-pointer transition-colors duration-200"><?php echo esc_html__( 'Stop', 'smart-manager-for-wp-e-commerce' ); ?></a>
 					</p>
 					<p class="<?php echo esc_attr( $batch_params['plugin_data']['plugin_obj_key'] ); ?>_background_note text-sm text-sm-base-muted-foreground m-0">
-						<?php echo esc_html__( $batch_params['backgroundProcessRunningMessage'] ); ?>
+						<?php echo esc_html__( ( ! empty( $batch_params['backgroundProcessRunningMessage'] ) ) ? $batch_params['backgroundProcessRunningMessage'] : '' ); ?>
 					</p>
 			</div>
 			<div id="sa_background_process_complete" class="mt-2 mx-4 smart-manager-dashboard bg-success/50 border-l-4 border-green-600 rounded-r-lg p-4 mb-4 shadow-sm" style="display: none;">
@@ -832,16 +837,29 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 										default:
 											break;
 									}
-									let recordsUpdatedHTML = `${recordsUpdated ? `<div class="mt-1 text-[#737373] text-sm font-normal"> (${recordsUpdated}/${totalRecords} ${recordsAffectedText})</div>` : ''}`
+									let recordsUpdatedHTML = `${recordsUpdated ? `<div class="mt-1 text-[#737373] text-sm font-normal"> (${recordsUpdated}/${totalRecords} ${recordsAffectedText})</div>` : ''}`;
+									if ( 'export_csv' === process) {
+										recordsUpdatedHTML += `<div class="mt-1 text-[#737373] text-sm font-normal">${sprintf(_x('The CSV will automatically download when the process is complete. A download link will also be sent to <code>%s</code>.', 'export csv message', 'smart-manager-for-wp-e-commerce'), window[pluginKey].sm_admin_email)}</div>`;
+									}
 									// Update progress bar with Tailwind CSS
 									jQuery('.sa_background_update_progressbar_fill').css('width', per + '%');
 									jQuery('.sa_background_update_progressbar_text').html(Math.round(parseInt(per)) + '<?php echo esc_html__( '% Completed', 'smart-manager-for-wp-e-commerce' ); ?>' + recordsUpdatedHTML ) ;
 								}
 								if (per < 100) {
+									window[pluginKey].export_csv_download_url = (response.hasOwnProperty('export_csv_download_url')) ? response.export_csv_download_url : false;
 									setTimeout(function() {
 										sa_background_process_heartbeat(0, process, pluginKey);
 									}, 1000);
 								} else {
+									let export_csv_download_url = window[pluginKey]?.export_csv_download_url || false;
+									if(!export_csv_download_url && (response.hasOwnProperty('export_csv_download_url'))){
+										export_csv_download_url = response.export_csv_download_url
+									}
+									// Auto-download CSV for background export process
+									if (export_csv_download_url) {
+										window.location.href = export_csv_download_url;
+										window[pluginKey].export_csv_download_url = false;
+									}
 									if (isBackground) {
 										jQuery('#sa_background_process_progress').fadeOut();
 										jQuery('#sa_background_process_complete').fadeIn();

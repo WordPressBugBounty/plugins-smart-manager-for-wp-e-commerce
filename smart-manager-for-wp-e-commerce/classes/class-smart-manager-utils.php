@@ -414,3 +414,94 @@ function sm_get_post_type_singular_name( $post_type = '' ) {
 	}
 	return $post_type_obj->labels->singular_name;
 }
+
+/**
+ * Parse column model to extract CSV export metadata.
+ *
+ * @param array $col_model Column model array.
+ * @return array Array with 'headers', 'select_cols', 'numeric_cols', 'fields'.
+ */
+function sa_sm_parse_csv_columns( $col_model = array() ) {
+	if ( empty( $col_model ) || ! is_array( $col_model ) ) {
+		return;
+	}
+	$headers      = array();
+	$select_cols  = array();
+	$numeric_cols = array();
+	foreach ( $col_model as $col ) {
+		if ( empty( $col['exportable'] ) || ! empty( $col['hidden'] ) ) {
+			continue;
+		}
+
+		$headers[ $col['data'] ] = $col['key'];
+
+		if ( ! empty( $col['values'] ) ) {
+			$select_cols[ $col['data'] ] = $col['values'];
+		}
+
+		if ( ( ! empty( $col['type'] ) && 'numeric' === $col['type'] ) || ( ! empty( $col['validator'] ) && 'customNumericTextEditor' === $col['validator'] ) ) {
+			$numeric_cols[] = $col['data'];
+		}
+	}
+
+	return array(
+		'headers'      => $headers,
+		'select_cols'  => $select_cols,
+		'numeric_cols' => $numeric_cols,
+		'fields'       => array_keys( $headers ),
+	);
+}
+
+/**
+ * Format a single row of data for CSV export.
+ *
+ * @param array $row         Row data.
+ * @param array $fields      Column field keys.
+ * @param array $select_cols Select/dropdown column values mapping.
+ * @param array $numeric_cols Numeric column keys.
+ * @return string Formatted CSV row string.
+ */
+function sa_sm_format_csv_row( $row = array(), $fields = array(), $select_cols = array(), $numeric_cols = array() ) {
+	if ( empty( $row ) || ! is_array( $row ) || empty( $fields ) || ! is_array( $fields ) ) {
+		return '';
+	}
+
+	$select_cols  = ( ! empty( $select_cols ) && is_array( $select_cols ) ) ? $select_cols : array();
+	$numeric_cols = ( ! empty( $numeric_cols ) && is_array( $numeric_cols ) ) ? $numeric_cols : array();
+	$escaped_cols = apply_filters( 'sa_sm_escaped_html_columns', array( 'posts_post_excerpt', 'posts_post_content' ) );
+	$escaped_cols = ( ! empty( $escaped_cols ) && is_array( $escaped_cols ) ) ? $escaped_cols : array();
+	$row_data     = array();
+
+	foreach ( $fields as $field ) {
+		$value = isset( $row[ $field ] ) ? $row[ $field ] : '';
+
+		// Map select/dropdown values to their labels.
+		if ( ! empty( $select_cols[ $field ] ) && is_array( $select_cols[ $field ] ) && ! empty( $value ) ) {
+			$value = isset( $select_cols[ $field ][ $value ] ) ? $select_cols[ $field ][ $value ] : $value;
+		}
+
+		// Replace line breaks.
+		$value = str_replace( array( "\n", "\r\n", "\n\r", "\r" ), "\t", $value );
+		$value = str_replace( '<br>', "\n", $value );
+
+		// Escape double quotes.
+		$value = str_replace( '"', '""', $value );
+
+		// Handle non-numeric columns - parse CSV values.
+		if ( empty( $numeric_cols ) || ! in_array( $field, $numeric_cols, true ) ) {
+			if ( ! is_array( $value ) ) {
+				$value = str_getcsv( $value, ',', '"', '\\' );
+			}
+			$value = ( $value && is_array( $value ) ) ? implode( ', ', $value ) : '';
+		}
+
+		// Escape HTML for specific columns.
+		if ( ! empty( $escaped_cols ) && in_array( $field, $escaped_cols, true ) ) {
+			$value = esc_html( $value );
+		}
+
+		$row_data[] = '"' . $value . '"';
+	}
+
+	return implode( ',', $row_data );
+}

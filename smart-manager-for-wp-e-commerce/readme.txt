@@ -7,7 +7,7 @@ Tags: woocommerce bulk edit, woocommerce inventory management, woocommerce order
 Requires at least: 5.0
 Tested up to: 7.0
 Requires PHP: 7.0
-Stable tag: 8.88.0
+Stable tag: 8.89.0
 License: GPLv2
 
 WooCommerce Advanced Bulk Edit products, orders, & posts in an Excel-like sheet editor. Get advanced WooCommerce stock, pricing, & order management.
@@ -312,6 +312,12 @@ Please report security bugs found in the source code of the Smart Manager plugin
 2. Bulk edit / Batch update (only in Pro version)
 
 == Changelog ==
+
+= 8.89.0 (08.06.2026) =
+* New: WooCommerce 10.8.1 compatible
+* Update: Background processing for CSV exports to prevent execution timeouts when exporting large number of records
+* Update: Pricing page related changes
+* Update: POT file
 
 = 8.88.0 (28.05.2026) =
 * New: WordPress 7.0 compatible
@@ -817,6 +823,9 @@ Please report security bugs found in the source code of the Smart Manager plugin
 [See changelog for all versions](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 8.89.0 =
+WooCommerce 10.8.1 compatible, updates related to Background processing for CSV exports to prevent execution timeouts when exporting large number of records, Pricing page related changes. Recommended upgrade.
 
 = 8.88.0 =
 WordPress 7.0 compatible, WPML 4.9.4 compatible (Pro), Fixes related to Grid records not preserving sort order when changing pagination while using Advanced Search, Column Manager icon position changing in the grid header when switching to Custom Views (Pro), 'Show Variations' toggle switch not appearing on Custom Views dashboards for WooCommerce Products (Pro), Some columns displaying 'null' values in the grid when switching to another dashboard from Custom Views dashboard (Pro), Updates related to Improved grid UI/UX, Improved UI/UX for the Custom Views dashboard (Pro). Recommended upgrade.

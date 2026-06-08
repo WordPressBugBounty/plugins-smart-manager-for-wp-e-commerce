@@ -201,6 +201,10 @@ class Smart_Manager {
 		if ( ! defined( 'SM_CONTACT_SUPPORT_URL' ) ) {
 			define( 'SM_CONTACT_SUPPORT_URL', 'https://www.storeapps.org/support/contact-us/' );
 		}
+		// Set Calendly book a call link.
+		if ( ! defined( 'SM_CALENDLY_URL' ) ) {
+			define( 'SM_CALENDLY_URL', 'https://calendly.com/storeapps/15min?utm_source=sm&utm_medium=in_app' );
+		}
 		if ( ! defined( 'SMPRO' ) ) {
 			if (file_exists ( (dirname ( SM_PLUGIN_FILE )) . '/pro/assets/js/smart-manager.js' )) {
 				define ( 'SMPRO', true );
@@ -1005,58 +1009,89 @@ class Smart_Manager {
 				echo '<style type="text/css">
 					.sm_design_notice {
 						display: none;
-						width: 50%;
-						background-color: rgb(204 251 241 / 82%) !important;
-						margin-top: 1em !important;
-						margin-bottom: 1em !important;
-						padding: 1em;
-						box-shadow: 0 0 7px 0 rgba(0, 0, 0, .2);
-						font-size: 1.1em;
-						// border: 0.15rem solid #5850ec;
-						margin: 0 auto;
-						text-align: center;
-						border-bottom-right-radius: 0.25rem;
-						border-bottom-left-radius: 0.25rem;
-						border-top: 4px solid #508991 !important;
+						align-items: center;
+						background-color: #e0e7ff;
+						border: 1px solid #c7d2fe;
+						border-radius: 0.75rem;
+						padding-right: 1.5rem;
+						margin: 1rem auto;
+						max-width: 62rem;
 					}
-					.sm_main_headline {
-						font-size: 1.7em;
-						color: rgb(55 65 81);
-						opacity: 0.9;
-						line-height: 1.75rem !important;
+					.sm_design_notice .sm_trophy_icon {
+						flex-shrink: 0;
+						margin-top: 0.25rem;
+						width: 7rem;
+						height: 7rem;
+						display: flex;
+						align-items: center;
+						justify-content: center;
 					}
-					.sm_main_headline .dashicons.dashicons-awards {
-						font-size: 3em;
-						color: #508991;
-						width: unset;
-						line-height: 3rem;
-						margin-right: 0.1em;
+					.sm_design_notice .sm_trophy_icon img {
+						width: 4rem;
+						height: 4rem;
+						object-fit: contain;
 					}
-					.sm_sub_headline {
-						font-size: 1.2em;
-						color: rgb(55 65 81);
-						line-height: 1.3em;
-						opacity: 0.8;
+					.sm_design_notice .sm_content {
+						flex: 1;
+					}
+					.sm_design_notice .sm_main_headline {
+						font-size: 1.25rem;
+						color: #1f2937;
+						margin: 0 0 0.25rem 0;
+					}
+					.sm_design_notice .sm_main_headline .sm_discount_highlight {
+						color: #4f46e5;
+						font-weight: 600;
+					}
+					.sm_design_notice .sm_sub_headline {
+						font-size: 1rem;
+						color: #6b7280;
+						margin: 0;
+					}
+					.sm_design_notice .sm_cta_container {
+						margin-left: 1.5rem;
+						flex-shrink: 0;
+					}
+					.sm_design_notice .sm_cta_btn {
+						display: inline-block;
+						background-color: #4f46e5;
+						color: #ffffff !important;
+						padding: 0.5rem 1rem;
+						border-radius: 0.5rem;
+						font-size: 0.875rem;
+						font-weight: 500;
+						text-decoration: none;
+						white-space: nowrap;
+					}
+					.sm_design_notice .sm_cta_btn:hover {
+						background-color: #4338ca;
+						text-decoration: none;
 					}
 				</style>';
 				$man_hours_data = self::sm_get_man_hours_data();
 				$discount = ( defined('SA_OFFER_VISIBLE') && SA_OFFER_VISIBLE === true ) ? '60%' : '25%';
-				if( ( ! empty( $man_hours_data ) ) && ( is_array( $man_hours_data ) ) && ( ! empty( $man_hours_data['display_man_hours'] ) )  ){
-					echo self::sm_get_man_hours_html( $man_hours_data, $sm_current_user_display_name, $discount );
-				}else{
+				if( !(( ! empty( $man_hours_data ) ) && ( is_array( $man_hours_data ) ) && ( ! empty( $man_hours_data['display_man_hours'] )))  ){
 					echo '<div class="sm_design_notice">
-						<div class="sm_container">
-							<div class="sm_main_headline"><span class="dashicons dashicons-awards"></span><span>'. ( ( self::show_halloween_offer() ) ? sprintf(
+						<div class="sm_trophy_icon">
+							<img src="https://www.storeapps.org/wp-content/uploads/2026/05/trophy-for-sm-inapp-banner.png" alt="trophy" />
+						</div>
+						<div class="sm_content">
+							<p class="sm_main_headline">'. ( ( self::show_halloween_offer() ) ? sprintf(
 								/* translators: %1$s: current user display name %2$s: HTML of Pro price discount */
-								__( 'Hey %1$s, grab your %2$s Halloween discount!', 'smart-manager-for-wp-e-commerce' ),
+								__( 'Hey %1$s, grab your <span class="sm_discount_highlight">%2$s Halloween discount!</span>', 'smart-manager-for-wp-e-commerce' ),
 								$sm_current_user_display_name,
-								'<span style="font-weight: bold;font-size: 2rem;color: rgb(20 184 166);color: #508991;color: rgb(55 65 81);">'. __( "25% off", "smart-manager-for-wp-e-commerce" ) .'</span>' ) : sprintf(
+								__( "25% off", "smart-manager-for-wp-e-commerce" ) ) : sprintf(
 								/* translators: %1$s: current user display name %2$s: HTML of Pro price discount */
-									__( 'Hey %1$s, you just unlocked %2$s off on Smart Manager Pro!', 'smart-manager-for-wp-e-commerce' ), $sm_current_user_display_name,
-									'<span style="font-weight: bold;font-size: 2rem;color: rgb(20 184 166);color: #508991;color: rgb(55 65 81);">'. __( $discount, "smart-manager-for-wp-e-commerce" ) .'</span>' ) ) .'</span></div>
-							<div class="sm_sub_headline" style="margin: 0.75rem 0 0 .5em !important;">' . sprintf(
-								/* translators: %s: pricing page link */
-								__( '%s to check Smart Manager Pro features/benefits and claim your discount.', 'smart-manager-for-wp-e-commerce' ), '<a style="color: rgb(55 65 81);" href="'. admin_url( 'admin.php?page=smart-manager-pricing' ) .'" target="_blank">' . __( 'Click here', 'smart-manager-for-wp-e-commerce' ) . '</a>' ) .'</div>
+									__( 'Hey %1$s, you just unlocked <span class="sm_discount_highlight">%2$s off</span> on Smart Manager Pro!', 'smart-manager-for-wp-e-commerce' ), $sm_current_user_display_name,
+									__( $discount, "smart-manager-for-wp-e-commerce" ) ) ) .'</p>
+							<p class="sm_sub_headline">' . __( 'Check Smart Manager Pro features/benefits and claim your discount.', 'smart-manager-for-wp-e-commerce' ) .'</p>
+						</div>
+						<div class="sm_cta_container">
+							<a class="sm_cta_btn" href="'. admin_url( 'admin.php?page=smart-manager-pricing' ) .'">' . sprintf(
+								/* translators: %s: discount percentage */
+								__( 'Upgrade to Pro at %s Off', 'smart-manager-for-wp-e-commerce' ),
+								$discount
+							) . '</a>
 						</div>
 					</div>';
 				}
@@ -1449,7 +1484,9 @@ class Smart_Manager {
 							'isStripeGatewayActive' => sm_is_stripe_gateway_active(),
 							'is_ai_integration_enabled' => self::is_ai_integration_enabled(),
 							'review_link'  => SM_REVIEW_URL,
-							'support_link' => SM_CONTACT_SUPPORT_URL
+							'support_link' => SM_CONTACT_SUPPORT_URL,
+							'calendly_link' => defined( 'SM_CALENDLY_URL' ) ? SM_CALENDLY_URL : '#',
+							'batchExportThreshold' => apply_filters( 'sa_sm_batch_export_threshold', intval( get_option( 'sa_sm_batch_export_threshold', 50 ) ) )
 						);
 
 		$active_plugins = (array) get_option( 'active_plugins', array() );
@@ -1832,6 +1869,10 @@ class Smart_Manager {
 				?> <div class="sa_offer_container"><?php self::$sa_offer_instance->show_offer_content(); ?></div> <?php
 			}
 			if( ! $is_pricing_page ) {
+				$man_hours_data = self::sm_get_man_hours_data();
+				if ( ( ! empty( $man_hours_data ) ) && ( is_array( $man_hours_data ) ) && ( ! empty( $man_hours_data['display_man_hours'] ) ) && is_callable( array( $this, 'sm_get_man_hours_html' ) ) ) {
+					echo self::sm_get_man_hours_html( self::sm_get_man_hours_data(), '', ( defined('SA_OFFER_VISIBLE') && SA_OFFER_VISIBLE === true ) ? '60%' : '25%' );
+				}
 		?>
 				<div id="sm-loading-messages-root"></div>
 				<div id="sm_grid_wrapper" class="relative">
@@ -1941,7 +1982,7 @@ class Smart_Manager {
 					</span>
 				</a>
 				<!-- Book a Call Button -->
-				<a href="https://calendly.com/storeapps/15min" target="_blank" class="sm-footer-btn">
+				<a href="<?php echo esc_url( defined( 'SM_CALENDLY_URL' ) ? SM_CALENDLY_URL : '#' ); ?>" target="_blank" class="sm-footer-btn">
 					<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
 						<path d="M13.3317 9.88001V11.6867C13.3324 11.8556 13.298 12.023 13.2306 12.178C13.1633 12.333 13.0646 12.4722 12.9409 12.5867C12.8173 12.7012 12.6713 12.7887 12.5121 12.8437C12.3529 12.8987 12.1839 12.9201 12.0157 12.9067C10.1575 12.7043 8.37302 12.0711 6.80566 11.0567C5.34829 10.1306 4.10578 8.88813 3.17967 7.43075C2.16202 5.85686 1.52875 4.06463 1.33041 2.19949C1.31707 2.03188 1.33823 1.86337 1.39277 1.70457C1.44731 1.54577 1.53406 1.40011 1.64758 1.27651C1.76111 1.15291 1.89917 1.05403 2.05306 0.986175C2.20695 0.918323 2.37321 0.882962 2.54167 0.882353H4.34834C4.64278 0.879565 4.92818 0.984338 5.1505 1.17718C5.37282 1.37002 5.51691 1.63762 5.55567 1.92949C5.62799 2.51306 5.76649 3.08668 5.96834 3.63949C6.05242 3.86807 6.0696 4.11588 6.01786 4.3541C5.96611 4.59231 5.84752 4.81072 5.67567 4.98416L4.91434 5.74549C5.77333 7.2559 7.05894 8.54151 8.56934 9.40049L9.33067 8.63916C9.5041 8.46731 9.72252 8.34872 9.96073 8.29697C10.1989 8.24523 10.4468 8.2624 10.6753 8.34649C11.2281 8.54834 11.8018 8.68684 12.3853 8.75916C12.6805 8.79827 12.9506 8.94505 13.1437 9.17115C13.3369 9.39724 13.4397 9.68697 13.4337 9.98401L13.3317 9.88001Z" stroke="#737373" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/>
 					</svg>
@@ -2271,59 +2312,97 @@ class Smart_Manager {
 	 * @return string html containing man hours data or empty string if data is not valid.
 	*/
 	public static function sm_get_man_hours_html( $man_hours_data = array(), $user_name = '', $discount = '' ) {
-		if( ( empty( $man_hours_data ) ) || ( ! is_array( $man_hours_data ) ) || ( empty( $user_name ) ) || ( empty( $man_hours_data['additional_savings'] ) ) || ( empty( $man_hours_data['man_hours_saved'] ) ) || ( empty( $discount ) ) ) {
+		if( ( empty( $man_hours_data ) ) || ( ! is_array( $man_hours_data ) ) || ( empty( $man_hours_data['additional_savings'] ) ) || ( empty( $man_hours_data['man_hours_saved'] ) ) || ( empty( $discount ) ) ) {
 			return '';
 		}
 		return '<style>
-			.sm_main_headline {
+			.sm_man_hours_banner {
 				display: flex;
+				align-items: center;
+				background-color: #e0e7ff;
+				border: 1px solid #c7d2fe;
+				border-radius: 0.75rem;
+				padding: 1rem 1.5rem;
+				margin: 1rem auto;
+				max-width: 62rem;
+			}
+			.sm_man_hours_banner .sm_trophy_icon {
+				flex-shrink: 0;
+				margin-right: 1rem;
+				margin-top: 0.25rem;
+				width: 7rem;
+				height: 7rem;
+				display: flex;
+				align-items: center;
 				justify-content: center;
 			}
-			.sm_main_headline .dashicons {
-				margin-right: 1rem;
+			.sm_man_hours_banner .sm_trophy_icon img {
+				width: 4rem;
+				height: 4rem;
+				object-fit: contain;
 			}
-			.sm_main_content {
-				font-size: 1rem;
+			.sm_man_hours_banner .sm_content {
+				flex: 1;
 			}
-			.sm_claim_discount {
-				margin-top: 1rem;
-			}
-			.discount-text {
-				font-weight: bold;
+			.sm_man_hours_banner .sm_headline {
 				font-size: 1.25rem;
-				color: rgb(55, 65, 81);
+				color: #1f2937;
+				margin: 0 0 0.25rem 0;
 			}
-			.sm_sub_headline {
-				font-size: 1.1em;
-				line-height: 1.5rem;
+			.sm_man_hours_banner .sm_headline .sm_hours_highlight {
+				color: #4f46e5;
+				font-weight: 600;
 			}
-			.pricing-link {
-				color: rgb(55, 65, 81);
+			.sm_man_hours_banner .sm_subtext {
+				font-size: 1rem;
+				color: #6b7280;
+				margin: 0;
+			}
+			.sm_man_hours_banner .sm_subtext strong {
+				color: #374151;
+			}
+			.sm_man_hours_banner .sm_cta_container {
+				margin-left: 1.5rem;
+				flex-shrink: 0;
+			}
+			.sm_man_hours_banner .sm_cta_btn {
+				display: inline-block;
+				background-color: #4f46e5;
+				color: #ffffff !important;
+				padding: 0.5rem 1rem;
+				border-radius: 0.5rem;
+				font-size: 0.875rem;
+				font-weight: 500;
+				text-decoration: none;
+				white-space: nowrap;
+			}
+			.sm_man_hours_banner .sm_cta_btn:hover {
+				background-color: #4338ca;
+				text-decoration: none;
 			}
 		</style>
-		<div class="sm_design_notice">
-			<div class="sm_container">
-				<div class="sm_main_headline">
-				<div class="dashicons dashicons-awards"></div>
-				<div class="sm_main_content">
-					<span>
-					' . sprintf(
-						/* translators: %1$s: user name, %2$s: saved man-hours */
-						__( 'Hey %1$s, you’ve just saved <strong>%2$s productive hours</strong> with Smart Manager! 🎉', 'smart-manager-for-wp-e-commerce' ),
-						$user_name,
-						$man_hours_data['man_hours_saved']
-					) . '
-					</span>
-					<div class="sm_claim_discount">
-					' . sprintf(
-						/* translators: %1$s: discount percentage, %2$s: additional man-hours */
-						__( 'Upgrade to Smart Manager Pro to save <strong>additional %1$s hours</strong> (minimum) and unlock all features. %2$s', 'smart-manager-for-wp-e-commerce' ),
-						$man_hours_data['additional_savings'],
-						'<a class="pricing-link" href="' . admin_url( 'admin.php?page=smart-manager-pricing' ) . '" target="_blank">' . __( 'Get it at', 'smart-manager-for-wp-e-commerce' ) . ' <strong>'. __( $discount . ' off!', 'smart-manager-for-wp-e-commerce' ) . '</strong> </a>'
-					) . '
-					</div>
-				</div>
-				</div>
+		<div class="sm_man_hours_banner">
+			<div class="sm_trophy_icon">
+				<img src="https://www.storeapps.org/wp-content/uploads/2026/05/trophy-for-sm-inapp-banner.png" alt="trophy" />
+			</div>
+			<div class="sm_content">
+				<p class="sm_headline">' . sprintf(
+					/* translators: %s: saved man-hours */
+					__( 'You\'ve saved <span class="sm_hours_highlight">%s productive hours</span> with Smart Manager', 'smart-manager-for-wp-e-commerce' ),
+					$man_hours_data['man_hours_saved']
+				) . '</p>
+				<p class="sm_subtext">' . sprintf(
+					/* translators: %s: additional man-hours */
+					__( 'Save another <strong>%s hours</strong> with advanced bulk editing and automation.', 'smart-manager-for-wp-e-commerce' ),
+					$man_hours_data['additional_savings']
+				) . '</p>
+			</div>
+			<div class="sm_cta_container">
+				<a class="sm_cta_btn" href="' . admin_url( 'admin.php?page=smart-manager-pricing' ) . '">' . sprintf(
+					/* translators: %s: discount percentage */
+					__( 'Upgrade to Pro at %s Off', 'smart-manager-for-wp-e-commerce' ),
+					$discount
+				) . '</a>
 			</div>
 		</div>';
 	}
@@ -2460,7 +2539,7 @@ class Smart_Manager {
 			delete_option( 'sa_sm_book_call_remind_later' );
 		}
 
-		$book_call_url = 'https://calendly.com/storeapps/15min';
+		$book_call_url = defined( 'SM_CALENDLY_URL' ) ? SM_CALENDLY_URL : '#';
 		$nonce = wp_create_nonce( 'sm_book_call_remind_later_nonce' );
 		
 		// SVG phone icon
