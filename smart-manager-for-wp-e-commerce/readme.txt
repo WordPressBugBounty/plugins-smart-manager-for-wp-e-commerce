@@ -7,7 +7,7 @@ Tags: woocommerce bulk edit, woocommerce inventory management, woocommerce order
 Requires at least: 5.0
 Tested up to: 7.0
 Requires PHP: 7.0
-Stable tag: 8.89.0
+Stable tag: 8.90.0
 License: GPLv2
 
 WooCommerce Advanced Bulk Edit products, orders, & posts in an Excel-like sheet editor. Get advanced WooCommerce stock, pricing, & order management.
@@ -312,6 +312,11 @@ Please report security bugs found in the source code of the Smart Manager plugin
 2. Bulk edit / Batch update (only in Pro version)
 
 == Changelog ==
+
+= 8.90.0 (12.06.2026) =
+* Fix: CSV export file failing to download when exporting large number of records
+* Fix: Scheduled Bulk Edits not working in some cases (Pro)
+* Update: POT file
 
 = 8.89.0 (08.06.2026) =
 * New: WooCommerce 10.8.1 compatible
@@ -823,6 +828,9 @@ Please report security bugs found in the source code of the Smart Manager plugin
 [See changelog for all versions](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 8.90.0 =
+Fixes related to CSV export file failing to download when exporting large number of records, Scheduled Bulk Edits not working in some cases (Pro). Recommended upgrade.
 
 = 8.89.0 =
 WooCommerce 10.8.1 compatible, updates related to Background processing for CSV exports to prevent execution timeouts when exporting large number of records, Pricing page related changes. Recommended upgrade.

@@ -8,7 +8,7 @@
  *
  * @package Smart_Manager/Classes
  * @since   8.89.0
- * @version 1.0.0
+ * @version 1.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -30,11 +30,11 @@ if ( ! class_exists( 'Smart_Manager_Batch_Export' ) ) {
 		protected static $_instance = null;
 
 		/**
-		 * Upload directory for exports (uses woocommerce_uploads for consistency).
+		 * Upload directory for exports (uses defined exports for consistency).
 		 *
 		 * @var string
 		 */
-		public static $export_dir = 'woocommerce_uploads';
+		public static $export_dir = 'sa_sm_exports';
 
 		/**
 		 * Meta key to identify batch export attachments.
@@ -64,11 +64,14 @@ if ( ! class_exists( 'Smart_Manager_Batch_Export' ) ) {
 
 			// Add hook for batch export CSV cleanup.
 			add_action( 'sm_batch_export_csv_cleanup', array( $this, 'cleanup_old_csv_files' ) );
+
+			// Add AJAX handler for secure file download.
+			add_action( 'wp_ajax_sa_sm_export_file_download', array( $this, 'handle_export_file_download' ) );
 		}
 
 		/**
 		 * Get upload directory for exports.
-		 * Uses woocommerce_uploads directory for consistency with scheduled exports.
+		 * Uses defined exports directory for consistency with scheduled exports.
 		 *
 		 * @return array|false Array with path, url, basedir, baseurl, or false on failure.
 		 */
@@ -104,7 +107,7 @@ if ( ! class_exists( 'Smart_Manager_Batch_Export' ) ) {
 		 * @return int|false Attachment ID on success, false on failure.
 		 */
 		public static function create_csv_attachment( $file_path, $file_name ) {
-			if ( empty( $file_path ) || empty( $file_name ) || ! file_exists( $file_path ) ) {
+			if ( empty( $file_path ) || empty( $file_name ) ) {
 				return false;
 			}
 
@@ -177,6 +180,7 @@ if ( ! class_exists( 'Smart_Manager_Batch_Export' ) ) {
                 return false;
             }
 			$csv_file_name = $params['csv_file_name'];
+			$csv_file_path = trailingslashit( $upload_dir['path'] ) . $csv_file_name;
 
 			// Build params for background process (following initiate_wsm_stock_log_import_process pattern)
 			$export_params = $params;
@@ -192,9 +196,9 @@ if ( ! class_exists( 'Smart_Manager_Batch_Export' ) ) {
 			$export_params['plugin_data']                      = get_sa_manager_common_params();
 			$export_params['backgroundProcessRunningMessage']  = _x( 'You can continue working. The CSV will automatically download when the process is complete. A download link will also be sent to your email.', 'background process message', 'smart-manager-for-wp-e-commerce' );
 			// Export-specific params
-			$export_params['csv_file_path']                    = trailingslashit( $upload_dir['path'] ) . $csv_file_name;
+			$export_params['csv_file_path']                    = $csv_file_path;
 			$export_params['csv_file_name']                    = $csv_file_name;
-			$export_params['csv_file_url']                     = trailingslashit( $upload_dir['url'] ) . $csv_file_name;
+			$export_params['csv_download_url']                 = self::get_download_url( self::create_csv_attachment( $csv_file_path, $csv_file_name ) );
 			$export_params['user_email']                       = wp_get_current_user()->user_email;
 
 			update_option( $identifier . '_params', $export_params, 'no' );
@@ -319,7 +323,41 @@ if ( ! class_exists( 'Smart_Manager_Batch_Export' ) ) {
 			if ( empty( $attachment_id ) ) {
 				return false;
 			}
-			return wp_get_attachment_url( $attachment_id );
+
+			return add_query_arg(
+				array(
+					'action' => 'sa_sm_export_file_download',
+					'id'     => $attachment_id,
+				),
+				admin_url( 'admin-ajax.php' )
+			);
+		}
+
+		/**
+		 * Handle secure file download via AJAX.
+		 * Validates token and streams file using WooCommerce's download method.
+		 */
+		public function handle_export_file_download() {
+			$attachment_id = ! empty( $_GET['id'] ) ? absint( wp_unslash( $_GET['id'] ) ) : 0;
+
+			if ( empty( $attachment_id ) ) {
+				wp_die( esc_html__( 'Invalid download link.', 'smart-manager-for-wp-e-commerce' ), '', array( 'response' => 403 ) );
+			}
+
+			// Verify it's a batch export file.
+			if ( empty( get_post_meta( $attachment_id, self::$attachment_meta_key, true ) ) ) {
+				wp_die( esc_html__( 'Invalid export file.', 'smart-manager-for-wp-e-commerce' ), '', array( 'response' => 404 ) );
+			}
+
+			// Get file path.
+			$file_path = get_attached_file( $attachment_id );
+			if ( empty( $file_path ) || ! file_exists( $file_path ) ) {
+				wp_die( esc_html__( 'File not found.', 'smart-manager-for-wp-e-commerce' ), '', array( 'response' => 404 ) );
+			}
+
+			//Downlaod CSV.
+			self::download_export_file( $file_path, basename( $file_path ) );
+			exit;
 		}
 
 		/**
@@ -329,7 +367,7 @@ if ( ! class_exists( 'Smart_Manager_Batch_Export' ) ) {
 		 * @param array  $batch_params Batch parameters.
 		 */
 		public function on_export_complete( $identifier = '', $batch_params = array() ) {
-			if ( ! is_array( $batch_params ) || empty( $batch_params['process_key'] ) || 'export_csv' !== $batch_params['process_key'] ) {
+			if ( ( ! is_array( $batch_params ) ) || ( empty( $batch_params['process_key'] ) ) || ( 'export_csv' !== $batch_params['process_key'] ) || ( empty( $batch_params['csv_download_url'] ) ) || ( empty( $batch_params['csv_file_name'] ) ) ) {
 				return;
 			}
 
@@ -338,18 +376,7 @@ if ( ! class_exists( 'Smart_Manager_Batch_Export' ) ) {
 				delete_option( $identifier . '_export_offset' );
 			}
 
-			if ( empty( $batch_params['csv_file_path'] ) || empty( $batch_params['csv_file_name'] ) ) {
-				return;
-			}
-
-			// Create WordPress attachment for the CSV file.
-			$attachment_id = self::create_csv_attachment( $batch_params['csv_file_path'], $batch_params['csv_file_name'] );
-			if ( empty( $attachment_id ) ) {
-				sa_manager_log( 'error', _x( 'Batch Export: Failed to create attachment for CSV file.', 'batch export error', 'smart-manager-for-wp-e-commerce' ) );
-				return;
-			}
-
-			$download_url = self::get_download_url( $attachment_id );
+			$download_url = $batch_params['csv_download_url'];
 			if ( empty( $download_url ) ) {
 				sa_manager_log( 'error', _x( 'Batch Export: Failed to get attachment URL.', 'batch export error', 'smart-manager-for-wp-e-commerce' ) );
 				return;
@@ -379,16 +406,13 @@ if ( ! class_exists( 'Smart_Manager_Batch_Export' ) ) {
 				'file_name'      => $batch_params['csv_file_name'],
 			) );
 
-			// Set content type to HTML
-			$headers = array( 'Content-Type: text/html; charset=UTF-8' );
-
 			// Send email
 			if ( class_exists( 'SA_Manager_Base' ) && is_callable( array( 'SA_Manager_Base', 'send_email' ) ) ) {
 				SA_Manager_Base::send_email( array(
 					'email'   => $batch_params['user_email'],
 					'subject' => $subject,
 					'message' => $message,
-					'headers' => $headers,
+					'headers' => array( 'Content-Type: text/html; charset=UTF-8' ),
 				) );
 			} 
 		}
@@ -512,6 +536,238 @@ if ( ! class_exists( 'Smart_Manager_Batch_Export' ) ) {
 					include_once $base_file;
 				}
 			}
+		}
+
+		/**
+		 * Force download file (fallback if WooCommerce not available).
+		 * Based on WC_Download_Handler::download_file_force() pattern.
+		 *
+		 * @param string $file_path Full path to file.
+		 * @param string $filename  Filename for download.
+		 */
+		private static function download_export_file( $file_path = '', $filename = '' ) {
+			if ( ( empty( $file_path ) ) || ( empty( $filename ) ) || ( ! file_exists( $file_path ) ) ) {
+				wp_die( esc_html__( 'File not found', 'smart-manager-for-wp-e-commerce' ), '', array( 'response' => 404 ) );
+			}
+			$file_size      = @filesize( $file_path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			$download_range = self::get_download_range( $file_size );
+
+			self::download_headers( $file_path, $filename, $download_range );
+
+			$start  = isset( $download_range['start'] ) ? $download_range['start'] : 0;
+			$length = isset( $download_range['length'] ) ? $download_range['length'] : 0;
+
+			if ( ! self::readfile_chunked( $file_path, $start, $length ) ) {
+				wp_die( esc_html__( 'File not found', 'smart-manager-for-wp-e-commerce' ), '', array( 'response' => 404 ) );
+			}
+
+			exit;
+		}
+
+		/**
+		 * Parse the HTTP_RANGE request from iOS devices.
+		 * Does not support multi-range requests.
+		 *
+		 * @param int $file_size Size of file in bytes.
+		 * @return array Range download info.
+		 */
+		private static function get_download_range( $file_size = 0 ) {
+			$start          = 0;
+			$download_range = array(
+				'start'            => $start,
+				'is_range_valid'   => false,
+				'is_range_request' => false,
+			);
+
+			if ( ! $file_size ) {
+				return $download_range;
+			}
+
+			$end                      = $file_size - 1;
+			$download_range['length'] = $file_size;
+
+			if ( isset( $_SERVER['HTTP_RANGE'] ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+				$http_range                         = sanitize_text_field( wp_unslash( $_SERVER['HTTP_RANGE'] ) );
+				$download_range['is_range_request'] = true;
+
+				$c_start = $start;
+				$c_end   = $end;
+
+				// Extract the range string.
+				list( , $range ) = explode( '=', $http_range, 2 );
+
+				// Make sure the client hasn't sent us a multibyte range.
+				if ( strpos( $range, ',' ) !== false ) {
+					return $download_range;
+				}
+
+				if ( '-' === $range[0] ) {
+					// The n-number of the last bytes is requested.
+					$c_start = $file_size - substr( $range, 1 );
+				} else {
+					$range   = explode( '-', $range );
+					$c_start = ( isset( $range[0] ) && is_numeric( $range[0] ) ) ? (int) $range[0] : 0;
+					$c_end   = ( isset( $range[1] ) && is_numeric( $range[1] ) ) ? (int) $range[1] : $file_size;
+				}
+
+				// End bytes can not be larger than $end.
+				$c_end = ( $c_end > $end ) ? $end : $c_end;
+
+				// Validate the requested range.
+				if ( $c_start > $c_end || $c_start > $file_size - 1 || $c_end >= $file_size ) {
+					return $download_range;
+				}
+
+				$start  = $c_start;
+				$end    = $c_end;
+				$length = $end - $start + 1;
+
+				$download_range['start']          = $start;
+				$download_range['length']         = $length;
+				$download_range['is_range_valid'] = true;
+			}
+
+			return $download_range;
+		}
+
+		/**
+		 * Set headers for the download.
+		 *
+		 * @param string $file_path      File path.
+		 * @param string $filename       File name.
+		 * @param array  $download_range Array containing info about range download request.
+		 */
+		private static function download_headers( $file_path = '', $filename = '', $download_range = array() ) {
+			if ( ( empty( $file_path ) ) || ( empty( $filename ) ) || ( ! is_array( $download_range ) ) ) {
+				return;
+			}
+			self::check_server_config();
+			self::clean_buffers();
+
+			nocache_headers();
+
+			header( 'X-Robots-Tag: noindex, nofollow', true );
+			header( 'Content-Type: text/csv; charset=UTF-8' );
+			header( 'Content-Description: File Transfer' );
+			header( 'Content-Disposition: attachment; filename="' . sanitize_file_name( $filename ) . '";' );
+			header( 'Content-Transfer-Encoding: binary' );
+
+			$file_size = @filesize( $file_path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			if ( ! $file_size ) {
+				return;
+			}
+
+			if ( isset( $download_range['is_range_request'] ) && true === $download_range['is_range_request'] ) {
+				if ( false === $download_range['is_range_valid'] ) {
+					header( 'HTTP/1.1 416 Requested Range Not Satisfiable' );
+					header( 'Content-Range: bytes 0-' . ( $file_size - 1 ) . '/' . $file_size );
+					exit;
+				}
+
+				$start  = $download_range['start'];
+				$end    = $download_range['start'] + $download_range['length'] - 1;
+				$length = $download_range['length'];
+
+				header( 'HTTP/1.1 206 Partial Content' );
+				header( "Accept-Ranges: 0-$file_size" );
+				header( "Content-Range: bytes $start-$end/$file_size" );
+				header( "Content-Length: $length" );
+			} else {
+				header( 'Content-Length: ' . $file_size );
+			}
+		}
+
+		/**
+		 * Check and set certain server config variables to ensure downloads work as intended.
+		 */
+		private static function check_server_config() {
+			if ( function_exists( 'wc_set_time_limit' ) ) {
+				wc_set_time_limit( 0 );
+			} elseif ( function_exists( 'set_time_limit' ) ) {
+				@set_time_limit( 0 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			}
+
+			if ( function_exists( 'apache_setenv' ) ) {
+				@apache_setenv( 'no-gzip', 1 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_apache_setenv
+			}
+
+			@ini_set( 'zlib.output_compression', 'Off' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_ini_set
+			@session_write_close(); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		}
+
+		/**
+		 * Clean all output buffers.
+		 * Can prevent errors, for example: transfer closed with 3 bytes remaining to read.
+		 */
+		private static function clean_buffers() {
+			if ( ob_get_level() ) {
+				$levels = ob_get_level();
+				for ( $i = 0; $i < $levels; $i++ ) {
+					@ob_end_clean(); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+				}
+			} else {
+				@ob_end_clean(); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			}
+		}
+
+		/**
+		 * Read file chunked.
+		 * Reads file in chunks so big downloads are possible without changing PHP.INI.
+		 *
+		 * @param  string $file   File.
+		 * @param  int    $start  Byte offset/position of the beginning from which to read from the file.
+		 * @param  int    $length Length of the chunk to be read from the file in bytes, 0 means full file.
+		 * @return bool Success or fail.
+		 */
+		private static function readfile_chunked( $file = '', $start = 0, $length = 0 ) {
+			if ( empty( $file ) ) {
+				return false;
+			}
+			$chunk_size = 1024 * 1024; // 1MB chunks.
+
+			$handle = @fopen( $file, 'r' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
+
+			if ( false === $handle ) {
+				return false;
+			}
+
+			if ( ! $length ) {
+				$length = @filesize( $file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			}
+
+			$read_length = (int) $chunk_size;
+
+			if ( $length ) {
+				$end = $start + $length - 1;
+
+				@fseek( $handle, $start ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+				$p = @ftell( $handle ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+
+				while ( ! @feof( $handle ) && $p <= $end ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+					// Don't run past the end of file.
+					if ( $p + $read_length > $end ) {
+						$read_length = $end - $p + 1;
+					}
+
+					echo @fread( $handle, $read_length ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.Security.EscapeOutput.OutputNotEscaped, WordPress.WP.AlternativeFunctions.file_system_read_fread
+					$p = @ftell( $handle ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+
+					if ( ob_get_length() ) {
+						ob_flush();
+						flush();
+					}
+				}
+			} else {
+				while ( ! @feof( $handle ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+					echo @fread( $handle, $read_length ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.Security.EscapeOutput.OutputNotEscaped, WordPress.WP.AlternativeFunctions.file_system_read_fread
+					if ( ob_get_length() ) {
+						ob_flush();
+						flush();
+					}
+				}
+			}
+
+			return @fclose( $handle ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fclose
 		}
 	}
 

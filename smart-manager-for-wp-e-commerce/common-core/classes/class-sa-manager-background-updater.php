@@ -415,8 +415,8 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 				'records_updated'     => ( ( ! empty( $progress ) ) && ( is_array( $progress ) ) && ( ! empty( $progress['records_updated'] ) ) ) ? absint( $progress['records_updated'] ) : 0
 			);
 			// Add download URL for export_csv process.
-			if ( ! empty( $batch_params['process_key'] ) && 'export_csv' === $batch_params['process_key'] && ! empty( $batch_params['csv_file_url'] ) ) {
-				$response['export_csv_download_url'] = $batch_params['csv_file_url'];
+			if ( ! empty( $batch_params['process_key'] ) && 'export_csv' === $batch_params['process_key'] && ! empty( $batch_params['csv_download_url'] ) ) {
+				$response['export_csv_download_url'] = $batch_params['csv_download_url'];
 			}
 			if ( 100 === $progress['percent_completion'] && ( ! empty( $_POST['pluginKey'] ) ) && ( 'smart_manager' === sanitize_key( wp_unslash( $_POST['pluginKey'] ) ) ) ) {
 				if ( ! class_exists( 'SA_Manager_Feedback' ) ) {

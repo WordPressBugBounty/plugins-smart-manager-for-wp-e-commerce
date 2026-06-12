@@ -2,14 +2,14 @@
 # This file is distributed under the GNU General Public License v2.0.
 msgid ""
 msgstr ""
-"Project-Id-Version: Smart Manager - Advanced WooCommerce Bulk Edit & Inventory Management 8.89.0\n"
+"Project-Id-Version: Smart Manager - Advanced WooCommerce Bulk Edit & Inventory Management 8.90.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/smart-manager-for-wp-e-commerce\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-06-08T05:37:28+00:00\n"
+"POT-Creation-Date: 2026-06-12T08:21:59+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.10.0\n"
 "X-Domain: smart-manager-for-wp-e-commerce\n"
@@ -64,152 +64,150 @@ msgid "You can continue working. Please wait before running bulk actions or expo
 msgstr ""
 
 #. translators: %1$s: current user display name %2$s: HTML of Pro price discount
-#: class-smart-manager.php:1053
-msgid "Hey %1$s, grab your %2$s Halloween discount!"
+#: class-smart-manager.php:1081
+msgid "Hey %1$s, grab your <span class=\"sm_discount_highlight\">%2$s Halloween discount!</span>"
 msgstr ""
 
-#: class-smart-manager.php:1055
+#: class-smart-manager.php:1083
 msgid "25% off"
 msgstr ""
 
 #. translators: %1$s: current user display name %2$s: HTML of Pro price discount
-#: class-smart-manager.php:1057
-msgid "Hey %1$s, you just unlocked %2$s off on Smart Manager Pro!"
+#: class-smart-manager.php:1085
+msgid "Hey %1$s, you just unlocked <span class=\"sm_discount_highlight\">%2$s off</span> on Smart Manager Pro!"
 msgstr ""
 
-#. translators: %s: pricing page link
-#: class-smart-manager.php:1061
-msgid "%s to check Smart Manager Pro features/benefits and claim your discount."
+#: class-smart-manager.php:1087
+msgid "Check Smart Manager Pro features/benefits and claim your discount."
 msgstr ""
 
-#. translators: %s: pricing page link
-#: class-smart-manager.php:1061
-#: class-smart-manager.php:2769
-msgid "Click here"
+#. translators: %s: discount percentage
+#: class-smart-manager.php:1092
+#: class-smart-manager.php:2403
+msgid "Upgrade to Pro at %s Off"
 msgstr ""
 
-#: class-smart-manager.php:1389
+#: class-smart-manager.php:1422
 msgid "This functionality has been disabled. Please contact store administrator for enabling the same."
 msgstr ""
 
-#: class-smart-manager.php:1393
+#: class-smart-manager.php:1426
 msgctxt "Column edit disable message"
 msgid "This column edit has been disabled. Please contact store administrator for enabling the same."
 msgstr ""
 
-#: class-smart-manager.php:1821
+#: class-smart-manager.php:1854
 msgid "An upgrade for Smart Manager Pro"
 msgstr ""
 
-#: class-smart-manager.php:1821
+#: class-smart-manager.php:1854
 msgid "is available."
 msgstr ""
 
-#: class-smart-manager.php:1821
+#: class-smart-manager.php:1854
 msgid "Click to upgrade."
 msgstr ""
 
-#: class-smart-manager.php:1939
+#: class-smart-manager.php:1972
 msgctxt "footer button"
 msgid "Visit StoreApps"
 msgstr ""
 
-#: class-smart-manager.php:1948
+#: class-smart-manager.php:1981
 msgctxt "footer button"
 msgid "Request a Feature"
 msgstr ""
 
-#: class-smart-manager.php:1957
+#: class-smart-manager.php:1990
 msgctxt "footer button"
 msgid "Book a Call"
 msgstr ""
 
-#: class-smart-manager.php:1966
+#: class-smart-manager.php:1999
 msgctxt "footer button"
 msgid "Rate Us"
 msgstr ""
 
-#: class-smart-manager.php:1982
+#: class-smart-manager.php:2015
 msgid "A required Smart Manager file is missing. Can't continue. "
 msgstr ""
 
-#: class-smart-manager.php:1997
+#: class-smart-manager.php:2030
 msgid "Error:"
 msgstr ""
 
-#: class-smart-manager.php:2055
+#: class-smart-manager.php:2088
 msgid "Auto-updates are not available for this plugin."
 msgstr ""
 
-#: class-smart-manager.php:2113
-#: class-smart-manager.php:2122
+#: class-smart-manager.php:2146
+#: class-smart-manager.php:2155
 msgctxt "WooCommerce post type label"
 msgid "WooCommerce - "
 msgstr ""
 
-#: class-smart-manager.php:2148
+#: class-smart-manager.php:2181
 msgctxt "go pro link title"
 msgid "Go Pro"
 msgstr ""
 
-#: class-smart-manager.php:2148
+#: class-smart-manager.php:2181
 msgctxt "go pro link"
 msgid "Go Pro"
 msgstr ""
 
 #. translators: %1\$: 5-star link %2s: 5-star link
-#: class-smart-manager.php:2153
+#: class-smart-manager.php:2186
 msgid "Boost us with %1$s&#11088;&#11088;&#11088;&#11088;&#11088; &#128640;%2$s"
 msgstr ""
 
-#: class-smart-manager.php:2154
+#: class-smart-manager.php:2187
 msgctxt "5-star link title"
 msgid "5-star review"
 msgstr ""
 
 #. translators: %s: saved man-hours
-#: class-smart-manager.php:2358
+#: class-smart-manager.php:2391
 msgid "You've saved <span class=\"sm_hours_highlight\">%s productive hours</span> with Smart Manager"
 msgstr ""
 
 #. translators: %s: additional man-hours
-#: class-smart-manager.php:2363
+#: class-smart-manager.php:2396
 msgid "Save another <strong>%s hours</strong> with advanced bulk editing and automation."
 msgstr ""
 
-#. translators: %s: discount percentage
-#: class-smart-manager.php:2370
-msgid "Upgrade to Pro at %s Off"
-msgstr ""
-
-#: class-smart-manager.php:2621
+#: class-smart-manager.php:2654
 msgid "Got ideas to improve Smart Manager?"
 msgstr ""
 
-#: class-smart-manager.php:2622
+#: class-smart-manager.php:2655
 msgid "We'd love to hear your feature requests and feedback. Schedule a quick 15-minute call with our team!"
 msgstr ""
 
-#: class-smart-manager.php:2625
+#: class-smart-manager.php:2658
 #: classes/class-smart-manager-admin-welcome.php:275
 msgid "Book a Call"
 msgstr ""
 
-#: class-smart-manager.php:2626
+#: class-smart-manager.php:2659
 msgid "Later"
 msgstr ""
 
-#: class-smart-manager.php:2627
+#: class-smart-manager.php:2660
 msgid "Remind me in 7 days"
 msgstr ""
 
-#: class-smart-manager.php:2628
+#: class-smart-manager.php:2661
 msgid "Don't show this again"
 msgstr ""
 
 #. translators: %s: clickable link text
-#: class-smart-manager.php:2768
+#: class-smart-manager.php:2801
 msgid "Smart Manager has detected stock logs from an earlier installation of <a href=\"https://wordpress.org/plugins/woocommerce-stock-manager/\" target=\"_blank\">Stock Manager for WooCommerce</a> plugin. %s to sync and import them into Smart Manager."
+msgstr ""
+
+#: class-smart-manager.php:2802
+msgid "Click here"
 msgstr ""
 
 #. translators: %s: Plugin version number
@@ -508,29 +506,40 @@ msgctxt "background update process name"
 msgid "Stock Log Synchronization"
 msgstr ""
 
-#: classes/class-smart-manager-batch-export.php:184
+#: classes/class-smart-manager-batch-export.php:188
 msgctxt "background process name"
 msgid "Export CSV"
 msgstr ""
 
-#: classes/class-smart-manager-batch-export.php:193
+#: classes/class-smart-manager-batch-export.php:197
 msgctxt "background process message"
 msgid "You can continue working. The CSV will automatically download when the process is complete. A download link will also be sent to your email."
 msgstr ""
 
-#: classes/class-smart-manager-batch-export.php:348
-msgctxt "batch export error"
-msgid "Batch Export: Failed to create attachment for CSV file."
+#: classes/class-smart-manager-batch-export.php:344
+msgid "Invalid download link."
 msgstr ""
 
-#: classes/class-smart-manager-batch-export.php:354
+#: classes/class-smart-manager-batch-export.php:349
+msgid "Invalid export file."
+msgstr ""
+
+#: classes/class-smart-manager-batch-export.php:355
+msgid "File not found."
+msgstr ""
+
+#: classes/class-smart-manager-batch-export.php:381
 msgctxt "batch export error"
 msgid "Batch Export: Failed to get attachment URL."
 msgstr ""
 
 #. translators: %s: site name
-#: classes/class-smart-manager-batch-export.php:370
+#: classes/class-smart-manager-batch-export.php:397
 msgid "Your CSV Export from %s is Ready"
+msgstr ""
+
+#: classes/class-smart-manager-batch-export.php:558
+msgid "File not found"
 msgstr ""
 
 #: classes/class-smart-manager-controller.php:97
@@ -2824,7 +2833,7 @@ msgstr ""
 #: assets/js/smart-manager.js:2748
 #: assets/js/smart-manager.js:2845
 #: assets/js/smart-manager.js:2860
-#: assets/js/smart-manager.js:5422
+#: assets/js/smart-manager.js:5423
 #: pro/assets/js/smart-manager.js:1155
 #: pro/assets/js/smart-manager.js:2287
 msgctxt "modal title"
@@ -4680,7 +4689,7 @@ msgid "Are you sure?"
 msgstr ""
 
 #: assets/js/smart-manager.js:3467
-#: assets/js/smart-manager.js:5427
+#: assets/js/smart-manager.js:5428
 #: common-core/assets/js/core-base.js:378
 msgctxt "button"
 msgid "Yes"
@@ -4688,7 +4697,7 @@ msgstr ""
 
 #: assets/js/smart-manager.js:3481
 #: assets/js/smart-manager.js:4853
-#: assets/js/smart-manager.js:5444
+#: assets/js/smart-manager.js:5445
 #: common-core/assets/js/core-base.js:391
 msgctxt "button"
 msgid "No"
@@ -4987,77 +4996,77 @@ msgctxt "notification"
 msgid "Please upgrade to %s to use this feature."
 msgstr ""
 
-#: assets/js/smart-manager.js:5392
+#: assets/js/smart-manager.js:5393
 msgctxt "progressbar modal title"
 msgid "Export CSV"
 msgstr ""
 
-#: assets/js/smart-manager.js:5424
+#: assets/js/smart-manager.js:5425
 msgctxt "modal content"
 msgid "You have unsaved changes. Are you sure you want to continue?"
 msgstr ""
 
-#: assets/js/smart-manager.js:5525
+#: assets/js/smart-manager.js:5526
 msgctxt "modal title"
 msgid "Sync Stock Log Data"
 msgstr ""
 
-#: assets/js/smart-manager.js:5533
+#: assets/js/smart-manager.js:5534
 msgctxt "modal content"
 msgid "Are you sure you want to sync stock log data from"
 msgstr ""
 
-#: assets/js/smart-manager.js:5535
+#: assets/js/smart-manager.js:5536
 msgctxt "modal content"
 msgid "into Smart Manager?"
 msgstr ""
 
-#: assets/js/smart-manager.js:5540
+#: assets/js/smart-manager.js:5541
 msgctxt "section heading"
 msgid "Please Note:"
 msgstr ""
 
-#: assets/js/smart-manager.js:5543
+#: assets/js/smart-manager.js:5544
 msgctxt "modal content"
 msgid "Synced records will <strong class=\"text-sm-base-foreground\">not support the Undo feature</strong>."
 msgstr ""
 
-#: assets/js/smart-manager.js:5546
+#: assets/js/smart-manager.js:5547
 msgctxt "modal content"
 msgid "Some field data (such as author and previous values) may be missing because this information was not captured by the Stock Manager for WooCommerce plugin."
 msgstr ""
 
-#: assets/js/smart-manager.js:5555
+#: assets/js/smart-manager.js:5556
 msgctxt "button text"
 msgid "Sync Now"
 msgstr ""
 
-#: assets/js/smart-manager.js:5556
+#: assets/js/smart-manager.js:5557
 msgctxt "button text"
 msgid "Cancel"
 msgstr ""
 
-#: assets/js/smart-manager.js:5566
+#: assets/js/smart-manager.js:5567
 msgctxt "progressbar modal title"
 msgid "Stock Log Synchronization"
 msgstr ""
 
-#: assets/js/smart-manager.js:5624
+#: assets/js/smart-manager.js:5625
 msgctxt "modal content"
 msgid "this record"
 msgstr ""
 
-#: assets/js/smart-manager.js:5711
+#: assets/js/smart-manager.js:5712
 msgctxt "quick column manager title"
 msgid "Manage columns"
 msgstr ""
 
-#: assets/js/smart-manager.js:5718
+#: assets/js/smart-manager.js:5719
 msgctxt "button"
 msgid "Open Column Manager"
 msgstr ""
 
-#: assets/js/smart-manager.js:5769
+#: assets/js/smart-manager.js:5770
 msgctxt "tooltip"
 msgid "Edit column name"
 msgstr ""
