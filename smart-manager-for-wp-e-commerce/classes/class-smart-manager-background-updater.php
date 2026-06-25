@@ -42,8 +42,8 @@ if ( ! class_exists( 'Smart_Manager_Background_Updater' ) ) {
 					}
 					include_once dirname( __FILE__ ) . '/class-smart-manager-product-stock-log.php';
                 }
-				if ( ( 'export_csv' === $params['process_key'] ) && ( ! class_exists( 'Smart_Manager_Batch_Export' ) ) && ( file_exists( dirname( __FILE__ ) . '/class-smart-manager-batch-export.php' ) ) ) {
-					include_once dirname( __FILE__ ) . '/class-smart-manager-batch-export.php';
+				if ( ( 'export_csv' === $params['process_key'] ) && defined( 'SMPRO' ) && SMPRO === true && file_exists( SM_PRO_URL . 'classes/class-smart-manager-pro-batch-export.php' ) ) {
+					include_once SM_PRO_URL . 'classes/class-smart-manager-pro-batch-export.php';
 				}
 				return (
 					( 'bulk_edit' === $params['process_key'] && ( ! empty( $params['is_common'] ) ) ) ||

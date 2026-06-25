@@ -160,12 +160,12 @@ if ( ! class_exists( 'Smart_Manager_Controller' ) ) {
 				$this->sm_beta_pro_background_updater = Smart_Manager_Pro_Background_Updater::instance();
 			}
 			// Initialize batch export handler (available in both lite and pro).
-			if ( file_exists( $this->plugin_path . '/class-smart-manager-batch-export.php' ) ) {
-				include_once $this->plugin_path . '/class-smart-manager-batch-export.php';
+			if ( defined( 'SMPRO' ) && SMPRO === true && file_exists( SM_PRO_URL . 'classes/class-smart-manager-pro-batch-export.php' ) ) {
+				include_once SM_PRO_URL . 'classes/class-smart-manager-pro-batch-export.php';
 			}
 			// Schedule batch export CSV cleanup (available in both lite and pro) - deletes files older than 7 days.
-			if ( function_exists( 'as_next_scheduled_action' ) && ! as_next_scheduled_action( 'sm_batch_export_csv_cleanup' ) && class_exists( 'Smart_Manager_Batch_Export' ) && is_callable( array( 'Smart_Manager_Batch_Export', 'schedule_batch_export_cleanup' ) ) ) {
-				Smart_Manager_Batch_Export::schedule_batch_export_cleanup();
+			if ( function_exists( 'as_next_scheduled_action' ) && ! as_next_scheduled_action( 'sm_batch_export_csv_cleanup' ) && class_exists( 'Smart_Manager_Pro_Batch_Export' ) && is_callable( array( 'Smart_Manager_Pro_Batch_Export', 'schedule_batch_export_cleanup' ) ) ) {
+				Smart_Manager_Pro_Batch_Export::schedule_batch_export_cleanup();
 			}
 			// Code for scheduling action for deleting older tasks and export CSV file after x no. of days.
 			if ( defined('SMPRO') && SMPRO === true && function_exists( 'as_has_scheduled_action' ) && function_exists( 'as_next_scheduled_action' ) && ( ! as_has_scheduled_action( 'sm_schedule_tasks_cleanup' ) || ! as_next_scheduled_action( 'storeapps_smart_manager_scheduled_export_cleanup' ) ) && ( file_exists( SM_PRO_URL . 'classes/class-smart-manager-pro-base.php' ) ) && ( file_exists( $this->plugin_path . '/class-smart-manager-base.php' ) ) ) {

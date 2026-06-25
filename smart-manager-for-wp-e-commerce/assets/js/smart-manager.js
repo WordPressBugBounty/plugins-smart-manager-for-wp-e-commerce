@@ -5368,8 +5368,8 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 		// Check if batch export should be used:
 		let batchExportThreshold = parseInt(sm_beta_params.batchExportThreshold) || 50;
 		let selectedIds = window.smart_manager.getSelectedKeyIds() || [];
-		//check if use batch export
-		if ( ('entire_store' === params.storewide_option || 'entire_store_stock_cols' === params.storewide_option || selectedIds.length > batchExportThreshold) ) {
+		//check if use batch export.
+		if ( ( window.smart_manager.sm_beta_pro == 1 ) && ( ( ( 'entire_store' === params.storewide_option || 'entire_store_stock_cols' === params.storewide_option ) && ( parseInt(window.smart_manager.totalRecords) > batchExportThreshold ) ) || ( selectedIds.length > batchExportThreshold ) ) ) {
 			params.use_batch_export  = true;
 			// Add filtered results flag.
 			if (window.smart_manager.isFilteredData()) {

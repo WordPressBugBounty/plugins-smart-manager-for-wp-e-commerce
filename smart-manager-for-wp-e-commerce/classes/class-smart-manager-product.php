@@ -4,6 +4,8 @@ if ( !defined( 'ABSPATH' ) ) exit;
 
 if ( ! class_exists( 'Smart_Manager_Product' ) ) {
 	class Smart_Manager_Product extends Smart_Manager_Base {
+		protected static $_instance = null;
+		
 		public $dashboard_key = '',
 			$default_store_model = array(),
 			$prod_sort = false,
@@ -12,6 +14,13 @@ if ( ! class_exists( 'Smart_Manager_Product' ) ) {
 			$product_old_title = array(), // array for storing the old product titles
 			$product_total_count = 0, //for total products count on the grid
 			$is_variations_enabled_advanced_search_condition = false; // For advanced search of 'Post Status' column for variations.
+
+		public static function instance( $dashboard_key ) {
+			if ( is_null( self::$_instance ) ) {
+				self::$_instance = new self( $dashboard_key );
+			}
+			return self::$_instance;
+		}
 
 		function __construct($dashboard_key) {
 			parent::__construct($dashboard_key);

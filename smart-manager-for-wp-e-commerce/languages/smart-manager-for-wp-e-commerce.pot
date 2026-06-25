@@ -2,14 +2,14 @@
 # This file is distributed under the GNU General Public License v2.0.
 msgid ""
 msgstr ""
-"Project-Id-Version: Smart Manager - Advanced WooCommerce Bulk Edit & Inventory Management 8.90.0\n"
+"Project-Id-Version: Smart Manager - Advanced WooCommerce Bulk Edit & Inventory Management 8.91.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/smart-manager-for-wp-e-commerce\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-06-12T08:21:59+00:00\n"
+"POT-Creation-Date: 2026-06-25T06:50:59+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.10.0\n"
 "X-Domain: smart-manager-for-wp-e-commerce\n"
@@ -506,42 +506,6 @@ msgctxt "background update process name"
 msgid "Stock Log Synchronization"
 msgstr ""
 
-#: classes/class-smart-manager-batch-export.php:188
-msgctxt "background process name"
-msgid "Export CSV"
-msgstr ""
-
-#: classes/class-smart-manager-batch-export.php:197
-msgctxt "background process message"
-msgid "You can continue working. The CSV will automatically download when the process is complete. A download link will also be sent to your email."
-msgstr ""
-
-#: classes/class-smart-manager-batch-export.php:344
-msgid "Invalid download link."
-msgstr ""
-
-#: classes/class-smart-manager-batch-export.php:349
-msgid "Invalid export file."
-msgstr ""
-
-#: classes/class-smart-manager-batch-export.php:355
-msgid "File not found."
-msgstr ""
-
-#: classes/class-smart-manager-batch-export.php:381
-msgctxt "batch export error"
-msgid "Batch Export: Failed to get attachment URL."
-msgstr ""
-
-#. translators: %s: site name
-#: classes/class-smart-manager-batch-export.php:397
-msgid "Your CSV Export from %s is Ready"
-msgstr ""
-
-#: classes/class-smart-manager-batch-export.php:558
-msgid "File not found"
-msgstr ""
-
 #: classes/class-smart-manager-controller.php:97
 msgctxt "Security error message"
 msgid "Access denied. Your user role could not be determined."
@@ -627,12 +591,12 @@ msgctxt "WSM Stock Log data import error"
 msgid "Error in Importing WSM Stock Log:"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:1591
-#: classes/class-smart-manager-product.php:1594
+#: classes/class-smart-manager-product.php:1600
+#: classes/class-smart-manager-product.php:1603
 msgid "Featured Image updated successfully"
 msgstr ""
 
-#: classes/class-smart-manager-product.php:1637
+#: classes/class-smart-manager-product.php:1646
 msgctxt "Title for task"
 msgid "Edited Stock"
 msgstr ""
@@ -1451,6 +1415,43 @@ msgctxt "Email subject for scheduled export"
 msgid "Your Scheduled Orders Export from %1$s on %2$s Is Ready"
 msgstr ""
 
+#: pro/classes/class-smart-manager-pro-batch-export.php:188
+msgctxt "background process name"
+msgid "Export CSV"
+msgstr ""
+
+#: pro/classes/class-smart-manager-pro-batch-export.php:197
+msgctxt "background process message"
+msgid "You can continue working. The CSV will automatically download when the process is complete. A download link will also be sent to your email."
+msgstr ""
+
+#: pro/classes/class-smart-manager-pro-batch-export.php:344
+msgid "Invalid download link."
+msgstr ""
+
+#: pro/classes/class-smart-manager-pro-batch-export.php:349
+msgid "Invalid export file."
+msgstr ""
+
+#: pro/classes/class-smart-manager-pro-batch-export.php:355
+msgid "File not found."
+msgstr ""
+
+#: pro/classes/class-smart-manager-pro-batch-export.php:381
+msgctxt "batch export error"
+msgid "Batch Export: Failed to get attachment URL."
+msgstr ""
+
+#. translators: %s: site name
+#: pro/classes/class-smart-manager-pro-batch-export.php:397
+msgid "Your CSV Export from %s is Ready"
+msgstr ""
+
+#: pro/classes/class-smart-manager-pro-batch-export.php:550
+#: pro/classes/class-smart-manager-pro-batch-export.php:561
+msgid "File not found"
+msgstr ""
+
 #: pro/classes/class-smart-manager-pro-course.php:42
 msgid "Category"
 msgstr ""
@@ -2192,6 +2193,84 @@ msgstr ""
 msgid "Subscription Trial Period"
 msgstr ""
 
+#: pro/templates/emails/batch-export.php:14
+msgctxt "Email heading for batch export"
+msgid "Your Export is Ready!"
+msgstr ""
+
+#: pro/templates/emails/batch-export.php:16
+msgctxt "batch export email user display name"
+msgid "there"
+msgstr ""
+
+#. translators: %s: user display name
+#: pro/templates/emails/batch-export.php:79
+msgctxt "batch export email content"
+msgid "Hi %s,"
+msgstr ""
+
+#. translators: 1: record count, 2: dashboard name, 3: site name
+#: pro/templates/emails/batch-export.php:84
+msgctxt "batch export email message"
+msgid "Your CSV export of <strong>%1$s %2$s</strong> from <strong>%3$s</strong> has been completed and is ready for download."
+msgstr ""
+
+#: pro/templates/emails/batch-export.php:89
+msgctxt "batch export email content"
+msgid "You can download your CSV file using the link below:"
+msgstr ""
+
+#: pro/templates/emails/batch-export.php:92
+msgctxt "batch export email content"
+msgid "Download CSV File"
+msgstr ""
+
+#: pro/templates/emails/batch-export.php:96
+msgctxt "batch export email content"
+msgid "Note:"
+msgstr ""
+
+#: pro/templates/emails/batch-export.php:96
+msgctxt "batch export email content"
+msgid "This download link will expire in 7 days. Please download your file before then."
+msgstr ""
+
+#. translators: %s: contact us link
+#: pro/templates/emails/batch-export.php:99
+msgctxt "batch export email content"
+msgid "If you have any questions or need help, feel free to reach out to our <a href=\"%s\">support team</a>."
+msgstr ""
+
+#: pro/templates/emails/batch-export.php:102
+msgctxt "batch export email content"
+msgid "Best regards,"
+msgstr ""
+
+#: pro/templates/emails/batch-export.php:103
+msgctxt "batch export email content"
+msgid "The Smart Manager Team"
+msgstr ""
+
+#: pro/templates/emails/batch-export.php:107
+msgctxt "batch export email content"
+msgid "If you like"
+msgstr ""
+
+#: pro/templates/emails/batch-export.php:107
+msgctxt "batch export email content"
+msgid "Smart Manager"
+msgstr ""
+
+#: pro/templates/emails/batch-export.php:107
+msgctxt "batch export email content"
+msgid ", please leave us a"
+msgstr ""
+
+#: pro/templates/emails/batch-export.php:107
+msgctxt "batch export email content"
+msgid "rating. A huge thank you from StoreApps in advance!"
+msgstr ""
+
 #. translators: %d: records count
 #: pro/templates/emails/bulk-edit.php:8
 msgctxt "user name in bulk edit email content"
@@ -2392,84 +2471,6 @@ msgstr ""
 
 #: pro/templates/order-invoice.php:223
 msgid "Total"
-msgstr ""
-
-#: templates/emails/batch-export.php:14
-msgctxt "Email heading for batch export"
-msgid "Your Export is Ready!"
-msgstr ""
-
-#: templates/emails/batch-export.php:16
-msgctxt "batch export email user display name"
-msgid "there"
-msgstr ""
-
-#. translators: %s: user display name
-#: templates/emails/batch-export.php:79
-msgctxt "batch export email content"
-msgid "Hi %s,"
-msgstr ""
-
-#. translators: 1: record count, 2: dashboard name, 3: site name
-#: templates/emails/batch-export.php:84
-msgctxt "batch export email message"
-msgid "Your CSV export of <strong>%1$s %2$s</strong> from <strong>%3$s</strong> has been completed and is ready for download."
-msgstr ""
-
-#: templates/emails/batch-export.php:89
-msgctxt "batch export email content"
-msgid "You can download your CSV file using the link below:"
-msgstr ""
-
-#: templates/emails/batch-export.php:92
-msgctxt "batch export email content"
-msgid "Download CSV File"
-msgstr ""
-
-#: templates/emails/batch-export.php:96
-msgctxt "batch export email content"
-msgid "Note:"
-msgstr ""
-
-#: templates/emails/batch-export.php:96
-msgctxt "batch export email content"
-msgid "This download link will expire in 7 days. Please download your file before then."
-msgstr ""
-
-#. translators: %s: contact us link
-#: templates/emails/batch-export.php:99
-msgctxt "batch export email content"
-msgid "If you have any questions or need help, feel free to reach out to our <a href=\"%s\">support team</a>."
-msgstr ""
-
-#: templates/emails/batch-export.php:102
-msgctxt "batch export email content"
-msgid "Best regards,"
-msgstr ""
-
-#: templates/emails/batch-export.php:103
-msgctxt "batch export email content"
-msgid "The Smart Manager Team"
-msgstr ""
-
-#: templates/emails/batch-export.php:107
-msgctxt "batch export email content"
-msgid "If you like"
-msgstr ""
-
-#: templates/emails/batch-export.php:107
-msgctxt "batch export email content"
-msgid "Smart Manager"
-msgstr ""
-
-#: templates/emails/batch-export.php:107
-msgctxt "batch export email content"
-msgid ", please leave us a"
-msgstr ""
-
-#: templates/emails/batch-export.php:107
-msgctxt "batch export email content"
-msgid "rating. A huge thank you from StoreApps in advance!"
 msgstr ""
 
 #. translators: %d: records count

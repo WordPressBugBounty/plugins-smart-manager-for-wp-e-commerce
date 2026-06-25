@@ -3437,14 +3437,14 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			} else{
 				$csv_file_name = ( ! empty( $this->req_params[ 'storewide_option' ] ) ) ? ( ( 'entire_store' === $this->req_params[ 'storewide_option' ] ? $csv_file_name : $csv_file_name . '_all_products_stock_columns') ) . ".csv" : $csv_file_name . ( ( ! empty( $this->req_params[ 'columnsToBeExported' ] ) && 'visible' === $this->req_params[ 'columnsToBeExported' ] ) ? '_selected_records' : '_selected_products_' . $this->req_params[ 'columnsToBeExported' ] . '_columns' ) . ".csv";
 			}
-			if ( ( ! empty( $this->req_params[ 'use_batch_export' ] ) )  && ( class_exists( 'Smart_Manager_Batch_Export' ) ) && ( is_callable( array( 'Smart_Manager_Batch_Export', 'initiate_batch_export_process' ) ) ) ) {
+			if ( ( ! empty( $this->req_params[ 'use_batch_export' ] ) )  && ( class_exists( 'Smart_Manager_Pro_Batch_Export' ) ) && ( is_callable( array( 'Smart_Manager_Pro_Batch_Export', 'initiate_batch_export_process' ) ) ) ) {
 				$batch_params = $this->req_params; 
 				$batch_params['selected_ids'] = $selected_ids;
 				$batch_params['csv_file_name'] = $csv_file_name;
 				$batch_params['csv_columns'] = $csv_columns;
 				$batch_params['col_model'] = $col_model;
 				$batch_params['dashboard_title'] = ! empty( $current_store_model['dashboard_title'] ) ? $current_store_model['dashboard_title'] : ucfirst( $this->dashboard_key );
-				$batch_result = Smart_Manager_Batch_Export::initiate_batch_export_process( $batch_params );
+				$batch_result = Smart_Manager_Pro_Batch_Export::initiate_batch_export_process( $batch_params );
 				if ( ! empty( $batch_result ) && is_array( $batch_result ) ) {
 					return;
 				}

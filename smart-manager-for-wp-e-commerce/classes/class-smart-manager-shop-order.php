@@ -496,7 +496,7 @@ if ( ! class_exists( 'Smart_Manager_Shop_Order' ) ) {
 		                    $product_full_name = ( !empty( $variation_att ) ) ? $order_item['order_prod'] . ' (' . $variation_att . ')' : $order_item['order_prod'];
 
 		                    $data_model['items'][$key]['custom_line_items'] = (!empty($data_model['items'][$key]['custom_line_items'])) ? $data_model['items'][$key]['custom_line_items'] : '';
-		                    $data_model['items'][$key]['custom_line_items'] .= $product_full_name.' '.$sku_detail.'['.__('Qty','smart-manager-for-wp-e-commerce').': '.$order_meta_key_values['_qty'].']['.__('Price','smart-manager-for-wp-e-commerce').': '.($order_meta_key_values['_line_total']/$order_meta_key_values['_qty']).']';
+							$data_model['items'][$key]['custom_line_items'] .= $product_full_name.' '.$sku_detail.'['.__('Qty','smart-manager-for-wp-e-commerce').': '.$order_meta_key_values['_qty'].']['.__('Price','smart-manager-for-wp-e-commerce').': '.( !empty($order_meta_key_values['_qty']) ? ($order_meta_key_values['_line_total']/$order_meta_key_values['_qty']) : $order_meta_key_values['_line_total'] ).']';
 
 		                    if( !empty( $order_meta_key_values['_wc_cog_item_total_cost'] ) ) {
 		                    	$data_model['items'][$key]['custom_line_items'] .= '['.__('Cost of Good','smart-manager-for-wp-e-commerce').': '.wc_format_decimal($order_meta_key_values['_wc_cog_item_total_cost']).']';
