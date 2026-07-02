@@ -3786,10 +3786,10 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 		let badgesDiv = '';
 		if(options){
 			options.forEach(category => {
-				badgesDiv += `<div class="inline-block ${!Array.from(td.classList).some(cls => cls.startsWith('sm_beta_select_')) ? 'text-sm-base-foreground' : ''} px-2 py-0.5 rounded-lg text-xs leading-4  whitespace-nowrap mt-1 mr-1 ${!color ? 'border border-sm-base-border font-normal' : 'font-medium'}" style="background-color: ${bgColor ? bgColor : '#fff'}; ${color ? `color:${color} !important` : ''}">${category}</div>`;
+				badgesDiv += `<div class="inline-block ${!Array.from(td.classList).some(cls => cls.startsWith('sm_beta_select_')) ? 'text-sm-base-foreground' : ''} px-2 py-0.5 rounded-lg text-xs leading-4  whitespace-nowrap mt-1 mr-1 ${!color ? 'border border-sm-base-border font-normal' : 'font-medium'}" style="background-color: ${bgColor ? bgColor : '#fff'}; ${color ? `color:${color} !important` : ''}">${ window.smart_manager.escapeHtmlAttr(category)}</div>`;
 			});
 		}
-		td.innerHTML = `<div style="overflow:hidden;max-height:${String(window.smart_manager.rowHeight).includes('px') ? window.smart_manager.rowHeight : window.smart_manager.rowHeight+'px'}" ${addTitleAttr ? `title="${td.innerText}"` : ""}>${badgesDiv}</div>`;
+		td.innerHTML = `<div style="overflow:hidden;max-height:${String(window.smart_manager.rowHeight).includes('px') ? window.smart_manager.rowHeight : window.smart_manager.rowHeight+'px'}" ${addTitleAttr ? `title="${ window.smart_manager.escapeHtmlAttr(td.innerText)}"` : ""}>${badgesDiv}</div>`;
 		return td;
 	}
 
@@ -3800,6 +3800,19 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 			window.smart_manager.currentGetDataParams.async = true;
 			window.smart_manager.getData();
 		}
+	}
+
+	/**
+	 * Escapes a string for safe use in HTML attribute context.
+	 * Prevents XSS attacks where malicious input containing quotes or HTML
+	 * could break out of attributes (e.g., title="...") and inject event handlers.
+	 * 
+	 * @param {string} str - The string to escape
+	 * @returns {string} The escaped string safe for HTML attributes
+	 */
+	SmartManager.prototype.escapeHtmlAttr = function(str = '') {
+		if (str === null || str === undefined) return '';
+		return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 	}
 
 	let instance = new SmartManager();
@@ -3972,7 +3985,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 		    if(!value || value === '' || value == null || value === 0 || value === 0.00 || value === '0' || value === '0.00' ) {
 		        td.innerHTML = '<div class="wrapper htRight htNumeric htNoWrap">' + value + '</div>';
 		    } else {
-		    	td.innerHTML = '<div title="'+ td.innerHTML +'" class="wrapper">' + td.innerHTML + '</div>';
+		    	td.innerHTML = '<div title="'+  window.smart_manager.escapeHtmlAttr(td.innerText) +'" class="wrapper">' + td.innerHTML + '</div>';
 		    }
 			// Code for handling colorCodes highlighting for the cells
 			let colorCodes = ( typeof(cellProperties.colorCodes) != 'undefined' ) ? cellProperties.colorCodes : '';
@@ -4016,9 +4029,9 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 			if (['_sale_price', '_regular_price', '_price'].some(field => prop.includes(field)) && value && value.length) {
 				td.classList.add('sm-price-cell')
 				// Sanity check for WooCommerce currency symbol
-				td.innerHTML = '<div title="'+ td.innerHTML +'" class="wrapper sm-price-cell">' + ( (typeof wc === 'object' && wc.wcSettings && wc.wcSettings.CURRENCY && wc.wcSettings.CURRENCY.symbol) ? wc.wcSettings.CURRENCY.symbol : '' ) + td.innerHTML + '</div>';
+				td.innerHTML = '<div title="'+  window.smart_manager.escapeHtmlAttr(td.innerText) +'" class="wrapper sm-price-cell">' + ( (typeof wc === 'object' && wc.wcSettings && wc.wcSettings.CURRENCY && wc.wcSettings.CURRENCY.symbol) ? wc.wcSettings.CURRENCY.symbol : '' ) + td.innerHTML + '</div>';
 			} else {
-				td.innerHTML = '<div title="'+ td.innerHTML +'" class="wrapper">' + td.innerHTML + '</div>';
+				td.innerHTML = '<div title="'+  window.smart_manager.escapeHtmlAttr(td.innerText) +'" class="wrapper">' + td.innerHTML + '</div>';
 			}
 		    return td;
 		}
@@ -4027,7 +4040,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 	  	function customHtmlRenderer(hotInstance, td, row, col, prop, value, cellProperties) {
 			td.setAttribute('data-column', window.smart_manager.getColumnDataKey(prop));
 			Handsontable.renderers.HtmlRenderer.apply(this, arguments);
-			td.innerHTML = '<div title="'+ td.innerText +'" class="wrapper">' + td.innerHTML + '</div>';
+			td.innerHTML = '<div title="'+  window.smart_manager.escapeHtmlAttr(td.innerText) +'" class="wrapper">' + td.innerHTML + '</div>';
 
 		    return td;
 		}
@@ -4159,11 +4172,11 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 				const fmt = i => `${i.field || ''} ${i.operator || ''} ${i.value != null ? i.value : ''}`;
 				let html = items.slice(0, maxVisible).map(i => {
 					let v = (i.value != null ? String(i.value) : '').substring(0, 20) + ((i.value?.length > 20) ? '...' : '');
-					return `<span class="items-center gap-1 px-2 py-0.5 rounded text-xs"><span class="font-medium">${i.field || ''}</span><span> ${i.operator || ''}</span><span class="font-medium"> ${v}</span></span>`;
+					return `<span class="items-center gap-1 px-2 py-0.5 rounded text-xs"><span class="font-medium">${ window.smart_manager.escapeHtmlAttr(i.field || '')}</span><span> ${ window.smart_manager.escapeHtmlAttr(i.operator || '')}</span><span class="font-medium"> ${ window.smart_manager.escapeHtmlAttr(v)}</span></span>`;
 				}).join(' ');
-				if (hiddenCount > 0) html += `<span class="inline-flex items-center h-5 bg-white border border-[#E5E5E5] px-1.5 py-0.5 rounded-lg text-xs ml-1" title="${items.slice(maxVisible).map(fmt).join(' | ')}">+${hiddenCount}</span>`;
+				if (hiddenCount > 0) html += `<span class="inline-flex items-center h-5 bg-white border border-[#E5E5E5] px-1.5 py-0.5 rounded-lg text-xs ml-1" title="${ window.smart_manager.escapeHtmlAttr(items.slice(maxVisible).map(fmt).join(' | '))}">+${hiddenCount}</span>`;
 				td.classList.add('pl-0');
-				td.innerHTML = `<div class="wrapper inline-flex items-center gap-1 pl-0" title="${items.map(fmt).join(' | ')}">${html}</div>`;
+				td.innerHTML = `<div class="wrapper inline-flex items-center gap-1 pl-0" title="${ window.smart_manager.escapeHtmlAttr(items.map(fmt).join(' | '))}">${html}</div>`;
 			} catch (e) {
 				td.innerHTML = '<div class="wrapper text-xs text-sm-base-muted-foreground">-</div>';
 			}
@@ -4197,7 +4210,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 				td.setAttribute('class',cellProperties.className);
 			}
 
-			td.innerHTML = '<div title="'+ td.innerText +'" class="wrapper">' + td.innerHTML + '</div>';
+			td.innerHTML = '<div title="'+  window.smart_manager.escapeHtmlAttr(td.innerText) +'" class="wrapper">' + td.innerHTML + '</div>';
 
 			return td;
 		}

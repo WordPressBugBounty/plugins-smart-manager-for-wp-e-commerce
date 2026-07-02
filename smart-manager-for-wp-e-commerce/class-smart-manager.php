@@ -517,7 +517,7 @@ class Smart_Manager {
 		$available_upgrade_classes = array_filter( $available_classes, function ( $class_name ) {
 																								return strpos( $class_name, 'StoreApps_Upgrade_' ) === 0;
 																							} );
-		$latest_class = 'StoreApps_Upgrade_4_0';
+		$latest_class = 'StoreApps_Upgrade_4_3';
 		$latest_version = 0;
 		foreach ( $available_upgrade_classes as $class ) {
 			$exploded = explode( '_', $class );
@@ -538,8 +538,8 @@ class Smart_Manager {
 	public function on_plugins_loaded() {
 		global $current_user;
 
-		if ( ( defined('SMPRO') && SMPRO === true ) && ! class_exists( 'StoreApps_Upgrade_4_0' ) && file_exists( ( dirname( SM_PLUGIN_FILE ) ) . '/pro/sa-includes/class-storeapps-upgrade-4-0.php' ) ) {
-			require_once 'pro/sa-includes/class-storeapps-upgrade-4-0.php';
+		if ( ( defined('SMPRO') && SMPRO === true ) && ! class_exists( 'StoreApps_Upgrade_4_3' ) && file_exists( ( dirname( SM_PLUGIN_FILE ) ) . '/pro/sa-includes/class-storeapps-upgrade-4-3.php' ) ) {
+			require_once 'pro/sa-includes/class-storeapps-upgrade-4-3.php';
 		}
 
 		$this->show_pricing_page = apply_filters( 'sm_show_pricing_page', false );

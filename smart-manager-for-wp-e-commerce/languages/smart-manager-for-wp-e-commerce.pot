@@ -2,14 +2,14 @@
 # This file is distributed under the GNU General Public License v2.0.
 msgid ""
 msgstr ""
-"Project-Id-Version: Smart Manager - Advanced WooCommerce Bulk Edit & Inventory Management 8.91.0\n"
+"Project-Id-Version: Smart Manager - Advanced WooCommerce Bulk Edit & Inventory Management 8.92.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/smart-manager-for-wp-e-commerce\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-06-25T06:50:59+00:00\n"
+"POT-Creation-Date: 2026-07-02T10:21:16+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.10.0\n"
 "X-Domain: smart-manager-for-wp-e-commerce\n"
@@ -1447,8 +1447,8 @@ msgstr ""
 msgid "Your CSV Export from %s is Ready"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-batch-export.php:550
-#: pro/classes/class-smart-manager-pro-batch-export.php:561
+#: pro/classes/class-smart-manager-pro-batch-export.php:549
+#: pro/classes/class-smart-manager-pro-batch-export.php:560
 msgid "File not found"
 msgstr ""
 
@@ -2681,7 +2681,7 @@ msgstr ""
 #: assets/js/smart-manager.js:2736
 #: assets/js/smart-manager.js:2763
 #: assets/js/smart-manager.js:2837
-#: assets/js/smart-manager.js:5310
+#: assets/js/smart-manager.js:5323
 #: src/views/AdvancedSearchDialog.js:124
 #: src/views/AdvancedSearchDialog.js:398
 msgctxt "notification"
@@ -2801,7 +2801,7 @@ msgstr ""
 
 #: assets/js/admin.js:1
 #: assets/js/smart-manager-product.js:524
-#: assets/js/smart-manager.js:4823
+#: assets/js/smart-manager.js:4836
 msgctxt "button"
 msgid "Save"
 msgstr ""
@@ -2814,7 +2814,7 @@ msgstr ""
 #: assets/js/admin.js:1
 #: assets/js/smart-manager-product.js:520
 #: assets/js/smart-manager.js:2713
-#: assets/js/smart-manager.js:4887
+#: assets/js/smart-manager.js:4900
 #: common-core/assets/js/core-base.js:618
 #: common-core/assets/js/core-base.js:619
 #: pro/assets/js/smart-manager.js:2368
@@ -2834,7 +2834,7 @@ msgstr ""
 #: assets/js/smart-manager.js:2748
 #: assets/js/smart-manager.js:2845
 #: assets/js/smart-manager.js:2860
-#: assets/js/smart-manager.js:5423
+#: assets/js/smart-manager.js:5436
 #: pro/assets/js/smart-manager.js:1155
 #: pro/assets/js/smart-manager.js:2287
 msgctxt "modal title"
@@ -4690,15 +4690,15 @@ msgid "Are you sure?"
 msgstr ""
 
 #: assets/js/smart-manager.js:3467
-#: assets/js/smart-manager.js:5428
+#: assets/js/smart-manager.js:5441
 #: common-core/assets/js/core-base.js:378
 msgctxt "button"
 msgid "Yes"
 msgstr ""
 
 #: assets/js/smart-manager.js:3481
-#: assets/js/smart-manager.js:4853
-#: assets/js/smart-manager.js:5445
+#: assets/js/smart-manager.js:4866
+#: assets/js/smart-manager.js:5458
 #: common-core/assets/js/core-base.js:391
 msgctxt "button"
 msgid "No"
@@ -4724,350 +4724,350 @@ msgctxt "manage scheduled exports button"
 msgid "Manage Scheduled Exports"
 msgstr ""
 
-#: assets/js/smart-manager.js:4330
+#: assets/js/smart-manager.js:4343
 msgctxt "bottom bar display name for tasks"
 msgid "Tasks"
 msgstr ""
 
-#: assets/js/smart-manager.js:4427
+#: assets/js/smart-manager.js:4440
 msgctxt "button"
 msgid "Undo Selected"
 msgstr ""
 
-#: assets/js/smart-manager.js:4438
+#: assets/js/smart-manager.js:4451
 msgctxt "button"
 msgid "Delete Selected"
 msgstr ""
 
-#: assets/js/smart-manager.js:4465
+#: assets/js/smart-manager.js:4478
 msgctxt "tooltip"
 msgid "Back to Dashboard"
-msgstr ""
-
-#: assets/js/smart-manager.js:4469
-msgctxt "button"
-msgid "Back to Dashboard"
-msgstr ""
-
-#: assets/js/smart-manager.js:4475
-msgctxt "dashboard title"
-msgid "History"
 msgstr ""
 
 #: assets/js/smart-manager.js:4482
 msgctxt "button"
+msgid "Back to Dashboard"
+msgstr ""
+
+#: assets/js/smart-manager.js:4488
+msgctxt "dashboard title"
+msgid "History"
+msgstr ""
+
+#: assets/js/smart-manager.js:4495
+msgctxt "button"
 msgid "Clear History"
 msgstr ""
 
-#: assets/js/smart-manager.js:4486
+#: assets/js/smart-manager.js:4499
 msgctxt "button"
 msgid "Undo all"
 msgstr ""
 
-#: assets/js/smart-manager.js:4507
+#: assets/js/smart-manager.js:4520
 msgctxt "delete all history"
 msgid "All History"
 msgstr ""
 
-#: assets/js/smart-manager.js:4515
+#: assets/js/smart-manager.js:4528
 msgctxt "undo all tasks"
 msgid "All Tasks"
 msgstr ""
 
-#: assets/js/smart-manager.js:4545
+#: assets/js/smart-manager.js:4558
 msgctxt "tooltip"
 msgid "(Click to sort)"
 msgstr ""
 
-#: assets/js/smart-manager.js:4703
-#: assets/js/smart-manager.js:4705
+#: assets/js/smart-manager.js:4716
+#: assets/js/smart-manager.js:4718
 msgctxt "custom view"
 msgid "None"
 msgstr ""
 
-#: assets/js/smart-manager.js:4712
+#: assets/js/smart-manager.js:4725
 msgctxt "custom views"
 msgid "No custom views"
 msgstr ""
 
-#: assets/js/smart-manager.js:4723
+#: assets/js/smart-manager.js:4736
 msgctxt "dashboard name"
 msgid "Products"
 msgstr ""
 
 #. translators: %s is the dashboard name (e.g., Product, Order, etc.)
-#: assets/js/smart-manager.js:4725
-#: assets/js/smart-manager.js:4956
+#: assets/js/smart-manager.js:4738
+#: assets/js/smart-manager.js:4969
 msgctxt "button"
 msgid "New %s"
 msgstr ""
 
-#: assets/js/smart-manager.js:4737
-#: assets/js/smart-manager.js:4747
+#: assets/js/smart-manager.js:4750
+#: assets/js/smart-manager.js:4760
 msgctxt "label"
 msgid "Custom view:"
 msgstr ""
 
-#: assets/js/smart-manager.js:4768
+#: assets/js/smart-manager.js:4781
 msgctxt "label"
 msgid "Manage Columns"
 msgstr ""
 
-#: assets/js/smart-manager.js:4780
+#: assets/js/smart-manager.js:4793
 msgctxt "label"
 msgid "Custom view"
 msgstr ""
 
-#: assets/js/smart-manager.js:4781
+#: assets/js/smart-manager.js:4794
 #: pro/assets/js/smart-manager.js:732
 msgctxt "button"
 msgid "Reset"
 msgstr ""
 
-#: assets/js/smart-manager.js:4798
+#: assets/js/smart-manager.js:4811
 msgctxt "button"
 msgid "Create Custom View"
 msgstr ""
 
-#: assets/js/smart-manager.js:4815
-#: assets/js/smart-manager.js:5101
+#: assets/js/smart-manager.js:4828
+#: assets/js/smart-manager.js:5114
 msgctxt "button"
 msgid "Discard Changes"
 msgstr ""
 
-#: assets/js/smart-manager.js:4841
+#: assets/js/smart-manager.js:4854
 msgctxt "modal title"
 msgid "Discard Changes?"
 msgstr ""
 
-#: assets/js/smart-manager.js:4842
+#: assets/js/smart-manager.js:4855
 msgctxt "modal content"
 msgid "The changes you've made cannot be reverted. Do you want to discard all changes?"
 msgstr ""
 
-#: assets/js/smart-manager.js:4846
+#: assets/js/smart-manager.js:4859
 msgctxt "button"
 msgid "Yes, Discard"
 msgstr ""
 
-#: assets/js/smart-manager.js:4873
+#: assets/js/smart-manager.js:4886
 msgctxt "modal title"
 msgid "Attention"
 msgstr ""
 
 #. translators: %s is the custom view name
-#: assets/js/smart-manager.js:4875
+#: assets/js/smart-manager.js:4888
 msgctxt "modal content"
 msgid "Are you sure you want to delete the custom view \"%s\"? This action cannot be undone."
 msgstr ""
 
-#: assets/js/smart-manager.js:4877
-#: assets/js/smart-manager.js:5089
+#: assets/js/smart-manager.js:4890
+#: assets/js/smart-manager.js:5102
 msgctxt "button"
 msgid "Delete"
 msgstr ""
 
 #. translators: %s is the custom view name
-#: assets/js/smart-manager.js:4883
+#: assets/js/smart-manager.js:4896
 msgctxt "notification"
 msgid "Custom view \"%s\" deleted successfully!"
 msgstr ""
 
-#: assets/js/smart-manager.js:5027
+#: assets/js/smart-manager.js:5040
 msgctxt "pagination button"
 msgid "Previous"
 msgstr ""
 
-#: assets/js/smart-manager.js:5034
+#: assets/js/smart-manager.js:5047
 msgctxt "pagination button"
 msgid "Next"
 msgstr ""
 
-#: assets/js/smart-manager.js:5049
-#: assets/js/smart-manager.js:5144
+#: assets/js/smart-manager.js:5062
+#: assets/js/smart-manager.js:5157
 msgctxt "tooltip"
 msgid "Clear selection"
 msgstr ""
 
-#: assets/js/smart-manager.js:5056
-#: assets/js/smart-manager.js:5143
+#: assets/js/smart-manager.js:5069
+#: assets/js/smart-manager.js:5156
 msgctxt "selection status"
 msgid "selected"
 msgstr ""
 
-#: assets/js/smart-manager.js:5065
+#: assets/js/smart-manager.js:5078
 msgctxt "button"
 msgid "Bulk edit"
 msgstr ""
 
-#: assets/js/smart-manager.js:5072
+#: assets/js/smart-manager.js:5085
 msgctxt "button"
 msgid "Duplicate"
 msgstr ""
 
-#: assets/js/smart-manager.js:5076
+#: assets/js/smart-manager.js:5089
 msgctxt "button"
 msgid "Export selected"
 msgstr ""
 
-#: assets/js/smart-manager.js:5083
+#: assets/js/smart-manager.js:5096
 msgctxt "button"
 msgid "Print Invoice"
 msgstr ""
 
-#: assets/js/smart-manager.js:5096
+#: assets/js/smart-manager.js:5109
 msgctxt "button"
 msgid "Save Changes"
 msgstr ""
 
-#: assets/js/smart-manager.js:5126
+#: assets/js/smart-manager.js:5139
 msgctxt "inline edit status"
 msgid "unsaved changes"
 msgstr ""
 
-#: assets/js/smart-manager.js:5127
+#: assets/js/smart-manager.js:5140
 msgctxt "tooltip"
 msgid "Discard changes"
 msgstr ""
 
-#: assets/js/smart-manager.js:5135
+#: assets/js/smart-manager.js:5148
 msgctxt "dashboard name"
 msgid "products"
 msgstr ""
 
-#: assets/js/smart-manager.js:5164
+#: assets/js/smart-manager.js:5177
 msgctxt "floating prompt"
 msgid "Missing column?"
 msgstr ""
 
-#: assets/js/smart-manager.js:5165
+#: assets/js/smart-manager.js:5178
 msgctxt "floating prompt button"
 msgid "Open Column Manager"
 msgstr ""
 
-#: assets/js/smart-manager.js:5263
+#: assets/js/smart-manager.js:5276
 msgctxt "option"
 msgid "All (Search Results)"
 msgstr ""
 
-#: assets/js/smart-manager.js:5263
+#: assets/js/smart-manager.js:5276
 msgctxt "option"
 msgid "All (Entire Store)"
 msgstr ""
 
-#: assets/js/smart-manager.js:5271
+#: assets/js/smart-manager.js:5284
 msgctxt "option"
 msgid "Selected"
 msgstr ""
 
-#: assets/js/smart-manager.js:5280
-#: assets/js/smart-manager.js:5283
+#: assets/js/smart-manager.js:5293
+#: assets/js/smart-manager.js:5296
 msgctxt "option"
 msgid "Visible"
 msgstr ""
 
-#: assets/js/smart-manager.js:5281
+#: assets/js/smart-manager.js:5294
 msgctxt "option"
 msgid "Stock"
 msgstr ""
 
-#: assets/js/smart-manager.js:5289
+#: assets/js/smart-manager.js:5302
 msgctxt "modal content"
 msgid "Do you want to export"
 msgstr ""
 
-#: assets/js/smart-manager.js:5291
+#: assets/js/smart-manager.js:5304
 msgctxt "modal content"
 msgid " records "
 msgstr ""
 
-#: assets/js/smart-manager.js:5292
+#: assets/js/smart-manager.js:5305
 msgctxt "modal content"
 msgid "with "
 msgstr ""
 
-#: assets/js/smart-manager.js:5294
+#: assets/js/smart-manager.js:5307
 msgctxt "modal content"
 msgid "columns?"
 msgstr ""
 
 #. translators: %s is a link to the Pro version
-#: assets/js/smart-manager.js:5309
+#: assets/js/smart-manager.js:5322
 msgctxt "notification"
 msgid "Please upgrade to %s to use this feature."
 msgstr ""
 
-#: assets/js/smart-manager.js:5393
+#: assets/js/smart-manager.js:5406
 msgctxt "progressbar modal title"
 msgid "Export CSV"
 msgstr ""
 
-#: assets/js/smart-manager.js:5425
+#: assets/js/smart-manager.js:5438
 msgctxt "modal content"
 msgid "You have unsaved changes. Are you sure you want to continue?"
 msgstr ""
 
-#: assets/js/smart-manager.js:5526
+#: assets/js/smart-manager.js:5539
 msgctxt "modal title"
 msgid "Sync Stock Log Data"
 msgstr ""
 
-#: assets/js/smart-manager.js:5534
+#: assets/js/smart-manager.js:5547
 msgctxt "modal content"
 msgid "Are you sure you want to sync stock log data from"
 msgstr ""
 
-#: assets/js/smart-manager.js:5536
+#: assets/js/smart-manager.js:5549
 msgctxt "modal content"
 msgid "into Smart Manager?"
 msgstr ""
 
-#: assets/js/smart-manager.js:5541
+#: assets/js/smart-manager.js:5554
 msgctxt "section heading"
 msgid "Please Note:"
 msgstr ""
 
-#: assets/js/smart-manager.js:5544
+#: assets/js/smart-manager.js:5557
 msgctxt "modal content"
 msgid "Synced records will <strong class=\"text-sm-base-foreground\">not support the Undo feature</strong>."
 msgstr ""
 
-#: assets/js/smart-manager.js:5547
+#: assets/js/smart-manager.js:5560
 msgctxt "modal content"
 msgid "Some field data (such as author and previous values) may be missing because this information was not captured by the Stock Manager for WooCommerce plugin."
 msgstr ""
 
-#: assets/js/smart-manager.js:5556
+#: assets/js/smart-manager.js:5569
 msgctxt "button text"
 msgid "Sync Now"
 msgstr ""
 
-#: assets/js/smart-manager.js:5557
+#: assets/js/smart-manager.js:5570
 msgctxt "button text"
 msgid "Cancel"
 msgstr ""
 
-#: assets/js/smart-manager.js:5567
+#: assets/js/smart-manager.js:5580
 msgctxt "progressbar modal title"
 msgid "Stock Log Synchronization"
 msgstr ""
 
-#: assets/js/smart-manager.js:5625
+#: assets/js/smart-manager.js:5638
 msgctxt "modal content"
 msgid "this record"
 msgstr ""
 
-#: assets/js/smart-manager.js:5712
+#: assets/js/smart-manager.js:5725
 msgctxt "quick column manager title"
 msgid "Manage columns"
 msgstr ""
 
-#: assets/js/smart-manager.js:5719
+#: assets/js/smart-manager.js:5732
 msgctxt "button"
 msgid "Open Column Manager"
 msgstr ""
 
-#: assets/js/smart-manager.js:5770
+#: assets/js/smart-manager.js:5783
 msgctxt "tooltip"
 msgid "Edit column name"
 msgstr ""
