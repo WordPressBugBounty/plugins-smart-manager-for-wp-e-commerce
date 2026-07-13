@@ -517,7 +517,13 @@ class Smart_Manager {
 		$available_upgrade_classes = array_filter( $available_classes, function ( $class_name ) {
 																								return strpos( $class_name, 'StoreApps_Upgrade_' ) === 0;
 																							} );
-		$latest_class = 'StoreApps_Upgrade_4_3';
+		
+		// Return empty if no upgrade classes are available
+		if ( empty( $available_upgrade_classes ) ) {
+			return '';
+		}
+
+		$latest_class = '';
 		$latest_version = 0;
 		foreach ( $available_upgrade_classes as $class ) {
 			$exploded = explode( '_', $class );
@@ -607,11 +613,14 @@ class Smart_Manager {
 		if ( defined('SMPRO') && SMPRO === true ) {
 			$latest_upgrade_class = $this->get_latest_upgrade_class();
 
-			$sku = SM_SKU;
-			$prefix = SM_PREFIX;
-			$plugin_name = SM_PLUGIN_NAME;
-			$documentation_link = 'https://www.storeapps.org/knowledgebase_category/smart-manager/';
-			$GLOBALS['smart_manager_upgrade'] = new $latest_upgrade_class( SM_PLUGIN_FILE, $sku, $prefix, $plugin_name, SM_TEXT_DOMAIN, $documentation_link );
+			// Sanity check: Only instantiate if the upgrade class exists
+			if ( ! empty( $latest_upgrade_class ) && class_exists( $latest_upgrade_class ) ) {
+				$sku = SM_SKU;
+				$prefix = SM_PREFIX;
+				$plugin_name = SM_PLUGIN_NAME;
+				$documentation_link = 'https://www.storeapps.org/knowledgebase_category/smart-manager/';
+				$GLOBALS['smart_manager_upgrade'] = new $latest_upgrade_class( SM_PLUGIN_FILE, $sku, $prefix, $plugin_name, SM_TEXT_DOMAIN, $documentation_link );
+			}
 		}
 	}
 
@@ -1486,7 +1495,8 @@ class Smart_Manager {
 							'review_link'  => SM_REVIEW_URL,
 							'support_link' => SM_CONTACT_SUPPORT_URL,
 							'calendly_link' => defined( 'SM_CALENDLY_URL' ) ? SM_CALENDLY_URL : '#',
-							'batchExportThreshold' => apply_filters( 'sa_sm_batch_export_threshold', intval( get_option( 'sa_sm_batch_export_threshold', 50 ) ) )
+							'batchExportThreshold' => apply_filters( 'sa_sm_batch_export_threshold', intval( get_option( 'sa_sm_batch_export_threshold', 50 ) ) ),
+							'freedomSale' => ( is_callable( array( 'Smart_Manager', 'get_freedom_sale_params' ) ) ) ? self::get_freedom_sale_params() : false
 						);
 
 		$active_plugins = (array) get_option( 'active_plugins', array() );
@@ -2812,6 +2822,33 @@ class Smart_Manager {
 	 */
 	public function add_dashboard_body_class( $classes = '' ) {
 		return ( ( ! empty( $_GET['page'] ) ) && ( 'smart-manager' === sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) ) ? $classes . ' smart-manager-dashboard' : $classes;
+	}
+
+	/**
+	 * Get Freedom Sale parameters for pricing page banner.
+	 *
+	 * @return array Freedom Sale parameters including sale status, end date, and banner text.
+	 */
+	public static function get_freedom_sale_params() {
+		// Sale end date: 16th July, 2026 at 12:30 PM IST, IST is UTC+5:30, so 12:30 PM IST = 07:00 UTC
+		$sale_end_date = '2026-07-16 07:00:00'; // UTC time
+		
+		// Use same approach as SA_OFFER_VISIBLE for consistency
+		$timezone_format = _x( 'Y-m-d H:i:s', 'timezone date format' );
+		$end             = strtotime( $sale_end_date ); // End time in UTC
+		
+		// Check if sale is currently live
+		$is_sale_live = ( strtotime( gmdate( $timezone_format ) ) < $end );
+		
+		// Convert to milliseconds for JavaScript (Date.now() returns UTC milliseconds)
+		$sale_end_timestamp_ms = $end * 1000;
+		
+		return array(
+			'is_sale_live'         => $is_sale_live,
+			'sale_end_timestamp'   => $sale_end_timestamp_ms,
+			'banner_text'          => _x( '🎉 [Freedom Sale] Get 25% Off on Smart Manager Pro. Auto-applied at checkout!', 'pricing banner text', 'smart-manager-for-wp-e-commerce' ),
+			'timer_prefix'         => ''
+		);
 	}
 }
 

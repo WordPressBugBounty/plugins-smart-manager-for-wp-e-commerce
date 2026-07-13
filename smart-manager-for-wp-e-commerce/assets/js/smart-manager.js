@@ -3811,7 +3811,12 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 	 * @returns {string} The escaped string safe for HTML attributes
 	 */
 	SmartManager.prototype.escapeHtmlAttr = function(str = '') {
-		if (str === null || str === undefined) return '';
+		if (str === null || str === undefined){
+			return '';
+		}
+		if ('object' === typeof wp && wp.hasOwnProperty('escapeHtml') && 'object' === typeof wp.escapeHtml && wp.escapeHtml.hasOwnProperty('escapeAttribute') && 'function' === typeof wp.escapeHtml.escapeAttribute) {
+			return wp.escapeHtml.escapeAttribute(str);
+		}
 		return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 	}
 
