@@ -2200,18 +2200,28 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 						current_value = new Array();
 					// Extracting selected values safely.
 					if ('undefined' !== typeof (current_cell_value) && (null !== current_cell_value) && ('' !== current_cell_value)) {
-						current_value = ('string' === typeof (current_cell_value)) ? current_cell_value.split(', ') : new Array(String(current_cell_value));
+						let raw_values = ('string' === typeof (current_cell_value)) ? current_cell_value.split(', ') : new Array(String(current_cell_value));
+						// Values should be IDs directly from server.
+						raw_values.forEach(function(val) {
+							val = val.trim();
+							if (actual_value.hasOwnProperty(val)) {
+								current_value.push(val);
+							}
+						});
 					}
 					// Initialize all data and assign children to their respective parents.
 					for (let index in actual_value) {
 						let title = actual_value[index].hasOwnProperty('title') ? actual_value[index].title : actual_value[index].term;
-						let parent_id = actual_value[index]['parent'];
 						multiselect_data[index] = {
 							id: index,
 							term: actual_value[index].term,
 							title: title,
 							child: {}
 						};
+					}
+					//Assign children to their respective parents.
+					for (let index in actual_value) {
+						let parent_id = actual_value[index]['parent'];
 						if ((0 !== parseInt(parent_id)) && multiselect_data[parent_id]) {
 							multiselect_data[parent_id].child[index] = multiselect_data[index]; // Assign child
 						}
@@ -3313,6 +3323,7 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 		};
 		window.smart_manager.sendRequest(params, function (response) {
 			window.smart_manager.isViewAuthor = (response && response.is_author) ? true : false;
+			window.smart_manager.viewAuthorName = (response && response.author_name) ? response.author_name : '';
 			let canDelete = (response && response.can_delete) ? true : false;
 			window.smart_manager.displayShowHideColumnSettings({ showEdit: canDelete, showDelete: canDelete });
 		});
@@ -3781,15 +3792,28 @@ if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
 	}
 
 	SmartManager.prototype.renderMultilistValuesInGrid = function (values_str, td, addTitleAttr = true, bgColor = '', color = '') {
-		// Split the comma-separated values and create elements.
-		const options = values_str.split(',').map(cat => cat.trim()).filter(Boolean);
+		// Get the column values mapping (IDs to names) from column model.
+		let colProp = td.getAttribute('data-column') || '';
+		let colValues = {};
+		if (colProp && window.smart_manager.currentColModel) {
+			let colModel = window.smart_manager.currentColModel.find(col => col.data === colProp);
+			if (colModel && colModel.values) {
+				colValues = colModel.values;
+			}
+		}
+		// Split the comma-separated values (IDs) and convert to display names.
+		const ids = values_str.split(',').map(id => id.trim()).filter(Boolean);
 		let badgesDiv = '';
-		if(options){
-			options.forEach(category => {
-				badgesDiv += `<div class="inline-block ${!Array.from(td.classList).some(cls => cls.startsWith('sm_beta_select_')) ? 'text-sm-base-foreground' : ''} px-2 py-0.5 rounded-lg text-xs leading-4  whitespace-nowrap mt-1 mr-1 ${!color ? 'border border-sm-base-border font-normal' : 'font-medium'}" style="background-color: ${bgColor ? bgColor : '#fff'}; ${color ? `color:${color} !important` : ''}">${ window.smart_manager.escapeHtmlAttr(category)}</div>`;
+		let displayNames = [];
+		if(ids){
+			ids.forEach(id => {
+				// Convert ID to display name using column values mapping.
+				let displayName = (colValues[id] && colValues[id].term) ? colValues[id].term : id;
+				displayNames.push(displayName);
+				badgesDiv += `<div class="inline-block ${!Array.from(td.classList).some(cls => cls.startsWith('sm_beta_select_')) ? 'text-sm-base-foreground' : ''} px-2 py-0.5 rounded-lg text-xs leading-4  whitespace-nowrap mt-1 mr-1 ${!color ? 'border border-sm-base-border font-normal' : 'font-medium'}" style="background-color: ${bgColor ? bgColor : '#fff'}; ${color ? `color:${color} !important` : ''}">${ window.smart_manager.escapeHtmlAttr(displayName)}</div>`;
 			});
 		}
-		td.innerHTML = `<div style="overflow:hidden;max-height:${String(window.smart_manager.rowHeight).includes('px') ? window.smart_manager.rowHeight : window.smart_manager.rowHeight+'px'}" ${addTitleAttr ? `title="${ window.smart_manager.escapeHtmlAttr(td.innerText)}"` : ""}>${badgesDiv}</div>`;
+		td.innerHTML = `<div style="overflow:hidden;max-height:${String(window.smart_manager.rowHeight).includes('px') ? window.smart_manager.rowHeight : window.smart_manager.rowHeight+'px'}" ${addTitleAttr ? `title="${ window.smart_manager.escapeHtmlAttr(displayNames.join(', '))}"` : ""}>${badgesDiv}</div>`;
 		return td;
 	}
 
@@ -4257,7 +4281,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 			if( typeof(cellProperties.className) != 'undefined' ) { //code to higlight the cell on selection
 				td.setAttribute('class',cellProperties.className);
 			}
-			let colType = window.smart_manager?.currentColModel[column]?.type || '';
+			let colType = window.smart_manager?.currentVisibleColumns[column]?.type || '';
 			if(colType && colType.length && ['dropdown', 'sm.multilist'].includes(colType)){
 				return window.smart_manager.renderMultilistValuesInGrid(window.smart_manager?.decodeHTMLString(td.innerHTML, ('terms_product_cat' === prop)), td);
 			}
@@ -4887,10 +4911,22 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 		jQuery(document).off('click', '#sm-delete-custom-view-btn').on('click', '#sm-delete-custom-view-btn', function(e) {
 			e.preventDefault();
 			let viewName = window.smart_manager.dashboardName || '';
+			/* translators: %s is the custom view name */
+			let content = sprintf(
+				_x('Are you sure you want to delete the custom view "%s"? This action cannot be undone.', 'modal content', 'smart-manager-for-wp-e-commerce'),
+				viewName
+			);
+			if (window.smart_manager.isViewAuthor === false) {
+				/* translators: %s is the name of the user who created the view */
+				const nonOwnerNote = sprintf(
+					_x('<strong>Note:</strong> This is a public view, created by another user (%s), deleting it will remove it for everyone who uses it.', 'modal content', 'smart-manager-for-wp-e-commerce'),
+					window.smart_manager?.viewAuthorName || ''
+				);
+				content += `<p class="smart-manager-delete-view-note">${nonOwnerNote}</p>`;
+			}
 			let confirmParams = {
 				title: `<span class="sm-error-icon"><span class="dashicons dashicons-warning" style="vertical-align: text-bottom;"></span>&nbsp;${_x('Attention', 'modal title', 'smart-manager-for-wp-e-commerce')}!</span>`,
-				/* translators: %s is the custom view name */
-				content: sprintf(_x('Are you sure you want to delete the custom view "%s"? This action cannot be undone.', 'modal content', 'smart-manager-for-wp-e-commerce'), viewName),
+				content: content,
 				btnParams: {
 					yesText: _x('Delete', 'button', 'smart-manager-for-wp-e-commerce'),
 					yesCallback: function() {
@@ -4898,7 +4934,8 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 							window.smart_manager.deleteView({
 								type: 'custom_views',
 								/* translators: %s is the custom view name */
-								success_msg: sprintf(_x('Custom view "%s" deleted successfully!', 'notification', 'smart-manager-for-wp-e-commerce'), viewName)
+								success_msg: sprintf(_x('Custom view "%s" deleted successfully!', 'notification', 'smart-manager-for-wp-e-commerce'), viewName),
+								reload_page: true
 							});
 						}
 					},
@@ -5514,7 +5551,8 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 		let html = '<ul id="sm-multilist-data">';
 		Object.keys(multiselect_data).forEach((key) => {
 			let data = multiselect_data[key];
-			let checked = (selectedValues) && ((selectedValues.includes(data.term) || selectedValues.includes(data.id.toString()))) ? 'checked' : '';
+			// Match only by ID to avoid selecting same-named categories under different parents.
+			let checked = (selectedValues) && (selectedValues.includes(data.id.toString())) ? 'checked' : '';
 			html += `<li class="mt-2 text-sm-base-foreground"><input type="hidden" name="chk_multiselect" value="${data.term}" class="sm-title-input"><input type="checkbox" name="chk_multiselect" value="${data.id}" ${checked}> ${data.term}`;
 			// Recursively add child data
 			if(data.child && Object.keys(data.child).length > 0){

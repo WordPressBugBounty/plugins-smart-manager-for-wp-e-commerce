@@ -1122,13 +1122,6 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 							if( !empty( $column_model_transient['search_params'] ) ) {
 								if( ! empty( $column_model_transient['search_params']['isAdvanceSearch'] ) && "true" == $column_model_transient['search_params']['isAdvanceSearch'] ) { // For advanced search
 									if( ! empty( $column_model_transient['search_params']['params'] ) && is_array( $column_model_transient['search_params']['params'] ) ) {
-										// array_walk(
-										// 	$column_model_transient['search_params']['params'],
-										// 	function ( &$value ) {
-										// 		$value = ( ! empty( $value ) ) ? addslashes( json_encode( $value ) ) : '';
-										// 	}
-										// );
-										$this->req_params['advanced_search_query'] = addslashes( json_encode( $column_model_transient['search_params']['params']) );
 										$is_view_contain_search_params = ( ! empty( $this->req_params['advanced_search_query'] ) && '[]' !== $this->req_params['advanced_search_query'] ) ? true : $is_view_contain_search_params;
 									}
 								} else { //for simple search
@@ -3202,14 +3195,10 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 	        		if ( empty( $term_obj->name ) || empty( $term_obj->term_id ) ) {
 	        			continue;
 	        		}
-					$multilist_value = $term_obj->name;
+					// Store term_id instead of name for unique identification across parents with same-named children.
+					$multilist_value = $term_obj->term_id;
 					$multilist_separator = ', ';
 
-					if ( ! empty( $args['terms_visible_cols'][ $taxonomy_nm ] ) ) {
-						if ( ! empty( $args['terms_visible_cols'][ $taxonomy_nm ][ $term_obj->term_id ] ) ) {
-							$multilist_value = ( ! empty( $args['terms_visible_cols'][ $taxonomy_nm ][ $term_obj->term_id ]['term'] ) ) ? $args['terms_visible_cols'][ $taxonomy_nm ][ $term_obj->term_id ]['term'] : $multilist_value;
-						}
-					}
 					if ( empty( $terms_data[ $term_obj->object_id ][ $taxonomy_nm ] ) ) {
 		        		$terms_data[ $term_obj->object_id ][ $taxonomy_nm ] = $multilist_value;
 		        	} else {
