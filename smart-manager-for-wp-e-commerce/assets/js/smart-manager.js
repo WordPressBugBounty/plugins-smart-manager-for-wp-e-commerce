@@ -3,9 +3,12 @@
  * Initialize and load data in grid
  * Public interface
  **/
-var { __, _x, _n, _nx} = wp.i18n;
-if(typeof sprintf === 'undefined' && wp.i18n.sprintf) { //Fix added for client
-    var sprintf = wp.i18n.sprintf;
+if (typeof wp !== 'undefined' && wp.i18n) {
+	[ '__', '_x', '_n', '_nx', 'sprintf' ].forEach( function( fn ) {
+		if (typeof window[ fn ] === 'undefined' && typeof wp.i18n[ fn ] === 'function') {
+			window[ fn ] = wp.i18n[ fn ];
+		}
+	} );
 }
 (function (window) {
     function SmartManager() {

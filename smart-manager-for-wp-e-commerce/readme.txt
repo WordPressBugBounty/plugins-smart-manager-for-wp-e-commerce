@@ -7,7 +7,7 @@ Tags: woocommerce bulk edit, woocommerce inventory management, woocommerce order
 Requires at least: 5.0
 Tested up to: 7.0
 Requires PHP: 7.0
-Stable tag: 8.94.0
+Stable tag: 8.95.0
 License: GPLv2
 
 WooCommerce Advanced Bulk Edit products, orders, & posts in an Excel-like sheet editor. Get advanced WooCommerce stock, pricing, & order management.
@@ -313,12 +313,18 @@ Please report security bugs found in the source code of the Smart Manager plugin
 
 == Changelog ==
 
+= 8.95.0 (31.07.2026) =
+* Fix: Smart Manager dashboard not loading due to conflicts with other third-party plugin scripts loaded on the dashboard
+* Fix: Deselected dashboard values remaining visible in Select2 dropdown when adding a new privilege in Access Privilege Settings (Pro)
+* Update: POT file
+
 = 8.94.0 (27.07.2026) =
 * New: WordPress 7.0.2 compatible
 * Fix: Taxonomy fields (e.g. Categories, Brands) displaying IDs in the grid before saving Inline Edit changes
 * Fix: Child taxonomy terms not visible in some cases in the Smart Manager grid
 * Fix: Updating taxonomy fields (e.g. Categories, Brands) using Bulk Edit not working in some setups where term IDs and term taxonomy IDs differ (Pro)
 * Fix: PHP fatal error in some cases when updating prices for WooCommerce Subscription Products using Bulk Edit (Pro)
+* Update: Pricing page related changes
 * Update: Allow admins to manage Custom Views created by other admins and non-admin users (Pro)
 * Update: Support for deleting Saved Advanced Searches (Pro)
 * Update: Support for updating Advanced Search conditions for Custom Views (Pro)
@@ -856,8 +862,11 @@ Please report security bugs found in the source code of the Smart Manager plugin
 
 == Upgrade Notice ==
 
+= 8.95.0 =
+Fixes related to Smart Manager dashboard not loading due to conflicts with other third-party plugin scripts loaded on the dashboard, Deselected dashboard values remaining visible in Select2 dropdown when adding a new privilege in Access Privilege Settings (Pro). Recommended upgrade.
+
 = 8.94.0 =
-WordPress 7.0.2 compatible, Fixes related to Taxonomy fields (e.g. Categories, Brands) displaying IDs in the grid before saving Inline Edit changes, Child taxonomy terms not visible in some cases in the Smart Manager grid, Updating taxonomy fields (e.g. Categories, Brands) using Bulk Edit not working in some setups where term IDs and term taxonomy IDs differ (Pro), PHP fatal error in some cases when updating prices for WooCommerce Subscription Products using Bulk Edit (Pro), Updates related to Allow admins to manage Custom Views created by other admins and non-admin users (Pro), Support for deleting Saved Advanced Searches (Pro), Support for updating Advanced Search conditions for Custom Views (Pro). Recommended upgrade.
+WordPress 7.0.2 compatible, Fixes related to Taxonomy fields (e.g. Categories, Brands) displaying IDs in the grid before saving Inline Edit changes, Child taxonomy terms not visible in some cases in the Smart Manager grid, Updating taxonomy fields (e.g. Categories, Brands) using Bulk Edit not working in some setups where term IDs and term taxonomy IDs differ (Pro), PHP fatal error in some cases when updating prices for WooCommerce Subscription Products using Bulk Edit (Pro), Updates related to Pricing page related changes, Allow admins to manage Custom Views created by other admins and non-admin users (Pro), Support for deleting Saved Advanced Searches (Pro), Support for updating Advanced Search conditions for Custom Views (Pro). Recommended upgrade.
 
 = 8.93.0 =
 WordPress 7.0.1 compatible, WooCommerce 10.9.4 compatible, Fixes related to Search & Replace not working for HTML content when using Bulk Edit (Pro). Recommended upgrade.
