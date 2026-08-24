@@ -1982,13 +1982,14 @@ class Smart_Manager {
 						<?php echo esc_html_x( 'Visit StoreApps', 'footer button', 'smart-manager-for-wp-e-commerce' ); ?>
 					</span>
 				</a>
-				<!-- Request a Feature Button -->
+				<!-- Get Help & Feedback Button -->
 				<a href="<?php echo esc_url( SM_CONTACT_SUPPORT_URL . '?utm_source=sm&utm_medium=in_app_footer&utm_campaign=feature_request' ); ?>" target="_blank" class="sm-footer-btn">
-					<svg width="10" height="15" viewBox="0 0 10 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<path d="M6.66504 8.66501C6.79837 7.99834 7.13171 7.53167 7.66504 6.99834C8.33171 6.39834 8.66504 5.53167 8.66504 4.66501C8.66504 3.60414 8.24361 2.58673 7.49347 1.83658C6.74332 1.08644 5.72591 0.665009 4.66504 0.665009C3.60417 0.665009 2.58676 1.08644 1.83661 1.83658C1.08647 2.58673 0.665039 3.60414 0.665039 4.66501C0.665039 5.33167 0.798372 6.13167 1.66504 6.99834C2.13171 7.46501 2.53171 7.99834 2.66504 8.66501M2.66504 11.3317H6.66504M3.33171 13.9983H5.99837" stroke="#737373" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/>
+					<svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M2.5 3.33167H12.5C13.1917 3.33167 13.75 3.89 13.75 4.5817V10.5817C13.75 11.2733 13.1917 11.8317 12.5 11.8317H2.5C1.80833 11.8317 1.25 11.2733 1.25 10.5817V4.5817C1.25 3.89 1.80833 3.33167 2.5 3.33167Z" stroke="#737373" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/>
+						<path d="M13.75 4.5813L7.5 8.83134L1.25 4.5813" stroke="#737373" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/>
 					</svg>
 					<span class="sm-footer-btn-text">
-						<?php echo esc_html_x( 'Request a Feature', 'footer button', 'smart-manager-for-wp-e-commerce' ); ?>
+						<?php echo esc_html_x( 'Get Help & Feedback', 'footer button', 'smart-manager-for-wp-e-commerce' ); ?>
 					</span>
 				</a>
 				<!-- Book a Call Button -->

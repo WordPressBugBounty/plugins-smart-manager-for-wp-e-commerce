@@ -246,7 +246,7 @@ if ( ! class_exists( 'SA_Manager_Base' ) ) {
 				unset( $args['is_meta'] );
 			}
 			$src  = $table_nm . '/' . ( ( ! empty( $is_meta ) ) ? 'meta_key=' . $col . '/meta_value=' . $col : $col ); // phpcs:ignore
-			$name = ( ! empty( $args['name'] ) ) ? $args['name'] : ucwords( str_replace( '_', ' ', $col ) ); // phpcs:ignore
+			$name = ( ! empty( $args['name'] ) ) ? $args['name'] : esc_html( ucwords( str_replace( '_', ' ', $col ) ) ); // phpcs:ignore
 			if ( isset( $args['name'] ) ) {
 				unset( $args['name'] );
 			}
@@ -447,10 +447,11 @@ if ( ! class_exists( 'SA_Manager_Base' ) ) {
 												AND {$wpdb->prefix}postmeta.meta_key NOT LIKE %s
 												AND {$wpdb->prefix}postmeta.meta_key NOT LIKE %s
 												AND {$wpdb->prefix}postmeta.meta_key NOT LIKE %s
+												AND {$wpdb->prefix}postmeta.meta_key NOT REGEXP %s
 												AND {$wpdb->prefix}posts.post_type IN (" . implode( ',', array_fill( 0, count( $this->post_type ), '%s' ) ) . ")
 											GROUP BY {$wpdb->prefix}postmeta.meta_key",
 						array_merge(
-							array( 'free-%', '_oembed%', 'xts-blocks%' ),
+							array( 'free-%', '_oembed%', 'xts-blocks%', '<[a-zA-Z!/]' ),
 							$this->post_type
 						)
 					),
@@ -467,11 +468,13 @@ if ( ! class_exists( 'SA_Manager_Base' ) ) {
 												AND {$wpdb->prefix}postmeta.meta_key NOT LIKE %s
 												AND {$wpdb->prefix}postmeta.meta_key NOT LIKE %s
 												AND {$wpdb->prefix}postmeta.meta_key NOT LIKE %s
+												AND {$wpdb->prefix}postmeta.meta_key NOT REGEXP %s
 												AND {$wpdb->prefix}posts.post_type = %s
 											GROUP BY {$wpdb->prefix}postmeta.meta_key",
 						'free-%',
 						'_oembed%',
 						'xts-blocks%',
+						'<[a-zA-Z!/]',
 						$this->post_type
 					),
 					'ARRAY_A'

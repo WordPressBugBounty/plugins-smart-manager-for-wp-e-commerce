@@ -553,7 +553,7 @@ td[aria-describedby*="postmeta_meta_key__thumbnail_id_meta_value__thumbnail_id"]
 }
 
 .mce-container {
-	z-index: 100105 !important;
+	z-index: 120002 !important;
 }
 
 .handsontable th:not(:first-child) {

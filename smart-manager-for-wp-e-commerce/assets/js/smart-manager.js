@@ -4136,7 +4136,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 				}
 			}
 
-			td.innerHTML = '<div class="wrapper"><span class="' + badgeClasses + '">' + displayValue + '</span></div>';
+			td.innerHTML = '<div class="wrapper"><span class="' + badgeClasses + '">' + window.smart_manager.escapeHtmlAttr(displayValue) + '</span></div>';
 
 			return td;
 		}
@@ -4228,9 +4228,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 			value = value.replace(/T/g, ' ');//replace T with space.
 		}
 
-        td.innerHTML = value;
-
-        td.innerHTML = '<div class="wrapper">' + td.innerHTML + '</div>';
+        td.innerHTML = '<div class="wrapper">' + window.smart_manager.escapeHtmlAttr(value || '') + '</div>';
 
         return td;
       }
@@ -4286,7 +4284,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 			}
 			let colType = window.smart_manager?.currentVisibleColumns[column]?.type || '';
 			if(colType && colType.length && ['dropdown', 'sm.multilist'].includes(colType)){
-				return window.smart_manager.renderMultilistValuesInGrid(window.smart_manager?.decodeHTMLString(td.innerHTML, ('terms_product_cat' === prop)), td);
+				return window.smart_manager.renderMultilistValuesInGrid(td.innerText, td);
 			}
 			td.innerHTML = '<div class="wrapper mr-4">' + window.smart_manager?.decodeHTMLString(td.innerHTML, ('terms_product_cat' === prop)) + '</div>';
 			return td;
@@ -5818,14 +5816,14 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 			const colSrc = col.src || col.data || '';
 			
 			html += `
-				<li class="group w-full flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-[#f5f5f5] cursor-grab" data-col-index="${index}" data-col-src="${colSrc}" draggable="true">
+				<li class="group w-full flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-[#f5f5f5] cursor-grab" data-col-index="${index}" data-col-src="${window.smart_manager.escapeHtmlAttr(colSrc)}" draggable="true">
 					<div class="shrink-0 w-4 h-4 text-[#9ca3af]">
 						<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><circle cx="6" cy="4" r="1.25"/><circle cx="10" cy="4" r="1.25"/><circle cx="6" cy="8" r="1.25"/><circle cx="10" cy="8" r="1.25"/><circle cx="6" cy="12" r="1.25"/><circle cx="10" cy="12" r="1.25"/></svg>
 					</div>
 					<button type="button" class="sm-quick-col-toggle shrink-0 w-4 h-4 rounded border bg-[#6b63f1] border-[#6b63f1] shadow-sm flex items-center justify-center cursor-pointer" data-col-index="${index}" data-checked="true">
 						<svg class="w-3.5 h-3.5 text-white" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.6667 3.5L5.25 9.91667L2.33333 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 					</button>
-					<span class="sm-col-name flex-1 text-sm text-[#0a0a0a] truncate leading-5" title="${colName}">${colName}</span>
+					<span class="sm-col-name flex-1 text-sm text-[#0a0a0a] truncate leading-5" title="${window.smart_manager.escapeHtmlAttr(colName)}">${window.smart_manager.escapeHtmlAttr(colName)}</span>
 					<button type="button" class="sm-quick-col-edit shrink-0 w-5 h-5 rounded flex items-center justify-center text-[#9ca3af] hover:text-[#6b63f1] hover:bg-[#e5e5e5] opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" data-col-index="${index}" title="${_x('Edit column name', 'tooltip', 'smart-manager-for-wp-e-commerce')}">
 						<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6.41667 2.33333H2.33333C1.97971 2.33333 1.64057 2.47381 1.39052 2.72386C1.14048 2.97391 1 3.31304 1 3.66667V11.6667C1 12.0203 1.14048 12.3594 1.39052 12.6095C1.64057 12.8595 1.97971 13 2.33333 13H10.3333C10.687 13 11.0261 12.8595 11.2761 12.6095C11.5262 12.3594 11.6667 12.0203 11.6667 11.6667V7.58333M10.7917 1.45833C11.0571 1.19291 11.4156 1.04398 11.7896 1.04398C12.1635 1.04398 12.522 1.19291 12.7875 1.45833C13.0529 1.72375 13.2018 2.08228 13.2018 2.45625C13.2018 2.83022 13.0529 3.18875 12.7875 3.45417L6.99167 9.25L4.66667 9.83333L5.25 7.50833L10.7917 1.45833Z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 					</button>
