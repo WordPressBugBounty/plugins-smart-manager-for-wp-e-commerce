@@ -3,11 +3,11 @@ Contributors: storeapps, niravmehta, Tarun.Parswani, mansi shah, ratnakar.dubey,
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CPTHCDC382KVA
 Author URI: https://www.storeapps.org/woocommerce-plugins/
 Plugin URI: https://www.storeapps.org/product/smart-manager/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme
-Tags: woocommerce bulk edit, woocommerce inventory management, woocommerce order management, woocommerce product manager, wordpress bulk edit
+Tags: bulk-edit, prices, inventory, products, woocommerce
 Requires at least: 5.0
 Tested up to: 7.1
 Requires PHP: 7.0
-Stable tag: 8.96.0
+Stable tag: 8.97.0
 License: GPLv2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -38,7 +38,7 @@ With Smart Manager, you can:
 🧾 **Bulk edit WooCommerce orders** – statuses, billing/shipping details, custom fields.
 🏷️ **Bulk edit coupons & posts** – coupon amount, expiry date, usage limits; post titles, status, categories and more.
 📊 Work in an **Excel-like spreadsheet** – sort, filter, search, inline edit, copy–paste and update in a few clicks.
-📤 **Export & import via CSV** – export stock-related data in Lite, or full filtered exports across all fields in Pro; import products via CSV to update your catalog fast. 
+📤 **Export & import via CSV** – export stock-related data in Lite, or full filtered exports across all fields in Pro; import products via CSV to update your catalog fast.
 
 *In Lite, these are inline edits (up to 3 at a time); Pro unlocks full batch bulk-editing across thousands of records at once.*
 
@@ -382,6 +382,18 @@ Please report security bugs found in the source code of the Smart Manager plugin
 ---
 
 == Changelog ==
+
+= 8.97.0 (17.09.2026) =
+* New: WooCommerce 11.1.0 compatible
+* Fix: 'Product Suggestions' and 'Edit Link' modals not appearing when adding or updating links in the Text Editor modal for Rich Text fields such as 'Description' and 'Additional Description' in Smart Manager grid
+* Fix: PHP 8.5 deprecated warnings for optional parameters declared before required parameters
+* Fix: CSV Export success message showing 0 records exported when exporting all records using the 'Export CSV' button in Smart Manager header (Pro)
+* Fix: Post field changes (e.g. title, description, etc.) not reflecting on the frontend on some setups (Pro)
+* Update: UI/UX improvements to help enable missing columns in Column Manager
+* Update: Automatically handle 'Manage Stock' when editing 'Stock' values via Inline Edit with warning prompts to prevent stock changes from not taking effect
+* Update: Automatically handle 'Manage Stock' when editing 'Stock' values via Bulk Edit with warning prompts to prevent stock changes from not taking effect (Pro)
+* Update: UI/UX improvements in the grid
+* Update: POT file
 
 = 8.96.0 (24.08.2026) =
 * New: WordPress 7.1 compatible
@@ -939,6 +951,9 @@ Please report security bugs found in the source code of the Smart Manager plugin
 [See changelog for all versions](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 8.97.0 =
+WooCommerce 11.1.0 compatible, Fixes related to 'Product Suggestions' and 'Edit Link' modals not appearing when adding or updating links in the Text Editor modal for Rich Text fields such as 'Description' and 'Additional Description' in Smart Manager grid, PHP 8.5 deprecated warnings for optional parameters declared before required parameters, CSV Export success message showing 0 records exported when exporting all records using the 'Export CSV' button in Smart Manager header (Pro), Post field changes (e.g. title, description, etc.) not reflecting on the frontend on some setups (Pro), Updates related to UI/UX improvements to help enable missing columns in Column Manager, Automatically handle 'Manage Stock' when editing 'Stock' values via Inline Edit with warning prompts to prevent stock changes from not taking effect, Automatically handle 'Manage Stock' when editing 'Stock' values via Bulk Edit with warning prompts to prevent stock changes from not taking effect (Pro), UI/UX improvements in the grid. Recommended upgrade.
 
 = 8.96.0 =
 WordPress 7.1 compatible, WooCommerce 11.0.1 compatible, Fixes related to Stored Cross-Site Scripting (XSS) vulnerability in Smart Manager grid due to improper escaping of column names [Thanks to Patchstack team], Link and color options not working in the Text Editor modal when editing Rich Text fields such as 'Description' and 'Additional Description' from Smart Manager grid, Updates related to UI/UX improvements in the footer. Recommended upgrade.

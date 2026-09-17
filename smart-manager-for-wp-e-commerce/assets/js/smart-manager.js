@@ -85,7 +85,7 @@ if (typeof wp !== 'undefined' && wp.i18n) {
 		this.lastrow = '1';
 		this.lastcell = '1';
 		this.grid_width = '750';
-		this.grid_height = '600';
+		this.grid_height = '450';
 		this.sm_qtags_btn_init = 1;
 		this.sm_grid_nm = 'sm_editor_grid'; //name of div containing jqgrid
 		this.sm_wp_editor_html = ''; //variable for storing the html of the wp editor
@@ -244,6 +244,9 @@ if (typeof wp !== 'undefined' && wp.i18n) {
 		this.review_link = sm_beta_params?.review_link || '';
 		this.calendly_link = sm_beta_params?.calendly_link || '';
 		this.pluginParams = sm_beta_params;
+		this.dependencyRuleRequired = false;
+		this.isWCStockManagementEnabled = sm_beta_params?.isWCStockManagementEnabled || 'no';
+		this.WCInventorySettingsURL = sm_beta_params?.WCInventorySettingsURL || '';
 		//Function to set all the states on unload
 		window.onbeforeunload = function (evt) {
 			if ( typeof (window.smart_manager.updateState) !== "undefined" && typeof (window.smart_manager.updateState) === "function" ) {
@@ -255,7 +258,9 @@ if (typeof wp !== 'undefined' && wp.i18n) {
 		}
 		let contentwidth = jQuery('#wpbody-content').width() - 8;
 		window.smart_manager.grid_width = contentwidth;
-		window.smart_manager.grid_height = document.body.clientHeight * 0.66;
+		if ( document.body.clientHeight > 700 ) {
+			window.smart_manager.grid_height = document.body.clientHeight * 0.66;
+		}
 		jQuery('#sm_editor_grid').trigger( 'smart_manager_init' ); //custom trigger
 		window.smart_manager.loadDashboard();
 		window.smart_manager.event_handler();
@@ -2597,11 +2602,17 @@ if (typeof wp !== 'undefined' && wp.i18n) {
 					window.smart_manager.processContent = [...inlineUpdatedFields].join(', ');
 					window.smart_manager.processCallback = window.smart_manager.saveData;
 					if ("undefined" !== typeof (window.smart_manager.showTitleModal) && "function" === typeof (window.smart_manager.showTitleModal) && (inlineUpdatedFields.size > 0)) {
-						window.smart_manager.showTitleModal()
+						if ("undefined" !== typeof (window.smart_manager.validateColumnDependencies) && typeof window.smart_manager.validateColumnDependencies === 'function' && window.smart_manager.validateColumnDependencies(window.smart_manager.showTitleModal)){
+							return;
+						}
+						window.smart_manager.showTitleModal();
 					} else if (0 === inlineUpdatedFields.size) {
 						window.smart_manager.saveData()
 					}
 				} else {
+					if ("undefined" !== typeof (window.smart_manager.validateColumnDependencies) && typeof window.smart_manager.validateColumnDependencies === 'function' && window.smart_manager.validateColumnDependencies(window.smart_manager.saveData)) {
+						return;
+					}
 					window.smart_manager.saveData();
 				}
 			})
@@ -3492,8 +3503,17 @@ if (typeof wp !== 'undefined' && wp.i18n) {
 				}
 			},
 			closeCTA: {
-				title: ((params.btnParams.hasOwnProperty('noText')) ? params.btnParams.noText : _x('No', 'button', 'smart-manager-for-wp-e-commerce')),
-				btnClass: (params.btnParams.hasOwnProperty('noBtnClass')) ? params.btnParams.noBtnClass : '',
+				title: ((params.btnParams.hasOwnProperty('noText'))
+					? params.btnParams.noText
+					: _x('No', 'button', 'smart-manager-for-wp-e-commerce')),
+				btnClass: ((params.btnParams.hasOwnProperty('noBtnClass'))
+					? params.btnParams.noBtnClass
+					: ''),
+				closeModalOnClick: (
+					params.btnParams.hasOwnProperty('hideOnNo')
+						? params.btnParams.hideOnNo
+						: true
+				),
 				callback: function () {
 					if (params.btnParams.hasOwnProperty('noCallback') && typeof params.btnParams.noCallback === "function") {
 						params.btnParams.noCallback();

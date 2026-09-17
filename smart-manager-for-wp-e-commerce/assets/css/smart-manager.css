@@ -552,8 +552,12 @@ td[aria-describedby*="postmeta_meta_key__thumbnail_id_meta_value__thumbnail_id"]
 	color: #6b7280c2!important;
 }
 
-.mce-container {
+.mce-container, .ui-autocomplete.wplink-autocomplete, #wp-link-wrap {
 	z-index: 120002 !important;
+}
+
+#wp-link-wrap #wp-link-submit{
+	color: #fff !important;
 }
 
 .handsontable th:not(:first-child) {

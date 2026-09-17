@@ -97,41 +97,51 @@ if ( ! class_exists( 'SA_Smart_Manager_Deactivation' ) ) {
 			$reasons = array(
 							array(
 									'id'                => 1,
-									'text'              => __( 'The plugin is not working / not compatible with another plugin.' , 'smart-manager-for-wp-e-commerce' ),
+									'text'              => _x( 'The plugin is not working / not compatible with another plugin.', 'deactivation survey reason', 'smart-manager-for-wp-e-commerce' ),
 									'input_type'        => 'textarea',
-									'input_placeholder' => __( 'Kindly share what did not work for you / conflicting with which plugin so we can fix it...', 'smart-manager-for-wp-e-commerce' )
+									'input_placeholder' => _x( 'Kindly share what did not work for you / conflicting with which plugin so we can fix it...', 'deactivation survey reason placeholder', 'smart-manager-for-wp-e-commerce' )
 								),
 							array(
 									'id'                => 2,
-									'text'              => __( 'I only needed the plugin for a short period' , 'smart-manager-for-wp-e-commerce' ),
+									'text'              => _x( 'I only needed the plugin for a short period', 'deactivation survey reason', 'smart-manager-for-wp-e-commerce' ),
 									'input_type'        => 'textarea',
-									'input_placeholder' => __( 'What did you wanted to do in short period?', 'smart-manager-for-wp-e-commerce' )
+									'input_placeholder' => _x( 'What did you wanted to do in short period?', 'deactivation survey reason placeholder', 'smart-manager-for-wp-e-commerce' )
 								),
 							array(
 									'id'                => 3,
-									'text'              => __( 'The plugin is great, but I need specific feature that you don\'t support' , 'smart-manager-for-wp-e-commerce' ),
+									'text'              => _x( 'The plugin is great, but I need specific feature that you don\'t support', 'deactivation survey reason', 'smart-manager-for-wp-e-commerce' ),
 									'input_type'        => 'textarea',
-									'input_placeholder' => __( 'What specific feature you need?', 'smart-manager-for-wp-e-commerce' )
+									'input_placeholder' => _x( 'What specific feature you need?', 'deactivation survey reason placeholder', 'smart-manager-for-wp-e-commerce' )
 								),
 							array(
 									'id'                => 4,
-									'text'              => __( 'I found another plugin for my needs' , 'smart-manager-for-wp-e-commerce' ),
+									'text'              => _x( 'I found another plugin for my needs', 'deactivation survey reason', 'smart-manager-for-wp-e-commerce' ),
 									'input_type'        => 'textfield',
-									'input_placeholder' => __( 'What is that plugin name?', 'smart-manager-for-wp-e-commerce' )
+									'input_placeholder' => _x( 'What is that plugin name?', 'deactivation survey reason placeholder', 'smart-manager-for-wp-e-commerce' )
 								),
 							array(
 									'id'                => 5,
-									'text'              => __( 'It is a temporary deactivation. I am just debugging an issue.' , 'smart-manager-for-wp-e-commerce' ),
+									'text'              => _x( 'It is a temporary deactivation. I am just debugging an issue.', 'deactivation survey reason', 'smart-manager-for-wp-e-commerce' ),
 									'input_type'        => '',
 									'input_placeholder' => ''
 								),
 							array(
 									'id'                => 6,
-									'text'              => __( 'Other' , 'smart-manager-for-wp-e-commerce' ),
+									'text'              => _x( 'Other', 'deactivation survey reason', 'smart-manager-for-wp-e-commerce' ),
 									'input_type'        => 'textarea',
-									'input_placeholder' => __( 'Please mention...', 'smart-manager-for-wp-e-commerce' )
+									'input_placeholder' => _x( 'Please mention...', 'deactivation survey reason placeholder', 'smart-manager-for-wp-e-commerce' )
 								)
 						);
+
+			// Lite only: intercept Pro buyers at the perfect intent moment.
+			if ( defined( 'SMPRO' ) && SMPRO === false ) {
+				array_unshift( $reasons, array(
+					'id'         => 7,
+					'text'       => _x( 'I bought Smart Manager Pro and need to switch to it', 'deactivation survey reason', 'smart-manager-for-wp-e-commerce' ),
+					'input_type' => '',
+					'html'       => '<div><a href="' . esc_url( 'https://www.storeapps.org/docs/sm-how-to-update-from-lite-to-pro-version/?utm_source=sm&utm_medium=in_app_deactivation_modal&utm_campaign=activate_pro' ) . '" target="_blank" class="button button-primary button-small">' . esc_html_x( 'View step-by-step guide to activate Pro →', 'deactivation survey CTA', 'smart-manager-for-wp-e-commerce' ) . '</a></div>',
+				) );
+			}
 
 			$uninstall_reasons['default'] = $reasons;
 

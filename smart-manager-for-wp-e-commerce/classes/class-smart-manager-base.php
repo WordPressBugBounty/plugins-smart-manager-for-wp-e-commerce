@@ -3433,10 +3433,8 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				$batch_params['csv_columns'] = $csv_columns;
 				$batch_params['col_model'] = $col_model;
 				$batch_params['dashboard_title'] = ! empty( $current_store_model['dashboard_title'] ) ? $current_store_model['dashboard_title'] : ucfirst( $this->dashboard_key );
-				$batch_result = Smart_Manager_Pro_Batch_Export::initiate_batch_export_process( $batch_params );
-				if ( ! empty( $batch_result ) && is_array( $batch_result ) ) {
-					return;
-				}
+				Smart_Manager_Pro_Batch_Export::initiate_batch_export_process( $batch_params );
+				return;
 			}
 			$data = $this->get_data_model( $col_model );
 			if ( empty( $data ) && is_callable( 'sa_manager_log' ) ) {

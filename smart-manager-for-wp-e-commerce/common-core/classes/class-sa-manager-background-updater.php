@@ -4,7 +4,7 @@
  *
  * @package common-core/
  * @since       8.77.0
- * @version     8.89.0
+ * @version     8.97.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -881,7 +881,7 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 												return match.toUpperCase();
 											}), 'capitalized process name', 'smart-manager-for-wp-e-commerce');
 										}
-										let noOfRecords = ('undefined' !== typeof(window[pluginKey].selectedRows) && window[pluginKey].selectedRows && window[pluginKey].selectedRows.length > 0 && window[pluginKey].selectAll === false) ? window[pluginKey].selectedRows.length : (window[pluginKey].selectAll ? _x('All', 'all records', 'smart-manager-for-wp-e-commerce') : 0);
+										let noOfRecords = ('undefined' !== typeof(window[pluginKey].selectedRows) && window[pluginKey].selectedRows && window[pluginKey].selectedRows.length > 0 && window[pluginKey].selectAll === false) ? window[pluginKey].selectedRows.length : (window[pluginKey].selectAll ? _x('All', 'all records', 'smart-manager-for-wp-e-commerce') : (('export_csv' === process && window[pluginKey].exportStore && (window[pluginKey].exportStore === 'entire_store' || window[pluginKey].exportStore === 'entire_store_stock_cols')) ? _x('All', 'all records', 'smart-manager-for-wp-e-commerce') : 0));
 										
 										setTimeout(function() {
 											jQuery('#sa_background_process_complete').fadeOut();

@@ -4,7 +4,7 @@
  *
  * @package common-core/
  * @since       8.74.0
- * @version     8.74.0
+ * @version     8.97.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -200,7 +200,7 @@ if ( ! class_exists( 'SA_Manager_Feedback' ) ) {
 		 * 
 		 * @return bool True if the action(s) meet(s) the threshold, false otherwise.
 		 */
-		private static function has_action_reached_threshold( $plugin_sku, $min_threshold = 1, $action_counts, $action_type = '' ) {
+		private static function has_action_reached_threshold( $plugin_sku = '', $min_threshold = 1, $action_counts = array(), $action_type = '' ) {
 			if ( empty( $plugin_sku ) || empty( $action_counts ) || ! is_array( $action_counts ) ) {
 				return false;
 			}

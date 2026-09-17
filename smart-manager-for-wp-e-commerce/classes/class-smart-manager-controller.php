@@ -218,6 +218,7 @@ if ( ! class_exists( 'Smart_Manager_Controller' ) ) {
 				return;
 			}
 
+
 			// Code to handle saving of settings
 			if( 'smart_manager_settings' === $req_params['active_module'] && is_callable( 'Smart_Manager_Settings', 'update' ) ){
 				$settings = ( ! empty( $req_params['settings'] ) ) ? json_decode( stripslashes( $req_params['settings'] ), true ) : array();

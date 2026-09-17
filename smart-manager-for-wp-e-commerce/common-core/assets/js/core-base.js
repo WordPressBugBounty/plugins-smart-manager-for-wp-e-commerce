@@ -600,8 +600,10 @@
                 </div>`
             : taskContent;
 
+        // Optional HTML block appended after the title field (e.g. stock notice from product.js)
         content = `
             <div id="show_modal_content">
+                ${params.appendContent ? params.appendContent : ''}
                 <div style="padding-bottom: 1em; color: #6b7280!important;">${taskDesc}</div>
                 ${titleFieldSection}
                 ${scheduleToggle}
@@ -609,21 +611,13 @@
             </div>
         `;
 
-        // CTA button text based on undo feature
-        let ctaTitle = isUndoEnabled 
-            ? _x('Ok', 'button', 'smart-manager-for-wp-e-commerce')
-            : _x('Apply Changes', 'button', 'smart-manager-for-wp-e-commerce');
-        
-        let closeCTATitle = isUndoEnabled
-            ? _x('Cancel', 'button', 'smart-manager-for-wp-e-commerce')
-            : _x('Cancel', 'button', 'smart-manager-for-wp-e-commerce');
-
+        // CTA button text — caller (e.g. product.js) can override via params.ctaText
         window[pluginKey].modal = {
             title: modalTitle,
             content: content,
             autoHide: false,
             cta: {
-                title: ctaTitle,
+                title: params.ctaText ? params.ctaText : (isUndoEnabled ? _x('Ok', 'button', 'smart-manager-for-wp-e-commerce') : _x('Apply Changes', 'button', 'smart-manager-for-wp-e-commerce')),
                 closeModalOnClick: params.hasOwnProperty('btnParams') ? ((params.btnParams.hasOwnProperty('hideOnYes')) ? params.btnParams.hideOnYes : true) : true,
                 callback: function () {
                     // Check if scheduling is enabled via toggle
@@ -643,6 +637,10 @@
                             window[pluginKey].hideModal();
                         }
                     }
+                    // Optional pre-callback from caller (e.g. enable Manage Stock rows before saving)
+                    if (typeof params.ctaPreCallback === 'function') {
+                        params.ctaPreCallback();
+                    }
                     let updatedTitle = jQuery('#sm_add_title').val();
                     if (updatedTitle) {
                         window[pluginKey].updatedTitle = updatedTitle;
@@ -652,7 +650,7 @@
                     }
                 }
             },
-            closeCTA: { title: closeCTATitle },
+            closeCTA: { title:_x('Cancel', 'button', 'smart-manager-for-wp-e-commerce') },
             onCreate: function () {
                 // Initialize datepicker
                 if ("undefined" !== typeof (window[pluginKey].scheduleDatePicker) && "function" === typeof (window[pluginKey].scheduleDatePicker)) {
@@ -679,7 +677,11 @@
                 });
             }
         }
-        window[pluginKey].showModal()
+        if (params.refreshExistingModal === true) { 
+            m.redraw(); 
+            return;
+        } 
+        window[pluginKey].showModal();
     }
 
     // Get random message (different from current)

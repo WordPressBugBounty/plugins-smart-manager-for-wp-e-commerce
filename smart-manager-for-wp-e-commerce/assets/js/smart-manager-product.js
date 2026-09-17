@@ -1057,3 +1057,154 @@ jQuery(document).on('sm_dashboard_change', '#sm_editor_grid', function() {
 		}
 	}
 })
+
+// Shared: Build the translatable notice body text for a given product count.
+SmartManager.prototype._getStockNoticeText = function (count) {
+	let unit = count === 1 ? `<span class="font-semibold">${_x('product', 'stock notice', 'smart-manager-for-wp-e-commerce')}</span>` : `<span class="font-semibold">${_x('products', 'stock notice', 'smart-manager-for-wp-e-commerce')}</span>`;
+	if (window.smart_manager.isWCStockManagementEnabled === 'yes') {
+		return {
+			title: _x('Stock management will be enabled', 'stock notice', 'smart-manager-for-wp-e-commerce'),
+			content: sprintf(_x("WooCommerce requires <span class='font-semibold'>'Manage Stock'</span> to be enabled to track stock quantity. Smart Manager will set <span class='font-semibold'>'Manage Stock'</span> to <span class='font-semibold'>'Yes'</span> for %d <span class='font-semibold'>edited</span> %s.", 'stock notice', 'smart-manager-for-wp-e-commerce'), count, unit),
+			settingsLink: ''
+		};
+	}
+	return {
+		title: _x('Store-wide stock management is turned off', 'stock notice', 'smart-manager-for-wp-e-commerce'),
+		content: _x("All your changes will be saved. However, WooCommerce won't track inventory levels for edited stock quantities until stock management is enabled in store settings.", 'stock notice', 'smart-manager-for-wp-e-commerce'),
+		settingsLink: window.smart_manager.WCInventorySettingsURL
+			? '<a href="' + window.smart_manager.WCInventorySettingsURL + '" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 mt-2 text-xs font-normal underline hover:text-amber-950">' + _x('Open WooCommerce Inventory Settings ↗', 'link text', 'smart-manager-for-wp-e-commerce') + '</a>'
+			: ''
+	};
+};
+
+// Check if "Don't show manage stock notice" was dismissed via localStorage.
+SmartManager.prototype._isStockNoticeDismissed = function () {
+	try {
+		return localStorage.getItem('sm_dismiss_manage_stock_notice') === 'yes';
+	} catch (e) {
+		return false;
+	}
+};
+
+// Save "Don't show manage stock notice" state in localStorage.
+SmartManager.prototype._saveStockNoticeSetting = function () {
+	try {
+		localStorage.setItem('sm_dismiss_manage_stock_notice', 'yes');
+	} catch (e) {}
+};
+
+// Build the inline yellow warning alert HTML (Scenario A — inside Task Title modal).
+SmartManager.prototype._buildStockNoticeHTML = function (count) {
+	let notice = this._getStockNoticeText(count);
+	let isGlobalStockManagementEnabled = window.smart_manager.isWCStockManagementEnabled === 'yes';
+	let headingId = isGlobalStockManagementEnabled ? 'sm_stock_notice_heading' : 'sm_stock_global_disabled_heading';
+	let textId = isGlobalStockManagementEnabled ? 'sm_stock_notice_text' : 'sm_stock_global_disabled_text';
+	return `<div id="${isGlobalStockManagementEnabled ? 'sm_stock_notice_alert' : 'sm_stock_global_disabled_alert'}" class="flex flex-col gap-2.5 p-3 mb-4 border rounded-md" role="${isGlobalStockManagementEnabled ? 'note' : 'alert'}" aria-labelledby="${headingId}" aria-describedby="${textId}" style="padding-bottom: 1em;">
+		<div class="flex items-start gap-2">
+			<span class="dashicons ${isGlobalStockManagementEnabled ? 'dashicons-info text-sm-base-primary' : 'dashicons-warning'} shrink-0 mt-0.5" aria-hidden="true"></span>
+			<div class="text-sm leading-relaxed text-slate-700">
+				<span id="${headingId}" class="block font-normal ${isGlobalStockManagementEnabled ? 'text-sm-base-foreground' : 'text-amber-900'} mb-0.5">${notice?.title || ''}</span>
+				<p id="${textId}" class="m-0">${notice?.content || ''}</p>
+				${notice?.settingsLink || ''}
+			</div>
+		</div>
+		${isGlobalStockManagementEnabled ? `<label for="sm_stock_notice_skip" class="flex items-center gap-2 text-xs text-slate-600 cursor-pointer select-none">
+				<input type="checkbox" id="sm_stock_notice_skip" name="sm_stock_notice_skip" class="m-0 cursor-pointer accent-sm-base-primary rounded border-gray-300">
+				<span>Don't show this notice again for this session</span>
+			</label>` : ''}
+	</div>`;
+};
+
+// Enable Manage Stock in editedData for all affected rows.
+SmartManager.prototype._enableManageStockRows = function (manageStockDisabledRows) {
+	let editedData = window.smart_manager.editedData || {};
+	manageStockDisabledRows.forEach(function (rowId) {
+		if (editedData[rowId] && Object.prototype.hasOwnProperty.call(editedData[rowId], 'postmeta/meta_key=_stock/meta_value=_stock')) {
+			editedData[rowId]['postmeta/meta_key=_manage_stock/meta_value=_manage_stock'] = 'yes';
+		}
+	});
+};
+
+// Show the standalone stock confirmation modal (Scenario B — Task Title modal disabled or Lite).
+SmartManager.prototype._showStandaloneStockModal = function (manageStockDisabledRows, callBackFunction) {
+	let self = this;
+	let isGlobalStockManagementEnabled = window.smart_manager.isWCStockManagementEnabled === 'yes';
+	let notice = self._getStockNoticeText(manageStockDisabledRows.length);
+	window.smart_manager.showConfirmDialog({
+		title: notice.title,
+		content: `<div class="text-sm leading-relaxed mb-3">
+			<p class="m-0">${notice.content}</p>
+			${notice.settingsLink}
+		</div>
+		<label class="flex items-center gap-2 cursor-pointer text-xs text-sm-base-muted-foreground">
+			<input type="checkbox" id="sm_stock_notice_skip" class="cursor-pointer m-0">
+			${_x("Don't show again for this session", 'stock notice checkbox', 'smart-manager-for-wp-e-commerce')}
+		</label>`,
+		showCloseIcon: false,
+		btnParams: {
+			yesText: isGlobalStockManagementEnabled ? _x('Enable & Save', 'button', 'smart-manager-for-wp-e-commerce') : _x('Save Changes', 'button', 'smart-manager-for-wp-e-commerce'),
+			noText: _x('Cancel', 'button', 'smart-manager-for-wp-e-commerce'),
+			hideOnYes: true,
+			hideOnNo: true,
+			yesCallback: function () {
+				if (jQuery('#sm_stock_notice_skip').is(':checked')) {
+					self._saveStockNoticeSetting();
+				}
+				self._enableManageStockRows(manageStockDisabledRows);
+				callBackFunction();
+			}
+		}
+	});
+};
+
+// ---------------------------------------------------------------------------
+// Handles the Manage Stock requirement for Stock Quantity edits.
+//
+// Scenario A (Task Title modal ENABLED, Pro):
+//   Injects an inline warning alert after the title field — no extra modal.
+//
+// Scenario B (Task Title modal DISABLED or Lite):
+//   If "Don't show again" was saved, saves silently. Otherwise shows the standalone stock confirmation modal.
+// ---------------------------------------------------------------------------
+SmartManager.prototype.validateColumnDependencies = function (callBackFunction) {
+	if (typeof callBackFunction !== 'function') { return false; }
+	let editedData = window.smart_manager.editedData || {};
+	let dashboardData = window.smart_manager.currentDashboardData || [];
+	if (Object.keys(editedData).length <= 0) { return false; }
+
+	let hasField = function (obj) { return obj && Object.prototype.hasOwnProperty.call(obj, 'postmeta/meta_key=_stock/meta_value=_stock'); };
+
+	if (!Object.values(editedData).some(hasField)) { return false; }
+
+	let manageStockDisabledRows = Object.keys(editedData).filter(function (rowId) {
+		let row = dashboardData.find(function (item) { return String(item.posts_id) === String(rowId); });
+		return hasField(editedData[rowId]) && row && row.postmeta_meta_key__manage_stock_meta_value__manage_stock === 'no';
+	});
+	if (manageStockDisabledRows.length <= 0) { return false; }
+
+	let self = this;
+	let shouldShowTaskTitle = (1 == window.smart_manager.sm_beta_pro) && 1 === window[pluginKey].showTasksTitleModal;
+	let isNoticeDismissed = self._isStockNoticeDismissed();
+	let isGlobalStockManagementEnabled = window.smart_manager.isWCStockManagementEnabled === 'yes';
+	// Scenario A: merge notice into Task Title modal.
+	if (shouldShowTaskTitle) {
+		window.smart_manager.showTitleModal({
+			appendContent: !isNoticeDismissed ? self._buildStockNoticeHTML(manageStockDisabledRows.length) : '',
+			ctaText: !isNoticeDismissed ? (isGlobalStockManagementEnabled ? _x('Enable & Save', 'button', 'smart-manager-for-wp-e-commerce') : _x('Save Changes', 'button', 'smart-manager-for-wp-e-commerce')) : _x('Save', 'button', 'smart-manager-for-wp-e-commerce'),
+			ctaPreCallback: function () {
+				if (jQuery('#sm_stock_notice_skip').is(':checked')) { self._saveStockNoticeSetting(); }
+				if (isGlobalStockManagementEnabled) { self._enableManageStockRows(manageStockDisabledRows); }
+			}
+		});
+		return true;
+	}
+	// Scenario B: silently save if dismissed, otherwise show standalone modal.
+	if (isNoticeDismissed) {
+		self._enableManageStockRows(manageStockDisabledRows);
+		callBackFunction();
+		return true;
+	}
+
+	self._showStandaloneStockModal(manageStockDisabledRows, callBackFunction);
+	return true;
+};

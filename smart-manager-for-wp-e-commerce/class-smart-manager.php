@@ -843,7 +843,7 @@ class Smart_Manager {
 			$show_sa_plugins_page = apply_filters('sm_show_sa_plugins_page', $show_sa_plugins_page);
 
 			if( !empty( $show_sa_plugins_page ) ) {
-				add_submenu_page( 'smart-manager', __( 'StoreApps Plugins', 'smart-manager-for-wp-e-commerce' ),  __( 'StoreApps Plugins', 'smart-manager-for-wp-e-commerce' ), 'manage_options', 'sm-storeapps-plugins', array( $this, 'add_admin_page' ) );
+				add_submenu_page( 'smart-manager', __( 'StoreApps Marketplace', 'smart-manager-for-wp-e-commerce' ),  __( 'StoreApps Marketplace', 'smart-manager-for-wp-e-commerce' ), 'manage_options', 'sm-storeapps-plugins', array( $this, 'add_admin_page' ) );
 			}
 		}
 	}
@@ -966,6 +966,10 @@ class Smart_Manager {
 				self::display_book_call_notice();
 			}
 		}
+		// Display power bundle notice.
+		if ( ( ! empty( $_GET['page'] ) ) && ( ( ( ( 'smart-manager' === $_GET['page'] ) && ( ! empty( $_GET['landing-page'] ) && ( 'sm-about' === $_GET['landing-page'] ) ) ) ) || ( 'sm-storeapps-plugins' === $_GET['page'] ) ) && ( is_callable( array( $this, 'display_power_bundle_banner_notice' ) ) ) ) {
+			self::display_power_bundle_banner_notice();
+		}
 		if( !( !empty( $_GET['page'] ) && ( 'smart-manager' === $_GET['page'] ) ) ) {
 			return;
 		}
@@ -991,12 +995,22 @@ class Smart_Manager {
 				$sm_lite_activation_date = $current_wp_date;
 				add_option('sm_lite_activation_date',$sm_lite_activation_date);
 				add_option('_sm_update_418_date',$sm_lite_activation_date);
+				add_option('_sm_update_897_date',$sm_lite_activation_date);
 			} else {
 				$sm_lite_activation_date = get_option( '_sm_update_418_date', false );
 				if( false === $sm_lite_activation_date ) {
 					$sm_lite_activation_date = $current_wp_date;
 					add_option('_sm_update_418_date',$sm_lite_activation_date);
 				}
+				$sm_lite_897_date = get_option( '_sm_update_897_date', false );
+				if( false === $sm_lite_897_date ) {
+					$sm_lite_897_date = $current_wp_date;
+					add_option('_sm_update_897_date',$sm_lite_897_date);
+				}
+			}
+
+			if ( is_callable( array( __CLASS__, 'is_show_power_bundle_banner_notice' ) ) && ( ! empty( self::is_show_power_bundle_banner_notice() ) ) ) {
+				return;
 			}
 
 			$date_diff = floor(( strtotime($current_wp_date) - strtotime( $sm_lite_activation_date ) ) / (3600 * 24) );
@@ -1496,7 +1510,9 @@ class Smart_Manager {
 							'support_link' => SM_CONTACT_SUPPORT_URL,
 							'calendly_link' => defined( 'SM_CALENDLY_URL' ) ? SM_CALENDLY_URL : '#',
 							'batchExportThreshold' => apply_filters( 'sa_sm_batch_export_threshold', intval( get_option( 'sa_sm_batch_export_threshold', 50 ) ) ),
-							'freedomSale' => ( is_callable( array( 'Smart_Manager', 'get_freedom_sale_params' ) ) ) ? self::get_freedom_sale_params() : false
+							'freedomSale' => ( is_callable( array( 'Smart_Manager', 'get_freedom_sale_params' ) ) ) ? self::get_freedom_sale_params() : false,
+							'isWCStockManagementEnabled' => get_option( 'woocommerce_manage_stock', 'yes' ),
+							'WCInventorySettingsURL' => admin_url( 'admin.php?page=wc-settings&tab=products&section=inventory' ),
 						);
 
 		$active_plugins = (array) get_option( 'active_plugins', array() );
@@ -1875,12 +1891,15 @@ class Smart_Manager {
 			if( is_callable( array( $this, 'display_book_call_notice' ) ) ) {
 				self::display_book_call_notice();
 			}
+			if( is_callable( array( $this, 'display_power_bundle_banner_notice' ) ) ) {
+				self::display_power_bundle_banner_notice();
+			}
 			if ( ( ! empty( self::$sa_offer_instance ) ) && ( is_callable( array( self::$sa_offer_instance, 'is_show' ) ) ) && ( ! empty( self::$sa_offer_instance->is_show() ) ) && ( is_callable( array( self::$sa_offer_instance, 'show_offer_content' ) ) ) && ( ! $is_pricing_page ) ) {
 				?> <div class="sa_offer_container"><?php self::$sa_offer_instance->show_offer_content(); ?></div> <?php
 			}
 			if( ! $is_pricing_page ) {
 				$man_hours_data = self::sm_get_man_hours_data();
-				if ( ( ! empty( $man_hours_data ) ) && ( is_array( $man_hours_data ) ) && ( ! empty( $man_hours_data['display_man_hours'] ) ) && is_callable( array( $this, 'sm_get_man_hours_html' ) ) ) {
+				if ( ( ! empty( $man_hours_data ) ) && ( is_array( $man_hours_data ) ) && ( ! empty( $man_hours_data['display_man_hours'] ) ) && is_callable( array( $this, 'sm_get_man_hours_html' ) ) && ( empty( self::is_show_power_bundle_banner_notice() ) ) ) {
 					echo self::sm_get_man_hours_html( self::sm_get_man_hours_data(), '', ( defined('SA_OFFER_VISIBLE') && SA_OFFER_VISIBLE === true ) ? '60%' : '25%' );
 				}
 		?>
@@ -1992,6 +2011,17 @@ class Smart_Manager {
 						<?php echo esc_html_x( 'Get Help & Feedback', 'footer button', 'smart-manager-for-wp-e-commerce' ); ?>
 					</span>
 				</a>
+				<?php if ( defined( 'SMPRO' ) && SMPRO === false ) : ?>
+				<!-- Activate Pro Button — Lite only -->
+				<a href="<?php echo esc_url( 'https://www.storeapps.org/docs/sm-how-to-update-from-lite-to-pro-version/?utm_source=sm&utm_medium=in_app_footer&utm_campaign=activate_pro' ); ?>" target="_blank" class="sm-footer-btn">
+					<svg width="15" height="15" viewBox="0 0 15 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M7.33171 3.33164C7.33171 2.6244 7.05075 1.94612 6.55066 1.44603C6.05056 0.945929 5.37228 0.664978 4.66504 0.664978H0.665039V10.665H5.33171C5.86214 10.665 6.37085 10.8757 6.74592 11.2508C7.12099 11.6258 7.33171 12.1345 7.33171 12.665M7.33171 3.33164V12.665M7.33171 3.33164C7.33171 2.6244 7.61266 1.94612 8.11275 1.44603C8.61285 0.945929 9.29113 0.664978 9.99837 0.664978H13.9984V10.665H9.33171C8.80127 10.665 8.29256 10.8757 7.91749 11.2508C7.54242 11.6258 7.33171 12.1345 7.33171 12.665" stroke="#737373" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/>
+					</svg>
+					<span class="sm-footer-btn-text">
+						<?php echo esc_html_x( 'Have Pro? Activate it', 'footer button', 'smart-manager-for-wp-e-commerce' ); ?>
+					</span>
+				</a>
+				<?php endif; ?>
 				<!-- Book a Call Button -->
 				<a href="<?php echo esc_url( defined( 'SM_CALENDLY_URL' ) ? SM_CALENDLY_URL : '#' ); ?>" target="_blank" class="sm-footer-btn">
 					<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -2009,8 +2039,8 @@ class Smart_Manager {
 					<span class="sm-footer-btn-text">
 						<?php echo esc_html_x( 'Rate Us', 'footer button', 'smart-manager-for-wp-e-commerce' ); ?>
 					</span>
-				</a>
-			</div>
+					</a>
+				</div>
 			<?php
 			return ob_get_clean();
 		}
@@ -2190,6 +2220,7 @@ class Smart_Manager {
 		}
 		if ( ( defined('SMPRO') && false === SMPRO ) || ( ! defined('SMPRO') ) ) {
 			$plugin_meta[] = '<span class="sm_pricing_icon"> 🔥 </span> <a href="' . esc_url( admin_url( 'admin.php?page=smart-manager-pricing' ) ) . '" target="storeapps_go_pro" title="' . _x( 'Go Pro', 'go pro link title', 'smart-manager-for-wp-e-commerce' ) . '">' . _x( 'Go Pro', 'go pro link', 'smart-manager-for-wp-e-commerce' ) . '</a>';
+			$plugin_meta[] = 'Already have Pro? <a href="' . esc_url( 'https://www.storeapps.org/docs/sm-how-to-update-from-lite-to-pro-version/?utm_source=sm&utm_medium=plugins_page_row_meta&utm_campaign=activate_pro' ) . '" target="_blank">' . _x( 'Activate it', 'activate pro link', 'smart-manager-for-wp-e-commerce' ) . '</a>';
 		}
 
 		$plugin_meta[] = sprintf(
@@ -2523,6 +2554,82 @@ class Smart_Manager {
 		$notice_key = sanitize_key( $_POST['feature_key'] );
 		check_ajax_referer( "sa-dismiss-{$notice_key}-notice", 'security' );
 		return update_option( "sa_sm_hide_{$notice_key}_notice", true );
+	}
+
+	/**
+	 * Check if Power Bundle offer banner notice can be displayed.
+	 *
+	 * - For Pro: Returns true if the notice has not been dismissed.
+	 * - For Lite: Returns true if within 3 days of version 8.97.0 update/activation.
+	 *
+	 * @return bool True if notice can be displayed, false otherwise.
+	 */
+	public static function is_show_power_bundle_banner_notice() {
+		return ( ( defined( 'SMPRO' ) && true === SMPRO )
+			? ( ! get_option( 'sa_sm_hide_power_bundle_banner_notice', false ) )
+			: ( floor( ( current_time( 'timestamp' ) - strtotime( get_option( '_sm_update_897_date', current_time( 'mysql' ) ) ) ) / 86400 ) < 3 )
+		);
+	}
+
+	/**
+	 * Display Power Bundle offer banner notice.
+	 *
+	 * @return void
+	 */
+	public static function display_power_bundle_banner_notice() {
+		if ( ! is_callable( array( __CLASS__, 'is_show_power_bundle_banner_notice' ) ) || ! self::is_show_power_bundle_banner_notice() ) {
+			return;
+		}
+
+		echo '<style type="text/css">
+			.sm-pb-banner { text-align: start; background: #4f46e5; border-radius: 0.75rem; padding: 1.25rem 1.5rem; margin: 1rem auto 1.5rem auto; max-width: 41rem; display: flex; align-items: center; justify-content: space-between; position: relative; font-family: Inter, sans-serif; box-shadow: 0 0.25rem 0.75rem rgba(79, 70, 229, 0.15); }
+			.sm-pb-left { display: flex; align-items: center; gap: 1rem; }
+			.sm-pb-icon-wrap { width: 2.75rem; height: 2.75rem; border-radius: 50%; background: #ffffff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+			.sm-pb-heading { font-size: 1rem; font-weight: 700; color: #ffffff; margin-bottom: 0.375rem; line-height: 1.25; }
+			.sm-pb-list { font-size: 0.8125rem; color: #ffffff; margin: 0; padding: 0; list-style: none; line-height: 1.45; opacity: 0.95; }
+			.sm-pb-list li {margin-bottom: 0px}
+			.sm-pb-right { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; margin-left: 1rem; padding-right: 0.875rem; }
+			.sm-pb-btn { background: #fbbf24; color: #78350f !important; font-weight: 700; font-size: 0.84375rem; padding: 0.5rem 1.25rem; border-radius: 9999px; text-decoration: none !important; display: inline-block; white-space: nowrap; }
+			.sm-pb-btn:hover { background: #f59e0b; }
+			.sm-pb-subtext { font-size: 0.6875rem; color: rgba(255, 255, 255, 0.85); margin-top: 0.3125rem; text-align: center; }
+			.sm-pb-dismiss { position: absolute; top: 0.4rem; right: 0.75rem; color: rgba(255, 255, 255, 0.8); cursor: pointer; font-size: 1.125rem; line-height: 1; border: none; background: none; width: 1.5rem; height: 1.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; padding-bottom: 0.35rem; transition: all 0.2s ease; }
+			.sm-pb-dismiss:hover { color: #ffffff; background: rgba(255, 255, 255, 0.2); }
+		</style>
+		<div class="sm-pb-banner" id="sm_power_bundle_banner_notice">
+			<div class="sm-pb-left">
+				<div class="sm-pb-icon-wrap">
+					<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1.375rem; height: 1.375rem;"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
+				</div>
+				<div>
+					<div class="sm-pb-heading">' . esc_html__( 'Power Bundle: 2 plugins, price of 1', 'smart-manager-for-wp-e-commerce' ) . '</div>
+					<ul class="sm-pb-list">
+						<li>&bull; ' . esc_html__( 'Smart Offers (upsells, BOGO & bumps)', 'smart-manager-for-wp-e-commerce' ) . '</li>
+						<li>&bull; ' . esc_html__( 'Bulk Variations Manager (manage variations in bulk)', 'smart-manager-for-wp-e-commerce' ) . '</li>
+					</ul>
+				</div>
+			</div>
+			<div class="sm-pb-right">
+				<a href="https://www.storeapps.org/product/power-bundle/?utm_source=sm&utm_medium=in_app_banner&utm_campaign=power_bundle" target="_blank" class="sm-pb-btn">
+					' . esc_html__( 'Grab now', 'smart-manager-for-wp-e-commerce' ) . ' &mdash; <span style="text-decoration: line-through; opacity: 0.75; font-weight: 400;">$178</span> <strong>$99</strong>
+				</a>
+				<div class="sm-pb-subtext">' . esc_html__( 'Offer ends soon', 'smart-manager-for-wp-e-commerce' ) . '</div>
+			</div>' .
+			( ( defined( 'SMPRO' ) && true === SMPRO ) ? '<button type="button" class="sm-pb-dismiss" id="sm_power_bundle_dismiss" title="' . esc_attr__( 'Dismiss', 'smart-manager-for-wp-e-commerce' ) . '">&times;</button>
+			<script type="text/javascript">
+				jQuery(document).on("click", "#sm_power_bundle_dismiss", function(){
+					jQuery.post(ajaxurl, { action: "dismiss_admin_notice", feature_key: "power_bundle_banner", security: "' . wp_create_nonce( 'sa-dismiss-power_bundle_banner-notice' ) . '" });
+					jQuery("#sm_power_bundle_banner_notice").fadeOut();
+				});
+			</script>' : '' ) .
+			( ( 'sm-about' === ( ! empty( $_GET['landing-page'] ) ? sanitize_text_field( wp_unslash( $_GET['landing-page'] ) ) : '' ) || 'sm-storeapps-plugins' === ( ! empty( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '' ) ) ? '<script type="text/javascript">
+				jQuery(function($){
+					var $heading = $(".wrap h1, .about-wrap h1, .sm-welcome h1, h1").first();
+					if ($heading.length) {
+						$("#sm_power_bundle_banner_notice").insertAfter($heading);
+					}
+				});
+			</script>' : '' ) .
+		'</div>';
 	}
 
 	/**

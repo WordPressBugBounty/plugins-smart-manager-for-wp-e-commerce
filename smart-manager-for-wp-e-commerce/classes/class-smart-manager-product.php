@@ -163,9 +163,28 @@ if ( ! class_exists( 'Smart_Manager_Product' ) ) {
 			return $select;
 		}
 
-		public function sm_beta_required_cols( $cols ) {
+		/**
+		 * Adds required columns for the current dashboard.
+		 *
+		 * @param array $cols Existing columns.
+		 * @return array Updated columns.
+		 */
+		public function sm_beta_required_cols( $cols = array() ) {
+			$current_user_id = get_current_user_id();
+			$column_model_transient = array();
+			if( ! empty( $current_user_id ) && ! empty( $this->dashboard_key ) ){
+				$column_model_transient = get_user_meta(
+					$current_user_id,
+					'sa_sm_' . $this->dashboard_key,
+					true
+				);
+			}
+			$is_stock_column_present = ( is_array( $column_model_transient ) && is_array( $column_model_transient['columns'] ) && ! empty( $column_model_transient['columns'] ) ) && array_key_exists( 'postmeta_meta_key__stock_meta_value__stock', $column_model_transient['columns'] );
 			$required_cols = array('posts_post_title', 'posts_post_parent', 'postmeta_meta_key__product_attributes_meta_value__product_attributes');
-			return array_merge($cols, $required_cols);
+			if ( ! empty( $is_stock_column_present ) ) {
+				$required_cols[] = 'postmeta_meta_key__manage_stock_meta_value__manage_stock';
+			}
+			return array_merge( $cols, $required_cols );
 		}
 
 		//function to modify the terms search column name while forming the formatted search query
