@@ -5463,14 +5463,32 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 			}
 
 			// Make AJAX request for batch export
-			window.smart_manager.sendRequest({ data: params, data_type: 'json', showLoader: false }, function(response) {});
+			window.smart_manager.hideFloatingActionBar();
+			//Show progress bar.
 			setTimeout(() => {
-				window.smart_manager.hideFloatingActionBar();
 				window.smart_manager.showProgressDialog(_x('Export CSV', 'progressbar modal title', 'smart-manager-for-wp-e-commerce'));
-				if (typeof sa_background_process_heartbeat === "function") {
-					sa_background_process_heartbeat(1000, 'export_csv', window.pluginKey);
-				}
 			}, 1000);
+			window.smart_manager.sendRequest({ data: params, data_type: 'json', showLoader: false }, function(response) {
+				if ( response && 'object' === typeof(response) && response.hasOwnProperty('ACK') && 'Success' === response.ACK && response.hasOwnProperty('csv_download_url') ) {
+					//Show success notification
+					window.smart_manager.notification = {
+						status: 'success',
+						message: _x('CSV Exported Successfully!', 'notification', 'smart-manager-for-wp-e-commerce'),
+					};
+					window.smart_manager.showNotification();
+					//Download CSV
+					window.location.href = response.csv_download_url;
+					//Hide progress bar.
+					window[pluginKey].modal = {};
+					if (typeof(window[pluginKey].getDefaultRoute) !== "undefined" && typeof(window[pluginKey].getDefaultRoute) === "function") {
+						window[pluginKey].showPannelDialog('', window[pluginKey].getDefaultRoute(true))
+					}
+				} else {
+					if (typeof sa_background_process_heartbeat === "function") {
+						sa_background_process_heartbeat(1000, 'export_csv', window.pluginKey);
+					}
+				}
+			});
 			return;
 		}
 		// Use direct download for smaller exports.

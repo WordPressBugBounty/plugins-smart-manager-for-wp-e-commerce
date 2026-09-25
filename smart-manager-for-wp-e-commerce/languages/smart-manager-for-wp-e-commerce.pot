@@ -2,40 +2,35 @@
 # This file is distributed under the GNU General Public License v2.0.
 msgid ""
 msgstr ""
-"Project-Id-Version: Smart Manager – WooCommerce Bulk Edit: Products, Orders, Users & More (Spreadsheet) 8.97.0\n"
+"Project-Id-Version: Smart Manager – WooCommerce Bulk Edit: Products, Orders, Users & More (Spreadsheet) 8.98.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/smart-manager-for-wp-e-commerce\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-17T14:21:14+05:30\n"
+"POT-Creation-Date: 2026-09-25T07:47:46+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.12.0\n"
+"X-Generator: WP-CLI 2.9.0\n"
 "X-Domain: smart-manager-for-wp-e-commerce\n"
 
 #. Plugin Name of the plugin
-#: smart-manager.php
 msgid "Smart Manager – WooCommerce Bulk Edit: Products, Orders, Users & More (Spreadsheet)"
 msgstr ""
 
 #. Plugin URI of the plugin
-#: smart-manager.php
 msgid "https://www.storeapps.org/product/smart-manager/"
 msgstr ""
 
 #. Description of the plugin
-#: smart-manager.php
 msgid "<strong>Pro Version Installed</strong>. The #1 tool for WooCommerce inventory management, stock management, bulk edit, export, delete, duplicate...from one place using an Excel-like sheet editor."
 msgstr ""
 
 #. Author of the plugin
-#: smart-manager.php
 msgid "StoreApps"
 msgstr ""
 
 #. Author URI of the plugin
-#: smart-manager.php
 msgid "https://www.storeapps.org/"
 msgstr ""
 
@@ -70,7 +65,6 @@ msgstr ""
 
 #. translators: %1$s: current user display name %2$s: HTML of Pro price discount
 #: class-smart-manager.php:1104
-#, php-format
 msgid "Hey %1$s, grab your <span class=\"sm_discount_highlight\">%2$s Halloween discount!</span>"
 msgstr ""
 
@@ -80,7 +74,6 @@ msgstr ""
 
 #. translators: %1$s: current user display name %2$s: HTML of Pro price discount
 #: class-smart-manager.php:1108
-#, php-format
 msgid "Hey %1$s, you just unlocked <span class=\"sm_discount_highlight\">%2$s off</span> on Smart Manager Pro!"
 msgstr ""
 
@@ -91,7 +84,6 @@ msgstr ""
 #. translators: %s: discount percentage
 #: class-smart-manager.php:1115
 #: class-smart-manager.php:2445
-#, php-format
 msgid "Upgrade to Pro at %s Off"
 msgstr ""
 
@@ -176,7 +168,6 @@ msgstr ""
 
 #. translators: %1\$: 5-star link %2s: 5-star link
 #: class-smart-manager.php:2228
-#, php-format
 msgid "Boost us with %1$s&#11088;&#11088;&#11088;&#11088;&#11088; &#128640;%2$s"
 msgstr ""
 
@@ -187,13 +178,11 @@ msgstr ""
 
 #. translators: %s: saved man-hours
 #: class-smart-manager.php:2433
-#, php-format
 msgid "You've saved <span class=\"sm_hours_highlight\">%s productive hours</span> with Smart Manager"
 msgstr ""
 
 #. translators: %s: additional man-hours
 #: class-smart-manager.php:2438
-#, php-format
 msgid "Save another <strong>%s hours</strong> with advanced bulk editing and automation."
 msgstr ""
 
@@ -249,7 +238,6 @@ msgstr ""
 
 #. translators: %s: clickable link text
 #: class-smart-manager.php:2919
-#, php-format
 msgid "Smart Manager has detected stock logs from an earlier installation of <a href=\"https://wordpress.org/plugins/woocommerce-stock-manager/\" target=\"_blank\">Stock Manager for WooCommerce</a> plugin. %s to sync and import them into Smart Manager."
 msgstr ""
 
@@ -264,7 +252,6 @@ msgstr ""
 
 #. translators: %s: Plugin version number
 #: classes/class-smart-manager-admin-welcome.php:245
-#, php-format
 msgid "Thank you for installing Smart Manager %s!"
 msgstr ""
 
@@ -307,7 +294,6 @@ msgstr ""
 
 #. translators: %s: HTML of Smart Manager about screen
 #: classes/class-smart-manager-admin-welcome.php:310
-#, php-format
 msgid "Apart from WooCommerce post types like Products, Orders, Coupons, now you can manage %s. Be it Posts, Pages, Media, WordPress Users, etc. you can now manage everything using Smart Manager."
 msgstr ""
 
@@ -326,7 +312,6 @@ msgstr ""
 
 #. translators: %1$s: Simple search doc link %2$s: Advanced search doc link
 #: classes/class-smart-manager-admin-welcome.php:326
-#, php-format
 msgid "Simply enter the keyword you wish to filter records in the “Simple Search” field at the top of the grid (%1$s). If you need to have a more specific search result, then you can switch to “%2$s“ and then search."
 msgstr ""
 
@@ -345,7 +330,6 @@ msgstr ""
 
 #. translators: %s: Inline Editing doc link
 #: classes/class-smart-manager-admin-welcome.php:339
-#, php-format
 msgid "You can quickly update your Products, Orders, Coupons and Posts from Smart Manager itself. This facilitates editing of multiple rows at a time instead of editing and saving each row separately, %s."
 msgstr ""
 
@@ -363,7 +347,6 @@ msgstr ""
 
 #. translators: %s: Delete Records doc link
 #: classes/class-smart-manager-admin-welcome.php:362
-#, php-format
 msgid "You can simply select records you want to delete (check the header box if you want to delete all records) and click on the “Delete” icon. All the selected records will be deleted. You can even delete records by applying search filters. %s."
 msgstr ""
 
@@ -379,7 +362,6 @@ msgstr ""
 
 #. translators: %1$s: HTML for bulk edit %2$s: link to Smart Manager Pro product page
 #: classes/class-smart-manager-admin-welcome.php:374
-#, php-format
 msgid "Bulk Edit - %1$s (only in %2$s)"
 msgstr ""
 
@@ -395,7 +377,6 @@ msgstr ""
 
 #. translators: %s: Bulk Edit doc link
 #: classes/class-smart-manager-admin-welcome.php:386
-#, php-format
 msgid "You can change / update multiple fields of the entire store OR for selected items by selecting multiple records and then click on Bulk Edit. %s."
 msgstr ""
 
@@ -405,13 +386,11 @@ msgstr ""
 
 #. translators: %s: Export CSV doc link
 #: classes/class-smart-manager-admin-welcome.php:397
-#, php-format
 msgid "Export CSV (only in %s)"
 msgstr ""
 
 #. translators: %s: HTML of Export CSV
 #: classes/class-smart-manager-admin-welcome.php:408
-#, php-format
 msgid "You can export all the records OR filtered records (%s) by simply clicking on the Export CSV button at the bottom right of the grid."
 msgstr ""
 
@@ -433,7 +412,6 @@ msgstr ""
 
 #. translators: %s: Changelog doc link
 #: classes/class-smart-manager-admin-welcome.php:440
-#, php-format
 msgid "Make sure you are using %s of Smart Manager. If still the issue persist, temporarily de-activate all plugins except WooCommerce/WPeCommerce & Smart Manager. Re-check the issue, if the issue still persists, contact us. If the issue goes away, re-activate other plugins one-by-one & re-checking the fields, to find out which plugin is conflicting."
 msgstr ""
 
@@ -472,7 +450,6 @@ msgstr ""
 
 #. translators: %s: Show and Hide doc link
 #: classes/class-smart-manager-admin-welcome.php:459
-#, php-format
 msgid "To show / hide columns in the Smart Manager, %s."
 msgstr ""
 
@@ -494,7 +471,6 @@ msgstr ""
 
 #. translators: %s: contact us link
 #: classes/class-smart-manager-admin-welcome.php:474
-#, php-format
 msgid "Smart Manager is actively developed. If you can't find your favorite feature (or have a suggestion) %s. We'd love to hear from you."
 msgstr ""
 
@@ -512,7 +488,6 @@ msgstr ""
 
 #. translators: %s: Lite version to a Pro version doc link
 #: classes/class-smart-manager-admin-welcome.php:482
-#, php-format
 msgid "Follow steps listed here: %s"
 msgstr ""
 
@@ -532,31 +507,26 @@ msgstr ""
 
 #. translators: %1$s: time saved in minutes/hours, %2$s: Pro upgrade link, %3$s: additional savings possible
 #: classes/class-smart-manager-base.php:2229
-#, php-format
 msgid "You saved <strong>%1$s</strong>! Upgrade to %2$s to save more <strong>%3$s</strong> and unlock undo."
 msgstr ""
 
 #. translators: %1$d: number of updated record %2$s: record update message
 #: classes/class-smart-manager-base.php:2252
-#, php-format
 msgid "%1$d record%2$s updated successfully!"
 msgstr ""
 
 #. translators: %1$d: number of updated record %2$s: record update message
 #: classes/class-smart-manager-base.php:2259
-#, php-format
 msgid "%1$d record%2$s updated successfully! %3$s"
 msgstr ""
 
 #. translators: %1$d: number of updated record %2$s: record update message
 #: classes/class-smart-manager-base.php:2306
-#, php-format
 msgid "%1$d record%2$s deleted successfully!"
 msgstr ""
 
 #. translators: %1$s: exports schedule success message
 #: classes/class-smart-manager-base.php:3371
-#, php-format
 msgctxt "success notification"
 msgid "Export scheduled successfully. Check all your scheduled export actions <a target='_blank' href='%s'>here</a>."
 msgstr ""
@@ -726,7 +696,6 @@ msgstr ""
 
 #. translators: %1$s: order note %2$s: author name %2$s: order note added date
 #: classes/class-smart-manager-shop-order.php:526
-#, php-format
 msgctxt "order note"
 msgid "Note:  %1$s (Added by  %2$s on  %3$s)"
 msgstr ""
@@ -879,7 +848,6 @@ msgstr ""
 
 #. translators: 1. Error title 2. The bulk process
 #: common-core/classes/class-sa-manager-background-updater.php:511
-#, php-format
 msgid "%1$s: The %2$s process has stopped. Please review the dashboard to check the status."
 msgstr ""
 
@@ -890,13 +858,11 @@ msgstr ""
 
 #. translators: %s: process name
 #: common-core/classes/class-sa-manager-background-updater.php:521
-#, php-format
 msgid "%s"
 msgstr ""
 
 #. translators: %s: admin email
 #: common-core/classes/class-sa-manager-background-updater.php:523
-#, php-format
 msgid "running in the background. You'll be notified at %s when it's done."
 msgstr ""
 
@@ -922,7 +888,6 @@ msgstr ""
 
 #. translators: %s: process name
 #: common-core/classes/class-sa-manager-background-updater.php:551
-#, php-format
 msgid "Are you sure you want to stop the %s process? Click OK to stop."
 msgstr ""
 
@@ -953,7 +918,6 @@ msgstr ""
 #. translators: %s: process name
 #: common-core/classes/class-sa-manager-background-updater.php:972
 #: pro/classes/class-smart-manager-pro-background-updater.php:136
-#, php-format
 msgctxt "batch handler time exceed status"
 msgid "Time is exceeded for %s"
 msgstr ""
@@ -961,7 +925,6 @@ msgstr ""
 #. translators: %s: process name
 #: common-core/classes/class-sa-manager-background-updater.php:976
 #: pro/classes/class-smart-manager-pro-background-updater.php:140
-#, php-format
 msgctxt "batch handler memory exceed status"
 msgid "Memory is exceeded for %s"
 msgstr ""
@@ -1013,21 +976,18 @@ msgstr ""
 
 #. translators: %1$1s: site title %2$2s: background process parameter name
 #: common-core/classes/class-sa-manager-base.php:910
-#, php-format
 msgctxt "background process title"
 msgid "[%1$1s] %2$2s process completed!"
 msgstr ""
 
 #. translators: 1: Method name, 2: Class name.
 #: common-core/classes/class-sa-manager-controller.php:241
-#, php-format
 msgctxt "Ajax request handler background progress"
 msgid "Method %1$s is not callable in class %2$s"
 msgstr ""
 
 #. Translators: %1$s is the method name, %2$s is the class name.
 #: common-core/classes/class-sa-manager-controller.php:266
-#, php-format
 msgctxt "Error message for non-callable method in Ajax request handler"
 msgid "Method %1$s is not callable in class %2$s."
 msgstr ""
@@ -1211,32 +1171,37 @@ msgctxt "featured column name"
 msgid "Featured"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-access-privilege.php:205
+#: pro/classes/class-smart-manager-pro-access-privilege.php:39
+msgctxt "Security error message"
+msgid "You do not have permission to update access privilege settings."
+msgstr ""
+
+#: pro/classes/class-smart-manager-pro-access-privilege.php:225
 msgctxt "select group title"
 msgid "Default"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-access-privilege.php:209
+#: pro/classes/class-smart-manager-pro-access-privilege.php:229
 msgctxt "select group title"
 msgid "WooCommerce"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-access-privilege.php:217
+#: pro/classes/class-smart-manager-pro-access-privilege.php:237
 msgctxt "select group title"
 msgid "Other"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-access-privilege.php:275
+#: pro/classes/class-smart-manager-pro-access-privilege.php:295
 msgctxt "select group title"
 msgid "All Post Types"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-access-privilege.php:285
+#: pro/classes/class-smart-manager-pro-access-privilege.php:305
 msgctxt "select group title"
 msgid "All Taxonomies"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-access-privilege.php:301
+#: pro/classes/class-smart-manager-pro-access-privilege.php:321
 msgctxt "select group title"
 msgid "All saved views"
 msgstr ""
@@ -1287,7 +1252,6 @@ msgstr ""
 
 #. translators: %s: URL to contact page
 #: pro/classes/class-smart-manager-pro-ai-connector.php:256
-#, php-format
 msgctxt "AI Connector Error"
 msgid "Authentication failed or something went wrong while processing the AI response. Please reconnect your StoreApps account and try again, or contact us from <a href=\"%s\" target=\"_blank\">here</a>."
 msgstr ""
@@ -1314,7 +1278,6 @@ msgstr ""
 
 #. translators: %s: URL to contact page
 #: pro/classes/class-smart-manager-pro-ai-connector.php:451
-#, php-format
 msgctxt "ai provider settings validation message"
 msgid "You need to connect StoreApps account to access AI feature, please contact us from <a href=\"%s\" target=\"_blank\">here</a>."
 msgstr ""
@@ -1405,7 +1368,6 @@ msgstr ""
 
 #. translators: %1$s: dashboard title
 #: pro/classes/class-smart-manager-pro-base.php:228
-#, php-format
 msgid "Allow search engines to show this %1$s in search results?"
 msgstr ""
 
@@ -1425,7 +1387,6 @@ msgstr ""
 
 #. translators: %1$s: dashboard title
 #: pro/classes/class-smart-manager-pro-base.php:239
-#, php-format
 msgid "Should search engines follow links on this %1$s?"
 msgstr ""
 
@@ -1484,14 +1445,12 @@ msgstr ""
 
 #. translators: %s: Directory path
 #: pro/classes/class-smart-manager-pro-base.php:1779
-#, php-format
 msgctxt "export file data"
 msgid "Export CSV: unable to create directory %s"
 msgstr ""
 
 #. translators: %s: File path
 #: pro/classes/class-smart-manager-pro-base.php:1788
-#, php-format
 msgctxt "process scheduled export file data"
 msgid "Export CSV: unable to write file to %s"
 msgstr ""
@@ -1503,7 +1462,6 @@ msgstr ""
 
 #. translators: %s: File path
 #: pro/classes/class-smart-manager-pro-base.php:1806
-#, php-format
 msgctxt "process scheduled export file data"
 msgid "Export CSV: failed to insert attachment for file %s"
 msgstr ""
@@ -1515,7 +1473,6 @@ msgstr ""
 
 #. translators: 1: Site title, 2: Date
 #: pro/classes/class-smart-manager-pro-base.php:1821
-#, php-format
 msgctxt "Email subject for scheduled export"
 msgid "Your Scheduled Orders Export from %1$s on %2$s Is Ready"
 msgstr ""
@@ -1530,31 +1487,30 @@ msgctxt "background process message"
 msgid "You can continue working. The CSV will automatically download when the process is complete. A download link will also be sent to your email."
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-batch-export.php:344
+#: pro/classes/class-smart-manager-pro-batch-export.php:349
 msgid "Invalid download link."
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-batch-export.php:349
+#: pro/classes/class-smart-manager-pro-batch-export.php:354
 msgid "Invalid export file."
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-batch-export.php:355
+#: pro/classes/class-smart-manager-pro-batch-export.php:360
 msgid "File not found."
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-batch-export.php:381
+#: pro/classes/class-smart-manager-pro-batch-export.php:386
 msgctxt "batch export error"
 msgid "Batch Export: Failed to get attachment URL."
 msgstr ""
 
 #. translators: %s: site name
-#: pro/classes/class-smart-manager-pro-batch-export.php:397
-#, php-format
+#: pro/classes/class-smart-manager-pro-batch-export.php:402
 msgid "Your CSV Export from %s is Ready"
 msgstr ""
 
-#: pro/classes/class-smart-manager-pro-batch-export.php:549
-#: pro/classes/class-smart-manager-pro-batch-export.php:560
+#: pro/classes/class-smart-manager-pro-batch-export.php:554
+#: pro/classes/class-smart-manager-pro-batch-export.php:565
 msgid "File not found"
 msgstr ""
 
@@ -1710,70 +1666,60 @@ msgstr ""
 
 #. translators: %s: list of item names
 #: pro/classes/class-smart-manager-pro-shop-order.php:860
-#, php-format
 msgctxt "order note"
 msgid "Added line items: %s by Smart Manager"
 msgstr ""
 
 #. translators: 1: item name, 2: stock adjustment from -> to
 #: pro/classes/class-smart-manager-pro-shop-order.php:884
-#, php-format
 msgctxt "order note"
 msgid "Deleted \"%1$s\" and adjusted stock (%2$s) by Smart Manager"
 msgstr ""
 
 #. translators: %s: item name
 #: pro/classes/class-smart-manager-pro-shop-order.php:884
-#, php-format
 msgctxt "order note"
 msgid "Deleted \"%s\" by Smart Manager"
 msgstr ""
 
 #. translators: %s: Coupon name
 #: pro/classes/class-smart-manager-pro-shop-order.php:982
-#, php-format
 msgctxt "order note"
 msgid "Coupon applied: \"%s\", by Smart Manager"
 msgstr ""
 
 #. translators: %s: Coupon name
 #: pro/classes/class-smart-manager-pro-shop-order.php:982
-#, php-format
 msgctxt "order note"
 msgid "Coupon removed: \"%s\", by Smart Manager"
 msgstr ""
 
 #. translators: %s: shipping method
 #: pro/classes/class-smart-manager-pro-shop-order.php:1067
-#, php-format
 msgctxt "order note"
 msgid "Shipping method: %s"
 msgstr ""
 
 #. translators: %s: fee name
 #: pro/classes/class-smart-manager-pro-shop-order.php:1085
-#, php-format
 msgctxt "order note"
 msgid "Fee: %s"
 msgstr ""
 
 #. translators: %1$s: list of item names %2$d: from order id
 #: pro/classes/class-smart-manager-pro-shop-order.php:1110
-#, php-format
 msgctxt "order note"
 msgid "Copied items: %1$s from order #%2$d, by Smart Manager"
 msgstr ""
 
 #. translators: 1: product name, 2: quantity
 #: pro/classes/class-smart-manager-pro-shop-order.php:1142
-#, php-format
 msgctxt "order note"
 msgid "%1$s (×%2$d)"
 msgstr ""
 
 #. translators: %s: list of updated line item names
 #: pro/classes/class-smart-manager-pro-shop-subscription.php:480
-#, php-format
 msgctxt "order note"
 msgid "Updated line items price: %s by Smart Manager."
 msgstr ""
@@ -1995,7 +1941,6 @@ msgstr ""
 
 #. translators: %s process name
 #: pro/common-pro/classes/class-sa-manager-pro-base.php:831
-#, php-format
 msgctxt "update status"
 msgid "%s failed"
 msgstr ""
@@ -2325,14 +2270,12 @@ msgstr ""
 
 #. translators: %s: user display name
 #: pro/templates/emails/batch-export.php:79
-#, php-format
 msgctxt "batch export email content"
 msgid "Hi %s,"
 msgstr ""
 
 #. translators: 1: record count, 2: dashboard name, 3: site name
 #: pro/templates/emails/batch-export.php:84
-#, php-format
 msgctxt "batch export email message"
 msgid "Your CSV export of <strong>%1$s %2$s</strong> from <strong>%3$s</strong> has been completed and is ready for download."
 msgstr ""
@@ -2359,7 +2302,6 @@ msgstr ""
 
 #. translators: %s: contact us link
 #: pro/templates/emails/batch-export.php:99
-#, php-format
 msgctxt "batch export email content"
 msgid "If you have any questions or need help, feel free to reach out to our <a href=\"%s\">support team</a>."
 msgstr ""
@@ -2396,7 +2338,6 @@ msgstr ""
 
 #. translators: %d: records count
 #: pro/templates/emails/bulk-edit.php:8
-#, php-format
 msgctxt "user name in bulk edit email content"
 msgid "Prices Updated for Existing %d Subscriptions"
 msgstr ""
@@ -2419,7 +2360,6 @@ msgstr ""
 
 #. translators: %s: user display name
 #: pro/templates/emails/bulk-edit.php:40
-#, php-format
 msgctxt "user name in bulk edit email content"
 msgid "Hi %s,"
 msgstr ""
@@ -2431,7 +2371,6 @@ msgstr ""
 
 #. translators: %d: number of existing subscriptions updated
 #: pro/templates/emails/bulk-edit.php:45
-#, php-format
 msgctxt "subscription update notice"
 msgid "Smart Manager has successfully updated prices for <strong>%d existing subscriptions</strong> based on your recent bulk edit action."
 msgstr ""
@@ -2493,21 +2432,18 @@ msgstr ""
 
 #. translators: %s: date
 #: pro/templates/emails/scheduled-export.php:13
-#, php-format
 msgctxt "Email heading for scheduled export"
 msgid "Orders Export for %s"
 msgstr ""
 
 #. translators: %s: user display name
 #: pro/templates/emails/scheduled-export.php:62
-#, php-format
 msgctxt "scheduled export email content"
 msgid "Hi %s,"
 msgstr ""
 
 #. translators: 1: Site title, 2: Date
 #: pro/templates/emails/scheduled-export.php:64
-#, php-format
 msgctxt "scheduled export email message"
 msgid "Smart Manager has successfully completed your scheduled orders export for <strong>%1$s</strong>  on <strong>%2$s</strong>."
 msgstr ""
@@ -2524,7 +2460,6 @@ msgstr ""
 
 #. translators: %s: contact us link
 #: pro/templates/emails/scheduled-export.php:72
-#, php-format
 msgctxt "scheduled export email content"
 msgid "If you have any questions or need help, feel free to reach out to our <a href=\"%s\">support team</a>."
 msgstr ""
@@ -2605,7 +2540,6 @@ msgstr ""
 
 #. translators: %d: records count
 #: templates/emails/sync-wsm-stock-log-data.php:8
-#, php-format
 msgctxt "email heading"
 msgid "Stock Log Synchronization Completed for %d Records"
 msgstr ""
@@ -2617,7 +2551,6 @@ msgstr ""
 
 #. translators: %s: user display name
 #: templates/emails/sync-wsm-stock-log-data.php:40
-#, php-format
 msgctxt "user name in email content"
 msgid "Hi %s,"
 msgstr ""
@@ -2632,7 +2565,6 @@ msgstr ""
 #: assets/js/admin.js:1
 #: src/views/AdvancedSearchDialog.js:124
 #: src/views/AdvancedSearchDialog.js:470
-#, js-format
 msgctxt "notification"
 msgid "Saved Searches available (Only in %s)"
 msgstr ""
@@ -2654,7 +2586,7 @@ msgstr ""
 #: assets/js/smart-manager.js:2772
 #: assets/js/smart-manager.js:2869
 #: assets/js/smart-manager.js:2884
-#: assets/js/smart-manager.js:5499
+#: assets/js/smart-manager.js:5517
 #: pro/assets/js/smart-manager.js:1177
 #: src/views/AdvancedSearchDialog.js:241
 msgctxt "modal title"
@@ -2907,7 +2839,6 @@ msgstr ""
 #: assets/js/smart-manager.js:3030
 #: assets/js/smart-manager.js:3475
 #: src/views/SettingsDialog.js:78
-#, js-format
 msgctxt "modal content"
 msgid "This feature is available only in the %s version"
 msgstr ""
@@ -3065,109 +2996,109 @@ msgid "Track product changes outside Smart Manager"
 msgstr ""
 
 #: assets/js/admin.js:1
-#: src/views/SettingsDialog.js:417
+#: src/views/SettingsDialog.js:418
 msgctxt "section title"
 msgid "Privilege Settings"
 msgstr ""
 
 #: assets/js/admin.js:1
-#: src/views/SettingsDialog.js:422
+#: src/views/SettingsDialog.js:423
 msgctxt "setting label"
 msgid "Access Privilege Settings"
 msgstr ""
 
 #: assets/js/admin.js:1
-#: src/views/SettingsDialog.js:428
+#: src/views/SettingsDialog.js:429
 msgctxt "button"
 msgid "Open"
 msgstr ""
 
 #: assets/js/admin.js:1
-#: src/views/SettingsDialog.js:455
+#: src/views/SettingsDialog.js:456
 msgctxt "section title"
 msgid "Interface & Layout"
 msgstr ""
 
 #: assets/js/admin.js:1
-#: src/views/SettingsDialog.js:475
+#: src/views/SettingsDialog.js:476
 msgctxt "section title"
 msgid "Input Fields"
 msgstr ""
 
 #: assets/js/admin.js:1
-#: src/views/SettingsDialog.js:495
+#: src/views/SettingsDialog.js:496
 msgctxt "section title"
 msgid "Smart Manager Controls"
 msgstr ""
 
 #: assets/js/admin.js:1
-#: src/views/SettingsDialog.js:517
+#: src/views/SettingsDialog.js:518
 msgctxt "section title"
 msgid "Record & Data Handling"
 msgstr ""
 
 #: assets/js/admin.js:1
-#: src/views/SettingsDialog.js:537
+#: src/views/SettingsDialog.js:538
 msgctxt "section title"
 msgid "Branding"
 msgstr ""
 
 #: assets/js/admin.js:1
-#: src/views/SettingsDialog.js:557
+#: src/views/SettingsDialog.js:558
 msgctxt "section title"
 msgid "AI Integration"
 msgstr ""
 
 #: assets/js/admin.js:1
-#: src/views/SettingsDialog.js:570
+#: src/views/SettingsDialog.js:571
 msgctxt "section title"
 msgid "Data Synchronization"
 msgstr ""
 
 #: assets/js/admin.js:1
-#: src/views/SettingsDialog.js:659
+#: src/views/SettingsDialog.js:660
 msgctxt "delete button for image type settings"
 msgid "Remove image"
 msgstr ""
 
 #: assets/js/admin.js:1
-#: src/views/SettingsDialog.js:686
+#: src/views/SettingsDialog.js:687
 msgctxt "setting label"
 msgid "Sync stock log data from"
 msgstr ""
 
 #: assets/js/admin.js:1
-#: src/views/SettingsDialog.js:686
+#: src/views/SettingsDialog.js:687
 msgctxt "plugin name"
 msgid "Stock Manager for WooCommerce"
 msgstr ""
 
 #: assets/js/admin.js:1
-#: src/views/SettingsDialog.js:698
+#: src/views/SettingsDialog.js:699
 msgctxt "button"
 msgid "Sync"
 msgstr ""
 
 #: assets/js/admin.js:1
-#: src/views/SettingsDialog.js:725
+#: src/views/SettingsDialog.js:726
 msgctxt "side panel - modal title"
 msgid "Settings"
 msgstr ""
 
 #: assets/js/admin.js:1
-#: src/views/SettingsDialog.js:746
+#: src/views/SettingsDialog.js:747
 msgctxt "settings button"
 msgid "Reset to Default"
 msgstr ""
 
 #: assets/js/admin.js:1
-#: src/views/SettingsDialog.js:752
+#: src/views/SettingsDialog.js:753
 msgctxt "settings button"
 msgid "Cancel"
 msgstr ""
 
 #: assets/js/admin.js:1
-#: src/views/SettingsDialog.js:768
+#: src/views/SettingsDialog.js:769
 msgctxt "settings button"
 msgid "Save"
 msgstr ""
@@ -4047,7 +3978,6 @@ msgid "Stock management will be enabled"
 msgstr ""
 
 #: assets/js/smart-manager-product.js:1067
-#, js-format
 msgctxt "stock notice"
 msgid "WooCommerce requires <span class='font-semibold'>'Manage Stock'</span> to be enabled to track stock quantity. Smart Manager will set <span class='font-semibold'>'Manage Stock'</span> to <span class='font-semibold'>'Yes'</span> for %d <span class='font-semibold'>edited</span> %s."
 msgstr ""
@@ -4118,7 +4048,6 @@ msgstr ""
 #. translators: %1$s: dashboard display name %2$s: success message %3$s: pricing page link
 #: assets/js/smart-manager.js:310
 #: assets/js/smart-manager.js:2388
-#, js-format
 msgctxt "modal content"
 msgid "For managing %1$s, %2$s %3$s version"
 msgstr ""
@@ -4250,14 +4179,12 @@ msgstr ""
 
 #. translators: %s is the search type (Simple or Advanced)
 #: assets/js/smart-manager.js:1062
-#, js-format
 msgctxt "tooltip"
 msgid "Switch to %s"
 msgstr ""
 
 #. translators: %s is the search type (Simple or Advanced)
 #: assets/js/smart-manager.js:1064
-#, js-format
 msgctxt "search type"
 msgid "%s Search"
 msgstr ""
@@ -4289,7 +4216,6 @@ msgstr ""
 
 #. translators: 1: number of filters, 2: pluralized 's' for filters
 #: assets/js/smart-manager.js:1187
-#, js-format
 msgctxt "tooltip"
 msgid "%1$d filter%2$s applied - Click to edit"
 msgstr ""
@@ -4329,7 +4255,6 @@ msgstr ""
 
 #. translators: %s: dashboard display name
 #: assets/js/smart-manager.js:1421
-#, js-format
 msgctxt "bottom bar status"
 msgid "No %s Found"
 msgstr ""
@@ -4457,14 +4382,12 @@ msgstr ""
 
 #. translators: %s: dashboard display name
 #: assets/js/smart-manager.js:2710
-#, js-format
 msgctxt "modal title"
 msgid "New %s"
 msgstr ""
 
 #. translators: %s: dashboard display name
 #: assets/js/smart-manager.js:2716
-#, js-format
 msgctxt "modal content"
 msgid "Choose how many %s you want to add to the table"
 msgstr ""
@@ -4483,7 +4406,6 @@ msgstr ""
 #. translators: %s: pricing page link
 #: assets/js/smart-manager.js:2760
 #: assets/js/smart-manager.js:2787
-#, js-format
 msgctxt "notification"
 msgid "Custom Views available (Only in %s)"
 msgstr ""
@@ -4540,7 +4462,6 @@ msgstr ""
 
 #. translators: %s is a link to documentation on how to use bulk edit
 #: assets/js/smart-manager.js:2920
-#, js-format
 msgctxt "modal description"
 msgid "You can change/update multiple fields of the entire store OR for selected items using the Bulk Edit feature. Refer to this doc on %s or watch the video below."
 msgstr ""
@@ -4564,7 +4485,6 @@ msgstr ""
 
 #. translators: %s is a link to the Pro version
 #: assets/js/smart-manager.js:2924
-#, js-format
 msgctxt "modal title"
 msgid "(Only in %s)"
 msgstr ""
@@ -4581,7 +4501,6 @@ msgstr ""
 
 #. translators: %s is the Pro version name
 #: assets/js/smart-manager.js:2933
-#, js-format
 msgctxt "notification"
 msgid "Duplicate Records (Only in %s)"
 msgstr ""
@@ -4614,7 +4533,7 @@ msgid "Are you sure?"
 msgstr ""
 
 #: assets/js/smart-manager.js:3492
-#: assets/js/smart-manager.js:5504
+#: assets/js/smart-manager.js:5522
 #: common-core/assets/js/core-base.js:378
 msgctxt "button"
 msgid "Yes"
@@ -4622,7 +4541,7 @@ msgstr ""
 
 #: assets/js/smart-manager.js:3508
 #: assets/js/smart-manager.js:4916
-#: assets/js/smart-manager.js:5521
+#: assets/js/smart-manager.js:5539
 #: common-core/assets/js/core-base.js:391
 msgctxt "button"
 msgid "No"
@@ -4722,7 +4641,6 @@ msgstr ""
 #. translators: %s is the dashboard name (e.g., Product, Order, etc.)
 #: assets/js/smart-manager.js:4788
 #: assets/js/smart-manager.js:5032
-#, js-format
 msgctxt "button"
 msgid "New %s"
 msgstr ""
@@ -4776,13 +4694,11 @@ msgid "Yes, Discard"
 msgstr ""
 
 #: assets/js/smart-manager.js:4937
-#, js-format
 msgctxt "modal content"
 msgid "Are you sure you want to delete the custom view \"%s\"? This action cannot be undone."
 msgstr ""
 
 #: assets/js/smart-manager.js:4943
-#, js-format
 msgctxt "modal content"
 msgid "<strong>Note:</strong> This is a public view, created by another user (%s), deleting it will remove it for everyone who uses it."
 msgstr ""
@@ -4800,7 +4716,6 @@ msgstr ""
 
 #. translators: %s is the custom view name
 #: assets/js/smart-manager.js:4958
-#, js-format
 msgctxt "notification"
 msgid "Custom view \"%s\" deleted successfully!"
 msgstr ""
@@ -4920,7 +4835,6 @@ msgstr ""
 
 #. translators: %s is a link to the Pro version
 #: assets/js/smart-manager.js:5385
-#, js-format
 msgctxt "notification"
 msgid "Please upgrade to %s to use this feature."
 msgstr ""
@@ -4930,72 +4844,77 @@ msgctxt "progressbar modal title"
 msgid "Export CSV"
 msgstr ""
 
-#: assets/js/smart-manager.js:5501
+#: assets/js/smart-manager.js:5476
+msgctxt "notification"
+msgid "CSV Exported Successfully!"
+msgstr ""
+
+#: assets/js/smart-manager.js:5519
 msgctxt "modal content"
 msgid "You have unsaved changes. Are you sure you want to continue?"
 msgstr ""
 
-#: assets/js/smart-manager.js:5603
+#: assets/js/smart-manager.js:5621
 msgctxt "modal title"
 msgid "Sync Stock Log Data"
 msgstr ""
 
-#: assets/js/smart-manager.js:5611
+#: assets/js/smart-manager.js:5629
 msgctxt "modal content"
 msgid "Are you sure you want to sync stock log data from"
 msgstr ""
 
-#: assets/js/smart-manager.js:5613
+#: assets/js/smart-manager.js:5631
 msgctxt "modal content"
 msgid "into Smart Manager?"
 msgstr ""
 
-#: assets/js/smart-manager.js:5618
+#: assets/js/smart-manager.js:5636
 msgctxt "section heading"
 msgid "Please Note:"
 msgstr ""
 
-#: assets/js/smart-manager.js:5621
+#: assets/js/smart-manager.js:5639
 msgctxt "modal content"
 msgid "Synced records will <strong class=\"text-sm-base-foreground\">not support the Undo feature</strong>."
 msgstr ""
 
-#: assets/js/smart-manager.js:5624
+#: assets/js/smart-manager.js:5642
 msgctxt "modal content"
 msgid "Some field data (such as author and previous values) may be missing because this information was not captured by the Stock Manager for WooCommerce plugin."
 msgstr ""
 
-#: assets/js/smart-manager.js:5633
+#: assets/js/smart-manager.js:5651
 msgctxt "button text"
 msgid "Sync Now"
 msgstr ""
 
-#: assets/js/smart-manager.js:5634
+#: assets/js/smart-manager.js:5652
 msgctxt "button text"
 msgid "Cancel"
 msgstr ""
 
-#: assets/js/smart-manager.js:5644
+#: assets/js/smart-manager.js:5662
 msgctxt "progressbar modal title"
 msgid "Stock Log Synchronization"
 msgstr ""
 
-#: assets/js/smart-manager.js:5702
+#: assets/js/smart-manager.js:5720
 msgctxt "modal content"
 msgid "this record"
 msgstr ""
 
-#: assets/js/smart-manager.js:5789
+#: assets/js/smart-manager.js:5807
 msgctxt "quick column manager title"
 msgid "Manage columns"
 msgstr ""
 
-#: assets/js/smart-manager.js:5796
+#: assets/js/smart-manager.js:5814
 msgctxt "button"
 msgid "Open Column Manager"
 msgstr ""
 
-#: assets/js/smart-manager.js:5847
+#: assets/js/smart-manager.js:5865
 msgctxt "tooltip"
 msgid "Edit column name"
 msgstr ""
@@ -5260,7 +5179,6 @@ msgstr ""
 
 #. translators: %s: Task process content
 #: common-core/assets/js/core-base.js:540
-#, js-format
 msgctxt "process title"
 msgid "Edited %s"
 msgstr ""
@@ -5277,7 +5195,6 @@ msgstr ""
 
 #. translators: %s: Undo modal description
 #: common-core/assets/js/core-base.js:554
-#, js-format
 msgctxt "modal description"
 msgid "Name the task for easier reference and future actions, especially for %s option. A pre-filled title has been suggested based on your changes."
 msgstr ""
@@ -5559,7 +5476,6 @@ msgstr ""
 
 #. translators: %s: dashboard display name
 #: pro/assets/js/smart-manager.js:911
-#, js-format
 msgctxt "placeholder"
 msgid "Select %s"
 msgstr ""
@@ -5723,14 +5639,12 @@ msgstr ""
 
 #. translators: %s is the task ID number
 #: pro/assets/js/smart-manager.js:1743
-#, js-format
 msgctxt "undo single task"
 msgid "Task #%s"
 msgstr ""
 
 #. translators: %s is the task ID number
 #: pro/assets/js/smart-manager.js:1755
-#, js-format
 msgctxt "delete single task"
 msgid "Task #%s"
 msgstr ""

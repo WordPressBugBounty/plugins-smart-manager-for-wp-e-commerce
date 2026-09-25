@@ -7,7 +7,7 @@ Tags: bulk-edit, prices, inventory, products, woocommerce
 Requires at least: 5.0
 Tested up to: 7.1
 Requires PHP: 7.0
-Stable tag: 8.97.0
+Stable tag: 8.98.0
 License: GPLv2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -382,6 +382,13 @@ Please report security bugs found in the source code of the Smart Manager plugin
 ---
 
 == Changelog ==
+
+= 8.98.0 (25.09.2026) =
+* New: WordPress 7.1.2 compatible
+* New: WooCommerce 11.1.2 compatible
+* Fix: CSV export file failing to download automatically when exporting more than 50 records (Pro)
+* Fix: Privilege escalation vulnerability via SQL Injection in Access Privilege Settings [Thanks to Wordfence team] (Pro)
+* Update: POT file
 
 = 8.97.0 (17.09.2026) =
 * New: WooCommerce 11.1.0 compatible
@@ -951,6 +958,9 @@ Please report security bugs found in the source code of the Smart Manager plugin
 [See changelog for all versions](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 8.98.0 =
+WordPress 7.1.2 compatible, WooCommerce 11.1.2 compatible, Fixes related to CSV export file failing to download automatically when exporting more than 50 records (Pro), Privilege escalation vulnerability via SQL Injection in Access Privilege Settings [Thanks to Wordfence team] (Pro). Recommended upgrade.
 
 = 8.97.0 =
 WooCommerce 11.1.0 compatible, Fixes related to 'Product Suggestions' and 'Edit Link' modals not appearing when adding or updating links in the Text Editor modal for Rich Text fields such as 'Description' and 'Additional Description' in Smart Manager grid, PHP 8.5 deprecated warnings for optional parameters declared before required parameters, CSV Export success message showing 0 records exported when exporting all records using the 'Export CSV' button in Smart Manager header (Pro), Post field changes (e.g. title, description, etc.) not reflecting on the frontend on some setups (Pro), Updates related to UI/UX improvements to help enable missing columns in Column Manager, Automatically handle 'Manage Stock' when editing 'Stock' values via Inline Edit with warning prompts to prevent stock changes from not taking effect, Automatically handle 'Manage Stock' when editing 'Stock' values via Bulk Edit with warning prompts to prevent stock changes from not taking effect (Pro), UI/UX improvements in the grid. Recommended upgrade.

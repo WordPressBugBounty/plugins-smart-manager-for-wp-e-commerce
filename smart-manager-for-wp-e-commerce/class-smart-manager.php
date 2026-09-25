@@ -161,6 +161,30 @@ class Smart_Manager {
 		}
 	}
 
+	/**
+	 * Get installation status flags for mapped plugins.
+	 *
+	 * @param array $plugin_info Installed plugin data, typically from get_plugins().
+	 * @return array Plugin installation status flags.
+	 */
+	public function get_plugin_installation_flags( $plugin_info = array() ) {
+		$plugin_map = array(
+			'bvm' => 'wc-bulk-variations-manager/wc-bulk-variations-manager.php',
+			'so'  => 'smart-offers/smart-offers.php',
+		);
+
+		if ( ( empty( $plugin_info ) ) || ( ! is_array( $plugin_info ) ) ) {
+			return array_fill_keys( array_keys( $plugin_map ), false );
+		}
+
+		$flags = array_fill_keys( array_keys( $plugin_map ), false );
+
+		foreach ( $plugin_map as $flag_key => $plugin_path ) {
+			$flags[ $flag_key ] = isset( $plugin_info[ $plugin_path ] );
+		}
+		return $flags;
+	}
+
 	public function define_constants() {
 		$plugin = plugin_basename( SM_PLUGIN_FILE );
 		$msg = str_word_count("Upgrade In Progress");
@@ -226,6 +250,17 @@ class Smart_Manager {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 		$plugin_info = get_plugins();
+		$plugin_flags = ( is_callable( array( $this, 'get_plugin_installation_flags' ) ) ) ? $this->get_plugin_installation_flags( $plugin_info ) : false;
+		if ( ! empty( $plugin_flags ) && is_array( $plugin_flags ) ) {
+			foreach ( array(
+				'IS_BVM_INSTALLED' => ! empty( $plugin_flags['bvm'] ),
+				'IS_SO_INSTALLED'  => ! empty( $plugin_flags['so'] ),
+			) as $constant_name => $is_installed ) {
+				if ( ! defined( $constant_name ) ) {
+					define( $constant_name, $is_installed );
+				}
+			}
+		}
 		$this->plugin_info = $plugin_info [SM_PLUGIN_BASE_NM];
 		$this->updater = rand(3,3);
 		$this->dupdater = rand(25,25);
@@ -2565,6 +2600,10 @@ class Smart_Manager {
 	 * @return bool True if notice can be displayed, false otherwise.
 	 */
 	public static function is_show_power_bundle_banner_notice() {
+		//Both BVM and SO should not be installed.
+		if ( ( defined( 'IS_BVM_INSTALLED' ) && true === IS_BVM_INSTALLED ) || ( defined( 'IS_SO_INSTALLED' ) && true === IS_SO_INSTALLED ) ) {
+			return;
+		}
 		return ( ( defined( 'SMPRO' ) && true === SMPRO )
 			? ( ! get_option( 'sa_sm_hide_power_bundle_banner_notice', false ) )
 			: ( floor( ( current_time( 'timestamp' ) - strtotime( get_option( '_sm_update_897_date', current_time( 'mysql' ) ) ) ) / 86400 ) < 3 )
@@ -2577,7 +2616,7 @@ class Smart_Manager {
 	 * @return void
 	 */
 	public static function display_power_bundle_banner_notice() {
-		if ( ! is_callable( array( __CLASS__, 'is_show_power_bundle_banner_notice' ) ) || ! self::is_show_power_bundle_banner_notice() ) {
+		if ( ( ! is_callable( array( __CLASS__, 'is_show_power_bundle_banner_notice' ) ) )  || ( empty( self::is_show_power_bundle_banner_notice() ) ) ) {
 			return;
 		}
 
