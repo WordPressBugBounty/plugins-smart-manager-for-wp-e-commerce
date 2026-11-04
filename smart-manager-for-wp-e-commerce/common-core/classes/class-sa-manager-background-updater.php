@@ -4,7 +4,7 @@
  *
  * @package common-core/
  * @since       8.77.0
- * @version     8.97.0
+ * @version     8.99.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -32,6 +32,14 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 		 * @var string
 		 */
 		const CORE_WP_CRON_SCHEDULE = 'every_5_seconds';
+
+		/**
+		 * Consecutive batches that may fail to finish before the process is stopped.
+		 * Enough for a batch of the maximum size to be halved down to a single record.
+		 *
+		 * @var int
+		 */
+		const MAX_INTERRUPTED_BATCHES = 5;
 
 		/**
 		 * Current action name.
@@ -111,6 +119,20 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 		public static $batch_handler_hook = 'storeapps_batch_handler';
 
 		/**
+		 * Whether the hooks of this class have been registered.
+		 *
+		 * @var bool
+		 */
+		protected static $hooks_registered = false;
+
+		/**
+		 * Value of the lock held by this worker. Static, as the base and child updater objects of a request share the lock.
+		 *
+		 * @var string
+		 */
+		protected static $batch_lock_value = '';
+
+		/**
 		 * Retrieves the identifier for the current operation.
 		 *
 		 * This method returns the identifier associated with the current operation or task.
@@ -167,8 +189,15 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 				$this->plugin_data = ( ! empty( $batch_params['plugin_data'] ) ) ? $batch_params['plugin_data'] : array();
 			}
 			$this->action = self::$action_name;
+			// Child classes call this constructor too. Registering again would run every batch action twice.
+			if ( self::$hooks_registered ) {
+				return;
+			}
+			self::$hooks_registered = true;
 			add_action( 'storeapps_batch_handler', array( $this, 'storeapps_batch_handler' ) );
 			add_action( 'action_scheduler_failed_action', array( $this, 'restart_failed_action' ) );
+			add_action( 'action_scheduler_failed_execution', array( $this, 'restart_failed_action' ) );
+			add_action( 'action_scheduler_unexpected_shutdown', array( $this, 'restart_failed_action' ) );
 			add_action( 'admin_head', array( $this, 'background_heartbeat' ) );
 			add_filter('cron_schedules', array($this, 'cron_schedules'), 1000); // phpcs:ignore
 			add_filter('action_scheduler_run_schedule', array($this, 'modify_action_scheduler_run_schedule'), 1000); // phpcs:ignore
@@ -194,8 +223,8 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 		 * Stop all scheduled actions by this plugin
 		 */
 		public function stop_scheduled_actions() {
-			if ( function_exists( 'as_unschedule_action' ) ) {
-				as_unschedule_action( self::$batch_handler_hook );
+			if ( function_exists( 'as_unschedule_all_actions' ) ) {
+				as_unschedule_all_actions( self::$batch_handler_hook );
 			}
 			$this->clean_scheduled_action_data( true );
 		}
@@ -225,8 +254,12 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 			delete_option( $this->identifier . '_initial_process' );
 			delete_option( $this->identifier . '_last_batch_size' );
 			delete_option( $this->identifier . '_last_batch_duration' );
+			delete_option( $this->identifier . '_batch_in_progress' );
+			delete_option( $this->identifier . '_batch_interrupted_count' );
 			delete_option( $this->identifier . '_subscription_product_ids' );
 			if ( ! empty( $abort ) ) {
+				// Removing the lock also tells a worker that is still running to stop after its current batch.
+				delete_option( $this->identifier . '_lock' );
 				delete_option( $this->identifier . '_ids' );
 				delete_option( $this->identifier . '_params' );
 				delete_option( $this->identifier . '_is_background' );
@@ -304,14 +337,122 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 		 * @param  array $action_id id of failed action.
 		 */
 		public function restart_failed_action( $action_id = array() ) {
-			if ( ! class_exists( 'ActionScheduler' ) || ! is_callable( array( 'ActionScheduler', 'store' ) ) || ! function_exists( 'as_schedule_single_action' ) || empty( $action_id ) ) {
+			if ( ! class_exists( 'ActionScheduler' ) || ! is_callable( array( 'ActionScheduler', 'store' ) ) || ! function_exists( 'as_schedule_single_action' ) || empty( $action_id ) || ( ! $this->is_process_running() ) ) {
 				return;
 			}
 			$action      = ActionScheduler::store()->fetch_action( $action_id );
 			$action_hook = $action->get_hook();
 			if ( self::$batch_handler_hook === $action_hook ) {
-				as_schedule_single_action( time() + MINUTE_IN_SECONDS, self::$batch_handler_hook );
+				$this->schedule_next_batch( MINUTE_IN_SECONDS );
 			}
+		}
+
+		/**
+		 * Schedules the next batch, unless one is already waiting to run.
+		 *
+		 * @param int $delay Seconds to wait before running the batch.
+		 * @return void
+		 */
+		protected function schedule_next_batch( $delay = 0 ) {
+			if ( ( ! function_exists( 'as_schedule_single_action' ) ) || ( ! function_exists( 'as_get_scheduled_actions' ) ) || ( ! class_exists( 'ActionScheduler_Store' ) ) ) {
+				return;
+			}
+			$pending_actions = as_get_scheduled_actions(
+				array(
+					'hook'     => self::$batch_handler_hook,
+					'status'   => ActionScheduler_Store::STATUS_PENDING,
+					'per_page' => 1,
+				),
+				'ids'
+			);
+			if ( ! empty( $pending_actions ) ) {
+				return;
+			}
+			as_schedule_single_action( time() + absint( $delay ), self::$batch_handler_hook );
+		}
+
+		/**
+		 * Takes the lock that allows only one worker to process batches at a time.
+		 * A lock left behind by a worker that was killed expires after the lock duration.
+		 *
+		 * @return bool True if the lock was taken, false if another worker holds it.
+		 */
+		protected function acquire_batch_lock() {
+			global $wpdb;
+			$lock_key     = $this->identifier . '_lock';
+			$current_lock = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $lock_key ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			if ( ! empty( $current_lock ) ) {
+				$lock_duration = absint( apply_filters( $this->identifier . '_batch_lock_duration', 10 * MINUTE_IN_SECONDS ) );
+				if ( ( time() - absint( $current_lock ) ) < $lock_duration ) {
+					return false;
+				}
+				$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name = %s AND option_value = %s", $lock_key, $current_lock ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			}
+			self::$batch_lock_value = time() . '-' . uniqid();
+			return ( ! empty( $wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->options} ( option_name, option_value, autoload ) VALUES ( %s, %s, 'off' )", $lock_key, self::$batch_lock_value ) ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		}
+
+		/**
+		 * Extends the lock between batches.
+		 *
+		 * @return bool False if the lock is gone, meaning the process was stopped or another worker took over.
+		 */
+		protected function refresh_batch_lock() {
+			global $wpdb;
+			$new_lock_value = time() . '-' . uniqid();
+			$is_refreshed   = $wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND option_value = %s", $new_lock_value, $this->identifier . '_lock', self::$batch_lock_value ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			if ( empty( $is_refreshed ) ) {
+				return false;
+			}
+			self::$batch_lock_value = $new_lock_value;
+			return true;
+		}
+
+		/**
+		 * Releases the lock if this worker still holds it.
+		 *
+		 * @return void
+		 */
+		protected function release_batch_lock() {
+			global $wpdb;
+			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name = %s AND option_value = %s", $this->identifier . '_lock', self::$batch_lock_value ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		}
+
+		/**
+		 * Recovers when the previous worker died during a batch: PHP errors, or the web server killing the request.
+		 * The batch is retried at half the size. The process stops if batches keep dying, instead of retrying forever.
+		 *
+		 * @return bool True to continue processing, false if the process has been stopped.
+		 */
+		protected function handle_interrupted_batch() {
+			$interrupted_batch_size = absint( get_option( $this->identifier . '_batch_in_progress', 0 ) );
+			if ( empty( $interrupted_batch_size ) ) {
+				return true;
+			}
+			delete_option( $this->identifier . '_batch_in_progress' );
+			delete_option( $this->identifier . '_last_batch_duration' );
+			$interrupted_count = absint( get_option( $this->identifier . '_batch_interrupted_count', 0 ) ) + 1;
+			if ( $interrupted_count < self::MAX_INTERRUPTED_BATCHES ) {
+				update_option( $this->identifier . '_batch_interrupted_count', $interrupted_count, 'no' );
+				update_option( $this->identifier . '_last_batch_size', max( 1, intdiv( $interrupted_batch_size, 2 ) ), 'no' );
+				if ( is_callable( 'sa_manager_log' ) ) {
+					/* translators: %d: number of records in the batch */
+					sa_manager_log( 'error', sprintf( _x( 'Batch of %d records did not finish and will be retried with a smaller size. The PHP error log may be empty if the web server ended the request.', 'batch handler interrupted status', 'smart-manager-for-wp-e-commerce' ), $interrupted_batch_size ) );
+				}
+				return true;
+			}
+			if ( is_callable( 'sa_manager_log' ) ) {
+				/* translators: %d: number of consecutive batches that did not finish */
+				sa_manager_log( 'error', sprintf( _x( 'Background process stopped: %d batches in a row did not finish. Check the PHP and web server error logs.', 'batch handler interrupted status', 'smart-manager-for-wp-e-commerce' ), $interrupted_count ) );
+			}
+			if ( function_exists( 'as_unschedule_all_actions' ) ) {
+				as_unschedule_all_actions( self::$batch_handler_hook );
+			}
+			// Leaves the process params in place, so that the admin notice reports that the process has stopped.
+			delete_option( $this->identifier . '_ids' );
+			delete_option( $this->identifier . '_initial_process' );
+			delete_option( $this->identifier . '_batch_interrupted_count' );
+			return false;
 		}
 
 		/**
@@ -354,7 +495,9 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 			update_option( $this->identifier . '_start_time', time(), 'no' );
 			update_option( $this->identifier . '_current_time', time(), 'no' );
 			update_option( $this->identifier . '_initial_process', 1, 'no' );
-			as_unschedule_action( self::$batch_handler_hook );
+			if ( function_exists( 'as_unschedule_all_actions' ) ) {
+				as_unschedule_all_actions( self::$batch_handler_hook );
+			}
 			if ( is_callable( array( $this, 'storeapps_batch_handler' ) ) ) {
 				$this->storeapps_batch_handler();
 			}
@@ -369,11 +512,16 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 		public function storeapps_batch_handler() {
 			$batch_params = get_option( $this->identifier . '_params', array() );
 			$update_ids   = get_option( $this->identifier . '_ids', array() );
-			if ( is_callable( 'sa_manager_log' ) ) {
-				sa_manager_log( 'info', _x( 'Batch handler params ', 'batch handler params', 'smart-manager-for-wp-e-commerce' ) . wp_json_encode( $batch_params ) );
-				sa_manager_log( 'info', _x( 'Batch handler update ids ', 'batch handler update ids', 'smart-manager-for-wp-e-commerce' ) . wp_json_encode( $update_ids ) );
-			}
 			if ( empty( $batch_params ) || empty( $update_ids ) || ( ! is_array( $batch_params ) ) || ( ! is_array( $update_ids ) ) || empty( $batch_params['process_name'] ) || empty( $batch_params['process_key'] ) ) {
+				return;
+			}
+			// Only a summary is logged: on large stores the full ID list is many MB per log entry.
+			if ( is_callable( 'sa_manager_log' ) ) {
+				/* translators: 1: process key 2: number of records remaining */
+				sa_manager_log( 'info', sprintf( _x( 'Batch handler: %1$s, %2$d records remaining', 'batch handler status', 'smart-manager-for-wp-e-commerce' ), $batch_params['process_key'], count( $update_ids ) ) );
+			}
+			if ( ! $this->acquire_batch_lock() ) {
+				$this->schedule_next_batch( MINUTE_IN_SECONDS );
 				return;
 			}
 			$start_time = get_option( $this->identifier . '_start_time', false );
@@ -391,11 +539,18 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 				'batch_params'           => $batch_params,
 				'identifier'             => $this->identifier,
 			);
-			if ( ! in_array( $batch_params['process_key'], $excluded_process_names, true ) ) {
-				$this->batch_process( $params );
-				return;
+			try {
+				if ( ! $this->handle_interrupted_batch() ) {
+					return;
+				}
+				if ( ! in_array( $batch_params['process_key'], $excluded_process_names, true ) ) {
+					$this->batch_process( $params );
+					return;
+				}
+				do_action( 'sa_handle_batch_process', $params );
+			} finally {
+				$this->release_batch_lock();
 			}
-			do_action( 'sa_handle_batch_process', $params );
 		}
 
 		/**
@@ -561,6 +716,7 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 							dataType: 'json',
 							data: requestData,
 							success: function(response) {
+								window.smart_manager?.posthog?.trackEvent?.('<?php echo ( ! empty( $batch_params['process_key'] ) ) ? $batch_params['process_key'] : 'batch_update_process' ?>:stopped', {source: 'admin notice'});
 								location.reload();
 							}
 						});
@@ -590,17 +746,18 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 			$batch_params           = $params['batch_params'];
 			
 			$batch_complete         = false;
-			// Get a slice of n records from $remaining_ids.
-			$batch_size = $this->get_dynamic_batch_size();
-			if ( empty( $batch_size ) ) {
-				return;
-			}
 			// Process the current batch of IDs.
 			while ( ( is_array( $remaining_ids ) ) && ( 0 !== $update_remaining_count ) ) {
+				// Get a slice of n records from $remaining_ids.
+				$batch_size = $this->get_dynamic_batch_size();
+				if ( empty( $batch_size ) ) {
+					return;
+				}
 				$batch_ids_to_process = ( ! empty( $remaining_ids ) ) ? array_slice( $remaining_ids, 0, $batch_size ) : array();
 				if ( empty( $batch_ids_to_process ) || ( ! is_array( $batch_ids_to_process ) ) ) {
 					break;
 				}
+				update_option( $this->identifier . '_batch_in_progress', count( $batch_ids_to_process ), 'no' );
 				$batch_start_time = microtime( true );
 				self::task(
 					array(
@@ -612,7 +769,13 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 						),
 					)
 				);
-				update_option( $this->identifier . '_last_batch_duration', round( microtime( true ) - $batch_start_time, 3 ) );
+				// The process was stopped, or another worker took over, during this batch. Its state is no longer this worker's to save.
+				if ( ! $this->refresh_batch_lock() ) {
+					break;
+				}
+				update_option( $this->identifier . '_last_batch_duration', round( microtime( true ) - $batch_start_time, 3 ), 'no' );
+				delete_option( $this->identifier . '_batch_in_progress' );
+				delete_option( $this->identifier . '_batch_interrupted_count' );
 				update_option( $this->identifier . '_current_time', time(), 'no' );
 				$batch_complete = $this->sa_batch_process_log( $params );
 				// Check if we've processed all records.
@@ -633,13 +796,12 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 					// Action hook after all records processed in batch.
 					do_action( 'sa_manager_after_background_process_complete', $this->identifier, $batch_params );
 					break;
-				} elseif ( ! empty( $batch_complete ) ) { // Code for continuing the batch.
-					update_option( $this->identifier . '_remaining', $update_remaining_count, 'no' );
-					update_option( $this->identifier . '_ids', $remaining_ids, 'no' ); // remaining ids to update.
-					// Schedule the next batch.
-					if ( function_exists( 'as_schedule_single_action' ) ) {
-						as_schedule_single_action( time(), self::$batch_handler_hook );
-					}
+				}
+				// Saved after every batch, so a worker that dies does not repeat the batches it already finished.
+				update_option( $this->identifier . '_remaining', $update_remaining_count, 'no' );
+				update_option( $this->identifier . '_ids', $remaining_ids, 'no' ); // remaining ids to update.
+				if ( ! empty( $batch_complete ) ) { // Code for continuing the batch.
+					$this->schedule_next_batch();
 					break;
 				}
 			}
@@ -658,7 +820,7 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 		 */
 		public static function task( $params = array() ) {
 			if ( is_callable( 'sa_manager_log' ) ) {
-				sa_manager_log('info', _x('Background process task params ', 'background process task params', 'smart-manager-for-wp-e-commerce') . print_r($params, true)); // phpcs:ignore
+				sa_manager_log( 'info', _x( 'Background process task ids ', 'background process task params', 'smart-manager-for-wp-e-commerce' ) . wp_json_encode( ( ! empty( $params['args']['selected_ids'] ) ) ? $params['args']['selected_ids'] : array() ) );
 			}
 			if ( ( empty( $params['callback'] ) || empty( $params['args'] ) ) || ( empty( $params['args']['batch_params']['plugin_data'] ) || ( ! is_array( $params['args']['batch_params']['plugin_data'] ) ) ) ) {
 				return false;
@@ -860,12 +1022,21 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 										window.location.href = export_csv_download_url;
 										window[pluginKey].export_csv_download_url = false;
 									}
+									if (process == 'export_csv') {
+										window.smart_manager?.posthog?.trackEvent?.('export_csv:completed', window[pluginKey]?._exportCsvParams || {
+											export_type: window[pluginKey]?.isFilteredData?.() ? 'filtered' : 'all',
+											row_count: (typeof totalRecords !== 'undefined' && totalRecords) ? totalRecords : 0
+										});
+									}
 									if (isBackground) {
 										jQuery('#sa_background_process_progress').fadeOut();
 										jQuery('#sa_background_process_complete').fadeIn();
 										setTimeout(function() {
 											jQuery('#sa_background_process_complete').fadeOut();
 										}, 10000);
+										window.smart_manager?.posthog?.trackEvent?.(`${(process || '').toLowerCase().trim().replace(/[\s-]+/g, '_')}:background_process_completed`, {
+											success: true
+										});
 									} else {
 										window[pluginKey].modal = {};
 										if (typeof(window[pluginKey].getDefaultRoute) !== "undefined" && typeof(window[pluginKey].getDefaultRoute) === "function") {
@@ -889,7 +1060,10 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 												status: 'success',
 												message: _x(`${processName} ${_x('for', 'success message', 'smart-manager-for-wp-e-commerce')} ${noOfRecords} ${_x(`${noOfRecords == 1 ? 'record' : 'records'}`, 'success notification', 'smart-manager-for-wp-e-commerce')} ${_x(' completed successfully!', 'success message', 'smart-manager-for-wp-e-commerce')}`, 'success notification', 'smart-manager-for-wp-e-commerce')
 											}
-											if('Stock Log Synchronization' === process){
+											if ('Stock Log Synchronization' === process || 'import_wsm_stock_log' === process) {
+												window.smart_manager?.posthog?.trackEvent?.('wsm_stock_log_sync:completed', {
+													success: true
+												});
 												let stockLogUrl = "<?php echo esc_url( admin_url( 'admin.php?page=smart-manager&dashboard=product_stock_log' ) ); ?>";
 												window[pluginKey].notification.message = sprintf(
 													_x( 'Stock logs synced successfully. Go to the %1$s to view the entries.', 'Stock Log Synchronization success msg', 'smart-manager-for-wp-e-commerce' ),
@@ -899,6 +1073,12 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 											}
 											window[pluginKey].showNotification()
 											if (process == 'bulk_edit') { //code to refresh all the pages for BE
+												window.smart_manager?.posthog?.trackEvent?.('bulk_edit:completed', {
+													fields: window.smart_manager?._bulkEditFields || [],
+													rows_affected: (typeof recordsUpdated !== 'undefined' && recordsUpdated) ? recordsUpdated : ((typeof totalRecords !== 'undefined' && totalRecords) ? totalRecords : (window[pluginKey]?.selectedRows ? window[pluginKey].selectedRows.length : 0)),
+													post_type: window[pluginKey]?.dashboardKey || '',
+													success: true
+												});
 												let p = 1;
 												while (p <= window[pluginKey].page && ('undefined' !== typeof(window[pluginKey].getData))) {
 													window[pluginKey].getData({
@@ -931,6 +1111,29 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 												window[pluginKey].selectedRows = [];
 												window[pluginKey].selectAll = false;
 											} else {
+												if (process === 'undo') {
+													let undoParams = window.smart_manager?._undoTrackingParams || { dashboard_key: window.smart_manager?.dashboardKey || '', task_type: 'bulk', rows_affected: 0 };
+													window.smart_manager?.posthog?.trackEvent?.('task_history:undo_completed', {
+														dashboard_key: undoParams.dashboard_key,
+														task_type: undoParams.task_type,
+														success: true
+													});
+													if (window.smart_manager?.selectedAllTasks) {
+														window.smart_manager?.posthog?.trackEvent?.('task_history:undo_all', {
+															count: undoParams.rows_affected || 0,
+															success: true
+														});
+													}
+													delete window.smart_manager?._undoTrackingParams;
+												} else if (process === 'duplicate') {
+													window.smart_manager?.posthog?.trackEvent?.('duplicate_records:completed', {
+														dashboard_key: window.smart_manager?._duplicateTrackingParams?.dashboard_key || window.smart_manager?.dashboardKey || '',
+														count: window.smart_manager?._duplicateTrackingParams?.count ?? (typeof totalRecords !== 'undefined' ? totalRecords : (window[pluginKey]?.selectedRows?.length || 0)),
+														type: 'bulk',
+														success: true
+													});
+													delete window.smart_manager?._duplicateTrackingParams;
+												}
 												window[pluginKey].refresh();
 											}
 										}, 1000);
@@ -999,8 +1202,11 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 			// Default fallback and limits.
 			$initial_batch_size = 5;
 
-			// Retrieve last batch size and duration (stored in transient).
-			$last_batch_size = absint( get_option( $this->identifier . '_last_batch_size', 0 ) );
+			// Upper limit, as time and memory are only checked between batches.
+			$max_batch_size = max( $initial_batch_size, absint( apply_filters( $this->identifier . '_batch_max_size', 200 ) ) );
+
+			// Retrieve last batch size and duration (stored in transient). Limited before casting, as sizes saved by older versions can overflow an int.
+			$last_batch_size = absint( min( floatval( get_option( $this->identifier . '_last_batch_size', 0 ) ), $max_batch_size ) );
 			$last_duration   = floatval( get_option( $this->identifier . '_last_batch_duration', 0 ) );
 			$batch_size      = ( $last_batch_size > 0 ) ? $last_batch_size : $initial_batch_size;
 			if ( empty( $last_duration ) || ( $last_duration < 0 ) ) {
@@ -1009,21 +1215,24 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 			// Define safe execution time limit.
 			$safe_time = floatval( apply_filters( $this->identifier . '_batch_default_time_limit', 20 ) );
 
-			// Case 1: Batch finished very fast (<10% of time).
-			if ( ( $last_duration < ( $safe_time * 0.1 ) ) && ( ! $this->memory_exceeded() ) ) {
+			if ( $this->memory_exceeded() ) {
+				$batch_size = ceil( $batch_size / 2 );
+
+				// Case 1: Close to limits — decrease in proportion.
+			} elseif ( $last_duration >= $safe_time ) {
 				$batch_size = ceil( $batch_size * ( $safe_time / $last_duration ) );
 
-				// Case 2: Under safe threshold — slowly increase.
-			} elseif ( ( $last_duration < $safe_time ) && ( ! $this->memory_exceeded() ) ) {
-				$batch_size = absint( $batch_size + $initial_batch_size );
+				// Case 2: Batch finished very fast (<10% of time). One quick batch says little about the next, so only double.
+			} elseif ( $last_duration < ( $safe_time * 0.1 ) ) {
+				$batch_size = $batch_size * 2;
 
-				// Case 3: Close to limits — slowly decrease.
-			} elseif ( ( $last_duration >= $safe_time ) || ( $this->memory_exceeded() ) ) {
-				$batch_size = ceil( $batch_size * ( $safe_time / $last_duration ) );
+				// Case 3: Under safe threshold — slowly increase.
+			} else {
+				$batch_size = $batch_size + $initial_batch_size;
 			}
-			$batch_size = ( $initial_batch_size < $batch_size ) ? $batch_size : $initial_batch_size;
+			$batch_size = absint( max( $initial_batch_size, min( $batch_size, $max_batch_size ) ) );
 			// Save current batch size for reference in next run.
-			update_option( $this->identifier . '_last_batch_size', $batch_size );
+			update_option( $this->identifier . '_last_batch_size', $batch_size, 'no' );
 			return $batch_size;
 		}
 	}

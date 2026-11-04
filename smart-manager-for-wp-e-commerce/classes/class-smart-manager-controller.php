@@ -163,12 +163,17 @@ if ( ! class_exists( 'Smart_Manager_Controller' ) ) {
 			if ( defined( 'SMPRO' ) && SMPRO === true && file_exists( SM_PRO_URL . 'classes/class-smart-manager-pro-batch-export.php' ) ) {
 				include_once SM_PRO_URL . 'classes/class-smart-manager-pro-batch-export.php';
 			}
-			// Schedule batch export CSV cleanup (available in both lite and pro) - deletes files older than 7 days.
-			if ( function_exists( 'as_next_scheduled_action' ) && ! as_next_scheduled_action( 'sm_batch_export_csv_cleanup' ) && class_exists( 'Smart_Manager_Pro_Batch_Export' ) && is_callable( array( 'Smart_Manager_Pro_Batch_Export', 'schedule_batch_export_cleanup' ) ) ) {
+			// Schedule batch export CSV cleanup (available in both lite and pro) - deletes files older than 7 days. Unschedules it if skipped via 'sa_sm_skip_batch_export_cleanup' filter.
+			if ( function_exists( 'as_next_scheduled_action' ) && class_exists( 'Smart_Manager_Pro_Batch_Export' ) && is_callable( array( 'Smart_Manager_Pro_Batch_Export', 'schedule_batch_export_cleanup' ) ) ) {
 				Smart_Manager_Pro_Batch_Export::schedule_batch_export_cleanup();
 			}
+			// Unschedule scheduled exports cleanup if skipped via 'sa_sm_skip_scheduled_export_cleanup' filter.
+			$skip_scheduled_export_cleanup = (bool) apply_filters( 'sa_sm_skip_scheduled_export_cleanup', false );
+			if ( ( ! empty( $skip_scheduled_export_cleanup ) ) && ( function_exists( 'as_unschedule_all_actions' ) ) ) {
+				as_unschedule_all_actions( 'storeapps_smart_manager_scheduled_export_cleanup' );
+			}
 			// Code for scheduling action for deleting older tasks and export CSV file after x no. of days.
-			if ( defined('SMPRO') && SMPRO === true && function_exists( 'as_has_scheduled_action' ) && function_exists( 'as_next_scheduled_action' ) && ( ! as_has_scheduled_action( 'sm_schedule_tasks_cleanup' ) || ! as_next_scheduled_action( 'storeapps_smart_manager_scheduled_export_cleanup' ) ) && ( file_exists( SM_PRO_URL . 'classes/class-smart-manager-pro-base.php' ) ) && ( file_exists( $this->plugin_path . '/class-smart-manager-base.php' ) ) ) {
+			if ( defined('SMPRO') && SMPRO === true && function_exists( 'as_has_scheduled_action' ) && function_exists( 'as_next_scheduled_action' ) && ( ! as_has_scheduled_action( 'sm_schedule_tasks_cleanup' ) || ( ( empty( $skip_scheduled_export_cleanup ) ) && ( ! as_next_scheduled_action( 'storeapps_smart_manager_scheduled_export_cleanup' ) ) ) ) && ( file_exists( SM_PRO_URL . 'classes/class-smart-manager-pro-base.php' ) ) && ( file_exists( $this->plugin_path . '/class-smart-manager-base.php' ) ) ) {
 				include_once SM_PLUGIN_DIR_PATH . '/common-core/classes/class-sa-manager-base.php';
 				include_once SM_PLUGIN_DIR_PATH . '/pro/common-pro/classes/class-sa-manager-pro-base.php';
 				include_once $this->plugin_path . '/class-smart-manager-base.php';
@@ -177,7 +182,7 @@ if ( ! class_exists( 'Smart_Manager_Controller' ) ) {
 					include_once SM_PRO_URL . 'classes/class-smart-manager-pro-task.php';
 					( is_callable( array( 'Smart_Manager_Pro_Task', 'schedule_task_deletion' ) ) ) ? Smart_Manager_Pro_Task::schedule_task_deletion() : '';
 				}
-				if ( ! as_next_scheduled_action( 'storeapps_smart_manager_scheduled_export_cleanup' ) ) {
+				if ( ( empty( $skip_scheduled_export_cleanup ) ) && ( ! as_next_scheduled_action( 'storeapps_smart_manager_scheduled_export_cleanup' ) ) ) {
 					( is_callable( array( 'Smart_Manager_Pro_Base', 'schedule_scheduled_exports_cleanup' ) ) ) ? Smart_Manager_Pro_Base::schedule_scheduled_exports_cleanup() : '';
 				}
 			}

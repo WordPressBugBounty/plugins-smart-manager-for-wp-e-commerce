@@ -3415,7 +3415,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 
 			$col_model = (!empty($current_store_model['columns'])) ? $current_store_model['columns'] : array();
 			$col_model = apply_filters( 'sm_col_model_for_export', $col_model, $this->req_params );
-			$selected_ids = ( ! empty( $this->req_params['selected_ids'] ) && ! is_array( $this->req_params['selected_ids'] ) ) ? json_decode( stripslashes( $this->req_params['selected_ids'] ), true ) : $this->req_params['selected_ids'];
+			$selected_ids = ( ! empty( $this->req_params['selected_ids'] ) && ! is_array( $this->req_params['selected_ids'] ) ) ? json_decode( stripslashes( $this->req_params['selected_ids'] ), true ) : ( isset( $this->req_params['selected_ids'] ) ? $this->req_params['selected_ids'] : null );
 			// Check if batch export should be used:
 			$csv_columns = sa_sm_parse_csv_columns( $col_model );
 			//CSV file name.

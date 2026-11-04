@@ -340,6 +340,10 @@ if ( ! class_exists( 'Smart_Manager_Task' ) ) {
 			global $wpdb;
 			$params = ( ! empty( property_exists( 'Smart_Manager_Base', 'update_task_details_params' ) ) ) ? Smart_Manager_Base::$update_task_details_params : array();
 			sm_task_details_update( $params );
+			// Saved rows must not be saved again by the next batch of the same request.
+			if ( property_exists( 'Smart_Manager_Base', 'update_task_details_params' ) ) {
+				Smart_Manager_Base::$update_task_details_params = array();
+			}
 		}
 
 		/**

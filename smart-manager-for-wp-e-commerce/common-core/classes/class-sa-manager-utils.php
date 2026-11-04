@@ -4,7 +4,7 @@
  *
  * @package common-core/
  * @since       8.64.0
- * @version     8.76.0
+ * @version     8.99.0
  */
 
 if ( ! function_exists( 'sa_variable_parent_sync_price' ) ) {
@@ -15,17 +15,13 @@ if ( ! function_exists( 'sa_variable_parent_sync_price' ) ) {
 	 * @return void
 	 */
 	function sa_variable_parent_sync_price( $ids = array() ) {
-		if ( empty( $ids ) ) {
+		if ( empty( $ids ) || ( ! is_array( $ids ) ) || ( ! class_exists( 'WC_Product_Variable' ) ) || ( ! is_callable( array( 'WC_Product_Variable', 'sync' ) ) ) ) {
 			return;
 		}
-		foreach ( $ids as $id ) {
-			$parent_id = wp_get_post_parent_id( $id );
-			if ( $parent_id > 0 ) {
-				if ( class_exists( 'WC_Product_Variable' ) && is_callable( array( 'WC_Product_Variable', 'sync' ) ) ) {
-					WC_Product_Variable::sync( $parent_id );
-					delete_transient( 'wc_product_children_' . $parent_id ); // added in woo24.
-				}
-			}
+		// Each parent is synced once, however many of its variations were updated: a sync is slow on large stores.
+		foreach ( array_unique( array_filter( array_map( 'wp_get_post_parent_id', $ids ) ) ) as $parent_id ) {
+			WC_Product_Variable::sync( $parent_id );
+			delete_transient( 'wc_product_children_' . $parent_id ); // added in woo24.
 		}
 	}
 }

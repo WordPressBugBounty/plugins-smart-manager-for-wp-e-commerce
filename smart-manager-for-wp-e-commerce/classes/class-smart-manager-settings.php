@@ -4,14 +4,14 @@ if ( !defined( 'ABSPATH' ) ) exit;
 
 if ( ! class_exists( 'Smart_Manager_Settings' ) ) {
 	class Smart_Manager_Settings {
-        
+
         /**
 		 * Singleton class
 		 *
 		 * @var object
 		 */
         protected static $_instance = null;
-		
+
         /**
 		 * Database settings option name
 		 *
@@ -47,31 +47,36 @@ if ( ! class_exists( 'Smart_Manager_Settings' ) ) {
         }
 
         /**
-		 * Function to get default settings
-		 *
-		 * @return array Default settings array
-		 */
-        public static function get_defaults(){
-            $settings = array(
-                'general' => array(
-                    'toggle' => array(
-                        'wp_force_collapse_admin_menu'                  => 'yes',
-                        'use_number_field_for_numeric_cols'             => 'yes',
-                        'use_date_picker_for_date_or_datetime_cols'     => 'yes',
-                        'view_trash_records'                            => 'no',
-                        'show_manage_with_smart_manager_button'         => 'yes',
-                        'show_smart_manager_menu_in_admin_bar'          => 'yes'
+         * Function to get default settings.
+         *
+         * @return array Default settings array.
+         */
+        public static function get_defaults() {
+            static $settings = null;
+            if ( null === $settings ) {
+                $settings = array(
+                    'general' => array(
+                        'toggle'  => array(
+                            'wp_force_collapse_admin_menu'              => 'yes',
+                            'use_number_field_for_numeric_cols'         => 'yes',
+                            'use_date_picker_for_date_or_datetime_cols' => 'yes',
+                            'view_trash_records'                        => 'no',
+                            'show_manage_with_smart_manager_button'     => 'yes',
+                            'show_smart_manager_menu_in_admin_bar'      => 'yes',
+                            'analytics_consent'                         => 'no'
+                        ),
+                        'numeric' => array(
+                            'per_page_record_limit' => 50,
+                        ),
+                        'text'    => array(
+                            'grid_row_height' => 50,
+                        ),
                     ),
-                    'numeric' => array(
-                        'per_page_record_limit' => 50
-                    ),
-                    'text'  => array(
-                        'grid_row_height' => 50
-                    )
-                )
-            );
-            if ( ( ! empty( Smart_Manager::is_wsm_stock_log_import_required() ) ) && ( ! defined('SMPRO') || false === SMPRO ) ) {
-                $settings[ 'general' ][ 'icon' ] = array( 'sync_wsm_stock_log_data' => '' );
+                );
+                // Check the cheap constant first, so Pro never hits the DB.
+                if ( ( ! defined( 'SMPRO' ) || false === SMPRO ) && Smart_Manager::is_wsm_stock_log_import_required() ) {
+                    $settings['general']['icon'] = array( 'sync_wsm_stock_log_data' => '' );
+                }
             }
             return apply_filters( 'sm_settings_default', $settings );
         }
@@ -88,7 +93,7 @@ if ( ! class_exists( 'Smart_Manager_Settings' ) ) {
             if( empty( $defaults ) ){
                 return ( empty( $setting_nm ) ) ? array() : '';
             }
-            
+
             foreach( $defaults as $group => $settings ){
                 if( empty( $settings ) ){
                     continue;

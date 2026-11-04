@@ -179,7 +179,7 @@ if ( ! class_exists( 'Smart_Manager_Product' ) ) {
 					true
 				);
 			}
-			$is_stock_column_present = ( is_array( $column_model_transient ) && is_array( $column_model_transient['columns'] ) && ! empty( $column_model_transient['columns'] ) ) && array_key_exists( 'postmeta_meta_key__stock_meta_value__stock', $column_model_transient['columns'] );
+			$is_stock_column_present = ( is_array( $column_model_transient ) && ! empty( $column_model_transient['columns'] ) && is_array( $column_model_transient['columns'] ) ) && array_key_exists( 'postmeta_meta_key__stock_meta_value__stock', $column_model_transient['columns'] );
 			$required_cols = array('posts_post_title', 'posts_post_parent', 'postmeta_meta_key__product_attributes_meta_value__product_attributes');
 			if ( ! empty( $is_stock_column_present ) ) {
 				$required_cols[] = 'postmeta_meta_key__manage_stock_meta_value__manage_stock';
@@ -925,14 +925,15 @@ if ( ! class_exists( 'Smart_Manager_Product' ) ) {
 					if ( !empty($data['posts_post_parent']) ) {
 
 						$parent_key = sa_multidimesional_array_search($data['posts_post_parent'], 'posts_id', $data_model['items']);
+						$parent_data = ( null !== $parent_key && isset( $data_model['items'][ $parent_key ] ) ) ? $data_model['items'][ $parent_key ] : array();
 						$parent_title  = '';
 
 						// Code for the variation title on sorting
 						// if ( $this->prod_sort === true ) {
-							$parent_title = (!empty($data_model['items'][$parent_key]['posts_post_title'])) ? $data_model['items'][$parent_key]['posts_post_title'] : get_the_title($data['posts_post_parent']);
+							$parent_title = ( ! empty( $parent_data['posts_post_title'] ) ) ? $parent_data['posts_post_title'] : get_the_title( $data['posts_post_parent'] );
 							$parent_title .= ( !empty($parent_title) ) ? ' - ' : '';
 						// }
-						$parent_attributes = ( ! empty( $data_model['items'][$parent_key]['postmeta_meta_key__product_attributes_meta_value__product_attributes'] ) ) ? json_decode( $data_model['items'][$parent_key]['postmeta_meta_key__product_attributes_meta_value__product_attributes'], true ) : get_post_meta( $data['posts_post_parent'], '_product_attributes', true );
+						$parent_attributes = ( ! empty( $parent_data['postmeta_meta_key__product_attributes_meta_value__product_attributes'] ) ) ? json_decode( $parent_data['postmeta_meta_key__product_attributes_meta_value__product_attributes'], true ) : get_post_meta( $data['posts_post_parent'], '_product_attributes', true );
 
 						$data_model['items'][$key]['parent'] = $data['posts_post_parent'];
 						$data_model['items'][$key]['isLeaf'] = true;

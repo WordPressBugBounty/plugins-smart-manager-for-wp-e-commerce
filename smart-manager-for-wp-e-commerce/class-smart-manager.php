@@ -433,6 +433,10 @@ class Smart_Manager {
 			if( file_exists( (dirname( SM_PLUGIN_FILE )) . '/pro/classes/class-smart-manager-pro-background-updater.php') ) {
 				include_once 'pro/classes/class-smart-manager-pro-background-updater.php';
 			}
+			// Load batch export globally so the 'sm_batch_export_csv_cleanup' callback is registered in WP-Cron/Async/CLI contexts too.
+			if ( ( ! class_exists( 'Smart_Manager_Pro_Batch_Export' ) ) && ( file_exists( ( dirname( SM_PLUGIN_FILE ) ) . '/pro/classes/class-smart-manager-pro-batch-export.php' ) ) ) {
+				include_once 'pro/classes/class-smart-manager-pro-batch-export.php';
+			}
 			if( !class_exists( 'Smart_Manager_Pro_Access_Privilege' ) && file_exists( (dirname( SM_PLUGIN_FILE )) . '/pro/classes/class-smart-manager-pro-access-privilege.php' ) ) {
 				include_once 'pro/classes/class-smart-manager-pro-access-privilege.php';
 			}
@@ -537,6 +541,7 @@ class Smart_Manager {
 		});
 		add_action( 'wp_ajax_dismiss_admin_notice', array( $this, 'dismiss_admin_notice' ) );
 		add_action( 'wp_ajax_sm_book_call_remind_later', array( $this, 'handle_book_call_remind_later' ) );
+		add_action( 'wp_ajax_sa_sm_analytics_optin_action', array( $this, 'handle_analytics_optin_action' ) );
 		add_filter( 'sa_sm_manager_request_handler_allowed_dir_path', array( $this, 'request_handler_allowed_dir_path' ), 10 );
 		if ( ( defined('SMPRO') ) && ( SMPRO === true ) && ( class_exists( 'Smart_Manager_Settings' ) ) && ( is_callable( array( 'Smart_Manager_Settings', 'get' ) ) ) && ( 'yes' === Smart_Manager_Settings::get( 'track_external_product_changes' ) ) && ! class_exists( 'Smart_Manager_Pro_Product_Changes_Tracker' ) && file_exists( ( dirname( SM_PLUGIN_FILE ) ) . '/pro/classes/class-smart-manager-pro-product-changes-tracker.php' ) ) {
 			require_once 'pro/classes/class-smart-manager-pro-product-changes-tracker.php';
@@ -1000,10 +1005,13 @@ class Smart_Manager {
 			if( is_callable( array( $this, 'display_book_call_notice' ) ) ) {
 				self::display_book_call_notice();
 			}
-		}
-		// Display power bundle notice.
-		if ( ( ! empty( $_GET['page'] ) ) && ( ( ( ( 'smart-manager' === $_GET['page'] ) && ( ! empty( $_GET['landing-page'] ) && ( 'sm-about' === $_GET['landing-page'] ) ) ) ) || ( 'sm-storeapps-plugins' === $_GET['page'] ) ) && ( is_callable( array( $this, 'display_power_bundle_banner_notice' ) ) ) ) {
-			self::display_power_bundle_banner_notice();
+			if ( is_callable( array( $this, 'display_analytics_optin_notice' ) ) ) {
+				self::display_analytics_optin_notice();
+			}
+			// Display power bundle notice.
+			if ( ( ! empty( $_GET['page'] ) ) && ( ( ( ( 'smart-manager' === $_GET['page'] ) && ( ! empty( $_GET['landing-page'] ) && ( 'sm-about' === $_GET['landing-page'] ) ) ) ) || ( 'sm-storeapps-plugins' === $_GET['page'] ) ) && ( is_callable( array( $this, 'display_power_bundle_banner_notice' ) ) ) ) {
+				self::display_power_bundle_banner_notice();
+			}
 		}
 		if( !( !empty( $_GET['page'] ) && ( 'smart-manager' === $_GET['page'] ) ) ) {
 			return;
@@ -1318,7 +1326,7 @@ class Smart_Manager {
 				$file_nm = 'sm_custom_' . preg_replace( '/[\s\-.]/', '_', substr( $file, strrpos( $file, '/', -3 ) + 1 ) );
 				array_push( $registered_scripts, $file_nm );
 
-				if ( in_array( $file_nm, array( 'sm_custom_smart_manager_js', 'sm_custom_styles_js', 'sm_custom_admin_js', 'sm_custom_core_base_js' ), true ) ) {
+				if ( in_array( $file_nm, array( 'sm_custom_smart_manager_js', 'sm_custom_styles_js', 'sm_custom_admin_js', 'sm_custom_core_base_js', 'sm_custom_posthog_js' ), true ) ) {
 					continue;
 				}
 
@@ -1575,6 +1583,11 @@ class Smart_Manager {
 				wp_enqueue_media();
 				wp_enqueue_script( 'custom-header' );
 			}
+		}
+		
+		// Load PostHog only when the user has opted in to analytics.
+		if ( ( class_exists( 'Smart_Manager_Settings' ) ) && ( is_callable( array( 'Smart_Manager_Settings', 'get' ) ) ) && ( 'yes' === Smart_Manager_Settings::get( 'analytics_consent' ) ) ) {
+			wp_enqueue_script( 'sm_posthog_js', plugins_url( '/assets/js/posthog.js', SM_PLUGIN_FILE ), array( 'sm_custom_smart_manager_js' ), $this->version );
 		}
 
 		do_action('smart_manager_enqueue_scripts'); //action for hooking any scripts
@@ -1902,9 +1915,11 @@ class Smart_Manager {
 
 				<div id="sm_nav_bar"></div>
 				<?php 
-					if ( class_exists( 'SA_Manager_Background_Updater' ) && ( is_callable( array( 'SA_Manager_Background_Updater', 'instance' ) ) ) && is_callable( array( 'SA_Manager_Background_Updater', 'background_process_notice' ) ) ) {
+					if ( class_exists( 'SA_Manager_Background_Updater' ) && ( is_callable( array( 'SA_Manager_Background_Updater', 'instance' ) ) ) ) {
 						$background_updater_instance = SA_Manager_Background_Updater::instance();
-						$background_updater_instance->background_process_notice();
+						if ( is_callable( array( $background_updater_instance, 'background_process_notice' ) ) ) {
+							$background_updater_instance->background_process_notice();
+						}
 					}
 				?>
 		<?php
@@ -1925,6 +1940,9 @@ class Smart_Manager {
 			}
 			if( is_callable( array( $this, 'display_book_call_notice' ) ) ) {
 				self::display_book_call_notice();
+			}
+			if( is_callable( array( $this, 'display_analytics_optin_notice' ) ) ) {
+				self::display_analytics_optin_notice();
 			}
 			if( is_callable( array( $this, 'display_power_bundle_banner_notice' ) ) ) {
 				self::display_power_bundle_banner_notice();
@@ -2847,6 +2865,200 @@ class Smart_Manager {
 	}
 
 	/**
+	 * Display anonymous analytics opt-in notice on Smart Manager pages.
+	 *
+	 * Prompts users to enable 100% anonymous usage data collection.
+	 *
+	 * @return void
+	 */
+	public static function display_analytics_optin_notice() {
+		if ( ( ! current_user_can( 'manage_options' ) ) || ( get_option( 'sa_sm_hide_analytics_optin_notice', false ) ) ) {
+			return;
+		}
+
+		$remind_later_date = get_option( 'sa_sm_analytics_remind_later', false );
+		if ( ! empty( $remind_later_date ) ) {
+			if ( current_time( 'timestamp' ) < $remind_later_date ) {
+				return; // Still in snooze period.
+			}
+			delete_option( 'sa_sm_analytics_remind_later' );
+		}
+
+		if ( ( class_exists( 'Smart_Manager_Settings' ) ) && ( is_callable( array( 'Smart_Manager_Settings', 'get' ) ) ) && ( 'yes' === Smart_Manager_Settings::get( 'analytics_consent' ) ) ) {
+			return;
+		}
+
+		$notice_content = sprintf(
+			'<style>
+				.sm-analytics-notice-wrap, .sm-analytics-notice-actions, .sm-analytics-remind-option, .sm-analytics-remind-dropdown-wrap button {
+					display: flex !important;
+					align-items: center !important;
+				}
+				#sm-analytics-optin-enable {
+					margin-top: 0px !important;
+				}
+				.sm-analytics-notice-wrap {
+					flex-wrap: wrap;
+					gap: 1.5rem;
+					justify-content: space-between;
+					padding: 4px 0;
+				}
+				.sm-analytics-notice-text {
+					flex: 1;
+					font-size: 13px;
+					color: #2c3338;
+					line-height: 2;
+				}
+				.sm-analytics-notice-actions {
+					gap: 0.625rem;
+					flex-shrink: 0;
+				}
+				.sm-analytics-remind-dropdown-wrap {
+					position: relative;
+					display: inline-block;
+				}
+				.sm-analytics-remind-dropdown-wrap svg {
+					margin-left: 0.375rem;
+					margin-top: 0.125rem;
+				}
+				.sm-analytics-remind-dropdown {
+					display: none;
+					position: absolute;
+					top: 100%%;
+					right: 0;
+					background: #fff;
+					border: 0.0625rem solid #c3c4c7;
+					box-shadow: 0 0.0625rem 0.1875rem rgba(0,0,0,0.1);
+					min-width: max-content;
+					margin-top: 0.0625rem;
+					z-index: 100;
+				}
+				.sm-analytics-remind-dropdown-wrap:hover .sm-analytics-remind-dropdown {
+					display: block;
+				}
+				.sm-analytics-remind-option {
+					gap: 0.5625rem;
+					width: 100%%;
+					padding: 0.5rem 0.5rem 0.5rem 0.375rem;
+					text-align: left;
+					border: none;
+					background: none;
+					cursor: pointer;
+					font-size: 0.8125rem;
+					color: #2c3338;
+				}
+				.sm-analytics-remind-option:hover {
+					background: #f0f0f1;
+					color: #3858e9;
+				}
+				.sm-analytics-remind-option svg {
+					flex-shrink: 0;
+				}
+			</style>
+			<span class="sm-analytics-notice-wrap">
+				<span class="sm-analytics-notice-text">
+					<strong>📊 %s</strong> %s %s <a href="%s" target="_blank" rel="noopener noreferrer" style="text-decoration: underline; margin-left: 4px; font-weight: 500; color: #2271b1;">%s</a>
+				</span>
+				<span class="sm-analytics-notice-actions">
+					<button type="button" id="sm-analytics-optin-enable" class="button button-primary">%s</button>
+					<span class="sm-analytics-remind-dropdown-wrap">
+						<button type="button" class="button">%s <svg width="14" height="7" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M0.665039 0.664978L4.66504 4.66498L8.66504 0.664978" stroke="#3858e9" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"></path>
+						</svg></button>
+						<span class="sm-analytics-remind-dropdown">
+							<button type="button" class="sm-analytics-remind-option" data-choice="remind_later">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+								%s
+							</button>
+							<button type="button" class="sm-analytics-remind-option" data-choice="dismiss">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13.73 21a2 2 0 0 1-3.46 0"></path><path d="M18.63 13A17.89 17.89 0 0 1 18 8"></path><path d="M6.26 6.26A5.86 5.86 0 0 0 6 8c0 7-3 9-3 9h14"></path><path d="M18 8a6 6 0 0 0-9.33-5"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+								%s
+							</button>
+						</span>
+					</span>
+				</span>
+			</span>
+			<script type="text/javascript">
+				jQuery(document).ready(function($) {
+					function sendAnalyticsChoice(choice) {
+						$("#sm_analytics_optin_notice").fadeOut(200);
+						$.ajax({
+							url: ajaxurl,
+							type: "POST",
+							data: {
+								action: "sa_sm_analytics_optin_action",
+								choice: choice,
+								security: "%s"
+							}
+						});
+					}
+
+					$("#sm-analytics-optin-enable").on("click", function(e) {
+						e.preventDefault();
+						sendAnalyticsChoice("enable");
+					});
+
+					$(".sm-analytics-remind-option").on("click", function(e) {
+						e.preventDefault();
+						var choice = $(this).data("choice");
+						sendAnalyticsChoice(choice);
+					});
+				});
+			</script>',
+			esc_html__( 'Help us improve Smart Manager — 100% Anonymous: ', 'smart-manager-for-wp-e-commerce' ),
+			esc_html__( 'Share anonymous usage patterns (like UI features clicked and usage stats) to help us optimize your experience.', 'smart-manager-for-wp-e-commerce' ),
+			esc_html__( 'Sensitive data like store sales, customer details, and personal info is never shared.', 'smart-manager-for-wp-e-commerce' ),
+			esc_url( 'https://wordpress.org/plugins/smart-manager-for-wp-e-commerce/#:~:text=Privacy%20%26%20Usage%20Tracking' ),
+			esc_html__( 'See what gets shared →', 'smart-manager-for-wp-e-commerce' ),
+			esc_html__( 'Yes, I\'m In', 'smart-manager-for-wp-e-commerce' ),
+			esc_html__( 'Later', 'smart-manager-for-wp-e-commerce' ),
+			esc_html__( 'Remind me later', 'smart-manager-for-wp-e-commerce' ),
+			esc_html__( 'Never ask again', 'smart-manager-for-wp-e-commerce' ),
+			esc_js( wp_create_nonce( 'sa_sm_analytics_optin_nonce' ) )
+		);
+
+		self::add_admin_notice( 'analytics_optin', $notice_content, false, false );
+	}
+
+	/**
+	 * AJAX handler for analytics opt-in notice actions (enable/remind_later/dismiss).
+	 *
+	 * @return void
+	 */
+	public function handle_analytics_optin_action() {
+		check_ajax_referer( 'sa_sm_analytics_optin_nonce', 'security' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => 'Unauthorized' ) );
+		}
+
+		$choice = isset( $_POST['choice'] ) ? sanitize_text_field( wp_unslash( $_POST['choice'] ) ) : 'dismiss';
+
+		if ( 'enable' === $choice ) {
+			if ( class_exists( 'Smart_Manager_Settings' ) && is_callable( array( 'Smart_Manager_Settings', 'get' ) ) && is_callable( array( 'Smart_Manager_Settings', 'update' ) ) ) {
+				$settings = Smart_Manager_Settings::get();
+				if ( ! is_array( $settings ) ) {
+					$settings = array();
+				}
+				$settings['general']['toggle']['analytics_consent'] = 'yes';
+				Smart_Manager_Settings::update( $settings );
+			}
+			update_option( 'sa_sm_hide_analytics_optin_notice', true );
+			delete_option( 'sa_sm_analytics_remind_later' );
+			wp_send_json_success( array( 'choice' => 'enable' ) );
+		} else if ( 'remind_later' === $choice ) {
+			$remind_date = current_time( 'timestamp' ) + ( 30 * DAY_IN_SECONDS );
+			update_option( 'sa_sm_analytics_remind_later', $remind_date );
+			wp_send_json_success( array( 'choice' => 'remind_later' ) );
+		} else {
+			// Permanent dismiss.
+			update_option( 'sa_sm_hide_analytics_optin_notice', true );
+			delete_option( 'sa_sm_analytics_remind_later' );
+			wp_send_json_success( array( 'choice' => 'dismiss' ) );
+		}
+	}
+
+	/**
 	 * Remove/clear previous feature notices DB options when a new feature is announced.
 	 *
 	 * @param array $previous_feature_keys. Array of previous feature keys to dismiss.
@@ -2904,42 +3116,41 @@ class Smart_Manager {
 	}
 
 	/**
-	 * Check if stock log import from WSM is required
-	 * 
+	 * Check if stock log import from WSM is required.
+	 *
 	 * This function checks:
-	 * 1. If the stock_log table exists
-	 * 2. If the table has data
-	 * 3. If the import flag is already set
-	 * 
-	 * @return bool True if import is required, false otherwise
+	 * 1. If the stock_log table exists.
+	 * 2. If the table has data.
+	 *
+	 * The result is cached for the request, so the DB queries run only once.
+	 *
+	 * @param bool $refresh Optional. Pass true to ignore the cached result and re-check.
+	 * @return bool True if import is required, false otherwise.
 	 */
-	public static function is_wsm_stock_log_import_required() {
+	public static function is_wsm_stock_log_import_required( $refresh = false ) {
+		static $required = null;
+		if ( ! $refresh && null !== $required ) {
+			return $required;
+		}
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'stock_log';
-		
 		// Check if table exists.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$table_exists = $wpdb->get_var(
 			$wpdb->prepare(
 				'SHOW TABLES LIKE %s',
-				$table_name
+				$wpdb->esc_like( $table_name )
 			)
 		);
-		
 		if ( empty( $table_exists ) ) {
-			return false;
+			$required = false;
+			return $required;
 		}
-		
-		// Check if table has any data.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$row_count = $wpdb->get_var(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			"SELECT COUNT(*) FROM {$table_name}"
-		);
-		if ( empty( $row_count ) || 0 === (int) $row_count ) {
-			return false;
-		}
-		return true;
+		// Check if table has at least one row.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$has_rows = $wpdb->get_var( "SELECT 1 FROM {$table_name} LIMIT 1" );
+		$required = ! empty( $has_rows );
+		return $required;
 	}
 
 	/**

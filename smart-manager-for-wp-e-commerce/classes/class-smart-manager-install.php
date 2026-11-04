@@ -57,6 +57,9 @@ class Smart_Manager_Install {
 		),
 		'8.77.0' => array(
 			'update_877_alter_table'
+		),
+		'8.99.0' => array(
+			'update_899_alter_table'
 		)
 	);
 
@@ -472,17 +475,30 @@ class Smart_Manager_Install {
 	 * @return bool Void.
 	*/
 	public static function update_856_alter_table() {
+		self::update_899_alter_table();
+	}
+
+	/**
+	 * Update the 'sm_views' table to add the 'type' column if it does not exist.
+	 *
+	 * @return void
+	 */
+	public static function update_899_alter_table() {
 		global $wpdb;
+		$table_name = $wpdb->prefix . 'sm_views';
+		if ( false === self::check_table_exists( $table_name ) ) {
+			return;
+		}
+
 		// Check if the 'type' column already exists.
-		if ( false === ( self::check_table_column_exists( $wpdb->prefix . 'sm_views', 'type' ) ) ) {
+		if ( false === ( self::check_table_column_exists( $table_name, 'type' ) ) ) {
 			// Add the 'type' column as ENUM type with default value '0'.
-			$wpdb->query( $wpdb->prepare( "
-            	ALTER TABLE {$wpdb->prefix}sm_views
-            	ADD COLUMN `type` ENUM('0', '1', '2') DEFAULT %s
-            	COMMENT 'ENUM values: 0 - Custom View, 1 - Saved Search, 2 - Saved Bulk Edit'
-            	AFTER `post_type`", 
-            	'0'
-        	) );
+			$wpdb->query( "
+				ALTER TABLE {$table_name}
+				ADD COLUMN `type` ENUM('0', '1', '2') NOT NULL DEFAULT '0'
+				COMMENT 'ENUM values: 0 - Custom View, 1 - Saved Search, 2 - Saved Bulk Edit'
+				AFTER `post_type`"
+			);
 		}
 	}
 

@@ -757,6 +757,13 @@ jQuery(document).on('sm_dashboard_change', '#sm_editor_grid', function() {
 // Show variations toggle change handler
 .on('change', '#sm-toggle-variations', function () {
 	const isChecked = jQuery(this).is(':checked');
+
+	// Track dashboard:show_variations_toggled
+	window.smart_manager.posthog?.trackEvent?.( 'dashboard:show_variations_toggled', {
+		dashboard_key: window.smart_manager.dashboardKey,
+		state:         isChecked ? 'on' : 'off',
+	} );
+
 	// Update dashboard model for variations
 	if (window.smart_manager.currentDashboardModel && window.smart_manager.currentDashboardModel.tables && window.smart_manager.currentDashboardModel.tables.posts) {
 		if (isChecked) {
