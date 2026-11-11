@@ -1008,9 +1008,19 @@ class Smart_Manager {
 			if ( is_callable( array( $this, 'display_analytics_optin_notice' ) ) ) {
 				self::display_analytics_optin_notice();
 			}
-			// Display power bundle notice.
-			if ( ( ! empty( $_GET['page'] ) ) && ( ( ( ( 'smart-manager' === $_GET['page'] ) && ( ! empty( $_GET['landing-page'] ) && ( 'sm-about' === $_GET['landing-page'] ) ) ) ) || ( 'sm-storeapps-plugins' === $_GET['page'] ) ) && ( is_callable( array( $this, 'display_power_bundle_banner_notice' ) ) ) ) {
-				self::display_power_bundle_banner_notice();
+			// Display Lite upgrade banner below the page heading.
+			if ( is_callable( array( __CLASS__, 'sm_get_man_hours_html' ) ) ) {
+				$banner_html = self::sm_get_man_hours_html();
+				if ( ! empty( $banner_html ) ) {
+					echo $banner_html . '<script type="text/javascript">
+						jQuery(function($){
+							var $heading = $(".wrap h1, .about-wrap h1, .sm-welcome h1, h1").first();
+							if ($heading.length) {
+								$("#sm_man_hours_banner").insertAfter($heading);
+							}
+						});
+					</script>';
+				}
 			}
 		}
 		if( !( !empty( $_GET['page'] ) && ( 'smart-manager' === $_GET['page'] ) ) ) {
@@ -1022,146 +1032,21 @@ class Smart_Manager {
 		}
 	}
 
-	// Function to handle SM In App Promo
+	/**
+	 * Store Lite activation dates (used by the deactivation survey).
+	 *
+	 * @return void
+	 */
 	function add_promo_notices() {
-
-		if ( !empty($_GET['page']) && ( 'smart-manager' === $_GET['page'] ) ) {
-
-			$sm_dismiss_admin_notice = '';
-			$sm_promo_msg = '';
-
-			$sm_lite_activation_date = get_option( 'sm_lite_activation_date', false );
-			$timezone_format = _x('Y-m-d H:i:s', 'timezone date format');
-			$current_wp_date = date_i18n($timezone_format);
-
-			if ( $sm_lite_activation_date === false ) {
-				$sm_lite_activation_date = $current_wp_date;
-				add_option('sm_lite_activation_date',$sm_lite_activation_date);
-				add_option('_sm_update_418_date',$sm_lite_activation_date);
-				add_option('_sm_update_897_date',$sm_lite_activation_date);
-			} else {
-				$sm_lite_activation_date = get_option( '_sm_update_418_date', false );
-				if( false === $sm_lite_activation_date ) {
-					$sm_lite_activation_date = $current_wp_date;
-					add_option('_sm_update_418_date',$sm_lite_activation_date);
-				}
-				$sm_lite_897_date = get_option( '_sm_update_897_date', false );
-				if( false === $sm_lite_897_date ) {
-					$sm_lite_897_date = $current_wp_date;
-					add_option('_sm_update_897_date',$sm_lite_897_date);
-				}
-			}
-
-			if ( is_callable( array( __CLASS__, 'is_show_power_bundle_banner_notice' ) ) && ( ! empty( self::is_show_power_bundle_banner_notice() ) ) ) {
-				return;
-			}
-
-			$date_diff = floor(( strtotime($current_wp_date) - strtotime( $sm_lite_activation_date ) ) / (3600 * 24) );
-
-			$is_pro_available = $this->is_pro_available();
-
-			if ( 'smart-manager' === $_GET['page'] && $is_pro_available === false ) { 
-				if( ( defined('SA_OFFER_VISIBLE') && SA_OFFER_VISIBLE === true ) && ( 'yes' === get_option( 'sa_sm_offer_bfcm_2025', 'yes' ) ) ){
-					return;
-				}
-				$sm_inline_update_count = get_option( 'sm_inline_update_count', 0 );
-				$sm_current_user_display_name = self::sm_get_current_user_display_name();
-				if( ( empty( $sm_current_user_display_name ) ) ) return;
-
-				if( false !== get_option( 'sm_dismiss_admin_notice', false ) ) {
-					delete_option( 'sm_dismiss_admin_notice' );
-				}
-
-				echo '<style type="text/css">
-					.sm_design_notice {
-						display: none;
-						align-items: center;
-						background-color: #e0e7ff;
-						border: 1px solid #c7d2fe;
-						border-radius: 0.75rem;
-						padding-right: 1.5rem;
-						margin: 1rem auto;
-						max-width: 62rem;
-					}
-					.sm_design_notice .sm_trophy_icon {
-						flex-shrink: 0;
-						margin-top: 0.25rem;
-						width: 7rem;
-						height: 7rem;
-						display: flex;
-						align-items: center;
-						justify-content: center;
-					}
-					.sm_design_notice .sm_trophy_icon img {
-						width: 4rem;
-						height: 4rem;
-						object-fit: contain;
-					}
-					.sm_design_notice .sm_content {
-						flex: 1;
-					}
-					.sm_design_notice .sm_main_headline {
-						font-size: 1.25rem;
-						color: #1f2937;
-						margin: 0 0 0.25rem 0;
-					}
-					.sm_design_notice .sm_main_headline .sm_discount_highlight {
-						color: #4f46e5;
-						font-weight: 600;
-					}
-					.sm_design_notice .sm_sub_headline {
-						font-size: 1rem;
-						color: #6b7280;
-						margin: 0;
-					}
-					.sm_design_notice .sm_cta_container {
-						margin-left: 1.5rem;
-						flex-shrink: 0;
-					}
-					.sm_design_notice .sm_cta_btn {
-						display: inline-block;
-						background-color: #4f46e5;
-						color: #ffffff !important;
-						padding: 0.5rem 1rem;
-						border-radius: 0.5rem;
-						font-size: 0.875rem;
-						font-weight: 500;
-						text-decoration: none;
-						white-space: nowrap;
-					}
-					.sm_design_notice .sm_cta_btn:hover {
-						background-color: #4338ca;
-						text-decoration: none;
-					}
-				</style>';
-				$man_hours_data = self::sm_get_man_hours_data();
-				$discount = ( defined('SA_OFFER_VISIBLE') && SA_OFFER_VISIBLE === true ) ? '60%' : '25%';
-				if( !(( ! empty( $man_hours_data ) ) && ( is_array( $man_hours_data ) ) && ( ! empty( $man_hours_data['display_man_hours'] )))  ){
-					echo '<div class="sm_design_notice">
-						<div class="sm_trophy_icon">
-							<img src="https://www.storeapps.org/wp-content/uploads/2026/05/trophy-for-sm-inapp-banner.png" alt="trophy" />
-						</div>
-						<div class="sm_content">
-							<p class="sm_main_headline">'. ( ( self::show_halloween_offer() ) ? sprintf(
-								/* translators: %1$s: current user display name %2$s: HTML of Pro price discount */
-								__( 'Hey %1$s, grab your <span class="sm_discount_highlight">%2$s Halloween discount!</span>', 'smart-manager-for-wp-e-commerce' ),
-								$sm_current_user_display_name,
-								__( "25% off", "smart-manager-for-wp-e-commerce" ) ) : sprintf(
-								/* translators: %1$s: current user display name %2$s: HTML of Pro price discount */
-									__( 'Hey %1$s, you just unlocked <span class="sm_discount_highlight">%2$s off</span> on Smart Manager Pro!', 'smart-manager-for-wp-e-commerce' ), $sm_current_user_display_name,
-									__( $discount, "smart-manager-for-wp-e-commerce" ) ) ) .'</p>
-							<p class="sm_sub_headline">' . __( 'Check Smart Manager Pro features/benefits and claim your discount.', 'smart-manager-for-wp-e-commerce' ) .'</p>
-						</div>
-						<div class="sm_cta_container">
-							<a class="sm_cta_btn" href="'. admin_url( 'admin.php?page=smart-manager-pricing' ) .'">' . sprintf(
-								/* translators: %s: discount percentage */
-								__( 'Upgrade to Pro at %s Off', 'smart-manager-for-wp-e-commerce' ),
-								$discount
-							) . '</a>
-						</div>
-					</div>';
-				}
-			}
+		if ( ( empty( $_GET['page'] ) ) || ( 'smart-manager' !== $_GET['page'] ) ) {
+			return;
+		}
+		$current_wp_date = date_i18n( _x( 'Y-m-d H:i:s', 'timezone date format' ) );
+		if ( false === get_option( 'sm_lite_activation_date', false ) ) {
+			add_option( 'sm_lite_activation_date', $current_wp_date );
+		}
+		if ( false === get_option( '_sm_update_418_date', false ) ) {
+			add_option( '_sm_update_418_date', $current_wp_date );
 		}
 	}
 
@@ -1944,16 +1829,12 @@ class Smart_Manager {
 			if( is_callable( array( $this, 'display_analytics_optin_notice' ) ) ) {
 				self::display_analytics_optin_notice();
 			}
-			if( is_callable( array( $this, 'display_power_bundle_banner_notice' ) ) ) {
-				self::display_power_bundle_banner_notice();
-			}
 			if ( ( ! empty( self::$sa_offer_instance ) ) && ( is_callable( array( self::$sa_offer_instance, 'is_show' ) ) ) && ( ! empty( self::$sa_offer_instance->is_show() ) ) && ( is_callable( array( self::$sa_offer_instance, 'show_offer_content' ) ) ) && ( ! $is_pricing_page ) ) {
 				?> <div class="sa_offer_container"><?php self::$sa_offer_instance->show_offer_content(); ?></div> <?php
 			}
 			if( ! $is_pricing_page ) {
-				$man_hours_data = self::sm_get_man_hours_data();
-				if ( ( ! empty( $man_hours_data ) ) && ( is_array( $man_hours_data ) ) && ( ! empty( $man_hours_data['display_man_hours'] ) ) && is_callable( array( $this, 'sm_get_man_hours_html' ) ) && ( empty( self::is_show_power_bundle_banner_notice() ) ) ) {
-					echo self::sm_get_man_hours_html( self::sm_get_man_hours_data(), '', ( defined('SA_OFFER_VISIBLE') && SA_OFFER_VISIBLE === true ) ? '60%' : '25%' );
+				if ( is_callable( array( __CLASS__, 'sm_get_man_hours_html' ) ) ) {
+					echo self::sm_get_man_hours_html();
 				}
 		?>
 				<div id="sm-loading-messages-root"></div>
@@ -2398,69 +2279,73 @@ class Smart_Manager {
 	}
 
 	/**
-	 * Display a notice summarizing the saved man-hours and available discounts.
+	 * Get the Lite upgrade banner HTML ("100 minutes of work in 37 seconds").
 	 *
-	 * @param string $user_name The name of the current user.
-	 * @param array  $man_hours_data The data about the saved man-hours and additional savings.
-	 * @param string $discount discount %.
-	 * 
-	 * @return string html containing man hours data or empty string if data is not valid.
+	 * @return string Banner HTML for Lite, empty string for Pro.
 	*/
-	public static function sm_get_man_hours_html( $man_hours_data = array(), $user_name = '', $discount = '' ) {
-		if( ( empty( $man_hours_data ) ) || ( ! is_array( $man_hours_data ) ) || ( empty( $man_hours_data['additional_savings'] ) ) || ( empty( $man_hours_data['man_hours_saved'] ) ) || ( empty( $discount ) ) ) {
+	public static function sm_get_man_hours_html() {
+		if ( ( defined( 'SMPRO' ) ) && ( true === SMPRO ) ) {
 			return '';
 		}
+		$discount = ( ( defined( 'SA_OFFER_VISIBLE' ) ) && ( true === SA_OFFER_VISIBLE ) ) ? '60%' : '25%';
 		return '<style>
-			.sm_man_hours_banner {
+			#sm_man_hours_banner {
+				box-sizing: border-box;
 				display: flex;
 				align-items: center;
+				gap: 1.5rem;
 				background-color: #e0e7ff;
 				border: 1px solid #c7d2fe;
 				border-radius: 0.75rem;
-				padding: 1rem 1.5rem;
+				padding: 2rem 1.5rem;
 				margin: 1rem auto;
 				max-width: 62rem;
 			}
-			.sm_man_hours_banner .sm_trophy_icon {
+			#sm_man_hours_banner .sm_trophy_icon {
 				flex-shrink: 0;
-				margin-right: 1rem;
-				margin-top: 0.25rem;
-				width: 7rem;
-				height: 7rem;
 				display: flex;
 				align-items: center;
 				justify-content: center;
+				width: 4rem;
+				height: 4rem;
+				margin: 0;
 			}
-			.sm_man_hours_banner .sm_trophy_icon img {
+			#sm_man_hours_banner .sm_trophy_icon img {
+				display: block;
 				width: 4rem;
 				height: 4rem;
 				object-fit: contain;
 			}
-			.sm_man_hours_banner .sm_content {
+			#sm_man_hours_banner .sm_content {
 				flex: 1;
+				min-width: 0;
 			}
-			.sm_man_hours_banner .sm_headline {
+			#sm_man_hours_banner .sm_headline,
+			#sm_man_hours_banner .sm_subtext {
+				line-height: 1.5;
+			}
+			#sm_man_hours_banner .sm_headline {
 				font-size: 1.25rem;
 				color: #1f2937;
 				margin: 0 0 0.25rem 0;
 			}
-			.sm_man_hours_banner .sm_headline .sm_hours_highlight {
+			#sm_man_hours_banner .sm_headline .sm_hours_highlight {
 				color: #4f46e5;
 				font-weight: 600;
 			}
-			.sm_man_hours_banner .sm_subtext {
+			#sm_man_hours_banner .sm_headline .sm_man_hours_watch_video {
+				color: #3858e9 !important;
+			}
+			#sm_man_hours_banner .sm_subtext {
 				font-size: 1rem;
 				color: #6b7280;
 				margin: 0;
 			}
-			.sm_man_hours_banner .sm_subtext strong {
-				color: #374151;
-			}
-			.sm_man_hours_banner .sm_cta_container {
-				margin-left: 1.5rem;
+			#sm_man_hours_banner .sm_cta_container {
 				flex-shrink: 0;
+				margin: 0;
 			}
-			.sm_man_hours_banner .sm_cta_btn {
+			#sm_man_hours_banner .sm_cta_btn {
 				display: inline-block;
 				background-color: #4f46e5;
 				color: #ffffff !important;
@@ -2471,33 +2356,29 @@ class Smart_Manager {
 				text-decoration: none;
 				white-space: nowrap;
 			}
-			.sm_man_hours_banner .sm_cta_btn:hover {
+			#sm_man_hours_banner .sm_cta_btn:hover {
 				background-color: #4338ca;
 				text-decoration: none;
 			}
 		</style>
-		<div class="sm_man_hours_banner">
+		<div class="sm_man_hours_banner" id="sm_man_hours_banner">
 			<div class="sm_trophy_icon">
 				<img src="https://www.storeapps.org/wp-content/uploads/2026/05/trophy-for-sm-inapp-banner.png" alt="trophy" />
 			</div>
 			<div class="sm_content">
 				<p class="sm_headline">' . sprintf(
-					/* translators: %s: saved man-hours */
-					__( 'You\'ve saved <span class="sm_hours_highlight">%s productive hours</span> with Smart Manager', 'smart-manager-for-wp-e-commerce' ),
-					$man_hours_data['man_hours_saved']
+					/* translators: %s: link to watch the bulk edit video */
+					__( '<span class="sm_hours_highlight">100 minutes of work in 37 seconds.</span> %s', 'smart-manager-for-wp-e-commerce' ),
+					'<a href="https://youtu.be/UnOG4sTvjCI" target="_blank" class="sm_man_hours_watch_video">' . esc_html__( 'Watch video for proof.', 'smart-manager-for-wp-e-commerce' ) . '</a>'
 				) . '</p>
-				<p class="sm_subtext">' . sprintf(
-					/* translators: %s: additional man-hours */
-					__( 'Save another <strong>%s hours</strong> with advanced bulk editing and automation.', 'smart-manager-for-wp-e-commerce' ),
-					$man_hours_data['additional_savings']
-				) . '</p>
+				<p class="sm_subtext">' . esc_html__( 'Save time & cost with advanced bulk editing and automation.', 'smart-manager-for-wp-e-commerce' ) . '</p>
 			</div>
 			<div class="sm_cta_container">
-				<a class="sm_cta_btn" href="' . admin_url( 'admin.php?page=smart-manager-pricing' ) . '">' . sprintf(
+				<a class="sm_cta_btn" href="' . esc_url( admin_url( 'admin.php?page=smart-manager-pricing' ) ) . '">' . esc_html( sprintf(
 					/* translators: %s: discount percentage */
 					__( 'Upgrade to Pro at %s Off', 'smart-manager-for-wp-e-commerce' ),
 					$discount
-				) . '</a>
+				) ) . '</a>
 			</div>
 		</div>';
 	}
@@ -2607,86 +2488,6 @@ class Smart_Manager {
 		$notice_key = sanitize_key( $_POST['feature_key'] );
 		check_ajax_referer( "sa-dismiss-{$notice_key}-notice", 'security' );
 		return update_option( "sa_sm_hide_{$notice_key}_notice", true );
-	}
-
-	/**
-	 * Check if Power Bundle offer banner notice can be displayed.
-	 *
-	 * - For Pro: Returns true if the notice has not been dismissed.
-	 * - For Lite: Returns true if within 3 days of version 8.97.0 update/activation.
-	 *
-	 * @return bool True if notice can be displayed, false otherwise.
-	 */
-	public static function is_show_power_bundle_banner_notice() {
-		//Both BVM and SO should not be installed.
-		if ( ( defined( 'IS_BVM_INSTALLED' ) && true === IS_BVM_INSTALLED ) || ( defined( 'IS_SO_INSTALLED' ) && true === IS_SO_INSTALLED ) ) {
-			return;
-		}
-		return ( ( defined( 'SMPRO' ) && true === SMPRO )
-			? ( ! get_option( 'sa_sm_hide_power_bundle_banner_notice', false ) )
-			: ( floor( ( current_time( 'timestamp' ) - strtotime( get_option( '_sm_update_897_date', current_time( 'mysql' ) ) ) ) / 86400 ) < 3 )
-		);
-	}
-
-	/**
-	 * Display Power Bundle offer banner notice.
-	 *
-	 * @return void
-	 */
-	public static function display_power_bundle_banner_notice() {
-		if ( ( ! is_callable( array( __CLASS__, 'is_show_power_bundle_banner_notice' ) ) )  || ( empty( self::is_show_power_bundle_banner_notice() ) ) ) {
-			return;
-		}
-
-		echo '<style type="text/css">
-			.sm-pb-banner { text-align: start; background: #4f46e5; border-radius: 0.75rem; padding: 1.25rem 1.5rem; margin: 1rem auto 1.5rem auto; max-width: 41rem; display: flex; align-items: center; justify-content: space-between; position: relative; font-family: Inter, sans-serif; box-shadow: 0 0.25rem 0.75rem rgba(79, 70, 229, 0.15); }
-			.sm-pb-left { display: flex; align-items: center; gap: 1rem; }
-			.sm-pb-icon-wrap { width: 2.75rem; height: 2.75rem; border-radius: 50%; background: #ffffff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-			.sm-pb-heading { font-size: 1rem; font-weight: 700; color: #ffffff; margin-bottom: 0.375rem; line-height: 1.25; }
-			.sm-pb-list { font-size: 0.8125rem; color: #ffffff; margin: 0; padding: 0; list-style: none; line-height: 1.45; opacity: 0.95; }
-			.sm-pb-list li {margin-bottom: 0px}
-			.sm-pb-right { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; margin-left: 1rem; padding-right: 0.875rem; }
-			.sm-pb-btn { background: #fbbf24; color: #78350f !important; font-weight: 700; font-size: 0.84375rem; padding: 0.5rem 1.25rem; border-radius: 9999px; text-decoration: none !important; display: inline-block; white-space: nowrap; }
-			.sm-pb-btn:hover { background: #f59e0b; }
-			.sm-pb-subtext { font-size: 0.6875rem; color: rgba(255, 255, 255, 0.85); margin-top: 0.3125rem; text-align: center; }
-			.sm-pb-dismiss { position: absolute; top: 0.4rem; right: 0.75rem; color: rgba(255, 255, 255, 0.8); cursor: pointer; font-size: 1.125rem; line-height: 1; border: none; background: none; width: 1.5rem; height: 1.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; padding-bottom: 0.35rem; transition: all 0.2s ease; }
-			.sm-pb-dismiss:hover { color: #ffffff; background: rgba(255, 255, 255, 0.2); }
-		</style>
-		<div class="sm-pb-banner" id="sm_power_bundle_banner_notice">
-			<div class="sm-pb-left">
-				<div class="sm-pb-icon-wrap">
-					<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1.375rem; height: 1.375rem;"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
-				</div>
-				<div>
-					<div class="sm-pb-heading">' . esc_html__( 'Power Bundle: 2 plugins, price of 1', 'smart-manager-for-wp-e-commerce' ) . '</div>
-					<ul class="sm-pb-list">
-						<li>&bull; ' . esc_html__( 'Smart Offers (upsells, BOGO & bumps)', 'smart-manager-for-wp-e-commerce' ) . '</li>
-						<li>&bull; ' . esc_html__( 'Bulk Variations Manager (manage variations in bulk)', 'smart-manager-for-wp-e-commerce' ) . '</li>
-					</ul>
-				</div>
-			</div>
-			<div class="sm-pb-right">
-				<a href="https://www.storeapps.org/product/power-bundle/?utm_source=sm&utm_medium=in_app_banner&utm_campaign=power_bundle" target="_blank" class="sm-pb-btn">
-					' . esc_html__( 'Grab now', 'smart-manager-for-wp-e-commerce' ) . ' &mdash; <span style="text-decoration: line-through; opacity: 0.75; font-weight: 400;">$178</span> <strong>$99</strong>
-				</a>
-				<div class="sm-pb-subtext">' . esc_html__( 'Offer ends soon', 'smart-manager-for-wp-e-commerce' ) . '</div>
-			</div>' .
-			( ( defined( 'SMPRO' ) && true === SMPRO ) ? '<button type="button" class="sm-pb-dismiss" id="sm_power_bundle_dismiss" title="' . esc_attr__( 'Dismiss', 'smart-manager-for-wp-e-commerce' ) . '">&times;</button>
-			<script type="text/javascript">
-				jQuery(document).on("click", "#sm_power_bundle_dismiss", function(){
-					jQuery.post(ajaxurl, { action: "dismiss_admin_notice", feature_key: "power_bundle_banner", security: "' . wp_create_nonce( 'sa-dismiss-power_bundle_banner-notice' ) . '" });
-					jQuery("#sm_power_bundle_banner_notice").fadeOut();
-				});
-			</script>' : '' ) .
-			( ( 'sm-about' === ( ! empty( $_GET['landing-page'] ) ? sanitize_text_field( wp_unslash( $_GET['landing-page'] ) ) : '' ) || 'sm-storeapps-plugins' === ( ! empty( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '' ) ) ? '<script type="text/javascript">
-				jQuery(function($){
-					var $heading = $(".wrap h1, .about-wrap h1, .sm-welcome h1, h1").first();
-					if ($heading.length) {
-						$("#sm_power_bundle_banner_notice").insertAfter($heading);
-					}
-				});
-			</script>' : '' ) .
-		'</div>';
 	}
 
 	/**
@@ -3008,7 +2809,7 @@ class Smart_Manager {
 			esc_html__( 'Help us improve Smart Manager — 100% Anonymous: ', 'smart-manager-for-wp-e-commerce' ),
 			esc_html__( 'Share anonymous usage patterns (like UI features clicked and usage stats) to help us optimize your experience.', 'smart-manager-for-wp-e-commerce' ),
 			esc_html__( 'Sensitive data like store sales, customer details, and personal info is never shared.', 'smart-manager-for-wp-e-commerce' ),
-			esc_url( 'https://wordpress.org/plugins/smart-manager-for-wp-e-commerce/#:~:text=Privacy%20%26%20Usage%20Tracking' ),
+			esc_url( 'https://www.storeapps.org/docs/smart-manager/telemetry-privacy/?utm_source=sm&utm_medium=in_app_notice&utm_campaign=telemetry_privacy' ),
 			esc_html__( 'See what gets shared →', 'smart-manager-for-wp-e-commerce' ),
 			esc_html__( 'Yes, I\'m In', 'smart-manager-for-wp-e-commerce' ),
 			esc_html__( 'Later', 'smart-manager-for-wp-e-commerce' ),

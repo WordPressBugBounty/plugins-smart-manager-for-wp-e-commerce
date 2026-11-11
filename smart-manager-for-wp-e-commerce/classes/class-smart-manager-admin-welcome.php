@@ -378,7 +378,7 @@ class Smart_Manager_Admin_Welcome {
 							?>
 						</h3>
 					<div class="sm-video-container">
-						<iframe class="sm-video-iframe" src="https://www.youtube.com/embed/COXCuX2rFrk" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+						<iframe class="sm-video-iframe" src="https://www.youtube.com/embed/UnOG4sTvjCI" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 					</div>
 						<p>
 							<?php echo sprintf(

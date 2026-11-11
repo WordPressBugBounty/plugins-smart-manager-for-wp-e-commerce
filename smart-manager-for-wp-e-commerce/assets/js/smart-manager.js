@@ -3068,18 +3068,7 @@ if (typeof wp !== 'undefined' && wp.i18n) {
 					if (isScheduledAction) {
 						showProUpsell(_x('This feature is available only in the %s version', 'modal content', 'smart-manager-for-wp-e-commerce'));
 					} else if (isBulkEdit) {
-						/* translators: %s is a link to documentation on how to use bulk edit */
-						let description = sprintf(_x('You can change/update multiple fields of the entire store OR for selected items using the Bulk Edit feature. Refer to this doc on %s or watch the video below.', 'modal description', 'smart-manager-for-wp-e-commerce'), '<a href="https://www.storeapps.org/docs/sm-how-to-use-batch-update/?utm_source=sm&utm_medium=in_app&utm_campaign=view_docs" target="_blank">' + _x('how to do bulk edit', 'modal description', 'smart-manager-for-wp-e-commerce') + '</a>');
-						
-						window.smart_manager.modal = {
-							title: _x('Bulk Edit', 'modal title', 'smart-manager-for-wp-e-commerce') + ' - <span style="color: red;">' + _x('Biggest Time Saver', 'modal title', 'smart-manager-for-wp-e-commerce') + '</span> ' + sprintf(/* translators: %s is a link to the Pro version */
-								_x('(Only in %s)', 'modal title', 'smart-manager-for-wp-e-commerce'), '<a href="' + window.smart_manager.pricingPageURL + '" target="_blank">' + _x('Pro', 'modal title', 'smart-manager-for-wp-e-commerce') + '</a>'
-							),
-							content: '<div><p>' + description + '</p><div><iframe width="100%" height="100%" src="https://www.youtube.com/embed/COXCuX2rFrk" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div></div>',
-							width: 'w-2/6', autoHide: false, isFooterItemsCenterAligned: true,
-							cta: { title: _x('Upgrade Now', 'button', 'smart-manager-for-wp-e-commerce'), callback: () => window.open(window.smart_manager.pricingPageURL, "_blank") }
-						};
-						window.smart_manager.showModal();
+						window.smart_manager.showBulkEditUpsellModal();
 					} else if (isDuplicate) {
 						/* translators: %s is the Pro version name */
 						showProUpsell(_x('Duplicate Records (Only in %s)', 'notification', 'smart-manager-for-wp-e-commerce'));
@@ -3088,6 +3077,10 @@ if (typeof wp !== 'undefined' && wp.i18n) {
 			})
 			.off('click', ".sm_scheduled_bulk_edits").on('click', ".sm_scheduled_bulk_edits", function (e) {
 				window.open(window.smart_manager.scheduledActionAdminUrl, '_blank');
+			})
+			.off('click', ".sm_man_hours_watch_video").on('click', ".sm_man_hours_watch_video", function (e) {
+				e.preventDefault();
+				window.smart_manager.showBulkEditUpsellModal();
 			})
 
 			.off('mouseover', '.sm_gallery_image > img').on('mouseover', '.sm_gallery_image > img', function (e) {
@@ -5771,6 +5764,27 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 			catch(e){
 				SaErrorHandler.log('Exception occurred in confirmUnsavedChanges:: ', e)
 			}
+	}
+	// Function to show the Bulk Edit Pro upsell modal with video in lite version.
+	SmartManager.prototype.showBulkEditUpsellModal = function() {
+		try{
+			/* translators: %s is a link to documentation on how to use bulk edit */
+			let description = sprintf(_x('Bulk Edit lets you update multiple fields for selected items or for your entire store at once. See the %s doc for the steps or watch the video below.', 'modal description', 'smart-manager-for-wp-e-commerce'), '<a href="https://www.storeapps.org/docs/sm-how-to-use-batch-update/?utm_source=sm&utm_medium=in_app&utm_campaign=view_docs" target="_blank">' + _x('how to do bulk edit', 'modal description', 'smart-manager-for-wp-e-commerce') + '</a>');
+			let discount = ((typeof sm_beta_params !== 'undefined') && sm_beta_params.isSAOfferVisible) ? '60%' : '25%';
+			window.smart_manager.modal = {
+				title: _x('Bulk Edit', 'modal title', 'smart-manager-for-wp-e-commerce') + ' - <span style="color: red;">' + _x('Biggest Time Saver', 'modal title', 'smart-manager-for-wp-e-commerce') + '</span> ' + sprintf(/* translators: %s is a link to the Pro version */
+					_x('(Only in %s)', 'modal title', 'smart-manager-for-wp-e-commerce'), '<a href="' + window.smart_manager.pricingPageURL + '" target="_blank">' + _x('Pro', 'modal title', 'smart-manager-for-wp-e-commerce') + '</a>'
+				),
+				content: '<div><p>' + description + '</p><div><iframe width="100%" height="100%" src="https://www.youtube.com/embed/UnOG4sTvjCI" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div></div>',
+				width: 'w-2/6', autoHide: false, isFooterItemsCenterAligned: true,
+				/* translators: %s is the discount percentage */
+				cta: { title: sprintf(_x('Upgrade to Pro at %s off', 'button', 'smart-manager-for-wp-e-commerce'), discount), callback: () => window.open(window.smart_manager.pricingPageURL, "_blank") }
+			};
+			window.smart_manager.showModal();
+		}
+		catch(e){
+			SaErrorHandler.log('Exception occurred in showBulkEditUpsellModal:: ', e)
+		}
 	}
 	// Function to show man-hrs saved message, post inline-update in lite version
 	SmartManager.prototype.showManHoursSaved = function(params ={}) {

@@ -8,7 +8,7 @@ Tags: bulk edit, bulk editor, prices, bulk edit products, inventory
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 7.2
-Stable tag: 8.99.0
+Stable tag: 9.0.0
 License: GPLv2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -205,7 +205,7 @@ Smart Manager respects your privacy. Usage tracking is completely optional and t
 
 When enabled, we only collect 100% anonymous usage patterns (such as feature clicks, plugin version, and general store size) to help guide our feature roadmap. We **never** collect store sales, customer details, product data, or personal info.
 
-Usage data is sent to [PostHog](https://posthog.com), our analytics provider, only after you opt in.
+Data is sent to our analytics provider, [PostHog](https://posthog.com). See the [Telemetry & Privacy Policy](https://www.storeapps.org/docs/smart-manager/telemetry-privacy/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme) for full details.
 
 == Installation ==
 
@@ -291,6 +291,10 @@ Through the [Patchstack Vulnerability Disclosure Program](https://patchstack.com
 
 == Changelog ==
 
+= 9.0.0 (11.11.2026) =
+* New: WooCommerce 11.2.2 compatible
+* Update: POT file
+
 = 8.99.0 (04.11.2026) =
 * New: WordPress 7.1.4 compatible
 * New: WooCommerce 11.2.1 compatible
@@ -337,6 +341,9 @@ Through the [Patchstack Vulnerability Disclosure Program](https://patchstack.com
 [Full changelog](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 9.0.0 =
+WooCommerce 11.2.2 compatible. Recommended upgrade.
 
 = 8.99.0 =
 WordPress 7.1.4 compatible, WooCommerce 11.2.1 compatible, PHP 8.5 compatible, Fixes related to Bulk Edit running very slowly when updating prices of product variations on large stores (Pro), Bulk Edit, Export CSV and other background processes getting stuck or failing on large stores (Pro), Interrupted background processes repeating records that were already processed (Pro), Stop option not cancelling all queued background actions (Pro), Undo data being saved multiple times for the same record in some cases during Bulk Edit (Pro), Daily cleanup of old Export CSV files failing (Pro), Stock log import check for the Stock Manager for WooCommerce plugin running database queries on every page load in admin and on the frontend, Advanced Search and other panels not opening after clicking the 'View' action in the grid, Large background processes not continuing after reaching server limits, Updates related to Easy access to the default view from the Custom Views dashboard (Pro), Minimum required versions are now WordPress 6.9 and PHP 7.2, Action Scheduler library to 4.2.0. Recommended upgrade.
