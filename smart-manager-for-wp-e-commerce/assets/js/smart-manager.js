@@ -5770,7 +5770,7 @@ jQuery.widget('ui.dialog', jQuery.extend({}, jQuery.ui.dialog.prototype, {
 		try{
 			/* translators: %s is a link to documentation on how to use bulk edit */
 			let description = sprintf(_x('Bulk Edit lets you update multiple fields for selected items or for your entire store at once. See the %s doc for the steps or watch the video below.', 'modal description', 'smart-manager-for-wp-e-commerce'), '<a href="https://www.storeapps.org/docs/sm-how-to-use-batch-update/?utm_source=sm&utm_medium=in_app&utm_campaign=view_docs" target="_blank">' + _x('how to do bulk edit', 'modal description', 'smart-manager-for-wp-e-commerce') + '</a>');
-			let discount = ((typeof sm_beta_params !== 'undefined') && sm_beta_params.isSAOfferVisible) ? '60%' : '25%';
+			let discount = ((typeof sm_beta_params !== 'undefined') && sm_beta_params.isSAOfferVisible) ? '35%' : '25%';
 			window.smart_manager.modal = {
 				title: _x('Bulk Edit', 'modal title', 'smart-manager-for-wp-e-commerce') + ' - <span style="color: red;">' + _x('Biggest Time Saver', 'modal title', 'smart-manager-for-wp-e-commerce') + '</span> ' + sprintf(/* translators: %s is a link to the Pro version */
 					_x('(Only in %s)', 'modal title', 'smart-manager-for-wp-e-commerce'), '<a href="' + window.smart_manager.pricingPageURL + '" target="_blank">' + _x('Pro', 'modal title', 'smart-manager-for-wp-e-commerce') + '</a>'

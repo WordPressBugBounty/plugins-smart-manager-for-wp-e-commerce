@@ -8,7 +8,7 @@ Tags: bulk edit, bulk editor, prices, bulk edit products, inventory
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 7.2
-Stable tag: 9.0.0
+Stable tag: 9.1.0
 License: GPLv2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -291,6 +291,11 @@ Through the [Patchstack Vulnerability Disclosure Program](https://patchstack.com
 
 == Changelog ==
 
+= 9.1.0 (23.11.2026) =
+* New: WordPress 7.1.5 compatible
+* New: WooCommerce 11.3.1 compatible
+* Update: POT file
+
 = 9.0.0 (11.11.2026) =
 * New: WooCommerce 11.2.2 compatible
 * Update: POT file
@@ -341,6 +346,9 @@ Through the [Patchstack Vulnerability Disclosure Program](https://patchstack.com
 [Full changelog](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 9.1.0 =
+WordPress 7.1.5 compatible, WooCommerce 11.3.1 compatible. Recommended upgrade.
 
 = 9.0.0 =
 WooCommerce 11.2.2 compatible. Recommended upgrade.

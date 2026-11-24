@@ -123,10 +123,9 @@ class SA_SM_In_App_Offer {
 	 */
 	public function is_show() {
 
-		$timezone_format = _x( 'Y-m-d H:i:s', 'timezone date format', 'smart-manager-for-wp-e-commerce' );
-		$current_date    = strtotime( date_i18n( $timezone_format, false, true ) );
-		$start           = strtotime( $this->start );
-		$end             = strtotime( $this->end );
+		$current_date = current_time( 'timestamp', true );
+		$start        = strtotime( $this->start );
+		$end          = strtotime( $this->end );
 		if ( ( $current_date >= $start ) && ( $current_date <= $end ) ) {
 			$option_value  = get_option( $this->option_name, 'yes' );
 			$get_post_type = isset( $_GET['post_type'] ) ? sanitize_text_field( wp_unslash( $_GET['post_type'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification
@@ -213,6 +212,8 @@ class SA_SM_In_App_Offer {
 			}
 			.sa_offer_content img {
 				width: 55%;
+				display: block;
+				margin: 0 auto;
 			}
 			.sa_dismiss {
 				font-size: 0.5em;
@@ -225,7 +226,7 @@ class SA_SM_In_App_Offer {
 		<div class="sa_offer">
 			<div class="sa_offer_content">
 				<a href="https://www.storeapps.org/woocommerce-plugins/?utm_source=in_app&utm_medium=<?php echo esc_attr( $this->prefix ); ?>_banner&utm_campaign=<?php echo esc_attr( $this->campaign ); ?>" target="_blank">
-					<img src="<?php echo esc_url( plugins_url( 'sa-includes/images/bfcm-2025.png', $this->plugin_file ) ); ?>" />
+					<img src="<?php echo esc_url( plugins_url( 'sa-includes/images/bfcm-2026.png', $this->plugin_file ) ); ?>" />
 				</a>
 				<div class="sa_dismiss"> <!-- Do not change this class -->
 					<a href="javascript:void(0)" style="color: black; text-decoration: none;" title="<?php echo esc_attr__( 'Dismiss', 'smart-manager-for-wp-e-commerce' ); ?>"><?php echo esc_html__( 'Hide this', 'smart-manager-for-wp-e-commerce' ); ?></a>

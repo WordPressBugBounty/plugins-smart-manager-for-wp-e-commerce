@@ -612,10 +612,10 @@ class Smart_Manager {
 			$args = array(
 				'file'           => (dirname( SM_PLUGIN_FILE )) . '/classes/sa-includes/',
 				'prefix'         => 'sm',				// prefix/slug of your plugin
-				'option_name'    => 'sa_sm_offer_bfcm_2025',
-				'campaign'       => 'sa_bfcm_2025',
-				'start'          => '2025-11-14 07:00:00',
-				'end'            => '2025-12-05 06:30:00',
+				'option_name'    => 'sa_sm_offer_bfcm_2026',
+				'campaign'       => 'sa_bfcm_2026',
+				'start'          => '2026-11-24 06:30:00 UTC',
+				'end'            => '2026-12-04 06:30:00 UTC',
 				'is_plugin_page' => ( !empty($_GET['page']) && in_array( $_GET['page'], array( 'smart-manager', 'sm-storeapps-plugins' ) ) ) ? true : false,	// page where you want to show offer, do not send this if no plugin page is there and want to show offer on Products page
 			);
 			self::$sa_offer_instance = SA_SM_In_App_Offer::get_instance( $args );
@@ -623,10 +623,9 @@ class Smart_Manager {
 
 				$show = false;
 
-				$timezone_format = _x( 'Y-m-d H:i:s', 'timezone date format' );
-				$current_date    = strtotime( date_i18n( $timezone_format ) );
-				$start           = strtotime( $args['start'] );
-				$end             = strtotime( $args['end'] );
+				$current_date = current_time( 'timestamp', true );
+				$start        = strtotime( $args['start'] );
+				$end          = strtotime( $args['end'] );
 				if ( ( $current_date >= $start ) && ( $current_date <= $end ) ) {
 					$show = true;
 				}
@@ -1103,7 +1102,7 @@ class Smart_Manager {
 		wp_enqueue_script( 'sm_select2' );
 		wp_register_script ( 'sm_mithril', plugins_url ( '/common-core/assets/js/mithril/mithril.min.js', SM_PLUGIN_FILE ), $deps, $this->version );
 		wp_register_script ( 'sm_search_styles', plugins_url ( '/common-core/assets/js/styles.js', SM_PLUGIN_FILE ), array( 'sm_mithril' ), $this->version );
-		wp_register_script ( 'sm_dashboard_js', plugins_url ( '/assets/js/admin.js', SM_PLUGIN_FILE ), array( 'sm_search_styles', 'wp-i18n'), $this->version );
+		wp_register_script ( 'sm_dashboard_js', plugins_url ( '/assets/js/admin.js', SM_PLUGIN_FILE ), array( 'sm_search_styles', 'wp-i18n'), filemtime( dirname( SM_PLUGIN_FILE ) . '/assets/js/admin.js' ) );
 		$last_reg_script = 'sm_mithril';
 		//Code for loading custom js automatically
 		$custom_lib_js = array();
@@ -1172,7 +1171,7 @@ class Smart_Manager {
 			$this->version,
 			true
 		);
-		wp_register_script ( 'sm_custom_smart_manager_js', plugins_url ( '/assets/js/smart-manager.js', SM_PLUGIN_FILE ), array( $last_reg_script, $sm_common_core_base ), $this->version );
+		wp_register_script ( 'sm_custom_smart_manager_js', plugins_url ( '/assets/js/smart-manager.js', SM_PLUGIN_FILE ), array( $last_reg_script, $sm_common_core_base ), filemtime( dirname( SM_PLUGIN_FILE ) . '/assets/js/smart-manager.js' ) );
 		$last_reg_script = 'sm_custom_smart_manager_js';
 
 		if( SMPRO === true ) {
@@ -1422,7 +1421,7 @@ class Smart_Manager {
 							'useDatePickerForDateTimeOrDateCols' => ( 'no' === apply_filters( 'sm_use_date_picker_for_date_or_datetime_cols', Smart_Manager_Settings::get( 'use_date_picker_for_date_or_datetime_cols' ) ) ) ? 0 : 1,
 							'SM_IS_WOO79' => ( ! empty( self::$sm_is_woo79 ) ) ? 'true' : 'false',
 							'isSAOfferVisible' => SA_OFFER_VISIBLE,
-							'isSAOfferBannerVisible' => ( 'yes' === get_option( 'sa_sm_offer_bfcm_2025', 'yes' ) ) ? true : false,
+							'isSAOfferBannerVisible' => ( 'yes' === get_option( 'sa_sm_offer_bfcm_2026', 'yes' ) ) ? true : false,
 							'scheduled_action_admin_url' => self::get_scheduled_actions_search_url('storeapps_sm_scheduled_actions'),
 							'scheduled_export_actions_admin_url' => self::get_scheduled_actions_search_url('storeapps_smart_manager_scheduled_export_actions'),
 							'is_admin' => ( 'administrator' === self::get_current_user_role() ) ? true : false,
@@ -1786,6 +1785,13 @@ class Smart_Manager {
 		$is_pricing_page = ( ! empty( $_GET['tab'] ) && 'upgrade' === $_GET['tab'] ) ? true : false;
 		?>
 		<div id="sa_manager_main"> </div>
+		<?php if ( $is_pricing_page && defined( 'SA_OFFER_VISIBLE' ) && true === SA_OFFER_VISIBLE ) { ?>
+			<style type="text/css">
+				#sa_manager_main section.bg-indigo-600.text-white.text-center {
+					display: none !important;
+				}
+			</style>
+		<?php } ?>
 		<?php
 			wp_enqueue_script( 'sm_dashboard_js' );
 		?>
@@ -1799,7 +1805,7 @@ class Smart_Manager {
 				<?php if ( SMPRO === true && function_exists( 'smart_support_ticket_content' ) ) smart_support_ticket_content();  ?>
 
 				<div id="sm_nav_bar"></div>
-				<?php 
+				<?php
 					if ( class_exists( 'SA_Manager_Background_Updater' ) && ( is_callable( array( 'SA_Manager_Background_Updater', 'instance' ) ) ) ) {
 						$background_updater_instance = SA_Manager_Background_Updater::instance();
 						if ( is_callable( array( $background_updater_instance, 'background_process_notice' ) ) ) {
@@ -2285,6 +2291,9 @@ class Smart_Manager {
 	*/
 	public static function sm_get_man_hours_html() {
 		if ( ( defined( 'SMPRO' ) ) && ( true === SMPRO ) ) {
+			return '';
+		}
+		if ( defined( 'SA_OFFER_VISIBLE' ) && true === SA_OFFER_VISIBLE ) {
 			return '';
 		}
 		$discount = ( ( defined( 'SA_OFFER_VISIBLE' ) ) && ( true === SA_OFFER_VISIBLE ) ) ? '60%' : '25%';
@@ -2895,7 +2904,7 @@ class Smart_Manager {
 
 	/**
 	 * Method to enqueue footer css file
-	 * 
+	 *
 	 * @return void
 	 */
 	public function enqueue_admin_footer_style() {
