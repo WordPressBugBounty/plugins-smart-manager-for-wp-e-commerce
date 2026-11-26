@@ -627,8 +627,17 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 		 */
 		public function background_process_notice() {
 			$batch_params       = get_option( $this->identifier . '_params', array() );
-			$this->plugin_data  = ( ! empty( $batch_params['plugin_data'] ) ) ? $batch_params['plugin_data'] : array();
-			$this->plugin_sku   = ( ! empty( $batch_params['plugin_data']['plugin_sku'] ) ) ? $batch_params['plugin_data']['plugin_sku'] : '';
+			$batch_params       = ( is_array( $batch_params ) ) ? $batch_params : array();
+			$plugin_data        = ( ! empty( $batch_params['plugin_data'] ) && is_array( $batch_params['plugin_data'] ) ) ? $batch_params['plugin_data'] : array();
+			if ( empty( $plugin_data ) && is_array( $this->plugin_data ) ) {
+				$plugin_data = $this->plugin_data;
+			}
+			if ( empty( $plugin_data ) && function_exists( 'get_sa_manager_common_params' ) ) {
+				$plugin_data = get_sa_manager_common_params();
+			}
+			$this->plugin_data  = $plugin_data;
+			$this->plugin_sku   = ( ! empty( $plugin_data['plugin_sku'] ) ) ? $plugin_data['plugin_sku'] : '';
+			$plugin_obj_key     = ( ! empty( $plugin_data['plugin_obj_key'] ) ) ? $plugin_data['plugin_obj_key'] : '';
 			$param_for_ajax_url = apply_filters( 'sa_param_for_ajax_url', '' );
 			$is_valid_page      = apply_filters( 'sa_' . $this->plugin_sku . '_validate_current_page', true );
 			if ( ( ! is_admin() ) || ( ! ( $is_valid_page ) ) ) {
@@ -684,7 +693,7 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 						<span class="font-semibold text-sm-base-primary"><span id="sa_remaining_time"><?php echo esc_html__( '-- • --:--:-- remaining', 'smart-manager-for-wp-e-commerce' ); ?></span></span>
 						<a id="sa-stop-batch-process" href="javascript:void(0);" class="text-sm font-medium text-sm-base-destructive hover:underline cursor-pointer transition-colors duration-200"><?php echo esc_html__( 'Stop', 'smart-manager-for-wp-e-commerce' ); ?></a>
 					</p>
-					<p class="<?php echo esc_attr( $batch_params['plugin_data']['plugin_obj_key'] ); ?>_background_note text-sm text-sm-base-muted-foreground m-0">
+					<p class="<?php echo esc_attr( $plugin_obj_key ); ?>_background_note text-sm text-sm-base-muted-foreground m-0">
 						<?php echo esc_html__( ( ! empty( $batch_params['backgroundProcessRunningMessage'] ) ) ? $batch_params['backgroundProcessRunningMessage'] : '' ); ?>
 					</p>
 			</div>
@@ -696,18 +705,18 @@ if ( ! class_exists( 'SA_Manager_Background_Updater' ) ) {
 			</div>
 			<script type="text/javascript">
 				if (typeof sa_background_process_heartbeat === 'function') {
-					sa_background_process_heartbeat(0, '<?php echo esc_html( $process_name ); ?>', '<?php echo esc_html( $batch_params['plugin_data']['plugin_obj_key'] ); ?>');
+					sa_background_process_heartbeat(0, '<?php echo esc_html( $process_name ); ?>', '<?php echo esc_js( $plugin_obj_key ); ?>');
 				}
 				jQuery('body').on('click', '#sa-stop-batch-process', function(e) {
 					e.preventDefault();
 					<?php /* translators: 1. The bulk process */ ?>
 					let admin_ajax_url = '<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>';
-					admin_ajax_url = (admin_ajax_url.indexOf('?') !== -1) ? admin_ajax_url + '&action=sa_' + '<?php echo esc_js( $batch_params['plugin_data']['plugin_obj_key'] ); ?>' + '_manager_include_file' : admin_ajax_url + '?action=sa_' + '<?php echo esc_js( $batch_params['plugin_data']['plugin_obj_key'] ); ?>' + '_manager_include_file';
+					admin_ajax_url = (admin_ajax_url.indexOf('?') !== -1) ? admin_ajax_url + '&action=sa_' + '<?php echo esc_js( $plugin_obj_key ); ?>' + '_manager_include_file' : admin_ajax_url + '?action=sa_' + '<?php echo esc_js( $plugin_obj_key ); ?>' + '_manager_include_file';
 					let result = window.confirm(' <?php echo sprintf( /* translators: %s: process name */esc_html__( 'Are you sure you want to stop the %s process? Click OK to stop.', 'smart-manager-for-wp-e-commerce' ), esc_html( $process_name ) ); ?> ');
 					if (result) {
 						let requestData = {
 							action: 'sa_stop_background_process',
-							security: '<?php echo esc_attr( wp_create_nonce( 'sa-' . $batch_params['plugin_data']['plugin_sku'] . '-manager-security' ) ); ?>',
+							security: '<?php echo esc_attr( wp_create_nonce( 'sa-' . $this->plugin_sku . '-manager-security' ) ); ?>',
 						};
 						Object.assign(requestData, <?php echo wp_json_encode( $request_data_params ); ?>);
 						jQuery.ajax({

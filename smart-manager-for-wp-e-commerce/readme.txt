@@ -8,7 +8,7 @@ Tags: bulk edit, bulk editor, prices, bulk edit products, inventory
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 7.2
-Stable tag: 9.1.0
+Stable tag: 9.2.0
 License: GPLv2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,9 +24,9 @@ Trusted by 10,000+ stores. Handles catalogs with 100,000+ records.
 
 [Try the live demo →](https://demo.storeapps.org/?demo=sm-woo&utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme)
 
-**See Smart Manager in action:**
+**See how Smart Manager helps you save hours of work:**
 
-https://youtu.be/dPjlz7IRYdI
+https://youtu.be/UnOG4sTvjCI
 
 ---
 
@@ -286,10 +286,18 @@ Through the [Patchstack Vulnerability Disclosure Program](https://patchstack.com
 1. Advanced Search – find the exact products, orders or coupons to edit.
 2. Bulk edit / batch update panel – change prices, stock or any field across thousands of records (Pro).
 3. Smart Manager spreadsheet – edit WooCommerce products, variations and stock in one grid.
+4. Cost savings - how much money Smart Manager will save you compared to other bulk edit plugins.
+5. Time savings table - how much time Smart Manager will save you compared to mundane store operations.
 
 ---
 
 == Changelog ==
+
+= 9.2.0 (25.11.2026) =
+* Fix: Advanced Custom Fields (ACF) True / False fields not saving correct values using Bulk Edit (Pro)
+* Fix: Advanced Custom Fields (ACF) True / False fields showing '#bad-value#' instead of a checkbox and not editable using Inline Edit
+* Fix: Advanced Search returning no results when searching Advanced Custom Fields (ACF) True / False fields for unchecked values
+* Update: POT file
 
 = 9.1.0 (23.11.2026) =
 * New: WordPress 7.1.5 compatible
@@ -346,6 +354,9 @@ Through the [Patchstack Vulnerability Disclosure Program](https://patchstack.com
 [Full changelog](https://www.storeapps.org/docs/sm-changelog/?utm_source=wprepo&utm_medium=web&utm_campaign=smwp_readme).
 
 == Upgrade Notice ==
+
+= 9.2.0 =
+Fixes related to Advanced Custom Fields (ACF) True / False fields not saving correct values using Bulk Edit (Pro), Advanced Custom Fields (ACF) True / False fields showing '#bad-value#' instead of a checkbox and not editable using Inline Edit, Advanced Search returning no results when searching Advanced Custom Fields (ACF) True / False fields for unchecked values. Recommended upgrade.
 
 = 9.1.0 =
 WordPress 7.1.5 compatible, WooCommerce 11.3.1 compatible. Recommended upgrade.

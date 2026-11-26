@@ -3,7 +3,7 @@
 * Plugin Name: Smart Manager – WooCommerce Bulk Edit: Products, Orders, Users & More (Spreadsheet)
 * Plugin URI: https://www.storeapps.org/product/smart-manager/
 * Description: <strong>Lite Version Installed</strong>. The #1 tool for WooCommerce inventory management, stock management, bulk edit, export, delete, duplicate...from one place using an Excel-like sheet editor.
-* Version: 9.1.0
+* Version: 9.2.0
 * Author: StoreApps
 * Author URI: https://www.storeapps.org/
 * Text Domain: smart-manager-for-wp-e-commerce

@@ -557,7 +557,6 @@ class Smart_Manager {
 		$available_upgrade_classes = array_filter( $available_classes, function ( $class_name ) {
 																								return strpos( $class_name, 'StoreApps_Upgrade_' ) === 0;
 																							} );
-		
 		// Return empty if no upgrade classes are available
 		if ( empty( $available_upgrade_classes ) ) {
 			return '';
@@ -943,13 +942,11 @@ class Smart_Manager {
 
 	public function on_admin_init() {
 		global $wp_version,$wpdb;
-		
 		// Remove WordPress core update nag on Smart Manager dashboard.
 		if ( ! empty( $_GET['page'] ) && 'smart-manager' === sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) {
 			remove_action( 'admin_notices', 'update_nag', 3 );
 			remove_action( 'admin_notices', 'maintenance_nag', 10 );
 		}
-		
 		if( is_callable( array( 'Smart_Manager', 'get_version' ) ) ) {
 			$this->version = self::get_version();
 		}
@@ -1102,7 +1099,7 @@ class Smart_Manager {
 		wp_enqueue_script( 'sm_select2' );
 		wp_register_script ( 'sm_mithril', plugins_url ( '/common-core/assets/js/mithril/mithril.min.js', SM_PLUGIN_FILE ), $deps, $this->version );
 		wp_register_script ( 'sm_search_styles', plugins_url ( '/common-core/assets/js/styles.js', SM_PLUGIN_FILE ), array( 'sm_mithril' ), $this->version );
-		wp_register_script ( 'sm_dashboard_js', plugins_url ( '/assets/js/admin.js', SM_PLUGIN_FILE ), array( 'sm_search_styles', 'wp-i18n'), filemtime( dirname( SM_PLUGIN_FILE ) . '/assets/js/admin.js' ) );
+		wp_register_script ( 'sm_dashboard_js', plugins_url ( '/assets/js/admin.js', SM_PLUGIN_FILE ), array( 'sm_search_styles', 'wp-i18n'), $this->version );
 		$last_reg_script = 'sm_mithril';
 		//Code for loading custom js automatically
 		$custom_lib_js = array();
@@ -1171,7 +1168,7 @@ class Smart_Manager {
 			$this->version,
 			true
 		);
-		wp_register_script ( 'sm_custom_smart_manager_js', plugins_url ( '/assets/js/smart-manager.js', SM_PLUGIN_FILE ), array( $last_reg_script, $sm_common_core_base ), filemtime( dirname( SM_PLUGIN_FILE ) . '/assets/js/smart-manager.js' ) );
+		wp_register_script ( 'sm_custom_smart_manager_js', plugins_url ( '/assets/js/smart-manager.js', SM_PLUGIN_FILE ), array( $last_reg_script, $sm_common_core_base ), $this->version );
 		$last_reg_script = 'sm_custom_smart_manager_js';
 
 		if( SMPRO === true ) {
@@ -1468,7 +1465,7 @@ class Smart_Manager {
 				wp_enqueue_script( 'custom-header' );
 			}
 		}
-		
+
 		// Load PostHog only when the user has opted in to analytics.
 		if ( ( class_exists( 'Smart_Manager_Settings' ) ) && ( is_callable( array( 'Smart_Manager_Settings', 'get' ) ) ) && ( 'yes' === Smart_Manager_Settings::get( 'analytics_consent' ) ) ) {
 			wp_enqueue_script( 'sm_posthog_js', plugins_url( '/assets/js/posthog.js', SM_PLUGIN_FILE ), array( 'sm_custom_smart_manager_js' ), $this->version );
@@ -1785,13 +1782,6 @@ class Smart_Manager {
 		$is_pricing_page = ( ! empty( $_GET['tab'] ) && 'upgrade' === $_GET['tab'] ) ? true : false;
 		?>
 		<div id="sa_manager_main"> </div>
-		<?php if ( $is_pricing_page && defined( 'SA_OFFER_VISIBLE' ) && true === SA_OFFER_VISIBLE ) { ?>
-			<style type="text/css">
-				#sa_manager_main section.bg-indigo-600.text-white.text-center {
-					display: none !important;
-				}
-			</style>
-		<?php } ?>
 		<?php
 			wp_enqueue_script( 'sm_dashboard_js' );
 		?>
@@ -2455,7 +2445,7 @@ class Smart_Manager {
 		}
 		//Remove previous feature notice DB options.
 		self::clear_previous_feature_notices( array( 'link_to_view_product_edit_history' ) );
-		
+
 		$notice_key = sanitize_key( $notice_key );
 		if ( ( ! defined('SMPRO') ) || ( ( ! empty( $pro_only ) ) && ( SMPRO !== true ) ) || ( empty( $_GET['page'] ) ) || ( ! in_array( sanitize_text_field( wp_unslash( $_GET['page'] ) ), array( 'smart-manager', 'sm-storeapps-plugins', 'sm-about' ), true ) ) || get_option( "sa_sm_hide_{$notice_key}_notice" ) ) {
 			return;
@@ -2476,7 +2466,7 @@ class Smart_Manager {
 			});
 		</script>
 		<?php
-		
+
 		printf(
 			'<div class="ml-4 sm_feature_notice notice notice-%s '.($is_dismissible ? 'is-dismissible' : '').'" id="sm_%s_notice" style="display:block !important;"><p> %s </p></div>',
 			'success',
@@ -2512,7 +2502,7 @@ class Smart_Manager {
 		if ( get_option( 'sa_sm_book_call_dismissed', false ) ) {
 			return;
 		}
-		
+
 		// Check if snoozed (remind later)
 		$remind_later_date = get_option( 'sa_sm_book_call_remind_later', false );
 		if ( $remind_later_date ) {
@@ -2526,7 +2516,7 @@ class Smart_Manager {
 
 		$book_call_url = defined( 'SM_CALENDLY_URL' ) ? SM_CALENDLY_URL : '#';
 		$nonce = wp_create_nonce( 'sm_book_call_remind_later_nonce' );
-		
+
 		// SVG phone icon
 		$phone_svg = '<svg width="13" height="13" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 6px;"><path d="M13.3317 9.88001V11.6867C13.3324 11.8556 13.298 12.023 13.2306 12.178C13.1633 12.333 13.0646 12.4722 12.9409 12.5867C12.8173 12.7012 12.6713 12.7887 12.5121 12.8437C12.3529 12.8987 12.1839 12.9201 12.0157 12.9067C10.1575 12.7043 8.37302 12.0711 6.80566 11.0567C5.34829 10.1306 4.10578 8.88813 3.17967 7.43075C2.16202 5.85686 1.52875 4.06463 1.33041 2.19949C1.31707 2.03188 1.33823 1.86337 1.39277 1.70457C1.44731 1.54577 1.53406 1.40011 1.64758 1.27651C1.76111 1.15291 1.89917 1.05403 2.05306 0.986175C2.20695 0.918323 2.37321 0.882962 2.54167 0.882353H4.34834C4.64278 0.879565 4.92818 0.984338 5.1505 1.17718C5.37282 1.37002 5.51691 1.63762 5.55567 1.92949C5.62799 2.51306 5.76649 3.08668 5.96834 3.63949C6.05242 3.86807 6.0696 4.11588 6.01786 4.3541C5.96611 4.59231 5.84752 4.81072 5.67567 4.98416L4.91434 5.74549C5.77333 7.2559 7.05894 8.54151 8.56934 9.40049L9.33067 8.63916C9.5041 8.46731 9.72252 8.34872 9.96073 8.29697C10.1989 8.24523 10.4468 8.2624 10.6753 8.34649C11.2281 8.54834 11.8018 8.68684 12.3853 8.75916C12.6805 8.79827 12.9506 8.94505 13.1437 9.17115C13.3369 9.39724 13.4397 9.68697 13.4337 9.98401L13.3317 9.88001Z" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
 
@@ -2658,9 +2648,9 @@ class Smart_Manager {
 	 */
 	public function handle_book_call_remind_later() {
 		check_ajax_referer( 'sm_book_call_remind_later_nonce', 'security' );
-		
+
 		$duration = isset( $_POST['duration'] ) ? sanitize_text_field( wp_unslash( $_POST['duration'] ) ) : '7days';
-		
+
 		if ( 'never' === $duration ) {
 			// Dismiss permanently
 			update_option( 'sa_sm_book_call_dismissed', true );
@@ -3000,17 +2990,17 @@ class Smart_Manager {
 	public static function get_freedom_sale_params() {
 		// Sale end date: 16th July, 2026 at 12:30 PM IST, IST is UTC+5:30, so 12:30 PM IST = 07:00 UTC
 		$sale_end_date = '2026-07-16 07:00:00'; // UTC time
-		
+
 		// Use same approach as SA_OFFER_VISIBLE for consistency
 		$timezone_format = _x( 'Y-m-d H:i:s', 'timezone date format' );
 		$end             = strtotime( $sale_end_date ); // End time in UTC
-		
+
 		// Check if sale is currently live
 		$is_sale_live = ( strtotime( gmdate( $timezone_format ) ) < $end );
-		
+
 		// Convert to milliseconds for JavaScript (Date.now() returns UTC milliseconds)
 		$sale_end_timestamp_ms = $end * 1000;
-		
+
 		return array(
 			'is_sale_live'         => $is_sale_live,
 			'sale_end_timestamp'   => $sale_end_timestamp_ms,

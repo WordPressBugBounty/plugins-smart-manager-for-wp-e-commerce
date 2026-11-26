@@ -1,84 +1,163 @@
 <?php
 /**
+ * Get product metadata keys that affect WooCommerce's product lookup table.
+ *
+ * @return array
+ */
+function sm_get_product_lookup_table_meta_keys() {
+	$meta_keys = array(
+		'_sku',
+		'_virtual',
+		'_downloadable',
+		'_regular_price',
+		'_sale_price',
+		'_sale_price_dates_from',
+		'_sale_price_dates_to',
+		'_price',
+		'_manage_stock',
+		'_stock',
+		'_stock_status',
+		'_backorders',
+		'_wc_rating_count',
+		'_wc_average_rating',
+		'total_sales',
+	);
+	if ( ! empty( Smart_Manager::$sm_is_woo40 ) ) {
+		$meta_keys = array_merge( $meta_keys, array( '_tax_status', '_tax_class' ) );
+	}
+	if ( ! empty( Smart_Manager::$sm_is_woo92 ) ) {
+		$meta_keys[] = '_global_unique_id';
+	}
+	return $meta_keys;
+}
+
+/**
  * This function will update the WC lookup table introduced in WC 3.6 for the edited product fields in SM
  *
  * Since SM 4.2.3
  * For WC 3.6+
  */
 function sm_update_product_lookup_table( $product_ids ) {
-
+	$product_ids = array_values( array_unique( array_filter( array_map( 'absint', (array) $product_ids ) ) ) );
 	if ( empty( $product_ids ) ) {
 		return;
 	}
 
 	global $wpdb;
 
+	$meta_keys = sm_get_product_lookup_table_meta_keys();
+
 	$query = "SELECT post_id, meta_key, meta_value
-				FROM {$wpdb->prefix}postmeta 
-				WHERE meta_key IN ( '_sku', '_virtual', '_downloadable', '_regular_price', '_sale_price', '_price', '_manage_stock', '_stock', '_stock_status', '_wc_rating_count', '_wc_average_rating', 'total_sales'
-				". ( ( !empty( Smart_Manager::$sm_is_woo40 ) ) ? ", '_tax_status', '_tax_class'" : '' ) . ( ( !empty( Smart_Manager::$sm_is_woo92 ) ) ? ", '_global_unique_id'" : '' ) ." ) 
-				AND post_id IN (".implode(",", $product_ids).")
-					GROUP BY post_id, meta_key";
-
-	$results = $wpdb->get_results( $query, 'ARRAY_A' );
-
-	$sm_cache_update = array();
-	$sm_update_wc_lookup_table = array();
-	$temp = array();
-
-	// Preparing data
+				FROM {$wpdb->prefix}postmeta
+				WHERE meta_key IN ('" . implode( "','", array_map( 'esc_sql', $meta_keys ) ) . "')
+				AND post_id IN (" . implode( ',', array_fill( 0, count( $product_ids ), '%d' ) ) . ")
+				ORDER BY post_id, meta_id";
+	$results = $wpdb->get_results( $wpdb->prepare( $query, $product_ids ), 'ARRAY_A' );
+	$product_meta = array();
 	foreach ( $results as $result ) {
-
-		$meta_key = ( !empty( $result['meta_key'] ) ) ? $result['meta_key'] : '';
-		if( empty( $meta_key ) ) {
-			continue;
-		}
-		$meta_value = ( !empty( $result['meta_value'] ) ) ? $result['meta_value'] : '';
-
 		$product_id = absint( $result['post_id'] );
-		if( empty( $sm_cache_update[$product_id] ) ) {
-			$sm_cache_update[$product_id] = array();
+		$meta_key   = $result['meta_key'];
+		if ( ! isset( $product_meta[ $product_id ] ) ) {
+			$product_meta[ $product_id ] = array();
 		}
+		if ( '_price' === $meta_key ) {
+			$product_meta[ $product_id ][ $meta_key ][] = $result['meta_value'];
+		} elseif ( ! array_key_exists( $meta_key, $product_meta[ $product_id ] ) ) {
+			$product_meta[ $product_id ][ $meta_key ] = $result['meta_value'];
+		}
+	}
 
-		$price_meta = (array) ( $meta_key == '_price' ? $meta_value : false );
+	$lookup_table_columns = array( 'product_id', 'sku' );
+	if ( ! empty( Smart_Manager::$sm_is_woo92 ) ) {
+		$lookup_table_columns[] = 'global_unique_id';
+	}
+	$lookup_table_columns = array_merge(
+		$lookup_table_columns,
+		array( 'virtual', 'downloadable', 'min_price', 'max_price', 'onsale', 'stock_quantity', 'stock_status', 'rating_count', 'average_rating', 'total_sales' )
+	);
+	if ( ! empty( Smart_Manager::$sm_is_woo40 ) ) {
+		$lookup_table_columns = array_merge( $lookup_table_columns, array( 'tax_status', 'tax_class' ) );
+	}
 
-		$sm_cache_update[$product_id]['product_id'] 	= ( empty( $sm_cache_update[$product_id]['product_id'] ) ) ? $product_id : $sm_cache_update[$product_id]['product_id'];
-		$sm_cache_update[$product_id]['sku'] 			= ( empty( $sm_cache_update[$product_id]['sku'] ) ) ? ( ( $meta_key == '_sku' ) ? $meta_value : '' ) : $sm_cache_update[$product_id]['sku'];
-		$sm_cache_update[$product_id]['virtual'] 		= ( empty( $sm_cache_update[$product_id]['virtual'] ) ) ? ( ( $meta_key == '_virtual' && 'yes' === $meta_value ) ? 1 : 0 ) : $sm_cache_update[$product_id]['virtual'];
-		$sm_cache_update[$product_id]['downloadable'] 	= ( empty( $sm_cache_update[$product_id]['downloadable'] ) ) ? ( ( $meta_key == '_downloadable' && 'yes' === $meta_value ) ? 1 : 0 ) : $sm_cache_update[$product_id]['downloadable'];
-		$sm_cache_update[$product_id]['min_price'] 		= ( empty( $sm_cache_update[$product_id]['min_price'] ) ) ? ( reset( $price_meta ) ) : $sm_cache_update[$product_id]['min_price'];
-		$sm_cache_update[$product_id]['max_price'] 		= ( empty( $sm_cache_update[$product_id]['max_price'] ) ) ? ( end( $price_meta ) ) : $sm_cache_update[$product_id]['max_price'];
-		$sm_cache_update[$product_id]['onsale'] 		= ( empty( $sm_cache_update[$product_id]['onsale'] ) ) ? ( wc_format_decimal( ( $meta_key == '_sale_price' && !empty( $meta_value ) ) ? 1 : 0 ) ) : $sm_cache_update[$product_id]['onsale'];
-		$sm_cache_update[$product_id]['stock_quantity'] = ( empty( $sm_cache_update[$product_id]['stock_quantity'] ) ) ? ( wc_stock_amount( ( $meta_key == '_stock' ) ? $meta_value : null ) ) : $sm_cache_update[$product_id]['stock_quantity'];
-		$sm_cache_update[$product_id]['stock_status'] 	= ( empty( $sm_cache_update[$product_id]['stock_status'] ) ) ? ( ( $meta_key == '_stock_status' ) ? $meta_value : '' ) : $sm_cache_update[$product_id]['stock_status'];
-		$sm_cache_update[$product_id]['rating_count'] 	= ( empty( $sm_cache_update[$product_id]['rating_count'] ) ) ? ( ( $meta_key == '_wc_rating_count' && is_array( maybe_unserialize( $meta_value ) ) ) ? array_sum( maybe_unserialize( $meta_value ) ) : 0 ) : $sm_cache_update[$product_id]['rating_count'];
-		$sm_cache_update[$product_id]['average_rating'] = ( empty( $sm_cache_update[$product_id]['average_rating'] ) ) ? ( ( $meta_key == '_wc_average_rating' ) ? $meta_value : 0 ) : $sm_cache_update[$product_id]['average_rating'];
-		$sm_cache_update[$product_id]['total_sales'] 	= ( empty( $sm_cache_update[$product_id]['total_sales'] ) ) ? ( ( $meta_key == 'total_sales' ) ? $meta_value : 0 ) : $sm_cache_update[$product_id]['total_sales'];
-		$sm_cache_update[$product_id]['tax_status'] 	= ( empty( $sm_cache_update[$product_id]['tax_status'] ) ) ? ( ( $meta_key == '_tax_status' ) ? $meta_value : '' ) : $sm_cache_update[$product_id]['tax_status'];
-		$sm_cache_update[$product_id]['tax_class'] 	= ( empty( $sm_cache_update[$product_id]['tax_class'] ) ) ? ( ( $meta_key == '_tax_class' ) ? $meta_value : '' ) : $sm_cache_update[$product_id]['tax_class'];
+	$lookup_rows = array();
+	$cache_rows  = array();
+	foreach ( $product_meta as $product_id => $meta ) {
+		$prices = ( ! empty( $meta['_price'] ) && is_array( $meta['_price'] ) ) ? array_values( array_filter( $meta['_price'], 'strlen' ) ) : array();
+		if ( ! empty( $prices ) ) {
+			sort( $prices, SORT_NUMERIC );
+		}
+		$sale_price    = isset( $meta['_sale_price'] ) ? wc_format_decimal( $meta['_sale_price'] ) : '';
+		$active_price  = ( ! empty( $prices ) ) ? wc_format_decimal( reset( $prices ) ) : '';
+		$rating_count  = ( isset( $meta['_wc_rating_count'] ) ) ? maybe_unserialize( $meta['_wc_rating_count'] ) : array();
+		$manage_stock  = isset( $meta['_manage_stock'] ) ? $meta['_manage_stock'] : '';
+		$stock         = ( 'yes' === $manage_stock && isset( $meta['_stock'] ) ) ? wc_stock_amount( $meta['_stock'] ) : null;
+
+		$lookup_rows[ $product_id ] = array(
+			'product_id'     => absint( $product_id ),
+			'sku'            => isset( $meta['_sku'] ) ? (string) $meta['_sku'] : '',
+			'virtual'        => ( isset( $meta['_virtual'] ) && 'yes' === $meta['_virtual'] ) ? 1 : 0,
+			'downloadable'   => ( isset( $meta['_downloadable'] ) && 'yes' === $meta['_downloadable'] ) ? 1 : 0,
+			'min_price'      => ( ! empty( $prices ) ) ? reset( $prices ) : null,
+			'max_price'      => ( ! empty( $prices ) ) ? end( $prices ) : null,
+			'onsale'         => ( '' !== $sale_price && $sale_price === $active_price ) ? 1 : 0,
+			'stock_quantity' => $stock,
+			'stock_status'   => isset( $meta['_stock_status'] ) ? (string) $meta['_stock_status'] : '',
+			'rating_count'   => is_array( $rating_count ) ? array_sum( array_map( 'intval', $rating_count ) ) : 0,
+			'average_rating' => isset( $meta['_wc_average_rating'] ) ? $meta['_wc_average_rating'] : 0,
+			'total_sales'    => isset( $meta['total_sales'] ) ? $meta['total_sales'] : 0,
+		);
+		if ( ! empty( Smart_Manager::$sm_is_woo40 ) ) {
+			$lookup_rows[ $product_id ]['tax_status'] = isset( $meta['_tax_status'] ) ? $meta['_tax_status'] : '';
+			$lookup_rows[ $product_id ]['tax_class']  = isset( $meta['_tax_class'] ) ? $meta['_tax_class'] : '';
+		}
 		if ( ! empty( Smart_Manager::$sm_is_woo92 ) ) {
-			$sm_cache_update[ $product_id ][ 'global_unique_id' ] 	= ( empty( $sm_cache_update[ $product_id ][ 'global_unique_id' ] ) ) ? ( ( '_global_unique_id' === $meta_key ) ? $meta_value : '' ) : $sm_cache_update[ $product_id ][ 'global_unique_id' ];
+			$lookup_rows[ $product_id ]['global_unique_id'] = isset( $meta['_global_unique_id'] ) ? $meta['_global_unique_id'] : '';
 		}
-		$temp = $sm_cache_update;
-		$temp[$product_id]['sku'] = (string) $temp[$product_id]['sku'];
-		$temp[$product_id]['stock_status'] = (string) $temp[$product_id]['stock_status'];
-
-		$sm_update_wc_lookup_table[$product_id] = "('".implode( "','", $temp[$product_id] )."')";
-
+		$cache_rows[ $product_id ] = $lookup_rows[ $product_id ];
 	}
 
-	// Updating lookup table
-	if ( ! empty( $sm_update_wc_lookup_table ) ) {
-		$query = "REPLACE INTO {$wpdb->prefix}wc_product_meta_lookup
-					VALUES ";
-		$query .= implode( ",", $sm_update_wc_lookup_table );
-		$wpdb->query( $query );
+	if ( ! empty( $lookup_rows ) ) {
+		$placeholders = array();
+		$values = array();
+		foreach ( $lookup_rows as $lookup_table_row ) {
+			$row_placeholders = array();
+			foreach ( $lookup_table_columns as $column ) {
+				$value = isset( $lookup_table_row[ $column ] ) ? $lookup_table_row[ $column ] : null;
+				if ( null === $value ) {
+					$row_placeholders[] = 'NULL';
+				} else {
+					$row_placeholders[] = '%s';
+					$values[] = $value;
+				}
+			}
+			$placeholders[] = '(' . implode( ',', $row_placeholders ) . ')';
+		}
+		$column_names = '`' . implode( '`,`', $lookup_table_columns ) . '`';
+		$update_columns = array();
+		foreach ( array_slice( $lookup_table_columns, 1 ) as $column ) {
+			$update_columns[] = "`{$column}` = VALUES(`{$column}`)";
+		}
+		$query = "INSERT INTO {$wpdb->prefix}wc_product_meta_lookup ({$column_names}) VALUES " . implode( ',', $placeholders );
+		$query .= ' ON DUPLICATE KEY UPDATE ' . implode( ',', $update_columns );
+		if ( false === $wpdb->query( $wpdb->prepare( $query, $values ) ) ) {
+			$error_message = 'Failed to update WooCommerce product lookup rows: ' . $wpdb->last_error;
+			if ( function_exists( 'sa_manager_log' ) ) {
+				sa_manager_log( 'error', $error_message );
+			} else {
+				error_log( $error_message );
+			}
+			return;
+		}
 	}
 
-	// wp_cache_set for lookup table
-	if ( ! empty( $sm_cache_update ) ) {
-		foreach ( $sm_cache_update as $update_data ) {
-			wp_cache_set( 'lookup_table', $update_data, 'object_' . $update_data['product_id'] );
+	foreach ( $cache_rows as $update_data ) {
+		if ( ! empty( $update_data ) ) {
+			$cache_group = 'object_' . $update_data['product_id'];
+			$cached_data = wp_cache_get( 'lookup_table', $cache_group );
+			if ( is_array( $cached_data ) ) {
+				$update_data = array_merge( $cached_data, $update_data );
+			}
+			wp_cache_set( 'lookup_table', $update_data, $cache_group );
 		}
 	}
 }

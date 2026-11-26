@@ -1431,7 +1431,12 @@ if ( ! class_exists( 'Smart_Manager_Product' ) ) {
 					}
 				}
 
-				$sm_update_lookup_table_meta_keys = array( 'postmeta/meta_key=_sku/meta_value=_sku',  'postmeta/meta_key=_regular_price/meta_value=_regular_price', 'postmeta/meta_key=_price/meta_value=_price', 'postmeta/meta_key=_sale_price/meta_value=_sale_price', 'postmeta/meta_key=_virtual/meta_value=_virtual', 'postmeta/meta_key=_downloadable/meta_value=_downloadable', 'postmeta/meta_key=_stock/meta_value=_stock', 'postmeta/meta_key=_manage_stock/meta_value=_manage_stock', 'postmeta/meta_key=_stock_status/meta_value=_stock_status', 'postmeta/meta_key=_wc_rating_count/meta_value=_wc_rating_count', 'postmeta/meta_key=_wc_average_rating/meta_value=_wc_average_rating', 'postmeta/meta_key=total_sales/meta_value=total_sales');
+				$sm_update_lookup_table_meta_keys = array_map(
+					function( $meta_key ) {
+						return 'postmeta/meta_key=' . $meta_key . '/meta_value=' . $meta_key;
+					},
+					sm_get_product_lookup_table_meta_keys()
+				);
 
 				// WC 3.6+ compat
 

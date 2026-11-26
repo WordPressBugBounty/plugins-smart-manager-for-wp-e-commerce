@@ -761,6 +761,11 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				$store_model_transient = false;
 				update_option( '_sm_update_8860_' . $this->dashboard_key . '_tasks', 1, 'no' );
 			}
+			if ( false === get_option( '_sm_update_920_' . $this->dashboard_key ) ) {
+				delete_transient( 'sa_sm_' . $this->dashboard_key );
+				$store_model_transient = false;
+				update_option( '_sm_update_920_' . $this->dashboard_key, 1, 'no' );
+			}
 			$store_model_and_old_model_transient['store_model_transient'] = $store_model_transient;
 			$store_model_and_old_model_transient['old_col_model'] = $old_col_model;
 			return $store_model_and_old_model_transient;
@@ -965,7 +970,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 							$this->advanced_search_operators = apply_filters( 'sm_modified_advanced_search_operators', $this->advanced_search_operators );
 							$search_operator = ( ! empty( $this->advanced_search_operators[$selected_search_operator] ) ) ? $this->advanced_search_operators[$selected_search_operator] : $selected_search_operator;
                             $search_data_type = ( ! empty( $search_cols_type[$rule['type']] ) ) ? $search_cols_type[$rule['type']] : 'text';
-                            $search_value = (isset($rule['value']) && $rule['value'] != "''") ? $rule['value'] : ( ( in_array( $search_data_type, array( "number", "numeric" ) ) ) ? "''" : '');
+                            $search_value = ( isset( $rule['value'] ) && "''" !== (string) $rule['value'] ) ? $rule['value'] : ( ( in_array( $search_data_type, array( "number", "numeric" ) ) ) ? "''" : '');
 
                             if( !empty( $params['data_col_params'] ) ) {
                             	$search_value = ( in_array( $search_col, $params['data_col_params']['data_cols_timestamp'] ) || in_array( $search_col, $params['data_col_params']['data_date_cols_timestamp'] ) || in_array( $search_col, $params['data_col_params']['data_time_cols_timestamp'] ) ) ? strtotime( $search_value ) : $search_value;
@@ -1251,7 +1256,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 						$data_cols_dropdown[] = $col_nm;
 					} else if( $type == 'checkbox' ) {
 						$data_cols_checkbox[] = $col_nm;
-						if( !empty( $col['uncheckedTemplate'] ) ) {
+						if ( isset( $col['uncheckedTemplate'] ) && '' !== $col['uncheckedTemplate'] ) {
 							$data_cols_unchecked_template[$col_nm] = $col['uncheckedTemplate'];
 						}
 					} else if( $type == 'sm.datetime' && !empty( $col['date_type'] ) && $col['date_type'] == 'timestamp' ) {
@@ -1389,10 +1394,10 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 							);
 				if ( ! empty( $meta_query ) ) {
 					$args['meta_query'] = $meta_query;
-				}						
+				}
 				if ( ! empty( $tax_query ) ) {
 					$args['tax_query'] = $tax_query;
-				}						
+				}
 				// // Add post__in for specific IDs during export (batch export uses this)
 				$can_optimize_dashboard_speed = apply_filters( 'sm_can_optimize_dashboard_speed', false );
 				if ( ! empty( $this->req_params['use_batch_export'] ) ) {
@@ -1494,7 +1499,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 	        				}
 
 	        				if ( is_array( $data_cols_checkbox ) && !empty( $data_cols_checkbox ) ) {
-	        					if( array_search( $post_key, $data_cols_checkbox ) !== false && $post_value == '' ) { //added for bad_value checkbox
+							if ( array_search( $post_key, $data_cols_checkbox, true ) !== false && array_key_exists( $post_key, $data_cols_unchecked_template ) && $post_value === '' ) { //added for bad_value checkbox
 	        						$post_value = $data_cols_unchecked_template[$post_key];
 	        					}
 	        				}
@@ -1536,8 +1541,8 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 	        					$meta_value = '';
 
 	        					//Code for handling checkbox data
-	        					if( is_array( $data_cols_checkbox ) && !empty( $data_cols_checkbox ) && is_array( $data_cols_unchecked_template ) && !empty( $data_cols_unchecked_template ) ) {
-	        						if( in_array( $col, $data_cols_checkbox ) && !empty( $data_cols_unchecked_template[ $col ] ) ) { //added for bad_value checkbox
+							if ( is_array( $data_cols_checkbox ) && ! empty( $data_cols_checkbox ) && is_array( $data_cols_unchecked_template ) ) {
+								if ( in_array( $col, $data_cols_checkbox, true ) && array_key_exists( $col, $data_cols_unchecked_template ) ) { //added for bad_value checkbox
 			        					$meta_value = $data_cols_unchecked_template[ $col ];
 			        				}
 	        					}
@@ -1601,7 +1606,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 	        				if( !in_array( $data['meta_key'], $data_cols_checkbox ) ) {
 								$meta_value = ( isset( $data['meta_value'] ) ) ? $data['meta_value'] : '';
 	        				} else {
-	        					$meta_value = ( isset( $data['meta_value'] ) && $data['meta_value'] != '' ) ? $data['meta_value'] : $items[$key]['postmeta_meta_key_'.$meta_key.'_meta_value_'.$meta_key];
+							$meta_value = ( isset( $data['meta_value'] ) && $data['meta_value'] != '' ) ? $data['meta_value'] : $items[ $index ]['postmeta_meta_key_' . $meta_key . '_meta_value_' . $meta_key];
 	        				}
 
 	        				//Code for handling serialized data
@@ -2401,6 +2406,9 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			if ( empty( $params['search_query']['cond_'.$meta_table.'_selected_search_operators'] ) ) {
 				$params['search_query']['cond_'.$meta_table.'_selected_search_operators'] = array();
 			}
+			if ( empty( $params['search_query']['cond_'.$meta_table.'_col_types'] ) ) {
+				$params['search_query']['cond_'.$meta_table.'_col_types'] = array();
+			}
 			if( in_array( $search_params['search_data_type'], array( "number", "numeric" ) ) ) {
 				$val = ( empty( $search_params['search_value'] ) && '0' != $search_params['search_value'] ) ? "''" : $search_params['search_value'];
 
@@ -2438,7 +2446,10 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				$post_type_condn = ( is_array( $search_params['post_type'] ) && count( $search_params['post_type'] ) > 0 ) ? $type . " IN ('" . implode( "','", $search_params['post_type'] ) ."')" : $type . " = '". $search_params['post_type']."'";
 			}
 
-			if( ( ( empty( $params['rule']['value'] ) && '0' !== $params['rule']['value'] ) || $params['rule']['value'] == "''") && ! empty( $search_params['post_type'] ) && ! empty( $search_params['search_col'] ) && ! empty( $post_type_condn ) ) {
+			$rule_value = isset( $params['rule']['value'] ) ? (string) $params['rule']['value'] : '';
+			$is_empty_search_value = ( '' === $rule_value || "''" === $rule_value );
+			$is_unchecked_checkbox = ( 'checkbox' === $search_params['search_data_type'] && '0' === $rule_value && in_array( $search_params['search_operator'], array( 'is', '=' ), true ) );
+			if( ( $is_empty_search_value || $is_unchecked_checkbox ) && ! empty( $search_params['post_type'] ) && ! empty( $search_params['search_col'] ) && ! empty( $post_type_condn ) ) {
 				$empty_search_value = ( $search_params['search_operator'] == 'is' || $search_params['search_operator'] == '=' ) ? 'IS NULL' : 'IS NOT NULL';
 				$meta_cond = "( ". $meta_cond ." OR ( ". $params['rule']['table_name'] .".meta_key LIKE '". $search_params['search_col'] . "' AND ". $params['rule']['table_name'] .".meta_value " . $empty_search_value ." )
 								OR ( ". $params['rule']['table_name'] .".".$pkey." ". ( ( $search_params['search_operator'] == 'is' || $search_params['search_operator'] == '=' ) ? 'NOT IN' : 'IN' ) ." ( SELECT DISTINCT ft.id 
@@ -2455,6 +2466,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			$params['search_query']['cond_'.$meta_table.'_operator'] .= " && ";
 			$params['search_query']['cond_'.$meta_table.'_col_vals'][] = $search_params['search_value'];
 			$params['search_query']['cond_'.$meta_table.'_selected_search_operators'][] = $search_params['selected_search_operator'];
+			$params['search_query']['cond_'.$meta_table.'_col_types'][] = $search_params['search_data_type'];
 			return $params['search_query'];
 		}
 
@@ -2545,7 +2557,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			$terms_advanced_search_where = '';
 			$result_terms_search = '';
 			foreach ($cond_terms_array as $cond_terms) {
-				$exp_search_val = ( is_array( $params['search_vals'] ) && ( ! empty( $params['search_vals'][ $index ] ) ) ) ? $params['search_vals'][ $index ] : '';
+				$exp_search_val = ( isset( $params['search_vals'] ) && is_array( $params['search_vals'] ) && isset( $params['search_vals'][ $index ] ) ) ? $params['search_vals'][ $index ] : '';
 				$exp_search_val = $this->format_advanced_search_value( array(
 					'search_val' => $exp_search_val,
 					'selected_search_operator' => $params['selected_search_operators'][ $index ],
@@ -2691,12 +2703,22 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			$col_names = (!empty($search_query['cond_'. $meta_table .'_col_name'])) ? explode(" && ",$search_query['cond_'. $meta_table .'_col_name']) : array();
 			$col_values = (!empty($search_query['cond_'. $meta_table .'_col_value'])) ? explode(" && ",$search_query['cond_'. $meta_table .'_col_value']) : array();
 			$col_ops = (!empty($search_query['cond_'. $meta_table .'_operator'])) ? explode(" && ",$search_query['cond_'. $meta_table .'_operator']) : array();
+			$col_types = ( ! empty( $search_query['cond_'. $meta_table .'_col_types'] ) ) ? $search_query['cond_'. $meta_table .'_col_types'] : array();
 
 			$index = 0;
 			$results = array();
 			foreach( $meta_conditions as $cond ) {
 
 				$flag = ', '.$params['search_query_index'];
+				$search_value = ( isset( $params['search_vals'] ) && is_array( $params['search_vals'] ) && isset( $params['search_vals'][ $index ] ) ) ? $params['search_vals'][ $index ] : '';
+				$is_negated_true_checkbox = (
+					'postmeta' === $meta_table &&
+					isset( $col_types[ $index ] ) &&
+					'checkbox' === $col_types[ $index ] &&
+					'1' === (string) $search_value &&
+					isset( $col_ops[ $index ] ) &&
+					in_array( strtoupper( trim( $col_ops[ $index ] ) ), array( 'NOT LIKE', '!=', '<>' ), true )
+				);
 
 				$search_params = array_merge( array( 'cond_'. $meta_table .'_col_name' => (!empty($col_names[$index])) ? trim($col_names[$index]) : '',
 										'cond_'. $meta_table .'_col_value' => (!empty($col_values[$index])) ? trim($col_values[$index]) : '',
@@ -2732,7 +2754,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 
 					if ( ( ! empty( $select ) ) && ( ! empty( $from ) ) && ( ! empty( $where ) ) ) {
 						$select = esc_sql( $select );
-						$exp_search_val = ( is_array( $params['search_vals'] ) && ( ! empty( $params['search_vals'][ $index ] ) ) ) ? $params['search_vals'][ $index ] : '';
+						$exp_search_val = ( isset( $params['search_vals'] ) && is_array( $params['search_vals'] ) && isset( $params['search_vals'][ $index ] ) ) ? $params['search_vals'][ $index ] : '';
 						$exp_search_val = $this->format_advanced_search_value( array(
 							'search_val' => $exp_search_val,
 							'selected_search_operator' => $params['selected_search_operators'][ $index ],
@@ -2743,6 +2765,34 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 						); // Prepare a SQL query using $wpdb->prepare for safe execution.
 						$results = $wpdb->query ( $query_postmeta_search );
 					}
+				}
+
+				if ( $is_negated_true_checkbox && ! empty( $params['post_type'] ) && ! empty( $col_names[ $index ] ) ) {
+					$post_types = (array) $params['post_type'];
+					$post_type_placeholders = implode( ', ', array_fill( 0, count( $post_types ), '%s' ) );
+					$previous_result_join = '';
+					$previous_result_where = '';
+					if ( false !== strpos( $from, $wpdb->base_prefix . 'sm_advanced_search_temp' ) ) {
+						$previous_result_join = " JOIN {$wpdb->base_prefix}sm_advanced_search_temp AS sm_previous_search ON ( sm_previous_search.product_id = {$wpdb->prefix}posts.ID )";
+						$previous_result_where = ' AND sm_previous_search.flag = 0';
+					}
+					$missing_meta_query = $wpdb->prepare(
+						"REPLACE INTO {$wpdb->base_prefix}sm_advanced_search_temp ( product_id, flag, cat_flag )
+						SELECT DISTINCT {$wpdb->prefix}posts.ID, %d, 0
+						FROM {$wpdb->prefix}posts
+						{$previous_result_join}
+						LEFT JOIN {$wpdb->prefix}postmeta AS sm_missing_checkbox_meta
+							ON ( sm_missing_checkbox_meta.post_id = {$wpdb->prefix}posts.ID AND sm_missing_checkbox_meta.meta_key = %s )
+						WHERE {$wpdb->prefix}posts.post_type IN ({$post_type_placeholders})
+							AND sm_missing_checkbox_meta.post_id IS NULL
+							{$previous_result_where}",
+						array_merge(
+							array( $params['search_query_index'], trim( $col_names[ $index ] ) ),
+							$post_types
+						)
+					);
+					$missing_meta_results = $wpdb->query( $missing_meta_query );
+					$results = (int) $results + (int) $missing_meta_results;
 				}
 
 				do_action('sm_search_'. $meta_table .'_condition_complete',$results,$search_params, array(
@@ -2821,7 +2871,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 					if ( ( ! empty( $select ) ) && ( ! empty( $from ) ) && ( ! empty( $where ) ) ) {
 						$select = esc_sql( $select );
 						$from = esc_sql( $from );
-						$exp_search_val = ( is_array( $params['search_vals'] ) && ( ! empty( $params['search_vals'][ $index ] ) ) ) ? $params['search_vals'][ $index ] : '';
+						$exp_search_val = ( isset( $params['search_vals'] ) && is_array( $params['search_vals'] ) && isset( $params['search_vals'][ $index ] ) ) ? $params['search_vals'][ $index ] : '';
 						$exp_search_val = $this->format_advanced_search_value( array(
 							'search_val' => $exp_search_val,
 							'selected_search_operator' => $params['selected_search_operators'][ $index ],
@@ -3427,7 +3477,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 				$csv_file_name = ( ! empty( $this->req_params[ 'storewide_option' ] ) ) ? ( ( 'entire_store' === $this->req_params[ 'storewide_option' ] ? $csv_file_name : $csv_file_name . '_all_products_stock_columns') ) . ".csv" : $csv_file_name . ( ( ! empty( $this->req_params[ 'columnsToBeExported' ] ) && 'visible' === $this->req_params[ 'columnsToBeExported' ] ) ? '_selected_records' : '_selected_products_' . $this->req_params[ 'columnsToBeExported' ] . '_columns' ) . ".csv";
 			}
 			if ( ( ! empty( $this->req_params[ 'use_batch_export' ] ) )  && ( class_exists( 'Smart_Manager_Pro_Batch_Export' ) ) && ( is_callable( array( 'Smart_Manager_Pro_Batch_Export', 'initiate_batch_export_process' ) ) ) ) {
-				$batch_params = $this->req_params; 
+				$batch_params = $this->req_params;
 				$batch_params['selected_ids'] = $selected_ids;
 				$batch_params['csv_file_name'] = $csv_file_name;
 				$batch_params['csv_columns'] = $csv_columns;
@@ -3733,12 +3783,11 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 		public function on_data_model_load( $data_model = array(), $data_col_params = array() ) {
 			if ( ! empty( $data_model ) && is_array( $data_model ) && ! empty( $this->req_params ) && is_array( $this->req_params ) && defined( 'SM_SKU' ) && class_exists( 'SA_Manager_Feedback' ) && is_callable( array( 'SA_Manager_Feedback', 'handle_feedback_tracking' ) ) ) {
 				$action = ( ! empty( $this->req_params['advanced_search_query'] ) && is_array( $this->req_params['advanced_search_query'] ) ) ? 'advanced_search' : ( ( ! empty( $this->req_params['show_variations'] ) && 'true' === $this->req_params['show_variations'] ) ? 'show_variations' : '' );
-				if ( ! empty( $action ) ) { 
+				if ( ! empty( $action ) ) {
 					SA_Manager_Feedback::handle_feedback_tracking( SM_SKU, $action );
 					if ( ( 'advanced_search' === $action ) && ( is_callable( array( 'SA_Manager_Feedback', 'show_feedback' ) ) ) ) {
 						$data_model['meta']['show_feedback'] = SA_Manager_Feedback::show_feedback( SM_SKU );
 					}
-					
 				}
 			}
 			return $data_model;
@@ -3764,7 +3813,7 @@ if ( ! class_exists( 'Smart_Manager_Base' ) ) {
 			$params = array();
 			$params['process_key']                        = 'import_wsm_stock_log';
 			$params['plugin_data']                        = $this->sa_manager_common_params;
-			$params['backgroundProcessRunningMessage']    = ( ! empty( $this->req_params['background_process_running_message'] ) ) ? $this->req_params['background_process_running_message'] : '';  
+			$params['backgroundProcessRunningMessage']    = ( ! empty( $this->req_params['background_process_running_message'] ) ) ? $this->req_params['background_process_running_message'] : '';
 			$params['process_name']                       = _x( 'Stock Log Synchronization' , 'background update process name', 'smart-manager-for-wp-e-commerce' );
 			$params['selected_ids']                       = $selected_ids;
 			$params['id_count']                           = count( $selected_ids );
